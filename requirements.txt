@@ -1,0 +1,7 @@
+frida
+prompt_toolkit
+click
+jinja2
+tabulate
+delegator.py
+requests

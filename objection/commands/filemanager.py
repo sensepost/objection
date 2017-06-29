@@ -1,0 +1,349 @@
+import base64
+import os
+
+import click
+from tabulate import tabulate
+
+from ..state.device import device_state
+from ..state.filemanager import file_manager_state
+from ..utils.frida_transport import FridaRunner
+from ..utils.templates import ios_hook
+
+
+def cd(args):
+    if len(args) <= 0:
+        click.secho('Usage: cd <destination directory>', bold=True)
+        return
+
+    path = args[0]
+    current_dir = pwd()
+
+    # nothing to do
+    if path == '.':
+        return
+
+    # moving one directory back
+    if path == '..':
+
+        split_path = os.path.split(current_dir)
+
+        # nothing to do if we are already at root
+        if len(split_path) == 1:
+            return
+
+        new_path = ''.join(split_path[:-1])
+        click.secho(new_path, fg='green', bold=True)
+
+        file_manager_state.cwd = new_path
+
+        return
+
+    # if we got an absolute path, check if the path
+    # actually exists, and then cd to it if we can
+    if os.path.isabs(path):
+
+        runner = FridaRunner()
+        # populate the template with the path we want to work with
+        runner.set_hook_with_data(
+            ios_hook('filesystem/exists'), path=path)
+        runner.run()
+
+        if runner.get_last_message().exists:
+            click.secho(path, fg='green', bold=True)
+
+            file_manager_state.cwd = path
+            return
+        else:
+            click.secho('Invalid path: `{0}`'.format(path), fg='red')
+
+    # directory is not absolute, tack it on at the end and
+    # see if its legit.
+    else:
+
+        proposed_path = os.path.join(current_dir, path)
+
+        runner = FridaRunner()
+        # populate the template with the path we want to work with
+        runner.set_hook_with_data(
+            ios_hook('filesystem/exists'), path=proposed_path)
+        runner.run()
+
+        if runner.get_last_message().exists:
+            click.secho(proposed_path, fg='green', bold=True)
+
+            file_manager_state.cwd = proposed_path
+            return
+        else:
+            click.secho('Invalid path: `{0}`'.format(proposed_path), fg='red')
+
+
+def pwd(args=None):
+    if file_manager_state.cwd is not None:
+        return file_manager_state.cwd
+
+    if device_state.device_type == 'ios':
+        return _pwd_ios()
+
+    if device_state.device_type == 'android':
+        return _pwd_android()
+
+
+def pwd_print(args=None):
+    click.secho('Current directory: {0}'.format(pwd()))
+
+
+def _pwd_ios():
+    hook = ios_hook('filesystem/pwd')
+
+    runner = FridaRunner()
+    runner.run(hook=hook)
+
+    response = runner.get_last_message()
+
+    if not response.is_successful():
+        raise Exception('Failed to get cwd')
+
+    # update the file_manager state's cwd
+    file_manager_state.cwd = response.cwd
+
+    return response.cwd
+
+
+def _pwd_android():
+    pass
+
+
+def ls(args):
+    if len(args) <= 0:
+        path = '.'
+    else:
+        path = args[0]
+
+    if device_state.device_type == 'ios':
+        return _ls_ios(path)
+
+    if device_state.device_type == 'android':
+        return _ls_android(path)
+
+
+def _ls_ios(path):
+    """
+        List files implementation for iOS.
+
+        See:
+            http://www.stanford.edu/class/cs193p/cgi-bin/drupal/system/files/lectures/09_Data.pdf
+    :param path:
+    :return:
+    """
+    if path == '.':
+        path = pwd()
+
+    runner = FridaRunner()
+    runner.set_hook_with_data(
+        ios_hook('filesystem/ls'), path=path)
+    runner.run()
+
+    # grab the output lets seeeeee
+    response = runner.get_last_message()
+
+    # ensure the response was successful
+    if not response.is_successful():
+        click.secho('Failed to get directory listing with error: {}'.format(response.error_reason))
+        return
+
+    # get the response data itself
+    data = response.data
+
+    # small helper to grab keys where some may or may
+    # not exist
+    def get_key_if_exists(attribs, key):
+        if key in attribs:
+            return attribs[key]
+
+        return 'n/a'
+
+    # output display
+    # click.secho('Path: {0}'.format(data['path']))
+    if data['readable']:
+        click.secho('Read Access', fg='green')
+    else:
+        click.secho('No Read Access', fg='red')
+
+    if data['writable']:
+        click.secho('Write Access', fg='green')
+    else:
+        click.secho('No Write Access', fg='red')
+
+    # if the directory was readable, dump the filesytem
+    if data['readable']:
+
+        table_data = []
+        for file_name, file_data in data['files'].items():
+            # extract the attributes
+            attributes = file_data['attributes']
+
+            table_data.append([
+                get_key_if_exists(attributes, 'NSFileType'),
+                get_key_if_exists(attributes, 'NSFilePosixPermissions'),
+
+                # read / write permissions
+                file_data['readable'],
+                file_data['writable'],
+
+                # owner name and uid
+                get_key_if_exists(attributes, 'NSFileOwnerAccountName') + ' (' +
+                get_key_if_exists(attributes, 'NSFileOwnerAccountID') + ')',
+
+                # group name and gid
+                get_key_if_exists(attributes, 'NSFileGroupOwnerAccountName') + ' (' +
+                get_key_if_exists(attributes, 'NSFileGroupOwnerAccountID') + ')',
+
+                get_key_if_exists(attributes, 'NSFileSize'),
+                get_key_if_exists(attributes, 'NSFileCreationDate'),
+                file_name,
+            ])
+
+        click.secho(tabulate(table_data,
+                             headers=['Type', 'Perms', 'Read', 'Write', 'Owner', 'Group', 'Size', 'Creation', 'Name']))
+
+
+def _ls_android(path):
+    pass
+
+
+def download(args):
+    if len(args) < 2:
+        click.secho('Usage: download <remote location> <local destination>', bold=True)
+        return
+
+    path = args[0]
+    destination = args[1]
+
+    if device_state.device_type == 'ios':
+        return _download_ios(path, destination)
+
+    if device_state.device_type == 'android':
+        return None
+
+
+def _download_ios(path, destination):
+    current_dir = pwd()
+
+    if not os.path.isabs(path):
+        path = os.path.join(current_dir, path)
+
+    # output about whats about to happen
+    click.secho('Downloading {0} to {1}'.format(path, destination), fg='green', dim=True)
+
+    # start a runner. going to use this a few times
+    # for this method
+    runner = FridaRunner()
+
+    # check that the path is readable
+    runner.set_hook_with_data(
+        ios_hook('filesystem/readable'), path=path)
+
+    # run the hook
+    runner.run()
+
+    # get the response message
+    response = runner.get_last_message()
+
+    # if we cant read the file, just stop
+    if not response.is_successful() or not response.readable:
+        click.secho('Unable to download file. File is not readable')
+        return
+
+    # check that its a file
+    runner.set_hook_with_data(
+        ios_hook('filesystem/is-type-file'), path=path)
+
+    # run the hook
+    runner.run()
+
+    # get the response message
+    response = runner.get_last_message()
+
+    if not response.is_successful():
+        click.secho('Unable to download file')
+        return
+
+    # run the download hook and get the file from
+    # extra_data
+    runner.set_hook_with_data(ios_hook('filesystem/download'), path=path)
+    runner.run()
+
+    response = runner.get_last_message()
+
+    if not response.is_successful():
+        click.secho('Failed to download {}: {}'.format(path, response.error_reason))
+        return
+
+    file_data = response.get_extra_data()
+
+    with open(destination, 'wb') as fh:
+        fh.write(file_data)
+
+
+def upload(args):
+    if len(args) < 2:
+        click.secho('Usage: upload <local source> <remote destination>', bold=True)
+        return
+
+    path = args[0]
+    destination = args[1]
+
+    if device_state.device_type == 'ios':
+        return _upload_ios(path, destination)
+
+    if device_state.device_type == 'android':
+        return None
+
+
+def _upload_ios(path, destination):
+    current_dir = pwd()
+
+    if not os.path.isabs(destination):
+        destination = os.path.join(current_dir, destination)
+
+    # output about whats about to happen
+    click.secho('Uploading {0} to {1}'.format(path, destination), fg='green', dim=True)
+
+    # start a runner. going to use this a few times
+    # for this method
+    runner = FridaRunner()
+
+    # check that the path is readable
+    runner.set_hook_with_data(
+        ios_hook('filesystem/writable'), path=os.path.dirname(destination))
+
+    # run the hook
+    runner.run()
+
+    # get the response message
+    response = runner.get_last_message()
+
+    # if we cant read the file, just stop
+    if not response.is_successful() or not response.writable:
+        click.secho('Unable to upload file. Destination is not writable')
+        return
+
+    # read the local file to upload, and base64 encode it
+    with open(path, 'rb') as f:
+        data = f.read()
+        data = str(base64.b64encode(data), 'utf-8')  # the frida hooks wants a raw string
+
+    # prepare the upload hook
+    runner.set_hook_with_data(
+        ios_hook('filesystem/upload'), destination=destination, base64_data=data)
+
+    # run the upload hook
+    runner.run()
+
+    response = runner.get_last_message()
+
+    if not response.is_successful():
+        click.secho('Failed to upload {}: {}'.format(path, response.error_reason))
+        return
+
+    click.secho('Uploaded: {0}'.format(destination), dim=True)
