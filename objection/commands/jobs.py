@@ -41,12 +41,12 @@ def kill(args: list) -> None:
         if str(job.id) == str(job_uuid):
             # run the end() method for the queued job so that any
             # cleanup operations that need to be run happen.
-            click.secho('Stopping job: {0}'.format(job.id))
+            click.secho('Job: {0} - Stopping'.format(job.id))
             job.end()
 
             # remove the job from the global job state manager
             job_manager_state.remove_job(job)
-            click.secho('Job {0} stopped'.format(job.id), fg='green')
+            click.secho('Job: {0} - Stopped'.format(job.id), fg='green')
 
             return
 

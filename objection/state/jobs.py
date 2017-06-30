@@ -48,7 +48,7 @@ class JobManagerState(object):
         """
 
         for job in self.jobs:
-            click.secho('[job manager] Ending job: {0}'.format(job.id), dim=True)
+            click.secho('[job manager] Job: {0} - Stopping'.format(job.id), dim=True)
             job.end()
 
 

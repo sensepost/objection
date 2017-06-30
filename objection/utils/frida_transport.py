@@ -278,7 +278,7 @@ class FridaRunner(object):
 
         job = FridaJobRunner(name=name)
 
-        click.secho('Starting job {0}'.format(job.id), dim=True)
+        click.secho('Job: {0} - Starting'.format(job.id), dim=True)
 
         job.hook = hook
         job.session = self.get_session()
@@ -289,4 +289,4 @@ class FridaRunner(object):
 
         # tell the state manager about this job
         job_manager_state.add_job(job)
-        click.secho('Job {0} started'.format(job.id), dim=True)
+        click.secho('Job: {0} - Started'.format(job.id), dim=True)
