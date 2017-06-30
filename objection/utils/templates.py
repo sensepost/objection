@@ -20,6 +20,19 @@ def _get_name_with_js_suffix(name: str) -> str:
     return name
 
 
+def _cleanup_hook_comments(hook: list) -> list:
+    """
+        Clean up a hook read from disk by removing the lines
+        that contain comments. Lines that start with // are
+        considered comments lines. Thank you Cpt. Verbose.
+
+        :param hook:
+        :return:
+    """
+
+    return [line for line in hook if not line.strip().startswith('//')]
+
+
 def generic_hook(name: str, skip_trycarch: bool = False) -> str:
     """
         Compile a hook from the 'generic' directory.
@@ -35,7 +48,7 @@ def generic_hook(name: str, skip_trycarch: bool = False) -> str:
     with open(tmpl_path, 'r') as f:
         hook = f.readlines()
 
-    hook = ''.join(hook)
+    hook = ''.join(_cleanup_hook_comments(hook))
 
     if skip_trycarch:
         return hook
@@ -59,7 +72,7 @@ def ios_hook(name: str, skip_trycatch: bool = False) -> str:
     with open(tmpl_path, 'r') as f:
         hook = f.readlines()
 
-    hook = ''.join(hook)
+    hook = ''.join(_cleanup_hook_comments(hook))
 
     if skip_trycatch:
         return hook
