@@ -2,6 +2,7 @@ import click
 import frida
 
 from .repl import Repl
+from ..__init__ import __version__
 from ..commands.device import get_device_info
 from ..commands.mobile_packages import patch_ios_ipa
 from ..state.connection import state_connection
@@ -18,7 +19,15 @@ from ..state.connection import state_connection
               show_default=True)
 def cli(network, host, port, gadget):
     """
-        Objection. Runtime Mobile Exploration!
+        \b
+             _     _         _   _
+         ___| |_  |_|___ ___| |_|_|___ ___
+        | . | . | | | -_|  _|  _| | . |   |
+        |___|___|_| |___|___|_| |_|___|_|_|
+                |___|(object)inject(ion)
+        \b
+             Runtime Mobile Exploration
+                by: @leonjza from @sensepost
 
         By default, communications will happen over USB, unless the --network
         option is provided.
@@ -50,6 +59,15 @@ def explore():
         click.secho('Error: {0}'.format(e.message), fg='red')
 
     r.start_repl()
+
+
+@cli.command()
+def version() -> None:
+    """
+        Prints the current version and exists
+    """
+
+    click.secho('objection: {0}'.format(__version__))
 
 
 @cli.command()
