@@ -5,20 +5,28 @@ from ..utils.frida_transport import FridaRunner
 from ..utils.templates import ios_hook
 
 
-def alert(args=None):
+def alert(args: list = None) -> None:
+    """
+        Displays an alert message via a popup or a Toast message
+        on the mobile device.
+
+        :param args:
+        :return:
+    """
+
     if len(args) <= 0:
         message = 'objection!'
     else:
         message = args[0]
 
     if device_state.device_type == 'ios':
-        return _alert_ios(message)
+        _alert_ios(message)
 
     if device_state.device_type == 'android':
-        return None
+        pass
 
 
-def _alert_ios(message):
+def _alert_ios(message: str):
     """
         Display an alert on iOS
 
@@ -31,13 +39,14 @@ def _alert_ios(message):
     runner.run()
 
 
-def ios_screenshot(args=None):
+def ios_screenshot(args: list = None) -> None:
     """
         Take an iOS screenshot.
 
         :param args:
         :return:
     """
+
     if len(args) <= 0:
         click.secho('Usage: ios ui screenshot <local png destination>', bold=True)
         return
@@ -63,7 +72,14 @@ def ios_screenshot(args=None):
     click.secho('Screenshot saved to: {0}'.format(destination), fg='green')
 
 
-def dump_ios_ui(args=None):
+def dump_ios_ui(args: list = None) -> None:
+    """
+        Dumps the current iOS user interface in a serialized form.
+
+        :param args:
+        :return:
+    """
+
     hook = ios_hook('ui/dump')
 
     runner = FridaRunner(hook=hook)
@@ -78,7 +94,15 @@ def dump_ios_ui(args=None):
     click.secho(response.data)
 
 
-def bypass_touchid(args=None):
+def bypass_touchid(args: list = None) -> None:
+    """
+        Starts a new objection job that hooks into the iOS TouchID
+        classes, replacing the verification logic to always pass.
+
+        :param args:
+        :return:
+    """
+
     hook = ios_hook('ui/touchid')
 
     runner = FridaRunner(hook=hook)

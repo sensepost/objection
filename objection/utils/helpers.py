@@ -10,7 +10,7 @@ from ..utils.templates import ios_hook
 _ls_cache = {}
 
 
-def _get_device_file_listing():
+def _get_device_file_listing() -> list:
     """
         Helper method used to get file listings in the current
         working directory.
@@ -44,7 +44,7 @@ def _get_device_file_listing():
     return runner.get_last_message()
 
 
-def list_folders_in_current_fm_directory():
+def list_folders_in_current_fm_directory() -> dict:
     """
         Return folders in the current working directory of the
         Frida attached device.
@@ -69,7 +69,7 @@ def list_folders_in_current_fm_directory():
     return resp
 
 
-def list_files_in_current_fm_directory():
+def list_files_in_current_fm_directory() -> dict:
     """
         Return files in the current working directory of the
         Frida attached device.
@@ -94,14 +94,14 @@ def list_files_in_current_fm_directory():
     return resp
 
 
-def list_files_in_current_host_directory():
+def list_files_in_current_host_directory() -> None:
     pass
 
 
-def list_current_jobs():
+def list_current_jobs() -> dict:
     """
-        Return files in the current working directory of the
-        Frida attached device.
+        Return a list of the currently listed objection jobs.
+        Used for tab completion in the repl.
     """
 
     resp = {}
@@ -112,23 +112,32 @@ def list_current_jobs():
     return resp
 
 
-def pretty_concat(data, at_most=75):
+def pretty_concat(data: str, at_most: int = 75) -> str:
+    """
+        Limits a string to the maximum value of 'at_most',
+        ending it off with 3 '.'s.
+
+        :param data:
+        :param at_most:
+        :return:
+    """
+
     return data[:at_most] + (data[at_most:] and '...')
 
 
-def sizeof_fmt(num, suffix='B'):
+def sizeof_fmt(num: float, suffix: str = 'B') -> str:
     """
         Pretty print bytes
     """
 
     for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
         if abs(num) < 1024.0:
-            return "%3.1f %s%s" % (num, unit, suffix)
+            return '%3.1f %s%s' % (num, unit, suffix)
         num /= 1024.0
-    return "%.1f %s%s" % (num, 'Yi', suffix)
+    return '%.1f %s%s' % (num, 'Yi', suffix)
 
 
-def get_tokens(text):
+def get_tokens(text: str) -> list:
     """
         Split the text line, shell-style.
 

@@ -4,7 +4,15 @@ from objection.utils.frida_transport import FridaRunner
 from objection.utils.templates import ios_hook
 
 
-def get(args=None):
+def get(args: list = None) -> None:
+    """
+        Gets all of the values stored in NSUserDefaults and prints
+        them to screen.
+
+        :param args:
+        :return:
+    """
+
     hook = ios_hook('nsuserdefaults/get')
 
     runner = FridaRunner(hook=hook)

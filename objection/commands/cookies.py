@@ -5,7 +5,15 @@ from ..utils.frida_transport import FridaRunner
 from ..utils.templates import ios_hook
 
 
-def get(args=None):
+def get(args: list = None) -> None:
+    """
+        Gets cookies using the iOS NSHTTPCookieStorage sharedHTTPCookieStorage
+        and primpts them to the screen.
+
+        :param args:
+        :return:
+    """
+
     hook = ios_hook('binarycookie/get')
 
     runner = FridaRunner(hook=hook)
@@ -14,7 +22,8 @@ def get(args=None):
     response = runner.get_last_message()
 
     if not response.is_successful():
-        click.secho('Failed to get cookies with error: {0}'.format(response.error_reason), fg='red')
+        click.secho('Failed to get cookies with error: {0}'.format(
+            response.error_reason), fg='red')
         return
 
     if not response.data:

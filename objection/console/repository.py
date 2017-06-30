@@ -1,7 +1,6 @@
 from ..commands import (
     filemanager,
     frida_commands,
-    fridascript,
     memory,
     device,
     sqlite,
@@ -23,7 +22,13 @@ from ..utils.helpers import (
 )
 
 # commands are defined with their name being the key, then optionally
-# have a meta, dynamic and commands key.
+# have a meta, help, dynamic and commands key.
+
+# meta: A small one-liner containing information about the command itself
+# help: A more complete help text, describing usages and examples of the command.
+# dynamic: A method to execute that would return completions to populate in the prompt
+# exec: The *actual* method to execute when the command is issued.
+
 COMMANDS = {
     'commands': {
 
@@ -81,7 +86,7 @@ COMMANDS = {
                 '   import ~/home/myscript.js\n'
                 '   import ~/home/hooks/custom.js custom-hook-name'
             ),
-            'exec': fridascript.load
+            'exec': frida_commands.load_script
         },
 
         # file manager commands

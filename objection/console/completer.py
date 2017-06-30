@@ -1,6 +1,7 @@
 import collections
 
-from prompt_toolkit.completion import Completer, Completion
+from prompt_toolkit.completion import Completer, Completion, CompleteEvent
+from prompt_toolkit.document import Document
 
 from .repository import COMMANDS
 from ..utils.helpers import get_tokens
@@ -8,21 +9,39 @@ from ..utils.helpers import get_tokens
 
 class CommandCompleter(Completer):
     """
-        The command completer
+        The objection REPL command completer.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super(CommandCompleter, self).__init__()
         self.COMMANDS = COMMANDS
 
-    def find_completions(self, document):
+    def find_completions(self, document: Document) -> dict:
+        """
+            Find tab completions from the commands repository.
 
-        # extract tokens from the docment similar to
-        # how a shell invokation would have been done
+            Completions are returned based on tokens extracted
+            from the command text received by prompt_toolkit. A
+            dictionary is then walked, matching a token to a
+            nested dictionary until no more dictionaries are
+            available. The resultant dictionary then becomes
+            the suggestions for tab completion.
+
+            Some commands may have 'dynamic' completions, such as
+            file system related commands. They are defined with a
+            'dynamic' key, and the method defined as the value for
+            this key is executed to get completions.
+
+            :param document:
+            :return:
+        """
+
+        # extract tokens from the document similar to
+        # how a shell invocation would have been done
         tokens = get_tokens(document.text)
 
         # start with the current suggestions dictionary being
-        # root commands
+        # all commands
         current_suggestions = self.COMMANDS['commands']
 
         # when the tokens are extracted, we are expecting something in
@@ -52,20 +71,22 @@ class CommandCompleter(Completer):
 
         suggestions = {}
 
-        # once we have the deepest suggestions ictionary in the
+        # once we have the deepest suggestions dictionary in the
         # current_suggestions variable, loop through and check for
         # 'sorta' matched versions
         if current_suggestions and len(current_suggestions) > 0:
             for k, _ in current_suggestions.items():
+
+                # fuzzy-ish matching when part of a word is in a suggestion
                 if document.get_word_before_cursor().lower() in k.lower():
                     suggestions[k] = current_suggestions[k]
 
         return suggestions
 
-    def get_completions(self, document, complete_event):
+    def get_completions(self, document: Document, complete_event: CompleteEvent) -> Completion:
         """
             The main method that gets called by prompt-toolkit to
-            determine which completions to show.
+            determine which completions to show. This
 
             :param document:
             :param complete_event:
@@ -87,6 +108,11 @@ class CommandCompleter(Completer):
             # sort alphabetically
             commands = collections.OrderedDict(sorted(list(commands.items()), key=lambda t: t[0]))
 
+            # loop the commands that we have determined to be useful
+            # based on the current text input and populate a 'meta' field
+            # if one exists.
             for cmd, extra in commands.items():
                 meta = extra['meta'] if 'meta' in extra else None
+
+                # finally, yield the generator for completions
                 yield Completion(cmd, -(len(word_before_cursor)), display_meta=meta)

@@ -23,10 +23,21 @@ from ..utils.helpers import get_tokens
 
 
 class PromptStyle(Style):
-    def __init__(self):
+    """
+        Class used to define some visual attributes for the
+        REPL prompt.
+    """
+
+    def __init__(self) -> None:
         self.style = self._init_style()
 
-    def _init_style(self):
+    def _init_style(self) -> dict:
+        """
+            Grab the values for the prompt styling.
+
+            :return:
+        """
+
         style = pygments.styles.get_style_by_name('vim')
 
         styles = {}
@@ -53,7 +64,13 @@ class PromptStyle(Style):
 
         return style_from_dict(styles)
 
-    def get_style(self):
+    def get_style(self) -> dict:
+        """
+            Return the style for this Class.
+
+            :return:
+        """
+
         return self.style
 
 
@@ -62,14 +79,14 @@ class Repl(object):
         The exploration REPL for objection
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.cli = None
         self.prompt_tokens = []
 
         self.completer = CommandCompleter()
         self.repository = COMMANDS
 
-    def set_prompt_tokens(self, device_info):
+    def set_prompt_tokens(self, device_info: tuple) -> None:
         """
             Set prompt tokens sourced from a command.device.device_info()
             call.
@@ -88,14 +105,14 @@ class Repl(object):
             (Token.Connection, '[' + state_connection.get_comms_type_string() + '] # '),
         ]
 
-    def get_prompt_tokens(self, cli):
+    def get_prompt_tokens(self, _) -> list:
         """
             Return prompt tokens to use in the cli app.
 
             If none were set during the init of this class, it
             is assumed that the connection failed.
 
-            :param cli:
+            :param _:
             :return:
         """
 
@@ -110,7 +127,13 @@ class Repl(object):
             (Token.Connection, '[' + state_connection.get_comms_type_string() + '] # '),
         ]
 
-    def run_command(self, document):
+    def run_command(self, document: str) -> None:
+        """
+            Process a command as recevied by prompt_toolkit.
+
+            :param document:
+            :return:
+        """
 
         logging.info(document)
 
@@ -119,6 +142,8 @@ class Repl(object):
 
         # handle os commands
         if document.strip().startswith('!'):
+
+            # strip the leading !
             os_cmd = document[1:]
 
             click.secho('Running OS command: {0}\n'.format(os_cmd), dim=True)
@@ -140,8 +165,12 @@ class Repl(object):
         tokens = get_tokens(document)
 
         # check if we should be presenting help instead of executing
-        # a command
+        # a command. this is indicated by the fact that the command
+        # starts with the word 'help'
         if len(tokens) > 0 and 'help' == tokens[0]:
+
+            # stip the 'help' entry from the tokens list so that
+            # the following method can find the correct help
             tokens.remove('help')
             command_help = self._find_command_help(tokens)
 
@@ -167,7 +196,7 @@ class Repl(object):
         # run the method for the command itself!
         exec_method(arguments)
 
-    def _find_command_exec_method(self, tokens):
+    def _find_command_exec_method(self, tokens: list) -> tuple:
         """
             Attempt to find the actual python method to run
             for the command tokens we have.
@@ -184,10 +213,14 @@ class Repl(object):
 
         # start with all of the commands we have
         dict_to_walk = self.repository['commands']
+
+        # ... and an empty method to execute
         exec_method = None
 
         # keep count of the number of tokens
-        # used in this walk
+        # used in this walk. this will help indicate to
+        # the caller how many tokens should be stripped to
+        # get to the arguments for the command
         walked_tokens = 0
 
         for token in tokens:
@@ -199,10 +232,10 @@ class Repl(object):
             if token in dict_to_walk:
 
                 # matched a dict for the token we have. we need
-                # to have *all* of the tokens patch a nested dict
+                # to have *all* of the tokens match a nested dict
                 # so that we can extract the final 'exec' key.
                 # if we encounter a key that does not have nested commands,
-                # chances are we are where we need to exec a command.
+                # chances are we are where we need to be to exec a command.
                 if 'commands' not in dict_to_walk[token]:
 
                     if 'exec' in dict_to_walk[token]:
@@ -218,7 +251,7 @@ class Repl(object):
 
         return walked_tokens, exec_method
 
-    def _find_command_help(self, tokens: list):
+    def _find_command_help(self, tokens: list) -> str:
         """
             Attempt to find help for a command.
 
@@ -240,7 +273,7 @@ class Repl(object):
             if token in dict_to_walk:
 
                 # matched a dict for the token we have. we need
-                # to have *all* of the tokens patch a nested dict
+                # to have *all* of the tokens match a nested dict
                 # so that we can extract the final 'help' key.
                 # if we encounter a key that does not have nested commands,
                 # chances are we are where we need to get help.
@@ -263,18 +296,33 @@ class Repl(object):
 
         return user_help
 
-    def handle_exit(self, document):
+    def handle_exit(self, document: str) -> None:
         """
-            Exit the repl if needed
+            Exit the repl if needed.
+
+            Running sys.exit() will also run all of the atext()
+            registrations used to cleanups jobs and cleanup some
+            cache entries.
         """
 
         if document.strip() in ('quit', 'exit', 'bye'):
             click.secho('Exiting...', dim=True)
             sys.exit()
 
-    def handle_reconnect(self, document):
+    def handle_reconnect(self, document: str) -> bool:
+        """
+            Handles a reconnection attempt to a device.
+
+            The reconnection itself is done by simply asking for the
+            device information again, just like how it would have
+            been done when the repl first started up.
+
+            :param document:
+            :return:
+        """
 
         if document.strip() in ('reconnect', 'reset'):
+
             click.secho('Reconnecting...', dim=True)
 
             try:
@@ -288,9 +336,9 @@ class Repl(object):
 
         return False
 
-    def start_repl(self):
+    def start_repl(self) -> None:
         """
-            Start the repl built in self.cli
+            Start the objection repl.
         """
 
         banner = ("""
@@ -307,6 +355,8 @@ class Repl(object):
         click.secho(banner, bold=True)
         click.secho('[tab] for command suggestions', fg='white', dim=True)
 
+        # the main application loop is here, reading inputs provided by
+        # prompt_toolkit and sending it off the the needed handlers
         while True:
 
             try:

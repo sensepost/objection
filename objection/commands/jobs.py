@@ -4,7 +4,7 @@ from tabulate import tabulate
 from ..state.jobs import job_manager_state
 
 
-def show(args=None):
+def show(args: list = None) -> None:
     """
         Show all of the jobs that are currently running
 
@@ -12,21 +12,24 @@ def show(args=None):
     """
 
     if len(job_manager_state.jobs) <= 0:
-        click.secho('No running jobs', bold=True)
+        click.secho('No jobs are currently running.', bold=True)
         return
 
     jobs = []
     for job in job_manager_state.jobs:
-        jobs.append([
-            job.id,
-            job.name,
-            job.started
-        ])
+        jobs.append([job.id, job.name, job.started])
 
     click.secho(tabulate(jobs, headers=['UUID', 'Name', 'Started']))
 
 
-def kill(args):
+def kill(args: list) -> None:
+    """
+        Kills a specific objbection job.
+
+        :param args:
+        :return:
+    """
+
     if len(args) <= 0:
         click.secho('Usage: jobs kill <uuid>', bold=True)
         return
@@ -34,9 +37,14 @@ def kill(args):
     job_uuid = args[0]
 
     for job in job_manager_state.jobs:
+
         if str(job.id) == str(job_uuid):
+            # run the end() method for the queued job so that any
+            # cleanup operations that need to be run happen.
             click.secho('Stopping job: {0}'.format(job.id))
             job.end()
+
+            # remove the job from the global job state manager
             job_manager_state.remove_job(job)
             click.secho('Job {0} stopped'.format(job.id), fg='green')
 

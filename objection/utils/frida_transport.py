@@ -11,11 +11,9 @@ from ..state.jobs import job_manager_state
 
 
 class RunnerMessage(object):
-    """
-        Object to store a response message from a Frida hook. 
-    """
+    """ Object to store a response message from a Frida hook. """
 
-    def __init__(self, message, data):
+    def __init__(self, message: dict, data) -> None:
 
         # set some defaults
         self.success = False
@@ -41,13 +39,26 @@ class RunnerMessage(object):
         if data is not None:
             self.extra_data = data
 
-    def is_successful(self):
+    def is_successful(self) -> bool:
+        """
+            Check if the message is considered a success message.
+
+            :return:
+        """
+
         return self.success
 
     def get_extra_data(self):
+        """
+            Returns the extra data send along with a hooks send() method
+            as the second argument.
+
+            :return:
+        """
+
         return self.extra_data
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: str):
         """
             Allow for access to the data property using
             the self['item'] syntax.
@@ -58,7 +69,7 @@ class RunnerMessage(object):
 
         return self.data[item]
 
-    def __getattr__(self, item):
+    def __getattr__(self, item: str):
         """
             Allow for access to the data property using
             the self.item syntax.
@@ -69,10 +80,11 @@ class RunnerMessage(object):
 
         return self.data[item]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
 
         if self.is_successful():
             return '<SuccessfulRunnerMessage Type: {0} Data: {1}>'.format(self.type, self.data)
+
         else:
             return '<FailedRunnerMessage Reason: {0} Type: {1} Data: {2}>'.format(self.error_reason, self.success,
                                                                                   self.type,
@@ -85,7 +97,7 @@ class FridaJobRunner(object):
         are represented by an instance of this class
     """
 
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
         """
             Init a new FridaJobRunner with a given name
 
@@ -100,7 +112,7 @@ class FridaJobRunner(object):
         self.session = None
         self.script = None
 
-    def on_message(self, message, data):
+    def on_message(self, message: dict, data) -> None:
         """
             This handler is used to echoing data instead of
             the other being used for direct, one time runs.
@@ -140,11 +152,18 @@ class FridaJobRunner(object):
         except Exception as e:
             raise e
 
-    def end(self):
+    def end(self) -> None:
+        """
+            The method used to 'finish' the hook by unloading it from
+            the processes memory.
+
+            :return:
+        """
+
         self.script.unload()
         self.session = None
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '<ID: {0} Started:{1}>'.format(self.id, self.started)
 
 
@@ -154,14 +173,21 @@ class FridaRunner(object):
         responses in the messages property.
     """
 
-    def __init__(self, hook=None):
+    def __init__(self, hook: str = None):
 
         self.messages = []
 
         if hook:
             self.hook = hook
 
-    def _on_message(self, message, data):
+    def _on_message(self, message: dict, data):
+        """
+            The callback to run when a message is received from a hook.
+
+            :param message:
+            :param data:
+            :return:
+        """
 
         try:
 
@@ -177,7 +203,7 @@ class FridaRunner(object):
         except Exception as e:
             raise e
 
-    def get_last_message(self):
+    def get_last_message(self) -> RunnerMessage:
         """
             Reusing a runner would mean multiple messages
             get stored. This method pops the last one as
@@ -185,27 +211,6 @@ class FridaRunner(object):
         """
 
         return self.messages[-1]
-
-    def get_remote_device(self):
-        """
-            Get a Frida gadgetified device to connect to
-        """
-
-        # TODO: Try and get this to actually work :|
-
-        # no device host? no device then
-        if state_connection.host is None:
-            return None
-
-        device_manager = frida.get_device_manager()
-
-        for device in device_manager.enumerate_devices():
-            if device.id == state_connection.host:
-                return device_manager.get_device(device_id=device.id)
-
-        click.secho('Adding {0} as a device.'.format(state_connection.host), dim=True)
-
-        return device_manager.add_remote_device(state_connection.host)
 
     def get_session(self):
         """
@@ -218,7 +223,7 @@ class FridaRunner(object):
         if state_connection.get_comms_type() == state_connection.TYPE_REMOTE:
             return frida.get_remote_device().attach(state_connection.gadget_name)
 
-    def set_hook_with_data(self, hook, **kwargs):
+    def set_hook_with_data(self, hook: str, **kwargs) -> None:
         """
             Sometimes, extra data is needed in a hook, and this
             is populated using Jinja templates. This method should
@@ -233,9 +238,7 @@ class FridaRunner(object):
         template = Template(hook)
         self.hook = template.render(**kwargs)
 
-        return
-
-    def run(self, hook=None):
+    def run(self, hook: str = None) -> None:
         """
             Run a hook syncronously and unload once finished.
 
@@ -255,7 +258,7 @@ class FridaRunner(object):
         script.load()
         script.unload()
 
-    def run_as_job(self, name: str, hook=None):
+    def run_as_job(self, name: str, hook: str = None) -> None:
         """
             Run a hook as a background job, identified by a name.
 

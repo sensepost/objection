@@ -6,10 +6,30 @@ template_env = Environment(loader=PackageLoader('objection', 'templates'))
 hook_path = path.realpath(path.abspath(path.dirname(__file__) + '/../hooks'))
 
 
-def generic_hook(name, skip_trycarch=False):
-    if not name.endswith('.js'):
-        name = name + '.js'
+def _get_name_with_js_suffix(name: str) -> str:
+    """
+        Ensures a string ends with .js
 
+        :param name:
+        :return:
+    """
+
+    if not name.endswith('.js'):
+        return name + '.js'
+
+    return name
+
+
+def generic_hook(name: str, skip_trycarch: bool = False) -> str:
+    """
+        Compile a hook from the 'generic' directory.
+
+        :param name:
+        :param skip_trycarch:
+        :return:
+    """
+
+    name = _get_name_with_js_suffix(name)
     tmpl_path = path.join(hook_path, 'generic/' + name)
 
     with open(tmpl_path, 'r') as f:
@@ -24,10 +44,16 @@ def generic_hook(name, skip_trycarch=False):
     return final_template.render(content=hook)
 
 
-def ios_hook(name, skip_trycatch=False):
-    if not name.endswith('.js'):
-        name = name + '.js'
+def ios_hook(name: str, skip_trycatch: bool = False) -> str:
+    """
+        Compile a hook from the 'ios' directory.
 
+        :param name:
+        :param skip_trycatch:
+        :return:
+    """
+
+    name = _get_name_with_js_suffix(name)
     tmpl_path = path.join(hook_path, 'ios/' + name)
 
     with open(tmpl_path, 'r') as f:
@@ -42,5 +68,5 @@ def ios_hook(name, skip_trycatch=False):
     return final_template.render(content=hook)
 
 
-def android_hook(name=None):
+def android_hook(name: str = None) -> None:
     pass

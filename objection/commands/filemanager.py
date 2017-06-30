@@ -10,7 +10,22 @@ from ..utils.frida_transport import FridaRunner
 from ..utils.templates import ios_hook
 
 
-def cd(args):
+def cd(args: list) -> None:
+    """
+        Change the current working directory of the device.
+
+        While this method does not actually change any directories,
+        it simply updates the value in the file_manager_state property
+        that keeps record of the current directory.
+
+        Before changing directories though, some checks are performed
+        on the device to at least ensure that the destination directory
+        exists.
+
+        :param args:
+        :return:
+    """
+
     if len(args) <= 0:
         click.secho('Usage: cd <destination directory>', bold=True)
         return
@@ -43,6 +58,7 @@ def cd(args):
     if os.path.isabs(path):
 
         runner = FridaRunner()
+
         # populate the template with the path we want to work with
         runner.set_hook_with_data(
             ios_hook('filesystem/exists'), path=path)
@@ -63,6 +79,7 @@ def cd(args):
         proposed_path = os.path.join(current_dir, path)
 
         runner = FridaRunner()
+
         # populate the template with the path we want to work with
         runner.set_hook_with_data(
             ios_hook('filesystem/exists'), path=proposed_path)
@@ -77,7 +94,19 @@ def cd(args):
             click.secho('Invalid path: `{0}`'.format(proposed_path), fg='red')
 
 
-def pwd(args=None):
+def pwd(args: list = None) -> str:
+    """
+        Return the current working directory.
+
+        If a record exists in the filemanager state, that directory
+        is returned. Else, an environment specific call is made to
+        the device to determine the directory it considers itself
+        to be working from.
+
+        :param args:
+        :return:
+    """
+
     if file_manager_state.cwd is not None:
         return file_manager_state.cwd
 
@@ -88,11 +117,25 @@ def pwd(args=None):
         return _pwd_android()
 
 
-def pwd_print(args=None):
+def pwd_print(args: list = None) -> None:
+    """
+        Prints the current working directory.
+
+        :param args:
+        :return:
+    """
+
     click.secho('Current directory: {0}'.format(pwd()))
 
 
-def _pwd_ios():
+def _pwd_ios() -> str:
+    """
+        Execute a Frida hook that gets the current working
+        directory from an iOS device.
+
+        :return:
+    """
+
     hook = ios_hook('filesystem/pwd')
 
     runner = FridaRunner()
@@ -109,32 +152,51 @@ def _pwd_ios():
     return response.cwd
 
 
-def _pwd_android():
+def _pwd_android() -> None:
+    """
+        This would be the method to return the current working
+        directory from an Android device.
+
+        :return:
+    """
+
     pass
 
 
-def ls(args):
+def ls(args: list) -> None:
+    """
+        Get a directory listing for a path on a device.
+        If no path is provided, the current working directory is used.
+
+        :param args:
+        :return:
+    """
+
+    # check if we have recevied a path to ls for.
     if len(args) <= 0:
         path = '.'
     else:
         path = args[0]
 
+    # based on the runtime, execute the correct ls method.
     if device_state.device_type == 'ios':
-        return _ls_ios(path)
+        _ls_ios(path)
 
     if device_state.device_type == 'android':
-        return _ls_android(path)
+        _ls_android(path)
 
 
-def _ls_ios(path):
+def _ls_ios(path: str) -> None:
     """
         List files implementation for iOS.
 
         See:
             http://www.stanford.edu/class/cs193p/cgi-bin/drupal/system/files/lectures/09_Data.pdf
-    :param path:
-    :return:
+
+        :param path:
+        :return:
     """
+
     if path == '.':
         path = pwd()
 
@@ -163,18 +225,22 @@ def _ls_ios(path):
         return 'n/a'
 
     # output display
-    # click.secho('Path: {0}'.format(data['path']))
     if data['readable']:
+
         click.secho('Read Access', fg='green')
+
     else:
         click.secho('No Read Access', fg='red')
 
     if data['writable']:
+
         click.secho('Write Access', fg='green')
+
     else:
         click.secho('No Write Access', fg='red')
 
-    # if the directory was readable, dump the filesytem
+    # if the directory was readable, dump the filesytem listing
+    # and attributes to screen.
     if data['readable']:
 
         table_data = []
@@ -207,11 +273,30 @@ def _ls_ios(path):
                              headers=['Type', 'Perms', 'Read', 'Write', 'Owner', 'Group', 'Size', 'Creation', 'Name']))
 
 
-def _ls_android(path):
+def _ls_android(path: str) -> None:
+    """
+        This will be the method used to get directory listings
+        on Android devices.
+
+        :param path:
+        :return:
+    """
+
     pass
 
 
-def download(args):
+def download(args: list) -> None:
+    """
+        Downloads a file from a remote filesystem and stores
+        it locally.
+
+        This method is simply a proxy to the actual download methods
+        used for the appopriate environment.
+
+        :param args:
+        :return:
+    """
+
     if len(args) < 2:
         click.secho('Usage: download <remote location> <local destination>', bold=True)
         return
@@ -220,17 +305,25 @@ def download(args):
     destination = args[1]
 
     if device_state.device_type == 'ios':
-        return _download_ios(path, destination)
+        _download_ios(path, destination)
 
     if device_state.device_type == 'android':
-        return None
+        pass
 
 
-def _download_ios(path, destination):
-    current_dir = pwd()
+def _download_ios(path: str, destination: str) -> None:
+    """
+        Download a file from an iOS filesystem and store it locally.
 
+        :param path:
+        :param destination:
+        :return:
+    """
+
+    # if the path we got is not absolute, join it with the
+    # current working directory
     if not os.path.isabs(path):
-        path = os.path.join(current_dir, path)
+        path = os.path.join(pwd(), path)
 
     # output about whats about to happen
     click.secho('Downloading {0} to {1}'.format(path, destination), fg='green', dim=True)
@@ -240,8 +333,7 @@ def _download_ios(path, destination):
     runner = FridaRunner()
 
     # check that the path is readable
-    runner.set_hook_with_data(
-        ios_hook('filesystem/readable'), path=path)
+    runner.set_hook_with_data(ios_hook('filesystem/readable'), path=path)
 
     # run the hook
     runner.run()
@@ -255,8 +347,7 @@ def _download_ios(path, destination):
         return
 
     # check that its a file
-    runner.set_hook_with_data(
-        ios_hook('filesystem/is-type-file'), path=path)
+    runner.set_hook_with_data(ios_hook('filesystem/is-type-file'), path=path)
 
     # run the hook
     runner.run()
@@ -281,11 +372,22 @@ def _download_ios(path, destination):
 
     file_data = response.get_extra_data()
 
+    # finally, write the downloaded file to disk
     with open(destination, 'wb') as fh:
         fh.write(file_data)
 
 
-def upload(args):
+def upload(args: list) -> None:
+    """
+        Uploads a local file to the remote operating system.
+
+        This method is just a proxy method to the real upload
+        method used based on the runtime that is available.
+
+        :param args:
+        :return:
+    """
+
     if len(args) < 2:
         click.secho('Usage: upload <local source> <remote destination>', bold=True)
         return
@@ -294,17 +396,23 @@ def upload(args):
     destination = args[1]
 
     if device_state.device_type == 'ios':
-        return _upload_ios(path, destination)
+        _upload_ios(path, destination)
 
     if device_state.device_type == 'android':
-        return None
+        pass
 
 
-def _upload_ios(path, destination):
-    current_dir = pwd()
+def _upload_ios(path: str, destination: str) -> None:
+    """
+        Upload a file to a remote iOS filesystem.
+
+        :param path:
+        :param destination:
+        :return:
+    """
 
     if not os.path.isabs(destination):
-        destination = os.path.join(current_dir, destination)
+        destination = os.path.join(pwd(), destination)
 
     # output about whats about to happen
     click.secho('Uploading {0} to {1}'.format(path, destination), fg='green', dim=True)
@@ -331,7 +439,7 @@ def _upload_ios(path, destination):
     # read the local file to upload, and base64 encode it
     with open(path, 'rb') as f:
         data = f.read()
-        data = str(base64.b64encode(data), 'utf-8')  # the frida hooks wants a raw string
+        data = str(base64.b64encode(data), 'utf-8')  # the frida hook wants a raw string
 
     # prepare the upload hook
     runner.set_hook_with_data(

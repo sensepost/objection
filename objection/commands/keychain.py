@@ -7,14 +7,19 @@ from ..utils.frida_transport import FridaRunner
 from ..utils.templates import ios_hook
 
 
-def _should_output_json(args):
-    if len(args) > 0 and '--json' in args:
-        return True
+def _should_output_json(args: list) -> None:
+    """
+        Checks if --json is in the list of tokens recieved from the
+        command line.
 
-    return False
+        :param args:
+        :return:
+    """
+
+    return len(args) > 0 and '--json' in args
 
 
-def dump(args=None):
+def dump(args: list = None) -> None:
     """
         Dump the iOS keychain
 
@@ -53,16 +58,11 @@ def dump(args=None):
 
     if response.data:
         for entry in response.data:
-            data.append([
-                entry['item_class'],
-                entry['account'],
-                entry['service'],
-                entry['generic'],
-                entry['data'],
-            ])
+            data.append([entry['item_class'], entry['account'], entry['service'], entry['generic'], entry['data'], ])
 
         click.secho('Get all of the attributes by adding `--json keychain.json` to this command', dim=True)
         click.secho('')
         click.secho(tabulate(data, headers=['Class', 'Account', 'Service', 'Generic', 'Data']))
+
     else:
         click.secho('No keychain data could be found', fg='yellow')

@@ -9,29 +9,33 @@ import delegator
 import requests
 
 
-def _get_frida_gadget(platform):
+def _get_frida_gadget(platform: str) -> str:
     objection_path = os.path.join(os.path.expanduser('~'), '.objection')
 
     # Ensure we have the objection path
     if not os.path.exists(objection_path):
         os.makedirs(objection_path)
 
+    # handle the ios specific gadget
     if platform == 'ios':
-        update_now = True
 
+        # by default, assume the gadget needs downloading
+        update_now = True
         dylib_path = os.path.join(objection_path, 'FridaGadget.dylib')
 
         if os.path.exists(dylib_path):
 
-            # check if the dylib was downloaded more than 3 days ago
+            # check if the dylib was downloaded less than 3 days ago
             created = os.path.getctime(dylib_path)
             if datetime.datetime.fromtimestamp(created) > datetime.datetime.now() - datetime.timedelta(days=3):
                 update_now = False
 
+        # if needed, download the latest versio of the dylib
         if update_now:
             frida_gadget_url = 'https://build.frida.re/frida/ios/lib/FridaGadget.dylib'
             click.secho('Updating to newest FridaGadget from: {0}...'.format(frida_gadget_url))
 
+            # Save the gadget to file
             frida_gadget = requests.get(frida_gadget_url, stream=True)
             with open(dylib_path, 'wb') as f:
                 click.secho('Streaming dylib to ~/.objection cache...', fg='green', dim=True)
@@ -43,13 +47,32 @@ def _get_frida_gadget(platform):
         raise Exception('Non yet implemented')
 
 
-def patch_ios_ipa(source, codesign_signature, provision_file, binary_name):
-    def cleanup_extracted_payload(t):
+def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, binary_name: str) -> None:
+    """
+        Patches an iOS IPA by extracting, injecting the Frida dylib,
+        codesigning the dylib and app executable and rezipping the IPA.
+
+        :param source:
+        :param codesign_signature:
+        :param provision_file:
+        :param binary_name:
+        :return:
+    """
+
+    def cleanup_extracted_payload(t: str) -> None:
+        """
+            Small helper method to cleanup temporary files created
+            when an IPA is extracted.
+
+            :param t:
+            :return:
+        """
 
         p = os.path.join(t, 'Payload')
         shutil.rmtree(p, ignore_errors=True)
-        return
 
+    # dictionary of commands and installation methods required for
+    # the patching process to work.
     required_commands = {
         'xcodebuild': {
             'installation': 'Install XCode on macOS via the Appstore'
@@ -78,9 +101,11 @@ def patch_ios_ipa(source, codesign_signature, provision_file, binary_name):
     # check that we have all of the commands needed to build the patched ipa
     for cmd, attributes in required_commands.items():
         location = delegator.run('which {0}'.format(cmd)).out.strip()
+
         if len(location) <= 0:
             click.secho('Unable to find {0}. Install it with: {1}'.format(cmd, attributes['installation']))
             return
+
         required_commands[cmd]['location'] = location
 
     _, temp_file = tempfile.mkstemp(suffix='.ipa')

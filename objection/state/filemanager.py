@@ -1,5 +1,7 @@
 class FileManagerState(object):
-    def __init__(self):
+    """  A class representing the state of the filemanager. """
+
+    def __init__(self) -> str:
         self.cwd = None
 
 

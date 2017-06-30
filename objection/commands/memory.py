@@ -6,11 +6,16 @@ from ..utils.helpers import sizeof_fmt, pretty_concat
 from ..utils.templates import generic_hook
 
 
-def _is_string_input(args):
-    if len(args) > 0 and '--string' in args:
-        return True
+def _is_string_input(args: list) -> None:
+    """
+        Checks if --string is in the list of tokens received form the
+        command line.
 
-    return False
+        :param args:
+        :return:
+    """
+
+    return len(args) > 0 and '--string' in args
 
 
 # TODO: Dump memory on hooked methods.
@@ -18,7 +23,7 @@ def _is_string_input(args):
 #
 # https://github.com/Nightbringer21/fridump/pull/3
 
-def dump_all(args):
+def dump_all(args: list) -> None:
     """
         Dump memory from the currently injected procress.
         Loosely based on:
@@ -46,8 +51,8 @@ def dump_all(args):
     click.secho('Will dump {0} {1} images, totalling {2}'.format(
         len(ranges), access, sizeof_fmt(total_size)), fg='green', dim=True)
 
-    with click.progressbar(ranges,
-                           label='Preparing to dump images') as bar:
+    with click.progressbar(ranges, label='Preparing to dump images') as bar:
+
         for image in bar:
             bar.label = 'Dumping {0} from base: {1}'.format(sizeof_fmt(image.size), hex(image.base_address))
 
@@ -61,7 +66,7 @@ def dump_all(args):
     click.secho('Memory dumped to file: {0}'.format(destination), fg='green')
 
 
-def dump_from_base(args):
+def dump_from_base(args: list) -> None:
     """
         Dump memory from a base address for a specific size to file
 
@@ -97,13 +102,14 @@ def dump_from_base(args):
     click.secho('Memory dumped to file: {0}'.format(destination), fg='green')
 
 
-def list_modules(args=None):
+def list_modules(args: list = None) -> None:
     """
         List modules loaded in the current process.
 
         :param args:
         :return:
     """
+
     hook = generic_hook('memory/list-modules')
     runner = FridaRunner(hook=hook)
     runner.run()
@@ -116,17 +122,20 @@ def list_modules(args=None):
 
     data = []
     for m in response.modules:
-        data.append([
-            m['name'],
-            m['base'],
-            str(m['size']) + ' (' + sizeof_fmt(m['size']) + ')',
-            pretty_concat(m['path'])
-        ])
+        data.append(
+            [m['name'], m['base'], str(m['size']) + ' (' + sizeof_fmt(m['size']) + ')', pretty_concat(m['path'])])
 
     click.secho(tabulate(data, headers=['Name', 'Base', 'Size', 'Path']))
 
 
-def dump_exports(args):
+def dump_exports(args: list) -> None:
+    """
+        Dumps the exported methods from a loaded module to screen.
+
+        :param args:
+        :return:
+    """
+
     if len(args) <= 0:
         click.secho('Usage: memory list exports <module name>', bold=True)
         return
@@ -146,16 +155,19 @@ def dump_exports(args):
 
     data = []
     for x in response.exports:
-        data.append([
-            x['type'],
-            x['name'],
-            x['address']
-        ])
+        data.append([x['type'], x['name'], x['address']])
 
     click.secho(tabulate(data, headers=['Type', 'Name', 'Address']))
 
 
-def find_pattern(args):
+def find_pattern(args: list) -> None:
+    """
+        Searches the  current processes accesible memory for a pspecific pattern.
+
+        :param args:
+        :return:
+    """
+
     if len(args) <= 0:
         click.secho('Usage: memory search "<pattern eg: 41 41 41 ?? 41>" (--string)', bold=True)
         return
@@ -189,7 +201,16 @@ def find_pattern(args):
         click.secho('Unable to find the pattern in any memory region')
 
 
-def write(args):
+def write(args: list) -> None:
+    """
+        Write an arbitrary amount of bytes to an arbitrary memory address.
+
+        Needless to say, use with caution. =P
+
+        :param args:
+        :return:
+    """
+
     if len(args) < 2:
         click.secho('Usage: memory write "<address>" "<pattern eg: 41 41 41 41>" (--string)', bold=True)
         return
@@ -210,4 +231,5 @@ def write(args):
     runner.set_hook_with_data(
         generic_hook('memory/write'),
         destination=destination, pattern=pattern)
+
     runner.run()

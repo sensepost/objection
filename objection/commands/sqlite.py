@@ -9,23 +9,46 @@ from ..commands.filemanager import download, upload, pwd
 from ..state.sqlite import sqlite_manager_state
 
 
-def _get_connection():
+def _get_connection() -> sqlite3.Connection:
+    """
+        Returns a new connection to the currently locally
+        cached sqlite file.
+
+        :return:
+    """
+
     return sqlite3.connect(sqlite_manager_state.temp_file)
 
 
-def status(args):
+def status(args: list) -> None:
+    """
+        Prints the status of the currently 'connected' (actually just cachesd)
+        SQLite database.
+
+        :param args:
+        :return:
+    """
+
     db_file = sqlite_manager_state.file
 
-    if db_file:
-        click.secho(
-            'Connected using file: {0} (locally cached at: {1})'.format(db_file, sqlite_manager_state.temp_file),
-            fg='green')
+    if not db_file:
+        click.secho('Not connected to any file', fg='blue')
+
         return
 
-    click.secho('Not connected to any file', fg='blue')
+    click.secho('Connected using file: {0} (locally cached at: {1})'.format(db_file, sqlite_manager_state.temp_file),
+                fg='green')
 
 
-def connect(args):
+def connect(args: list) -> None:
+    """
+        Connects to a SQLite database by downloading a copy of the database
+        from the device and storing it locally in a temporary directory.
+
+        :param args:
+        :return:
+    """
+
     if len(args) <= 0:
         click.secho('Usage: sqlite connect <remote_file>', bold=True)
         return
@@ -61,7 +84,15 @@ def connect(args):
     click.secho('Connected to SQLite database at: {0}'.format(db_location), fg='green')
 
 
-def disconnect(args=None):
+def disconnect(args: list = None) -> None:
+    """
+        Disconnects from the currently connected/cached SQLite database file
+        by clearing the statemager and deleting the locally cached copy.
+
+        :param args:
+        :return:
+    """
+
     if sqlite_manager_state.is_connected():
         click.secho('Disconnecting database: {0}'.format(sqlite_manager_state.file))
         sqlite_manager_state.cleanup()
@@ -79,7 +110,14 @@ def schema(args=None):
     execute(query.split(' '))
 
 
-def execute(args):
+def execute(args: list) -> None:
+    """
+        Executes a query against the locally cached SQLite database file.
+
+        :param args:
+        :return:
+    """
+
     if not sqlite_manager_state.is_connected():
         click.secho('Connect using sqlite connect first!', fg='red')
         return
@@ -104,11 +142,16 @@ def execute(args):
 
     click.secho(tabulate(results), bold=True)
 
-    for row in results:
-        click.secho(row, bold=True)
 
+def sync(args: list = None) -> None:
+    """
+        Syncs the locally cached copy of the SQLite database with the
+        remote location on a device.
 
-def sync(args=None):
+        :param args:
+        :return:
+    """
+   
     if not sqlite_manager_state.is_connected():
         click.secho('Connect using sqlite connect first!', fg='red')
         return

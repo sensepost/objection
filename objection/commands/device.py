@@ -6,7 +6,7 @@ from ..utils.frida_transport import FridaRunner
 from ..utils.templates import generic_hook, ios_hook
 
 
-def get_device_info():
+def get_device_info() -> tuple:
     """
         Get device information by first checking which runtimes
         are available, and then extracting information about the
@@ -37,6 +37,7 @@ def get_device_info():
         runner.run(hook=hook)
         response = runner.get_last_message()
 
+        # we have some device information for iOS, return it!
         if response.is_successful():
             return response.deviceName, response.systemName, response.model, response.systemVersion
 
@@ -45,10 +46,19 @@ def get_device_info():
     # android device information
     if runner.get_last_message().device_type == 'android':
         device_state.device_type = 'android'
-        raise Exception("Not implemented yet")
+        raise Exception('Not implemented yet')
 
 
-def get_environment(args=None):
+def get_environment(args: list = None) -> None:
+    """
+        Get information about the current environment.
+
+        This method will call the correct runtime specific
+        method to get the information that it can.
+
+        :param args:
+        :return:
+    """
     if device_state.device_type == 'ios':
         _get_ios_environment()
 
@@ -56,7 +66,17 @@ def get_environment(args=None):
         pass
 
 
-def _get_ios_environment():
+def _get_ios_environment() -> None:
+    """
+        Prints information about the iOS environment.
+
+        This includes the current OS version as well as directories
+        of interest for the current applications Documents, Library and
+        main application bundle.
+
+        :return:
+    """
+
     click.secho(tabulate([get_device_info()], headers=['Name', 'System', 'Model', 'Version']))
 
     hook = ios_hook('filesystem/environment')

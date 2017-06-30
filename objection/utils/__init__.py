@@ -4,6 +4,7 @@ from logging.config import dictConfig
 
 import click
 
+# the configuration used for the objection logger
 logging_config = dict(
     version=1,
     formatters={
@@ -33,7 +34,16 @@ dictConfig(logging_config)
 real_secho = click.secho
 
 
-def new_secho(text, **kwargs):
+def new_secho(text: str, **kwargs) -> None:
+    """
+        Patch the secho method from the click package so that
+        the text that should be echoed is logged first.
+
+        :param text:
+        :param kwargs:
+        :return:
+    """
+
     logging.info(text)
     real_secho(text, **kwargs)
 

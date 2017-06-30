@@ -17,7 +17,7 @@ from ..state.connection import state_connection
 @click.option('--gadget', '-g', required=False, default='Gadget',
               help='Name of the Frida Gadget/Process to connect to.',
               show_default=True)
-def cli(network, host, port, gadget):
+def cli(network: bool, host: str, port: int, gadget: str) -> None:
     """
         \b
              _     _         _   _
@@ -43,7 +43,7 @@ def cli(network, host, port, gadget):
 
 
 @cli.command()
-def explore():
+def explore() -> None:
     """
         Start the objection exploration REPL.
     """
@@ -97,7 +97,7 @@ def device_type():
               required=True)
 @click.option('--provision-file', '-p', help='The .mobileprovision file to use in the patched .ipa', required=True)
 @click.option('--binary-name', '-b', help='Name of the Mach-O binary in the IPA (used to patch with Frida)')
-def patchipa(source, codesign_signature, provision_file, binary_name):
+def patchipa(source: str, codesign_signature: str, provision_file: str, binary_name: str) -> None:
     """
         Patch an IPA with the FridaGadget dylib.
     """
