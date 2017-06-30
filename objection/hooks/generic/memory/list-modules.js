@@ -1,3 +1,5 @@
+// Lists the modules available in the current process.
+
 var modules = [];
 
 var process_modules = Process.enumerateModules({
@@ -8,9 +10,9 @@ var process_modules = Process.enumerateModules({
 });
 
 var response = {
-    status: "success",
+    status: 'success',
     error_reason: NaN,
-    type: "frida-environment",
+    type: 'frida-environment',
     data: {
         modules
     }

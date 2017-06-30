@@ -1,6 +1,5 @@
-// UIPasteboard *pb = [UIPasteboard generalPasteboard];
-// NSLog(@"%@", [pb string]);
-// NSLog(@"%@", [pb image]);
+// Monitors the iOS pasteboard and reports in changes to
+// its contents.
 
 var UIPasteboard = ObjC.classes.UIPasteboard;
 var pasteboard = UIPasteboard.generalPasteboard();
@@ -35,3 +34,9 @@ function check_string_data() {
 
 // Poll every 5 minutes
 setInterval(check_string_data, 1000 * 5);
+
+// -- Sample Objective-C
+//
+// UIPasteboard *pb = [UIPasteboard generalPasteboard];
+// NSLog(@"%@", [pb string]);
+// NSLog(@"%@", [pb image]);

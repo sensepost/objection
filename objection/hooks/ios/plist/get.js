@@ -1,14 +1,18 @@
-// NSMutableDictionary *result = [[NSMutableDictionary alloc] initWithContentsOfFile:path];
+// Attempts to read a Plist as an Objective-C dictionary.
 
 var NSMutableDictionary = ObjC.classes.NSMutableDictionary;
 
-var data = NSMutableDictionary.alloc().initWithContentsOfFile_("{{ plist }}");
+var data = NSMutableDictionary.alloc().initWithContentsOfFile_('{{ plist }}');
 
 var response = {
-    status: "success",
+    status: 'success',
     error_reason: NaN,
-    type: "plist-get",
+    type: 'plist-get',
     data: data.toString() 
 }
 
 send(JSON.stringify(response));
+
+// -- Sample Objective-C
+//
+// NSMutableDictionary *result = [[NSMutableDictionary alloc] initWithContentsOfFile:path];

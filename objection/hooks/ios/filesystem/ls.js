@@ -1,12 +1,4 @@
-// NSFileManager *fm = [NSFileManager defaultManager];
-// NSString *bundleURL = [[NSBundle mainBundle] bundlePath];
-// NSArray *contents = [fm contentsOfDirectoryAtPath:bundleURL error:nil];
-
-// for (id item in contents) {
-//     NSString *p = [[NSString alloc] initWithFormat:@"%@/%@",bundleURL, item];
-//     NSDictionary *attribs = [fm attributesOfItemAtPath:p error:nil];
-//     NSLog(@"%@ - %@", p, attribs);
-// }
+// Obtains a directory listing for a specified path.
 
 var NSFileManager = ObjC.classes.NSFileManager;
 var NSBundle = ObjC.classes.NSBundle;
@@ -16,7 +8,7 @@ var NSString = ObjC.classes.NSString;
 var fm = NSFileManager.defaultManager();
 
 // init the path we want to list
-var path = NSString.stringWithString_("{{ path }}");
+var path = NSString.stringWithString_('{{ path }}');
 
 // check read / write access on the current path
 var readable = fm.isReadableFileAtPath_(path);
@@ -24,7 +16,7 @@ var writable = fm.isWritableFileAtPath_(path);
 
 // variable for file information
 var data = {
-    path: "{{ path }}",
+    path: '{{ path }}',
     readable: Boolean(readable),
     writable: Boolean(writable),
     files: {}
@@ -53,7 +45,7 @@ if (Boolean(readable)) {
         }
 
         // generate a full path to the file
-        var item_path = NSString.stringWithString_(path + "/" + file)
+        var item_path = NSString.stringWithString_(path + '/' + file)
 
         // check read / write
         file_data.readable = fm.isReadableFileAtPath_(item_path);
@@ -86,10 +78,22 @@ if (Boolean(readable)) {
 }
 
 var response = {
-    status: "success",
+    status: 'success',
     error_reason: NaN,
-    type: "list-directory-contents",
+    type: 'list-directory-contents',
     data: data
 }
 
 send(JSON.stringify(response));
+
+// -- Sample Objective-C
+//
+// NSFileManager *fm = [NSFileManager defaultManager];
+// NSString *bundleURL = [[NSBundle mainBundle] bundlePath];
+// NSArray *contents = [fm contentsOfDirectoryAtPath:bundleURL error:nil];
+
+// for (id item in contents) {
+//     NSString *p = [[NSString alloc] initWithFormat:@"%@/%@",bundleURL, item];
+//     NSDictionary *attribs = [fm attributesOfItemAtPath:p error:nil];
+//     NSLog(@"%@ - %@", p, attribs);
+// }

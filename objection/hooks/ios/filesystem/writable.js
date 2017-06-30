@@ -1,5 +1,4 @@
-// NSFileManager *fm = [NSFileManager defaultManager];
-// NSLog(@"%d / readable?", [fm isReadableFileAtPath:@"/"]);
+// Determines of a path on the iOS device is writable.
 
 var NSFileManager = ObjC.classes.NSFileManager;
 var NSString = ObjC.classes.NSString;
@@ -8,17 +7,22 @@ var NSString = ObjC.classes.NSString;
 var fm = NSFileManager.defaultManager();
 
 // init the path we want to check
-var path = NSString.stringWithString_("{{ path }}");
+var path = NSString.stringWithString_('{{ path }}');
 var writable = fm.isWritableFileAtPath_(path);
 
 var response = {
-    status: "success",
+    status: 'success',
     error_reason: NaN,
-    type: "file-writable",
+    type: 'file-writable',
     data: {
-        path: "{{ path }}",
+        path: '{{ path }}',
         writable: Boolean(writable)
     }
 }
 
 send(JSON.stringify(response));
+
+// -- Sample Objective-C
+//
+// NSFileManager *fm = [NSFileManager defaultManager];
+// NSLog(@"%d / readable?", [fm isReadableFileAtPath:@"/"]);

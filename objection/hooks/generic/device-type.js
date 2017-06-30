@@ -1,11 +1,14 @@
+// Depending on which runtime is available, return the
+// appropriate device_type.
+
 if (ObjC.available) {
 
     var response = {
-        status: "success",
+        status: 'success',
         error_reason: NaN,
-        type: "device-type-enumeration",
+        type: 'device-type-enumeration',
         data: {
-            device_type: "ios",
+            device_type: 'ios',
             frida_version: Frida.version
         }
     }
@@ -15,11 +18,11 @@ if (ObjC.available) {
 } else if (Java.available) {
 
     var response = {
-        status: "success",
+        status: 'success',
         error_reason: NaN,
-        type: "device-type-enumeration",
+        type: 'device-type-enumeration',
         data: {
-            device_type: "android",
+            device_type: 'android',
             frida_version: Frida.version
         }
     }
@@ -29,11 +32,11 @@ if (ObjC.available) {
 } else {
 
     var response = {
-        status: "error",
-        error_reason: "Unknown Platform",
-        type: "device-type-enumeration",
+        status: 'error',
+        error_reason: 'Unknown Platform',
+        type: 'device-type-enumeration',
         data: {
-            device_type: "unknown",
+            device_type: 'unknown',
         }
     }
 

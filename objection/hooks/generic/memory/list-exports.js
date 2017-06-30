@@ -1,6 +1,8 @@
+// Lists exports from a specific import.
+
 var exports = [];
 
-var process_modules = Module.enumerateExports("{{ module }}", {
+var process_modules = Module.enumerateExports('{{ module }}', {
     onMatch: function(module) {
         exports.push(module);
     },
@@ -8,9 +10,9 @@ var process_modules = Module.enumerateExports("{{ module }}", {
 });
 
 var response = {
-    status: "success",
+    status: 'success',
     error_reason: NaN,
-    type: "module-exports",
+    type: 'module-exports',
     data: {
         exports
     }

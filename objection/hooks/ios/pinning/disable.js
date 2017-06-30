@@ -45,9 +45,9 @@ var NSURLCredential = ObjC.classes.NSURLCredential;
 if (ObjC.classes.AFHTTPSessionManager && ObjC.classes.AFSecurityPolicy) {
 
     send(JSON.stringify({
-        status: "success",
+        status: 'success',
         error_reason: NaN,
-        type: "ios-ssl-pinning-bypass",
+        type: 'ios-ssl-pinning-bypass',
         data: 'Found AFNetworking 3.0 library'
     }));
 
@@ -63,9 +63,9 @@ if (ObjC.classes.AFHTTPSessionManager && ObjC.classes.AFSecurityPolicy) {
             if (args[2] != '0x0') {
 
                 send(JSON.stringify({
-                    status: "success",
+                    status: 'success',
                     error_reason: NaN,
-                    type: "ios-ssl-pinning-bypass",
+                    type: 'ios-ssl-pinning-bypass',
                     data: '[AFNetworking 3.0] setting AFSSLPinningModeNone for policyWithPinningMode:'
                 }));
 
@@ -86,9 +86,9 @@ if (ObjC.classes.AFHTTPSessionManager && ObjC.classes.AFSecurityPolicy) {
             if (args[2] != '0x0') {
 
                 send(JSON.stringify({
-                    status: "success",
+                    status: 'success',
                     error_reason: NaN,
-                    type: "ios-ssl-pinning-bypass",
+                    type: 'ios-ssl-pinning-bypass',
                     data: '[AFNetworking 3.0] setting AFSSLPinningModeNone for policyWithPinningMode:withPinnedCertificates:'
                 }));
 
@@ -104,9 +104,9 @@ var search = resolver.enumerateMatchesSync('-[* URLSession:didReceiveChallenge:c
 if (search.length > 0) {
 
     send(JSON.stringify({
-        status: "success",
+        status: 'success',
         error_reason: NaN,
-        type: "ios-ssl-pinning-bypass",
+        type: 'ios-ssl-pinning-bypass',
         data: '[NSURLSession] Found ' + search.length + ' matches for URLSession:didReceiveChallenge:completionHandler:'
     }));
 
@@ -128,9 +128,9 @@ if (search.length > 0) {
                 var challenge = new ObjC.Object(args[3]);
 
                 send(JSON.stringify({
-                    status: "success",
+                    status: 'success',
                     error_reason: NaN,
-                    type: "ios-ssl-pinning-bypass",
+                    type: 'ios-ssl-pinning-bypass',
                     data: '[NSURLSession] Got call to -[' + receiver + ' ' + selector + ']. Ensuring pinning passes.'
                 }));
 
@@ -185,9 +185,9 @@ var search = resolver.enumerateMatchesSync('-[* connection:willSendRequestForAut
 if (search.length > 0) {
 
     send(JSON.stringify({
-        status: "success",
+        status: 'success',
         error_reason: NaN,
-        type: "ios-ssl-pinning-bypass",
+        type: 'ios-ssl-pinning-bypass',
         data: '[NSURLConnection] Found ' + search.length + ' matches for connection:willSendRequestForAuthenticationChallenge:'
     }));
 
@@ -206,9 +206,9 @@ if (search.length > 0) {
 //  https://github.com/nabla-c0d3/ssl-kill-switch2/blob/master/SSLKillSwitch/SSLKillSwitch.m
 
 send(JSON.stringify({
-    status: "success",
+    status: 'success',
     error_reason: NaN,
-    type: "ios-ssl-pinning-bypass",
+    type: 'ios-ssl-pinning-bypass',
     data: 'Hooking lower level methods: SSLSetSessionOption, SSLCreateContext, ' +
     'SSLHandshake and tls_helper_create_peer_trust'
 }));
@@ -223,15 +223,15 @@ var errSecSuccess = 0;
 
 // SSLSetSessionOption
 var SSLSetSessionOption = new NativeFunction(
-    Module.findExportByName("Security", "SSLSetSessionOption"),
+    Module.findExportByName('Security', 'SSLSetSessionOption'),
     'int', ['pointer', 'int', 'bool']);
 
 Interceptor.replace(SSLSetSessionOption, new NativeCallback(function (context, option, value) {
 
     send(JSON.stringify({
-        status: "success",
+        status: 'success',
         error_reason: NaN,
-        type: "ios-ssl-pinning-bypass",
+        type: 'ios-ssl-pinning-bypass',
         data: '[SSLSetSessionOption] Called'
     }));
 
@@ -245,15 +245,15 @@ Interceptor.replace(SSLSetSessionOption, new NativeCallback(function (context, o
 
 // SSLCreateContext
 var SSLCreateContext = new NativeFunction(
-    Module.findExportByName("Security", "SSLCreateContext"),
+    Module.findExportByName('Security', 'SSLCreateContext'),
     'pointer', ['pointer', 'int', 'int']);
 
 Interceptor.replace(SSLCreateContext, new NativeCallback(function (alloc, protocolSide, connectionType) {
 
     send(JSON.stringify({
-        status: "success",
+        status: 'success',
         error_reason: NaN,
-        type: "ios-ssl-pinning-bypass",
+        type: 'ios-ssl-pinning-bypass',
         data: '[SSLCreateContext] Called'
     }));
 
@@ -266,15 +266,15 @@ Interceptor.replace(SSLCreateContext, new NativeCallback(function (alloc, protoc
 
 // SSLHandshake
 var SSLHandshake = new NativeFunction(
-    Module.findExportByName("Security", "SSLHandshake"),
+    Module.findExportByName('Security', 'SSLHandshake'),
     'int', ['pointer']);
 
 Interceptor.replace(SSLHandshake, new NativeCallback(function (context) {
 
     send(JSON.stringify({
-        status: "success",
+        status: 'success',
         error_reason: NaN,
-        type: "ios-ssl-pinning-bypass",
+        type: 'ios-ssl-pinning-bypass',
         data: '[SSLHandshake] Called'
     }));
 
@@ -293,15 +293,15 @@ Interceptor.replace(SSLHandshake, new NativeCallback(function (context) {
 
 // tls_helper_create_peer_trust
 var tls_helper_create_peer_trust = new NativeFunction(
-    Module.findExportByName("libcoretls_cfhelpers.dylib", "tls_helper_create_peer_trust"),
+    Module.findExportByName('libcoretls_cfhelpers.dylib', 'tls_helper_create_peer_trust'),
     'int', ['void', 'bool', 'pointer']);
 
 Interceptor.replace(tls_helper_create_peer_trust, new NativeCallback(function (hdsk, server, SecTrustRef) {
 
     send(JSON.stringify({
-        status: "success",
+        status: 'success',
         error_reason: NaN,
-        type: "ios-ssl-pinning-bypass",
+        type: 'ios-ssl-pinning-bypass',
         data: '[tls_helper_create_peer_trust] Called'
     }));
 

@@ -1,15 +1,20 @@
-// NSURL *bundleURL = [[NSBundle mainBundle] bundleURL];
+// Determines the current working directory, based
+// on the main bundles path on the iOS device.
 
 var NSBundle = ObjC.classes.NSBundle;
 var BundleURL = NSBundle.mainBundle().bundlePath();
 
 var response = {
-    status: "success",
+    status: 'success',
     error_reason: NaN,
-    type: "current-working-directory",
+    type: 'current-working-directory',
     data: {
         cwd: String(BundleURL),
     }
 }
 
 send(JSON.stringify(response));
+
+// -- Sample Objective-C
+//
+// NSURL *bundleURL = [[NSBundle mainBundle] bundleURL];

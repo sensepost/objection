@@ -1,3 +1,5 @@
+// Watches for invocations of a specific Objective-C method.
+
 var resolver = new ApiResolver('objc');
 var method = {};
 
@@ -12,9 +14,9 @@ resolver.enumerateMatches('{{ selector }}', {
 if (method.address) {
 
     send(JSON.stringify({
-        status: "success",
+        status: 'success',
         error_reason: NaN,
-        type: "watch-class-method",
+        type: 'watch-class-method',
         data: 'Found address for: {{ selector }} at ' + method.address
     }));
 
@@ -22,14 +24,14 @@ if (method.address) {
         onEnter: function (args) {
 
             var receiver = new ObjC.Object(args[0]);
-            var message = "(Kind: " + receiver.$kind +
-                ") (Super: " + receiver.$superClass +
-                ") [" + receiver.$className + " " + ObjC.selectorAsString(args[1]) + "]";
+            var message = '(Kind: ' + receiver.$kind +
+                ') (Super: ' + receiver.$superClass +
+                ') [' + receiver.$className + ' ' + ObjC.selectorAsString(args[1]) + ']';
 
             send(JSON.stringify({
-                status: "success",
+                status: 'success',
                 error_reason: NaN,
-                type: "watch-class-method",
+                type: 'watch-class-method',
                 data: 'Hit: ' + message
             }));
         }
@@ -38,9 +40,9 @@ if (method.address) {
 } else {
 
     send(JSON.stringify({
-        status: "error",
-        error_reason: "Unable to find address for {{ selector }}. Is the selector valid?",
-        type: "watch-class-method",
+        status: 'error',
+        error_reason: 'Unable to find address for {{ selector }}. Is the selector valid?',
+        type: 'watch-class-method',
         data: NaN
     }));
 }

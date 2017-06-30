@@ -1,19 +1,28 @@
+// Watches for all method invocations of a certain Objective-C
+// class. Based on the value of the include_parents Jinja template
+// variable, the class in questions parent methods may also be
+// hooked.
+
 for (class_name in ObjC.classes) {
 
-    if (class_name == "{{ class_name }}") {
+    if (class_name == '{{ class_name }}') {
 
         send(JSON.stringify({
-            status: "success",
+            status: 'success',
             error_reason: NaN,
-            type: "call-to-hooked-method",
+            type: 'call-to-hooked-method',
             data: 'Found class: {{ class_name }}, hooking methods...'
         }));
 
         // if we should include parent classes, do that.
-        if ("{{ include_parents }}" == "True") {
+        if ('{{ include_parents }}' == 'True') {
+
             var methods = eval('ObjC.classes.{{ class_name }}.$methods');
+
         } else {
+
             var methods = eval('ObjC.classes.{{ class_name }}.$ownMethods');
+
         }
 
         // hook into all of the methods in this class
@@ -30,14 +39,14 @@ for (class_name in ObjC.classes) {
                     onEnter: function (args) {
 
                         var receiver = new ObjC.Object(args[0]);
-                        var message = "(Kind: " + receiver.$kind +
-                            ") (Super: " + receiver.$superClass +
-                            ") [" + receiver.$className + " " + ObjC.selectorAsString(args[1]) + "]";
+                        var message = '(Kind: ' + receiver.$kind +
+                            ') (Super: ' + receiver.$superClass +
+                            ') [' + receiver.$className + ' ' + ObjC.selectorAsString(args[1]) + ']';
 
                         send(JSON.stringify({
-                            status: "success",
+                            status: 'success',
                             error_reason: NaN,
-                            type: "call-to-hooked-method",
+                            type: 'call-to-hooked-method',
                             data: 'Hit: ' + message
                         }));
                     }
@@ -45,9 +54,9 @@ for (class_name in ObjC.classes) {
             } catch (err) {
 
                 send(JSON.stringify({
-                    status: "success",
-                    error_reason: "Hooking method " + method + "failed with: " + err.message,
-                    type: "call-to-hooked-method",
+                    status: 'success',
+                    error_reason: 'Hooking method ' + method + 'failed with: ' + err.message,
+                    type: 'call-to-hooked-method',
                     data: NaN
                 }));
             }

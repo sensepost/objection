@@ -197,7 +197,7 @@ def dump_ios_method_args(args: list) -> None:
         usage()
         return
 
-    full_method = "{0}[{1} {2}]".format(class_instance, class_name, method_name)
+    full_method = '{0}[{1} {2}]'.format(class_instance, class_name, method_name)
     argument_count = full_method.count(':')
     click.secho('Full method: {0} ({1} arguments)'.format(full_method, argument_count))
 

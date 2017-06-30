@@ -1,7 +1,9 @@
+// Returns information about Frida itself.
+
 var response = {
-    status: "success",
+    status: 'success',
     error_reason: NaN,
-    type: "frida-environment",
+    type: 'frida-environment',
     data: {
         frida_version: Frida.version,
         process_arch: Process.arch,

@@ -1,5 +1,4 @@
-// NSFileManager *fm = [NSFileManager defaultManager];
-// NSLog(@"%d / readable?", [fm isReadableFileAtPath:@"/"]);
+// Determine if a file is readable on the iOS filesystem.
 
 var NSFileManager = ObjC.classes.NSFileManager;
 var NSString = ObjC.classes.NSString;
@@ -8,17 +7,22 @@ var NSString = ObjC.classes.NSString;
 var fm = NSFileManager.defaultManager();
 
 // init the path we want to check
-var path = NSString.stringWithString_("{{ path }}");
+var path = NSString.stringWithString_('{{ path }}');
 var readable = fm.isReadableFileAtPath_(path);
 
 var response = {
-    status: "success",
+    status: 'success',
     error_reason: NaN,
-    type: "file-readable",
+    type: 'file-readable',
     data: {
-        path: "{{ path }}",
+        path: '{{ path }}',
         readable: Boolean(readable)
     }
 }
 
 send(JSON.stringify(response));
+
+// -- Sample Objective-C
+//
+// NSFileManager *fm = [NSFileManager defaultManager];
+// NSLog(@"%d / readable?", [fm isReadableFileAtPath:@"/"]);

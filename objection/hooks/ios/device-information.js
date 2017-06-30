@@ -1,17 +1,12 @@
-// NSDictionary *deviceIdentifiers = @{
-//                             @"name": [[UIDevice currentDevice] name],
-//                             @"systemName": [[UIDevice currentDevice] systemName],
-//                             @"systemVersion": [[UIDevice currentDevice] systemVersion],
-//                             };
 
-// [NSString stringWithString:@"Hello World"]
-// var NSString = ObjC.classes.NSString; NSString.stringWithString_("Hello World");
+// Retreives some information about the iOS device.
+
 var UIDevice = ObjC.classes.UIDevice;
 
 var response = {
-    status: "success",
+    status: 'success',
     error_reason: NaN,
-    type: "device-info",
+    type: 'device-info',
     data: {
         deviceName: String(UIDevice.currentDevice().name()),
         systemName: String(UIDevice.currentDevice().systemName()),
@@ -22,3 +17,11 @@ var response = {
 }
 
 send(JSON.stringify(response));
+
+// -- Sample Objective-C
+//
+// NSDictionary *deviceIdentifiers = @{
+//                             @"name": [[UIDevice currentDevice] name],
+//                             @"systemName": [[UIDevice currentDevice] systemName],
+//                             @"systemVersion": [[UIDevice currentDevice] systemVersion],
+//                             };

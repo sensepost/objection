@@ -5,9 +5,9 @@ try {
 } catch (err) {
 
     var response = {
-        status: "error",
+        status: 'error',
         error_reason: err.message,
-        type: "global-exception",
+        type: 'global-exception',
         data: {}
     }
 

@@ -7,9 +7,9 @@ if (ObjC.available) {
     } catch (err) {
 
         var response = {
-            status: "error",
+            status: 'error',
             error_reason: err.message,
-            type: "global-exception",
+            type: 'global-exception',
             data: {}
         }
 
@@ -19,9 +19,9 @@ if (ObjC.available) {
 } else {
 
     var response = {
-        status: "error",
-        error_reason: "Objective-C runtime is not available.",
-        type: "global-exception",
+        status: 'error',
+        error_reason: 'Objective-C runtime is not available.',
+        type: 'global-exception',
         data: {}
     }
 

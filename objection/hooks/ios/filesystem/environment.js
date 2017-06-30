@@ -1,10 +1,5 @@
-// NSFileManager *fm = [NSFileManager defaultManager];
-// NSString *pictures = [[fm URLsForDirectory:NSPicturesDirectory inDomains:NSUserDomainMask] lastObject].path;
-
-// NSBundle *bundle = [NSBundle mainBundle];
-// NSString *bundlePath = [bundle bundlePath];
-// NSString *receipt = [bundle appStoreReceiptURL].path;
-// NSString *resourcePath = [bundle resourcePath];
+// Gets some 'environmental' information about the current application,
+// primarily by getting the locations of interesting app related directories.
 
 var NSFileManager = ObjC.classes.NSFileManager;
 var NSBundle = ObjC.classes.NSBundle;
@@ -12,25 +7,25 @@ var NSBundle = ObjC.classes.NSBundle;
 var fm = NSFileManager.defaultManager();
 var mb = NSBundle.mainBundle();
 
-// nice. so it doesnt seem like i can just go a-la NSPicturesDirectory & NSUserDomainMask
-// and expect things to work. nope. have to map those thingies to integers from the NS_ENUM
-// in Foundation/NSPathUtilities.h 
-
-// The ENUM exceprt from the header is...
-
-// NSApplicationDirectory = 1,             // supported applications (Applications)
-// NSDemoApplicationDirectory,             // unsupported applications, demonstration versions (Demos)
-// NSDeveloperApplicationDirectory,        // developer applications (Developer/Applications). DEPRECATED - there is no one single Developer directory.
-// NSAdminApplicationDirectory,            // system and network administration applications (Administration)
-// NSLibraryDirectory,                     // various documentation, support, and configuration files, resources (Library)
-// NSDeveloperDirectory,                   // developer resources (Developer) DEPRECATED - there is no one single Developer directory.
-// NSUserDirectory,                        // user home directories (Users)
-// NSDocumentationDirectory,               // documentation (Documentation)
-// NSDocumentDirectory,                    // documents (Documents)
-// NSCoreServiceDirectory,                 // location of CoreServices directory (System/Library/CoreServices)
-// NSAutosavedInformationDirectory NS_ENUM_AVAILABLE(10_6, 4_0) = 11,   // location of autosaved documents (Documents/Autosaved)
-// NSDesktopDirectory = 12,                // location of user's desktop
-// NSCachesDirectory = 13,                 // location of discardable cache files (Library/Caches)
+// typedef NS_ENUM(NSUInteger, NSSearchPathDirectory) {
+//     NSApplicationDirectory = 1,             // supported applications (Applications)
+//     NSDemoApplicationDirectory,             // unsupported applications, demonstration versions (Demos)
+//     NSDeveloperApplicationDirectory,        // developer applications (Developer/Applications). DEPRECATED - there is no one single Developer directory.
+//     NSAdminApplicationDirectory,            // system and network administration applications (Administration)
+//     NSLibraryDirectory,                     // various documentation, support, and configuration files, resources (Library)
+//     NSDeveloperDirectory,                   // developer resources (Developer) DEPRECATED - there is no one single Developer directory.
+//     NSUserDirectory,                        // user home directories (Users)
+//     NSDocumentationDirectory,               // documentation (Documentation)
+//     NSDocumentDirectory,                    // documents (Documents)
+//     NSCoreServiceDirectory,                 // location of CoreServices directory (System/Library/CoreServices)
+//     NSAutosavedInformationDirectory NS_ENUM_AVAILABLE(10_6, 4_0) = 11,   // location of autosaved documents (Documents/Autosaved)
+//     NSDesktopDirectory = 12,                // location of user's desktop
+//     NSCachesDirectory = 13,                 // location of discardable cache files (Library/Caches)
+//     NSApplicationSupportDirectory = 14,     // location of application support files (plug-ins, etc) (Library/Application Support)
+//
+//     [... snip ...]
+//
+// };
 
 var NSApplicationDirectory = 1,
     NSDemoApplicationDirectory = 2,
@@ -67,9 +62,7 @@ function getPathForNSLocation(NSSomeLocationDirectory) {
 
 var data = {
 
-    // data from the NSFileManager
-
-    // most interesting directories:
+    // most interesting directories
     DocumentDirectory: getPathForNSLocation(NSDocumentDirectory),
     LibraryDirectory: getPathForNSLocation(NSLibraryDirectory),
     CachesDirectory: getPathForNSLocation(NSCachesDirectory),
@@ -79,10 +72,7 @@ var data = {
     ApplicationDirectory: getPathForNSLocation(NSApplicationDirectory),
     DemoApplicationDirectory: getPathForNSLocation(NSDemoApplicationDirectory),
     DeveloperApplicationDirectory: getPathForNSLocation(NSDeveloperApplicationDirectory),
-    AdminApplicationDirectory: getPathForNSLocation(NSAdminApplicationDirectory),
-    DeveloperDirectory: getPathForNSLocation(NSDeveloperDirectory),
     UserDirectory: getPathForNSLocation(NSUserDirectory),
-    DocumentationDirectory: getPathForNSLocation(NSDocumentationDirectory),
     CoreServiceDirectory: getPathForNSLocation(NSCoreServiceDirectory),
     AutosavedInformationDirectory: getPathForNSLocation(NSAutosavedInformationDirectory),
     DesktopDirectory: getPathForNSLocation(NSDesktopDirectory),
@@ -94,10 +84,19 @@ var data = {
 }
 
 var response = {
-    status: "success",
+    status: 'success',
     error_reason: NaN,
-    type: "environment-directories",
+    type: 'environment-directories',
     data: data 
 }
 
 send(JSON.stringify(response));
+
+// -- Sample Objective-C
+//
+// NSFileManager *fm = [NSFileManager defaultManager];
+// NSString *pictures = [[fm URLsForDirectory:NSPicturesDirectory inDomains:NSUserDomainMask] lastObject].path;
+// NSBundle *bundle = [NSBundle mainBundle];
+// NSString *bundlePath = [bundle bundlePath];
+// NSString *receipt = [bundle appStoreReceiptURL].path;
+// NSString *resourcePath = [bundle resourcePath];

@@ -105,7 +105,7 @@ class FridaJobRunner(object):
         """
 
         self.id = uuid.uuid4()
-        self.started = strftime("%Y-%m-%d %H:%M:%S")
+        self.started = strftime('%Y-%m-%d %H:%M:%S')
         self.name = name
 
         self.hook = None

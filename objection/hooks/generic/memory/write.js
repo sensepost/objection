@@ -1,3 +1,5 @@
-var bar = eval(["{{ pattern }}"]);
+// Writes arbitrary bytes to a memory address.
 
-Memory.writeByteArray(ptr("{{ destination }}"), bar);
+var bar = eval(['{{ pattern }}']);
+
+Memory.writeByteArray(ptr('{{ destination }}'), bar);

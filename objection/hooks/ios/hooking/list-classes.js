@@ -1,3 +1,6 @@
+// Lists the classes available in the current Objective-C
+// runtime.
+
 var classes = [];
 
 for (var class_name in ObjC.classes) {
@@ -5,9 +8,9 @@ for (var class_name in ObjC.classes) {
 }
 
 var response = {
-    status: "success",
+    status: 'success',
     error_reason: NaN,
-    type: "ios-classes",
+    type: 'ios-classes',
     data: classes
 }
 

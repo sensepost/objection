@@ -1,6 +1,9 @@
+// Hooks an Objective-C class method and attempts to dump its
+// arguements as it is called.
+
 var resolver = new ApiResolver('objc');
 var method = {};
-var argument_count = "{{ argument_count }}"
+var argument_count = '{{ argument_count }}'
 
 resolver.enumerateMatches('{{ method }}', {
     onMatch: function (match) {
@@ -13,9 +16,9 @@ resolver.enumerateMatches('{{ method }}', {
 if (method.address) {
 
     send(JSON.stringify({
-        status: "success",
+        status: 'success',
         error_reason: NaN,
-        type: "call-to-hooked-method",
+        type: 'call-to-hooked-method',
         data: 'Found address for: {{ method }} at ' + method.address
     }));
 
@@ -26,9 +29,9 @@ if (method.address) {
         onEnter: function (args) {
 
             send(JSON.stringify({
-                status: "success",
+                status: 'success',
                 error_reason: NaN,
-                type: "call-to-hooked-method",
+                type: 'call-to-hooked-method',
                 data: 'Detected call to: {{ method }}'
             }));
 
@@ -53,9 +56,9 @@ if (method.address) {
                 }
 
                 send(JSON.stringify({
-                    status: "success",
+                    status: 'success',
                     error_reason: NaN,
-                    type: "call-to-hooked-method",
+                    type: 'call-to-hooked-method',
                     data: split_method.join(' ')
                 }));
             }
@@ -65,9 +68,9 @@ if (method.address) {
 } else {
 
     send(JSON.stringify({
-        status: "error",
-        error_reason: "Unable to find address for {{ method }}. Is the selector valid?",
-        type: "call-to-hooked-method",
+        status: 'error',
+        error_reason: 'Unable to find address for {{ method }}. Is the selector valid?',
+        type: 'call-to-hooked-method',
         data: NaN
     }));
 }

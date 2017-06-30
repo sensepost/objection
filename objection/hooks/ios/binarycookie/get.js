@@ -1,5 +1,4 @@
-// NSHTTPCookieStorage *cs = [NSHTTPCookieStorage sharedHTTPCookieStorage];
-// NSArray *cookies = [cs cookies];
+// Enumerates cookies in from [NSHTTPCookieStorage sharedHTTPCookieStorage]
 
 var NSHTTPCookieStorage = ObjC.classes.NSHTTPCookieStorage;
 var cookieStore = NSHTTPCookieStorage.sharedHTTPCookieStorage();
@@ -35,10 +34,15 @@ if (cookieJar.count() > 0) {
 }
 
 var response = {
-    status: "success",
+    status: 'success',
     error_reason: NaN,
-    type: "cookies-get",
+    type: 'cookies-get',
     data: cookies
 }
 
 send(JSON.stringify(response));
+
+// -- Sample Objective-C
+//
+// NSHTTPCookieStorage *cs = [NSHTTPCookieStorage sharedHTTPCookieStorage];
+// NSArray *cookies = [cs cookies];

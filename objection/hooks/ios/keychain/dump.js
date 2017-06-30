@@ -1,52 +1,5 @@
-// Objective-C sources for the below dumper:
-
-// NSMutableDictionary *query = [[NSMutableDictionary alloc] init];
-// [query setObject:(__bridge id)kCFBooleanTrue forKey:(__bridge id)kSecReturnAttributes];
-// [query setObject:(__bridge id)kCFBooleanTrue forKey:(__bridge id)kSecReturnData];
-// [query setObject:(__bridge id)kCFBooleanTrue forKey:(__bridge id)kSecReturnRef];
-// [query setObject:(__bridge id)kSecMatchLimitAll forKey:(__bridge id)kSecMatchLimit];
-
-// NSArray *itemClasses = [NSArray arrayWithObjects:
-//                         (__bridge id)kSecClassKey,
-//                         (__bridge id)kSecClassIdentity,
-//                         (__bridge id)kSecClassCertificate,
-//                         (__bridge id)kSecClassGenericPassword,
-//                         (__bridge id)kSecClassInternetPassword,
-//                         nil];
-
-// for (id itemClass in itemClasses) {
-
-//     NSLog(@"Querying: %@", itemClass);
-//     [query setObject:itemClass forKey:(__bridge id)kSecClass];
-
-//     CFTypeRef result = NULL;
-//     OSStatus findStatus = SecItemCopyMatching((__bridge CFDictionaryRef)query, &result);
-
-//     if(findStatus != errSecSuccess) {
-
-//         NSLog(@"Failed to query keychain for types %@", itemClass);
-//         continue;
-//     }
-
-//     // loopy-loop the results
-//     for (NSDictionary *entry in (__bridge NSDictionary *)result) {
-
-//         NSString *stringRes = [[NSString alloc] initWithData:[entry objectForKey:@"v_Data"] encoding:NSUTF8StringEncoding];
-//         NSLog(@"%@", stringRes);
-
-//     }
-
-//     if (result != NULL) {
-//         CFRelease(result);
-//     }
-// }
-
-// To reference some of the constants, the had to be echoed to 
-// get their values.
-
-// NSLog(@"Constants Dump");
-// NSLog(@"kSecAttrService: %@", kSecAttrService);
-// NSLog(@"End Constants Dump");
+// Dumps all of the keychain items available to the current
+// application.
 
 var NSMutableDictionary = ObjC.classes.NSMutableDictionary;
 var NSArray = ObjC.classes.NSArray;
@@ -56,88 +9,88 @@ var NSKeyedUnarchiver = ObjC.classes.NSKeyedUnarchiver;
 // Ref: http://nshipster.com/bool/
 var kCFBooleanTrue = ObjC.classes.__NSCFBoolean.numberWithBool_(true);
 var SecItemCopyMatching = new NativeFunction(
-    ptr(Module.findExportByName("Security", "SecItemCopyMatching")), 'pointer', ['pointer', 'pointer']);
+    ptr(Module.findExportByName('Security', 'SecItemCopyMatching')), 'pointer', ['pointer', 'pointer']);
 
 // constants
-var kSecReturnAttributes = "r_Attributes",
-    kSecReturnData = "r_Data",
-    kSecReturnRef = "r_Ref",
-    kSecMatchLimit = "m_Limit",
-    kSecMatchLimitAll = "m_LimitAll",
-    kSecClass = "class",
-    kSecClassKey = "keys",
-    kSecClassIdentity = "idnt",
-    kSecClassCertificate = "cert",
-    kSecClassGenericPassword = "genp",
-    kSecClassInternetPassword = "inet",
-    kSecAttrService = "svce",
-    kSecAttrAccount = "acct",
-    kSecAttrAccessGroup = "agrp",
-    kSecAttrLabel = "labl",
-    kSecAttrCreationDate = "cdat",
-    kSecAttrAccessControl = "accc",
-    kSecAttrGeneric = "gena",
-    kSecAttrSynchronizable = "sync",
-    kSecAttrModificationDate = "mdat",
-    kSecAttrServer = "srvr",
-    kSecAttrDescription = "desc",
-    kSecAttrComment = "icmt",
-    kSecAttrCreator = "crtr",
-    kSecAttrType = "type",
-    kSecAttrScriptCode = "scrp",
-    kSecAttrAlias = "alis",
-    kSecAttrIsInvisible = "invi",
-    kSecAttrIsNegative = "nega",
-    kSecAttrHasCustomIcon = "cusi",
-    kSecProtectedDataItemAttr = "prot",
-    kSecAttrAccessible = "pdmn",
-    kSecAttrAccessibleWhenUnlocked = "ak",
-    kSecAttrAccessibleAfterFirstUnlock = "ck",
-    kSecAttrAccessibleAlways = "dk",
-    kSecAttrAccessibleWhenUnlockedThisDeviceOnly = "aku",
-    kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly = "cku",
-    kSecAttrAccessibleAlwaysThisDeviceOnly = "dku";
+var kSecReturnAttributes = 'r_Attributes',
+    kSecReturnData = 'r_Data',
+    kSecReturnRef = 'r_Ref',
+    kSecMatchLimit = 'm_Limit',
+    kSecMatchLimitAll = 'm_LimitAll',
+    kSecClass = 'class',
+    kSecClassKey = 'keys',
+    kSecClassIdentity = 'idnt',
+    kSecClassCertificate = 'cert',
+    kSecClassGenericPassword = 'genp',
+    kSecClassInternetPassword = 'inet',
+    kSecAttrService = 'svce',
+    kSecAttrAccount = 'acct',
+    kSecAttrAccessGroup = 'agrp',
+    kSecAttrLabel = 'labl',
+    kSecAttrCreationDate = 'cdat',
+    kSecAttrAccessControl = 'accc',
+    kSecAttrGeneric = 'gena',
+    kSecAttrSynchronizable = 'sync',
+    kSecAttrModificationDate = 'mdat',
+    kSecAttrServer = 'srvr',
+    kSecAttrDescription = 'desc',
+    kSecAttrComment = 'icmt',
+    kSecAttrCreator = 'crtr',
+    kSecAttrType = 'type',
+    kSecAttrScriptCode = 'scrp',
+    kSecAttrAlias = 'alis',
+    kSecAttrIsInvisible = 'invi',
+    kSecAttrIsNegative = 'nega',
+    kSecAttrHasCustomIcon = 'cusi',
+    kSecProtectedDataItemAttr = 'prot',
+    kSecAttrAccessible = 'pdmn',
+    kSecAttrAccessibleWhenUnlocked = 'ak',
+    kSecAttrAccessibleAfterFirstUnlock = 'ck',
+    kSecAttrAccessibleAlways = 'dk',
+    kSecAttrAccessibleWhenUnlockedThisDeviceOnly = 'aku',
+    kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly = 'cku',
+    kSecAttrAccessibleAlwaysThisDeviceOnly = 'dku';
 
 // dict for reverse constants lookups
 var kSecConstantReverse = {
-    "r_Attributes": "kSecReturnAttributes",
-    "r_Data": "kSecReturnData",
-    "r_Ref": "kSecReturnRef",
-    "m_Limit": "kSecMatchLimit",
-    "m_LimitAll": "kSecMatchLimitAll",
-    "class": "kSecClass",
-    "keys": "kSecClassKey",
-    "idnt": "kSecClassIdentity",
-    "cert": "kSecClassCertificate",
-    "genp": "kSecClassGenericPassword",
-    "inet": "kSecClassInternetPassword",
-    "svce": "kSecAttrService",
-    "acct": "kSecAttrAccount",
-    "agrp": "kSecAttrAccessGroup",
-    "labl": "kSecAttrLabel",
-    "srvr": "kSecAttrServer",
-    "cdat": "kSecAttrCreationDate",
-    "accc": "kSecAttrAccessControl",
-    "gena": "kSecAttrGeneric",
-    "sync": "kSecAttrSynchronizable",
-    "mdat": "kSecAttrModificationDate",
-    "desc": "kSecAttrDescription",
-    "icmt": "kSecAttrComment",
-    "crtr": "kSecAttrCreator",
-    "type": "kSecAttrType",
-    "scrp": "kSecAttrScriptCode",
-    "alis": "kSecAttrAlias",
-    "invi": "kSecAttrIsInvisible",
-    "nega": "kSecAttrIsNegative",
-    "cusi": "kSecAttrHasCustomIcon",
-    "prot": "kSecProtectedDataItemAttr",
-    "pdmn": "kSecAttrAccessible",
-    "ak": "kSecAttrAccessibleWhenUnlocked",
-    "ck": "kSecAttrAccessibleAfterFirstUnlock",
-    "dk": "kSecAttrAccessibleAlways",
-    "aku": "kSecAttrAccessibleWhenUnlockedThisDeviceOnly",
-    "cku": "kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly",
-    "dku": "kSecAttrAccessibleAlwaysThisDeviceOnly",
+    'r_Attributes': 'kSecReturnAttributes',
+    'r_Data': 'kSecReturnData',
+    'r_Ref': 'kSecReturnRef',
+    'm_Limit': 'kSecMatchLimit',
+    'm_LimitAll': 'kSecMatchLimitAll',
+    'class': 'kSecClass',
+    'keys': 'kSecClassKey',
+    'idnt': 'kSecClassIdentity',
+    'cert': 'kSecClassCertificate',
+    'genp': 'kSecClassGenericPassword',
+    'inet': 'kSecClassInternetPassword',
+    'svce': 'kSecAttrService',
+    'acct': 'kSecAttrAccount',
+    'agrp': 'kSecAttrAccessGroup',
+    'labl': 'kSecAttrLabel',
+    'srvr': 'kSecAttrServer',
+    'cdat': 'kSecAttrCreationDate',
+    'accc': 'kSecAttrAccessControl',
+    'gena': 'kSecAttrGeneric',
+    'sync': 'kSecAttrSynchronizable',
+    'mdat': 'kSecAttrModificationDate',
+    'desc': 'kSecAttrDescription',
+    'icmt': 'kSecAttrComment',
+    'crtr': 'kSecAttrCreator',
+    'type': 'kSecAttrType',
+    'scrp': 'kSecAttrScriptCode',
+    'alis': 'kSecAttrAlias',
+    'invi': 'kSecAttrIsInvisible',
+    'nega': 'kSecAttrIsNegative',
+    'cusi': 'kSecAttrHasCustomIcon',
+    'prot': 'kSecProtectedDataItemAttr',
+    'pdmn': 'kSecAttrAccessible',
+    'ak': 'kSecAttrAccessibleWhenUnlocked',
+    'ck': 'kSecAttrAccessibleAfterFirstUnlock',
+    'dk': 'kSecAttrAccessibleAlways',
+    'aku': 'kSecAttrAccessibleWhenUnlockedThisDeviceOnly',
+    'cku': 'kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly',
+    'dku': 'kSecAttrAccessibleAlwaysThisDeviceOnly',
 }
 
 // the base query dictionary to use for the keychain lookups
@@ -159,6 +112,7 @@ var item_classes = [
 // get the string representation of some data
 // ref: https://www.frida.re/docs/examples/ios/
 function odas(raw_data) {
+
     // "objective-c data as string"
 
     // // TODO: check if this is something we need NSKeyedUnarchiver for
@@ -292,27 +246,27 @@ for (item_class_index in item_classes) {
             // TODO: Decode accc (eg: kSecAccessControlTouchIDCurrentSet)
 
             var keychain_entry = {
-                "item_class": get_constant_for_value(item_class),
-                "create_date": odas(search_result.objectForKey_(kSecAttrCreationDate)),
-                "modification_date": odas(search_result.objectForKey_(kSecAttrModificationDate)),
-                "description": odas(search_result.objectForKey_(kSecAttrDescription)),
-                "comment": odas(search_result.objectForKey_(kSecAttrComment)),
-                "creator": odas(search_result.objectForKey_(kSecAttrCreator)),
-                "type": odas(search_result.objectForKey_(kSecAttrType)),
-                "script_code": odas(search_result.objectForKey_(kSecAttrScriptCode)),
-                "alias": odas(search_result.objectForKey_(kSecAttrAlias)),
-                "invisible": odas(search_result.objectForKey_(kSecAttrIsInvisible)),
-                "negative": odas(search_result.objectForKey_(kSecAttrIsNegative)),
-                "custom_icon": odas(search_result.objectForKey_(kSecAttrHasCustomIcon)),
-                "protected": odas(search_result.objectForKey_(kSecProtectedDataItemAttr)),
-                "access_control": odas(search_result.objectForKey_(kSecAttrAccessControl)),
-                "accessible_attribute": get_constant_for_value(odas(search_result.objectForKey_(kSecAttrAccessible))),
-                "entitlement_group": odas(search_result.objectForKey_(kSecAttrAccessGroup)),
-                "generic": odas(search_result.objectForKey_(kSecAttrGeneric)),
-                "service": odas(search_result.objectForKey_(kSecAttrService)),
-                "account": odas(search_result.objectForKey_(kSecAttrAccount)),
-                "label": odas(search_result.objectForKey_(kSecAttrLabel)),
-                "data": odas(search_result.objectForKey_("v_Data")),
+                'item_class': get_constant_for_value(item_class),
+                'create_date': odas(search_result.objectForKey_(kSecAttrCreationDate)),
+                'modification_date': odas(search_result.objectForKey_(kSecAttrModificationDate)),
+                'description': odas(search_result.objectForKey_(kSecAttrDescription)),
+                'comment': odas(search_result.objectForKey_(kSecAttrComment)),
+                'creator': odas(search_result.objectForKey_(kSecAttrCreator)),
+                'type': odas(search_result.objectForKey_(kSecAttrType)),
+                'script_code': odas(search_result.objectForKey_(kSecAttrScriptCode)),
+                'alias': odas(search_result.objectForKey_(kSecAttrAlias)),
+                'invisible': odas(search_result.objectForKey_(kSecAttrIsInvisible)),
+                'negative': odas(search_result.objectForKey_(kSecAttrIsNegative)),
+                'custom_icon': odas(search_result.objectForKey_(kSecAttrHasCustomIcon)),
+                'protected': odas(search_result.objectForKey_(kSecProtectedDataItemAttr)),
+                'access_control': odas(search_result.objectForKey_(kSecAttrAccessControl)),
+                'accessible_attribute': get_constant_for_value(odas(search_result.objectForKey_(kSecAttrAccessible))),
+                'entitlement_group': odas(search_result.objectForKey_(kSecAttrAccessGroup)),
+                'generic': odas(search_result.objectForKey_(kSecAttrGeneric)),
+                'service': odas(search_result.objectForKey_(kSecAttrService)),
+                'account': odas(search_result.objectForKey_(kSecAttrAccount)),
+                'label': odas(search_result.objectForKey_(kSecAttrLabel)),
+                'data': odas(search_result.objectForKey_('v_Data')),
             };
 
             keychain_items.push(keychain_entry);
@@ -321,10 +275,60 @@ for (item_class_index in item_classes) {
 }
 
 var response = {
-    status: "success",
+    status: 'success',
     error_reason: NaN,
-    type: "ios-keychaindump",
+    type: 'ios-keychaindump',
     data: keychain_items
 }
 
 send(JSON.stringify(response));
+
+// -- Sample Objective-C
+//
+// NSMutableDictionary *query = [[NSMutableDictionary alloc] init];
+// [query setObject:(__bridge id)kCFBooleanTrue forKey:(__bridge id)kSecReturnAttributes];
+// [query setObject:(__bridge id)kCFBooleanTrue forKey:(__bridge id)kSecReturnData];
+// [query setObject:(__bridge id)kCFBooleanTrue forKey:(__bridge id)kSecReturnRef];
+// [query setObject:(__bridge id)kSecMatchLimitAll forKey:(__bridge id)kSecMatchLimit];
+
+// NSArray *itemClasses = [NSArray arrayWithObjects:
+//                         (__bridge id)kSecClassKey,
+//                         (__bridge id)kSecClassIdentity,
+//                         (__bridge id)kSecClassCertificate,
+//                         (__bridge id)kSecClassGenericPassword,
+//                         (__bridge id)kSecClassInternetPassword,
+//                         nil];
+
+// for (id itemClass in itemClasses) {
+
+//     NSLog(@"Querying: %@", itemClass);
+//     [query setObject:itemClass forKey:(__bridge id)kSecClass];
+
+//     CFTypeRef result = NULL;
+//     OSStatus findStatus = SecItemCopyMatching((__bridge CFDictionaryRef)query, &result);
+
+//     if(findStatus != errSecSuccess) {
+
+//         NSLog(@"Failed to query keychain for types %@", itemClass);
+//         continue;
+//     }
+
+//     // loopy-loop the results
+//     for (NSDictionary *entry in (__bridge NSDictionary *)result) {
+
+//         NSString *stringRes = [[NSString alloc] initWithData:[entry objectForKey:@"v_Data"] encoding:NSUTF8StringEncoding];
+//         NSLog(@"%@", stringRes);
+
+//     }
+
+//     if (result != NULL) {
+//         CFRelease(result);
+//     }
+// }
+
+// To reference some of the constants, the had to be echoed to 
+// get their values.
+
+// NSLog(@"Constants Dump");
+// NSLog(@"kSecAttrService: %@", kSecAttrService);
+// NSLog(@"End Constants Dump");
