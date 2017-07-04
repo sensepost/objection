@@ -11,3 +11,4 @@ Updating then can be done with just a `git pull`.
 - script loads on start
 - implement `rpc.exports` for the filemanager to help with performance and timeouts
 - fix frida exception handling when a Gadget can not be found to connect to via any transport
+- add a simulated jailbreak environment, returning true to common calls for jailbreak checks
