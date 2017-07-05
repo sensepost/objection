@@ -2,9 +2,9 @@ import os
 
 import click
 
-from ..commands import filemanager
-from ..utils.frida_transport import FridaRunner
-from ..utils.templates import ios_hook
+from objection.commands import filemanager
+from objection.utils.frida_transport import FridaRunner
+from objection.utils.templates import ios_hook
 
 
 def cat(args: list = None) -> None:

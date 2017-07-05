@@ -1,26 +1,21 @@
-from ..commands import (
-    filemanager,
-    frida_commands,
-    memory,
-    device,
-    sqlite,
-    keychain,
-    ui,
-    hooking,
-    jobs,
-    plist,
-    cookies,
-    nsuserdefaults,
-    pasteboard,
-    pinning,
-    jailbreak
-)
-
-from ..utils.helpers import (
-    list_files_in_current_fm_directory,
-    list_folders_in_current_fm_directory,
-    list_current_jobs
-)
+from ..commands import device
+from ..commands import filemanager
+from ..commands import frida_commands
+from ..commands import jobs
+from ..commands import memory
+from ..commands import sqlite
+from ..commands import ui
+from ..commands.ios import cookies
+from ..commands.ios import hooking
+from ..commands.ios import jailbreak
+from ..commands.ios import keychain
+from ..commands.ios import nsuserdefaults
+from ..commands.ios import pasteboard
+from ..commands.ios import pinning
+from ..commands.ios import plist
+from ..utils.helpers import list_current_jobs
+from ..utils.helpers import list_files_in_current_fm_directory
+from ..utils.helpers import list_folders_in_current_fm_directory
 
 # commands are defined with their name being the key, then optionally
 # have a meta, help, dynamic and commands key.

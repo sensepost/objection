@@ -1,7 +1,7 @@
 import click
 
-from ..utils.frida_transport import FridaRunner
-from ..utils.templates import ios_hook
+from objection.utils.frida_transport import FridaRunner
+from objection.utils.templates import ios_hook
 
 # a thumbsucked list of prefixes used in Objective-C runtime
 # for iOS applications. This is not a science, but a gut feeling.

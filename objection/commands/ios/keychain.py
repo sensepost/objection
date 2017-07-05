@@ -3,8 +3,8 @@ import json
 import click
 from tabulate import tabulate
 
-from ..utils.frida_transport import FridaRunner
-from ..utils.templates import ios_hook
+from objection.utils.frida_transport import FridaRunner
+from objection.utils.templates import ios_hook
 
 
 def _should_output_json(args: list) -> None:
