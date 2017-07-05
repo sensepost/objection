@@ -42,7 +42,7 @@ class CommandCompleter(Completer):
 
         # start with the current suggestions dictionary being
         # all commands
-        current_suggestions = self.COMMANDS['commands']
+        current_suggestions = self.COMMANDS
 
         # when the tokens are extracted, we are expecting something in
         # the format of:

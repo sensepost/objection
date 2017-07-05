@@ -15,7 +15,7 @@ from pygments.style import Style
 from pygments.token import Token
 
 from .completer import CommandCompleter
-from .repository import COMMANDS
+from .repository import COMMANDS, HELP
 from ..__init__ import __version__
 from ..commands.device import get_device_info
 from ..state.connection import state_connection
@@ -84,7 +84,8 @@ class Repl(object):
         self.prompt_tokens = []
 
         self.completer = CommandCompleter()
-        self.repository = COMMANDS
+        self.commands_repository = COMMANDS
+        self.help_repository = HELP
 
     def set_prompt_tokens(self, device_info: tuple) -> None:
         """
@@ -212,7 +213,7 @@ class Repl(object):
         """
 
         # start with all of the commands we have
-        dict_to_walk = self.repository['commands']
+        dict_to_walk = self.commands_repository
 
         # ... and an empty method to execute
         exec_method = None
@@ -264,7 +265,7 @@ class Repl(object):
         """
 
         # start with all of the commands we have
-        dict_to_walk = self.repository['commands']
+        dict_to_walk = self.help_repository
         user_help = None
 
         for token in tokens:
