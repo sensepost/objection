@@ -12,7 +12,8 @@ from ..commands import (
     cookies,
     nsuserdefaults,
     pasteboard,
-    pinning
+    pinning,
+    jailbreak
 )
 
 from ..utils.helpers import (
@@ -930,6 +931,49 @@ COMMANDS = {
                             ),
                             'exec': pinning.ios_disable
                         }
+                    }
+                },
+                'jailbreak': {
+                    'meta': 'Work with iOS Jailbreak detection',
+                    'help': (
+                        'Contains subcommands to work with iOS Jailbreak detection, such as disabling\n'
+                        'it, or simulating that a device is Jailbroken'
+                    ),
+                    'commands': {
+                        'disable': {
+                            'meta': 'Attempt to disable Jailbreak detection',
+                            'help': (
+                                'Command: ios jailbreak disable\n'
+                                '\n'
+                                'Usage: ios jailbreak disable\n'
+                                '\n'
+                                'Attempts to disable Jailbreak detection on iOS devices. This is acheived by\n'
+                                'hooking the NSFileManager fileExistsAtPath method, and checking if it was\n'
+                                'called with a path to common Jailbroken path artifacts. Calls to the fork()\n'
+                                'method are also hooked and will respond with a 0, indicating that it was\n'
+                                'unsuccessful.\n'
+                                '\n'
+                                'Examples:\n'
+                                '   ios jailbreak disable'
+                            ),
+                            'exec': jailbreak.disable
+                        },
+                        'simulate': {
+                            'meta': 'Attempt to simulate a Jailbroken environment',
+                            'help': (
+                                'Command: ios jailbreak simulate\n'
+                                '\n'
+                                'Usage: ios jailbreak simulate\n'
+                                '\n'
+                                'Attempts to simulate a Jailbroken iOS environment. This is acheived by returning\n'
+                                'positive results for file existance checks from NSFileManager fileExistsAtPath\n'
+                                'as well as indicating that a fork() was successful if that is called.\n'
+                                '\n'
+                                'Examples:\n'
+                                '   ios jailbreak simulate'
+                            ),
+                            'exec': jailbreak.simulate
+                        },
                     }
                 }
             }

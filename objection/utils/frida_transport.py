@@ -289,4 +289,4 @@ class FridaRunner(object):
 
         # tell the state manager about this job
         job_manager_state.add_job(job)
-        click.secho('Job: {0} - Started'.format(job.id), dim=True)
+        click.secho('Job: {0} - Started'.format(job.id), fg='green')
