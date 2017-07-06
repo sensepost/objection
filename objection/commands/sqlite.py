@@ -151,7 +151,7 @@ def sync(args: list = None) -> None:
         :param args:
         :return:
     """
-   
+
     if not sqlite_manager_state.is_connected():
         click.secho('Connect using sqlite connect first!', fg='red')
         return
