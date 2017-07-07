@@ -113,7 +113,7 @@ def device_type():
 @click.option('--codesign-signature', '-c',
               help='Codesigning Identity to use. Get it with: `security find-identity -p codesigning -v`',
               required=True)
-@click.option('--provision-file', '-p', help='The .mobileprovision file to use in the patched .ipa', required=True)
+@click.option('--provision-file', '-p', help='The .mobileprovision file to use in the patched .ipa')
 @click.option('--binary-name', '-b', help='Name of the Mach-O binary in the IPA (used to patch with Frida)')
 def patchipa(source: str, codesign_signature: str, provision_file: str, binary_name: str) -> None:
     """

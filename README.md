@@ -3,14 +3,15 @@
 ## introduction
 `objection` is a runtime mobile exploration toolkit, powered by [Frida](https://www.frida.re/). It was built with the aim of helping assess mobile applications and their security posture without the need for a jailbroken or rooted mobile device.
 
-The projects name quite literally explains the approach as well, whereby runtime specific objects is injected into a running process an executed using Frida.
+The projects name quite literally explains the approach as well, whereby runtime specific objects is injected into a running process and executed using Frida.
 
 **Note** This is not some form of jailbreak / root bypass. By using `objection`, you are still limited by all of the restrictions imposed by the applicable sandbox you are facing.
 
 ## features
-Currently, only iOS is supported with Android support coming soon™
+Currently, only iOS is supported with Android support coming soon.
 
 For iOS, `objection` allows you to:
+
 - Interact with the iOS filesystem, listing entries as well as upload & download files where permitted.
 - Perform various memory related tasks, such as listing loaded modules and their respective exports.
 - Dump the iOS keychain, and export it to a file.
@@ -18,6 +19,9 @@ For iOS, `objection` allows you to:
 - Perform common SSL pinning bypasses.
 - Dump data from NSUserDefaults and the shared NSHTTPCookieStorage.
 - Dynamically dump arguments from methods called as you use the target application.
+- Dump various formats of information in human readable forms.
+- Bypass certain forms of TouchID restrictions.
+- Execute custom Frida scripts.
 
 ## screenshots
 The following screenshots show the main `objection` repl, connected to a test application on an iPad running iOS 10.2.1

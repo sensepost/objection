@@ -3,6 +3,7 @@ import os
 import shutil
 import tempfile
 import zipfile
+import plistlib
 
 import click
 import delegator
@@ -109,6 +110,53 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
         required_commands[cmd]['location'] = location
 
     _, temp_file = tempfile.mkstemp(suffix='.ipa')
+
+    # check if we have a mobile provision to work with, else we search for one
+    if not provision_file:
+        click.secho('No provision file specified, searching for one...')
+        possible_provisions = [
+            os.path.join(dp, f) for dp, dn, fn in os.walk(os.path.expanduser('~/Library/Developer/Xcode/DerivedData/'))
+            for f in fn if 'embedded.mobileprovision' in f]
+
+        if len(possible_provisions) <= 0:
+            click.secho('No provisioning files found. Please specify one or generate one by building an app.', fg='red')
+            return
+
+        # we have some provisioning profiles, lets find the one
+        # with the most days left
+        current_time = datetime.datetime.now()
+        expirations = {}
+
+        for pf in possible_provisions:
+            _, decoded_location = tempfile.mkstemp('decoded_provision')
+
+            # Decode the mobile provision using macOS's security cms tool
+            delegator.run(
+                '{0} cms -D -i {1} > {2}'.format(
+                    required_commands['security']['location'],
+                    pf,
+                    decoded_location
+                )
+            )
+
+            with open(decoded_location, 'rb') as f:
+                parsed_data = plistlib.load(f)
+                # print(l['CreationDate'], l['ExpirationDate'])
+
+                if parsed_data['ExpirationDate'] > current_time:
+                    expirations[pf] = parsed_data['ExpirationDate'] - current_time
+
+            os.remove(decoded_location)
+
+        # ensure that we got some valid mobileprovisions to work with
+        if len(expirations) <= 0:
+            click.secho('Could not find a non-expired provisioning file. Please specify or generate one.', fg='red')
+            return
+
+        # sort the results so that the mobileprovision with the most time is at
+        # the top of the list
+        click.secho('Found a valid provisioning file', fg='green')
+        provision_file = sorted(expirations, key=expirations.get, reverse=True)[0]
 
     # get a place to work with the IPA
     temp_directory = os.path.dirname(temp_file)
