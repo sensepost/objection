@@ -150,7 +150,7 @@ class FridaJobRunner(object):
                         str(self.id)[-12:], payload['status'], payload['data']))
 
         except Exception as e:
-            raise e
+            click.secho('Failed to process an incoming message from hook: {0}'.format(e))
 
     def end(self) -> None:
         """
@@ -201,7 +201,7 @@ class FridaRunner(object):
                     click.secho('Frida hook failure: {0}'.format(msg.error_reason), fg='red')
 
         except Exception as e:
-            raise e
+            click.secho('Failed to process an incoming message from hook: {0}'.format(e))
 
     def get_last_message(self) -> RunnerMessage:
         """

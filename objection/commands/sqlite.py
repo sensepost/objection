@@ -137,7 +137,7 @@ def execute(args: list) -> None:
 
     except (sqlite3.OperationalError, sqlite3.Warning, sqlite3.Error) as e:
 
-        click.secho('Error: {0}'.format(e.message), fg='red')
+        click.secho('Error: {0}'.format(e), fg='red')
         return
 
     click.secho(tabulate(results), bold=True)

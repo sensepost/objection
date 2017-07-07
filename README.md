@@ -57,4 +57,3 @@ There is still a ton of work left to do.
 - Detect more argument types in ios argument dumper
 - Touchid `kSecAccessControlTouchIDAny` keychain item experiment
 - Implement `rpc.exports` for the filemanager to help with performance and timeouts
-- Fix frida exception handling when a Gadget can not be found to connect to via any transport

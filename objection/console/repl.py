@@ -331,7 +331,7 @@ class Repl(object):
                 click.secho('Reconnection succesful!', fg='green')
 
             except frida.ServerNotRunningError as e:
-                click.secho('Failed to reconnect with error: {0}'.format(e.message), fg='red')
+                click.secho('Failed to reconnect with error: {0}'.format(e), fg='red')
 
             return True
 

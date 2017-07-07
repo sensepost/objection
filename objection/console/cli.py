@@ -74,7 +74,7 @@ def explore(startup_command: str, startup_script: str) -> None:
         r.set_prompt_tokens(device_info)
 
     except (frida.TimedOutError, frida.ServerNotRunningError) as e:
-        click.secho('Error: {0}'.format(e.message), fg='red')
+        click.secho('Error: {0}'.format(e), fg='red')
 
     r.start_repl()
 
