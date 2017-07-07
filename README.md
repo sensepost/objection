@@ -1,7 +1,7 @@
 ![objection](images/objection.png)
 
 ## introduction
-`objection` is a runtime mobile exploration toolkit, powered by [Frida](https://www.frida.re/). It was built with the aim of helping assess mobile applications and their security posture without the need for a jailbroken or rooted device mobile device.
+`objection` is a runtime mobile exploration toolkit, powered by [Frida](https://www.frida.re/). It was built with the aim of helping assess mobile applications and their security posture without the need for a jailbroken or rooted mobile device.
 
 The projects name quite literally explains the approach as well, whereby runtime specific objects is injected into a running process an executed using Frida.
 
@@ -48,12 +48,10 @@ Updating can be done with just a `git pull` in the cloned repositories path.
 ## todo:
 There is still a ton of work left to do.
 
-- Android support! Soon™
-- unarchive keychain items that are bplist00ԁX$versionX$objectsY$archiverT$top
-- detect more argument types in ios arg dumper
-- touchid `kSecAccessControlTouchIDAny` keychain item experiment
-- generic method return value changes (ie: true -> false)
-- script loads on start
-- implement `rpc.exports` for the filemanager to help with performance and timeouts
-- fix frida exception handling when a Gadget can not be found to connect to via any transport
-- add a simulated jailbreak environment, returning true to common calls for jailbreak checks
+- Android support!
+- Automatically unarchive keychain items that are bplist00ԁX$versionX$objectsY$archiverT$top
+- Detect more argument types in ios argument dumper
+- Touchid `kSecAccessControlTouchIDAny` keychain item experiment
+- Generic method return value changes (ie: true -> false)
+- Implement `rpc.exports` for the filemanager to help with performance and timeouts
+- Fix frida exception handling when a Gadget can not be found to connect to via any transport

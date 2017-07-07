@@ -43,15 +43,33 @@ def cli(network: bool, host: str, port: int, gadget: str) -> None:
 
 
 @cli.command()
-def explore() -> None:
+@click.option('--startup-command', '-s', required=False,
+              help='A command to run before the repl polls the device for information.')
+@click.option('--startup-script', '-S', required=False,
+              help='A script to import and run before the repl polls the device for information.')
+def explore(startup_command: str, startup_script: str) -> None:
     """
         Start the objection exploration REPL.
     """
 
     r = Repl()
 
+    # if we have a command to run, do that first before
+    # the call to get_device_info().
+    if startup_command:
+        click.secho('Running a startup command...', dim=True)
+        r.run_command(startup_command)
+
+    # if we have a startup script to run, use the 'import' command
+    # and give it the users path.
+    if startup_script:
+        click.secho('Importing and running a startup script...', dim=True)
+        r.run_command('import {0}'.format(startup_script))
+
     try:
 
+        # poll the device for informations and populate the
+        # repls prompt.
         device_info = get_device_info()
         r.set_prompt_tokens(device_info)
 
