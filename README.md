@@ -52,6 +52,5 @@ There is still a ton of work left to do.
 - Automatically unarchive keychain items that are bplist00ԁX$versionX$objectsY$archiverT$top
 - Detect more argument types in ios argument dumper
 - Touchid `kSecAccessControlTouchIDAny` keychain item experiment
-- Generic method return value changes (ie: true -> false)
 - Implement `rpc.exports` for the filemanager to help with performance and timeouts
 - Fix frida exception handling when a Gadget can not be found to connect to via any transport

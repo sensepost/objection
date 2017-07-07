@@ -300,6 +300,15 @@ COMMANDS = {
                                 'exec': hooking.watch_class_method
                             }
                         }
+                    },
+                    'set': {
+                        'meta': 'Set various values',
+                        'commands': {
+                            'return_value': {
+                                'meta': 'Set a methods return value. Supports only boolean returns.',
+                                'exec': hooking.set_method_return_value
+                            }
+                        }
                     }
                 }
             },
@@ -1084,6 +1093,26 @@ HELP = {
                                     '   ios hooking watch method "-[PinnedNSURLSessionStarwarsApi '
                                     'getJsonResponseFrom:onSuccess:onFailure:]"'
                                 ),
+                            }
+                        }
+                    },
+                    'set': {
+                        'help': 'Sets various bits of hooking related information.',
+                        'commands': {
+                            'return_value': {
+                                'help': (
+                                    'Command: ios hooking set return_value\n'
+                                    '\n'
+                                    'Usage: ios hooking set return_value "<full class & selector>" <true/false>\n'
+                                    '\n'
+                                    'Hooks into a specified Objective-C method and sets its return value to\n'
+                                    'either True or False. This is useful in cases where simple methods are used\n'
+                                    'to determine things like \'Should SSL pinning be enabled?\' as an example.\n'
+                                    '\n'
+                                    'Examples:\n'
+                                    '   ios hooking set return_value "+[JailbreakDetection isJailbroken]" false\n'
+                                    '   ios hooking set return_value "-[SecurityHelper shouldPinSSL:]" true\n'
+                                )
                             }
                         }
                     }

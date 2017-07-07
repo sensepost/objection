@@ -93,6 +93,17 @@ def _class_is_prefixed_with_native(class_name: str) -> bool:
     return False
 
 
+def _string_is_true(s: str) -> bool:
+    """
+        Check if a string should be considered as "True"
+
+        :param s:
+        :return:
+    """
+
+    return s.lower() in ('true', 'yes')
+
+
 def _get_ios_classes() -> list:
     """
         Gets a list of all of the classes available in the current
@@ -233,7 +244,7 @@ def watch_class(args: list) -> None:
     runner.run_as_job(name='watch-class-methods')
 
 
-def watch_class_method(args):
+def watch_class_method(args: list) -> None:
     """
         Starts an objection jon that hooks into a specific class method
         and reports on invocations.
@@ -253,3 +264,27 @@ def watch_class_method(args):
         ios_hook('hooking/watch-method'), selector=selector)
 
     runner.run_as_job(name='watch-method')
+
+
+def set_method_return_value(args: list) -> None:
+    """
+        Make an Objective-C method return a specific boolean
+        value, always.
+
+        :param args:
+        :return:
+    """
+
+    if len(args) < 2:
+        click.secho('Usage: ios hooking set_method_return "<selector>" (eg: "-[ClassName methodName:]") <true/false>',
+                    bold=True)
+        return
+
+    selector = args[0]
+    retval = args[1]
+
+    runner = FridaRunner()
+    runner.set_hook_with_data(
+        ios_hook('hooking/set-return'), selector=selector, retval=_string_is_true(retval))
+
+    runner.run_as_job(name='set-return-value')
