@@ -11,9 +11,11 @@ setup(
     download_url='https://github.com/objection/tarball/' + __version__,
     keywords=['mobile', 'instrumentation', 'pentest', 'frida', 'hook'],
     version=__version__,
+    python_requires='>=3.3',
     packages=[
         'objection',
         'objection.commands',
+        'objection.commands.ios',
         'objection.console',
         'objection.utils',
     ],
@@ -26,6 +28,12 @@ setup(
         'tabulate',
         'delegator.py',
         'requests',
+    ],
+    classifiers=[
+        'Operating System :: OS Independent',
+        'Natural Language :: English',
+        'Programming Language :: Python :: 3 :: Only',
+        'Programming Language :: JavaScript',
     ],
     entry_points={
         'console_scripts': [
