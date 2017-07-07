@@ -183,8 +183,14 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
     click.secho('Working with app: {0}'.format(app_name))
 
     app_folder = os.path.join(temp_directory, 'Payload', app_name)
+
+    # determine the name of the binary from the Info.plist
     if binary_name is None:
-        app_binary = os.path.join(app_folder, os.path.splitext(os.path.basename(app_folder))[0])
+
+        with open(os.path.join(app_folder, 'Info.plist'), 'rb') as f:
+            info_plist = plistlib.load(f)
+
+        app_binary = os.path.join(app_folder, info_plist['CFBundleExecutable'])
     else:
         app_binary = os.path.join(app_folder, binary_name)
 
