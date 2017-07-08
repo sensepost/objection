@@ -46,8 +46,7 @@ As for the mobile applications though, for iOS, an unencrypted IPA is needed. If
 ## installation
 Installation for now is simply a matter of cloning this repository and doing `pip install --editable .`. This will give you the `objection` command.
 
-## updating
-Updating can be done with just a `git pull` in the cloned repositories path.
+For more detailed update and installation instructions, please refer to the wiki page [here](https://github.com/sensepost/objection/wiki/Installation).
 
 ## todo:
 There is still a ton of work left to do.
