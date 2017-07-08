@@ -1,37 +1,20 @@
 import logging
 import os
-from logging.config import dictConfig
 
 import click
 
-# the configuration used for the objection logger
-logging_config = dict(
-    version=1,
-    formatters={
-        'f': {
-            'format':
-                '%(asctime)s %(levelname)-8s\n%(message)s\n'
-        }
-    },
-    handlers={
-        'h': {
-            'class': 'logging.FileHandler',
-            'formatter': 'f',
-            'filename': os.path.expanduser('~/.objection/objection.log'),
-            # 'maxBytes': 1000000 * 10,
-            'level': logging.DEBUG
-        }
-    },
-    root={
-        'handlers': ['h'],
-        'level': logging.DEBUG,
-    },
-)
 
-dictConfig(logging_config)
+class MakeFileHandler(logging.FileHandler):
+    """
+        Wrapper Class around the builtin Filehandler.
 
-# monkey patch secho to log to file
-real_secho = click.secho
+        All this does is make sure the logdir for filename is
+        created.
+    """
+
+    def __init__(self, filename: str, mode: str = 'a', encoding: str = None, delay: bool = False) -> None:
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        logging.FileHandler.__init__(self, filename, mode, encoding, delay)
 
 
 def new_secho(text: str, **kwargs) -> None:
@@ -48,4 +31,14 @@ def new_secho(text: str, **kwargs) -> None:
     real_secho(text, **kwargs)
 
 
+# Configure the logging used in objection
+logger = logging.getLogger()
+handler = MakeFileHandler(os.path.expanduser('~/.objection/objection.log'))
+formatter = logging.Formatter('%(asctime)s %(levelname)-8s\n%(message)s\n')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.setLevel(logging.DEBUG)
+
+# monkey patch secho to log to file
+real_secho = click.secho
 click.secho = new_secho
