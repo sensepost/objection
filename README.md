@@ -24,18 +24,18 @@ For iOS, `objection` allows you to:
 - Execute custom Frida scripts.
 
 ## screenshots
-The following screenshots show the main `objection` repl, connected to a test application on an iPad running iOS 10.2.1
+The following screenshots show the main `objection` repl, connected to a test application on an iPad running iOS 10.2.1.
 
-A file system listing of the applications main bundle
+#### A file system listing of the applications main bundle
 ![ls](images/objection_ls.png)
 
-iOS Keychain dumped for the current application (short version)
+#### iOS Keychain dumped for the current application (short version)
 ![keychain](images/objection_keychain.png)
 
-Inline SQLite query tool
+#### Inline SQLite query tool
 ![sqlite](images/objection_sqlite.png)
 
-SSL Pinning bypass
+#### SSL Pinning bypass
 ![sslpinning](images/objection_ssl_pinning.png)
 
 ## prerequisites

@@ -7,12 +7,19 @@ import click
 class MakeFileHandler(logging.FileHandler):
     """
         Wrapper Class around the builtin Filehandler.
-
-        All this does is make sure the logdir for filename is
-        created.
     """
 
     def __init__(self, filename: str, mode: str = 'a', encoding: str = None, delay: bool = False) -> None:
+        """
+            The original FileHandler's init is called, right after the
+            directory used to store the objection logfile is created.
+
+            :param filename:
+            :param mode:
+            :param encoding:
+            :param delay:
+        """
+
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         logging.FileHandler.__init__(self, filename, mode, encoding, delay)
 
