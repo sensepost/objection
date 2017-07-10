@@ -1,9 +1,9 @@
 import datetime
 import os
+import plistlib
 import shutil
 import tempfile
 import zipfile
-import plistlib
 
 import click
 import delegator
@@ -189,6 +189,9 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
 
         with open(os.path.join(app_folder, 'Info.plist'), 'rb') as f:
             info_plist = plistlib.load(f)
+
+        # print the bundle identifier
+        click.secho('Bundle identifier is: {0}'.format(info_plist['CFBundleIdentifier']), fg='green', bold=True)
 
         app_binary = os.path.join(app_folder, info_plist['CFBundleExecutable'])
     else:

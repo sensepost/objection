@@ -66,7 +66,7 @@ Interceptor.attach(ObjC.classes.NSFileManager["- fileExistsAtPath:"].implementat
                     status: 'success',
                     error_reason: NaN,
                     type: 'jailbreak-simulate',
-                    data: 'A failed lookup for ' + this.path + ' occured. Marking it as successful.'
+                    data: 'A failed lookup for ' + this.path + ' occurred. Marking it as successful.'
                 }));
 
                 retval.replace(0x1);
