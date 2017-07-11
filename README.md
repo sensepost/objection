@@ -3,7 +3,7 @@
 ## introduction
 `objection` is a runtime mobile exploration toolkit, powered by [Frida](https://www.frida.re/). It was built with the aim of helping assess mobile applications and their security posture without the need for a jailbroken or rooted mobile device.
 
-The projects name quite literally explains the approach as well, whereby runtime specific objects is injected into a running process and executed using Frida.
+The project's name quite literally explains the approach as well, whereby runtime specific objects are injected into a running process and executed using Frida.
 
 **Note** This is not some form of jailbreak / root bypass. By using `objection`, you are still limited by all of the restrictions imposed by the applicable sandbox you are facing.
 
@@ -60,3 +60,7 @@ There is still a ton of work left to do.
 ## powered by
 
 ![frida](images/frida_logo.png)
+
+# License
+
+Objections is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License (http://creativecommons.org/licenses/by-nc-sa/4.0/) Permissions beyond the scope of this license may be available at http://sensepost.com/contact/.
