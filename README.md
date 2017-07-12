@@ -38,6 +38,10 @@ The following screenshots show the main `objection` repl, connected to a test ap
 #### SSL Pinning bypass
 ![sslpinning](images/objection_ssl_pinning.png)
 
+## sample usage
+A sample session, where `objection` is used to explore the applications environment:
+[![asciicast](https://asciinema.org/a/8O6fjDHOdVKgPYeqITHXPp6HV.png)](https://asciinema.org/a/8O6fjDHOdVKgPYeqITHXPp6HV)
+
 ## prerequisites
 To run `objection`, all you need is the python3 interpreter to be available. The installation via `pip` should take care of all of the dependencies needed.
 
