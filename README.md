@@ -59,7 +59,7 @@ To run `objection`, all you need is the python3 interpreter to be available. The
 As for the mobile applications though, for iOS, an unencrypted IPA is needed. If you have the source code of the application you want to explore, then you can simply embed and load the `FridaGadget.gylib` in the project.
 
 ## installation
-Installation for now is simply a matter of cloning this repository and doing `pip install --editable .`. This will give you the `objection` command.
+Installation is simply a matter of `pip install objection` with a Python 3 interpreter active. This will give you the `objection` command.
 
 For more detailed update and installation instructions, please refer to the wiki page [here](https://github.com/sensepost/objection/wiki/Installation).
 
