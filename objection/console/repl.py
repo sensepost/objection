@@ -149,15 +149,15 @@ class Repl(object):
 
             click.secho('Running OS command: {0}\n'.format(os_cmd), dim=True)
 
-            o = delegator.run(os_cmd)
+            o = delegator.run(os_cmd, binary=True)
 
             # print stdout
             if len(o.out) > 0:
-                click.secho(o.out, bold=True)
+                click.secho(o.out.decode('utf-8', 'replace'), bold=True)
 
             # print stderr
             if len(o.err) > 0:
-                click.secho(o.err, fg='red')
+                click.secho(o.err.decode('utf-8', 'replace'), fg='red')
 
             return
 
