@@ -9,6 +9,10 @@
 
 <h4 align="center">Runtime Mobile Exploration, powered by <a href="https://www.frida.re/" target="_blank">Frida</a>.</h4>
 
+<p align="center">
+  <a href="https://pypi.python.org/pypi/objection"><img src="https://badge.fury.io/py/objection.svg" alt="PyPI version" height="18"></a>
+</p>
+
 <br>
 
 ## introduction
