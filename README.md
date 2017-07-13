@@ -1,4 +1,15 @@
-![objection](images/objection.png)
+<h1 align="center">
+  <br>
+  <a href="https://github.com/sensepost/objection">
+    <img src="https://raw.githubusercontent.com/sensepost/objection/master/images/objection.png" alt="objection"></a>
+  <br>
+  objection
+  <br>
+</h1>
+
+<h4 align="center">Runtime Mobile Exploration, powered by <a href="https://www.frida.re/" target="_blank">Frida</a>.</h4>
+
+<br>
 
 ## introduction
 `objection` is a runtime mobile exploration toolkit, powered by [Frida](https://www.frida.re/). It was built with the aim of helping assess mobile applications and their security posture without the need for a jailbroken or rooted mobile device.
@@ -65,7 +76,7 @@ There is still a ton of work left to do.
 
 ![frida](images/frida_logo.png)
 
-## License
+## license
 
 Objection is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License (http://creativecommons.org/licenses/by-nc-sa/4.0/) Permissions beyond the scope of this license may be available at http://sensepost.com/contact/.
 

@@ -208,9 +208,13 @@ COMMANDS = {
                 'meta': 'Work with the iOS keychain',
                 'commands': {
                     'dump': {
-                        'meta': 'Dump the keychain for the current app',
+                        'meta': 'Dump the keychain for the current app\'s entitlement group',
                         'exec': keychain.dump
-                    }
+                    },
+                    'clear': {
+                        'meta': 'Delete all keychain entries for the current app\s entitlement group',
+                        'exec': keychain.clear
+                    },
                 }
             },
             'plist': {
@@ -845,10 +849,12 @@ HELP = {
                             '\n'
                             'Usage: ios keychain dump (optional: --json <filename>)\n'
                             '\n'
-                            'Extracts the keychain items for the current process. This is achieved by iterating\n'
+                            'Extracts the keychain items for the current application. This is achieved by iterating\n'
                             'over the keychain type classes available in iOS and populating a search dictionary\n'
                             'with them. This dictionary is then used as a query to SecItemCopyMatching() and the\n'
                             'results parsed.\n'
+                            'Items that will be accessible include everything stored with the entitlement group used\n'
+                            'during the patching/signing process.\n'
                             'Providing a filename with the --json flag will dump all of the keychain attributes\n'
                             'to the file specified for later inspection.\n'
                             '\n'
@@ -856,7 +862,24 @@ HELP = {
                             '   ios keychain dump\n'
                             '   ios keychain dump --json keychain.json'
                         ),
-                    }
+                    },
+                    'clear': {
+                        'help': (
+                            'Command: ios keychain clear\n'
+                            '\n'
+                            'Usage: ios keychain clear\n'
+                            '\n'
+                            'Clears all the keychain items for the current application. This is achieved by\n'
+                            'iterating over the keychain type classes available in iOS and populating a search\n'
+                            'dictionary with them. This dictionary is then used as a query to SecItemDelete(),\n'
+                            'deleting the entries.\n'
+                            'Items that will be deleted include everything stored with the entitlement group used\n'
+                            'during the patching/signing process.\n'
+                            '\n'
+                            'Examples:\n'
+                            '   ios keychain clear'
+                        ),
+                    },
                 }
             },
             'plist': {

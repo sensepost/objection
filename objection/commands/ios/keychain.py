@@ -31,7 +31,7 @@ def dump(args: list = None) -> None:
         click.secho('Usage: ios keychain dump (--json <local destination>)', bold=True)
         return
 
-    click.secho('Reading the iOS keychain...', dim=True)
+    click.secho('Reading the keychain...', dim=True)
     hook = ios_hook('keychain/dump')
     runner = FridaRunner(hook=hook)
     runner.run()
@@ -66,3 +66,25 @@ def dump(args: list = None) -> None:
 
     else:
         click.secho('No keychain data could be found', fg='yellow')
+
+
+def clear(args: list = None) -> None:
+    """
+        Clear the iOS keychain.
+
+        :param args:
+        :return:
+    """
+
+    click.secho('Clearing the keychain...', dim=True)
+    hook = ios_hook('keychain/clear')
+    runner = FridaRunner(hook=hook)
+    runner.run()
+
+    response = runner.get_last_message()
+
+    if not response.is_successful():
+        click.secho('Failed to clear keychain items with error: {0}'.format(response.error_message), fg='red')
+        return
+
+    click.secho('Keychain cleared', fg='green')
