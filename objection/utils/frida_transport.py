@@ -282,7 +282,22 @@ class FridaRunner(object):
 
         job.hook = hook
         job.session = self.get_session()
-        job.script = job.session.create_script(job.hook)
+
+        # attempt to load the hook. external scripts are also
+        # loaded (with the import command) and may have some severe
+        # syntax errors etc. to cater for this we wrap the load in
+        # a try catch to ensure we dont crash the repl
+        try:
+
+            job.script = job.session.create_script(job.hook)
+
+        except frida.InvalidArgumentError as e:
+
+            # explain what went wrong and that the job was not 'started'
+            click.secho('Failed to load script with error: {0}'.format(e), fg='red')
+            click.secho('Job: {0} - Starting Failed'.format(job.id), fg='red', dim=True)
+
+            return
 
         job.script.on('message', job.on_message)
         job.script.load()
