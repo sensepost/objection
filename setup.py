@@ -1,34 +1,66 @@
+import os
+
 from setuptools import setup
 
 from objection.__init__ import __version__
 
+
+def _package_files(directory: str) -> list:
+    """
+        Get all of the .js file paths in the directory specified
+
+        :param directory:
+        :return:
+    """
+
+    paths = []
+
+    for (path, directories, filenames) in os.walk(directory):
+        for filename in filenames:
+            if filename.endswith('.js'):
+                paths.append(os.path.join('..', path, filename))
+
+    return paths
+
+
+# here - where we are.
+here = os.path.abspath(os.path.dirname(__file__))
+
+# read the package requirements for install_requires
+with open(os.path.join(here, 'requirements.txt'), 'r') as f:
+    requirements = f.readlines()
+
+# setup!
 setup(
     name='objection',
     description='Instrumented Mobile Pentest Framework',
+    license='CC BY-NC-SA 4.0',
+
     author='Leon Jacobs',
     author_email='leon@sensepost.com',
+
     url='https://github.com/sensepost/objection',
     download_url='https://github.com/objection/tarball/' + __version__,
+
     keywords=['mobile', 'instrumentation', 'pentest', 'frida', 'hook'],
     version=__version__,
+
+    # include the hooks!
+    package_data={
+        '': _package_files(os.path.join(here, 'objection/hooks')) +
+            _package_files(os.path.join(here, 'objection/templates')),
+    },
+
     python_requires='>=3.3',
     packages=[
         'objection',
         'objection.commands',
         'objection.commands.ios',
         'objection.console',
+        'objection.state',
         'objection.utils',
     ],
-    include_package_data=True,
-    install_requires=[
-        'frida',
-        'prompt_toolkit',
-        'click',
-        'jinja2',
-        'tabulate',
-        'delegator.py',
-        'requests',
-    ],
+    install_requires=requirements,
     classifiers=[
         'Operating System :: OS Independent',
         'Natural Language :: English',
