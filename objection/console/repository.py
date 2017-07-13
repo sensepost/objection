@@ -394,7 +394,7 @@ HELP = {
         'help': (
             'Command: import\n'
             '\n'
-            'Usage: import <path to local fridascript> (optional: <job name>)\n'
+            'Usage: import <path to local fridascript> (optional: <job name>) (optional: --no-exception-handler)\n'
             '\n'
             'Imports Fridascript from a file on the local filesystem and executes it as a job.\n'
             'To \'unload\' the script, the job that was started to should be killed.\n'
@@ -402,9 +402,14 @@ HELP = {
             'specified for your job, a generic name of \'user-script\' will be used for the \n'
             'job started as a result of the import.\n'
             '\n'
+            'Scripts that are run using this command get wrapped in a global, generic JavaScript try/catch\n'
+            'block. If this is not something that you want, the \'--no-exception-handler\' flag may be specified.\n'
+            '\n'
             'Examples:\n'
             '   import ~/home/myscript.js\n'
-            '   import ~/home/hooks/custom.js custom-hook-name'
+            '   import ~/home/hooks/custom.js custom-hook-name\n'
+            '   import ~/home/hooks/custom.js custom-hook-name --no-exception-handler\n'
+            '   import ~/home/script.js --no-exception-handler'
         ),
     },
 

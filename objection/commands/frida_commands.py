@@ -4,7 +4,19 @@ import click
 from tabulate import tabulate
 
 from ..utils.frida_transport import FridaRunner
-from ..utils.templates import generic_hook
+from ..utils.templates import generic_hook, template_env
+
+
+def _should_disable_exception_handler(args: list = None) -> bool:
+    """
+        Checks the arguments if '--no-exception-handler'
+        is part of it.
+
+        :param args:
+        :return:
+    """
+
+    return len(args) > 0 and '--no-exception-handler' in args
 
 
 def frida_environment(args: list = None) -> None:
@@ -44,14 +56,18 @@ def load_script(args: list) -> None:
     """
 
     if len(args) <= 0:
-        click.secho('Usage: import <local path to frida-script> (optional name)', bold=True)
+        click.secho('Usage: import <local path to frida-script> (optional name) (optional: --no-exception-handler)',
+                    bold=True)
         return
 
     source = args[0]
 
-    # if we have another argument, use that as the name
+    # if we have another argument, use that as the name, if its not an arg
     if len(args) > 1:
-        name = args[1]
+        if '--' not in args[1]:
+            name = args[1]
+        else:
+            name = 'user-script-no-exception-handler'
     else:
         name = 'user-script'
 
@@ -63,8 +79,17 @@ def load_script(args: list) -> None:
         click.secho('Unable to import file {0}'.format(source), fg='red')
         return
 
+    # read the hook sources
     with open(source, 'r') as f:
         hook = ''.join(f.read())
+
+    # wrap the user script in an exception handler, unless we
+    # explicitly shouldnt. we also use the generic exception
+    # handler as there is no way to know which environment
+    # it may be for here.
+    if not _should_disable_exception_handler(args):
+        err_handler = template_env.get_template('generic-base.js')
+        hook = err_handler.render(content=hook)
 
     runner = FridaRunner(hook=hook)
     runner.run_as_job(name=name)
