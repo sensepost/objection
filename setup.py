@@ -40,7 +40,7 @@ setup(
     author_email='leon@sensepost.com',
 
     url='https://github.com/sensepost/objection',
-    download_url='https://github.com/objection/tarball/' + __version__ + '.tar.gz',
+    download_url='https://github.com/sensepost/objection/archive/' + __version__ + '.tar.gz',
 
     keywords=['mobile', 'instrumentation', 'pentest', 'frida', 'hook'],
     version=__version__,
