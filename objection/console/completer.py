@@ -112,7 +112,7 @@ class CommandCompleter(Completer):
             # based on the current text input and populate a 'meta' field
             # if one exists.
             for cmd, extra in commands.items():
-                meta = extra['meta'] if 'meta' in extra else None
+                meta = extra['meta'] if type(extra) is dict and 'meta' in extra else None
 
                 # finally, yield the generator for completions
                 yield Completion(cmd, -(len(word_before_cursor)), display_meta=meta)
