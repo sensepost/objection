@@ -86,7 +86,7 @@ class RunnerMessage(object):
             return '<SuccessfulRunnerMessage Type: {0} Data: {1}>'.format(self.type, self.data)
 
         else:
-            return '<FailedRunnerMessage Reason: {0} Type: {1} Data: {2}>'.format(self.error_reason, self.success,
+            return '<FailedRunnerMessage Reason: {0} Type: {1} Data: {2}>'.format(self.error_reason,
                                                                                   self.type,
                                                                                   self.data)
 
