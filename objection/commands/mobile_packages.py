@@ -11,6 +11,17 @@ import requests
 
 
 def _get_frida_gadget(platform: str) -> str:
+    """
+        Gets the location of the Frida Gadget on disk.
+
+        If the applicable library is not on disk in the ~/.objection
+        directory, or, if its older than 3 days, a new version will be
+        downloaded.
+
+        :param platform:
+        :return:
+    """
+
     objection_path = os.path.join(os.path.expanduser('~'), '.objection')
 
     # Ensure we have the objection path
@@ -220,12 +231,22 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
         click.secho(load_library_output.out, fg='red', dim=True)
         click.secho(load_library_output.err, fg='red')
 
-    # codesign the FridaGadget
-    click.secho('Codesigning FridaGadget.dylib with signature {0}'.format(codesign_signature))
-    delegator.run('{0} {1} {2} {3}'.format(required_commands['codesign']['location'],
-                                           '-f -v -s',
-                                           codesign_signature,
-                                           os.path.join(app_folder, 'Frameworks', 'FridaGadget.dylib')))
+    # get the paths of all of the .dylib files in this applications
+    # bundle. we will have to codesign all of them and not just the
+    # frida gadget
+    dylibs_to_sign = [os.path.join(dp, f) for dp, dn, fn in os.walk(app_folder) for f in fn if f.endswith('.dylib')]
+
+    # add the FridaGadget to the dylibs to sign
+    dylibs_to_sign.append(os.path.join(app_folder, 'Frameworks', 'FridaGadget.dylib'))
+
+    # codesign the dylibs in this bundle
+    click.secho('Codesigning {0} .dylib\'s with signature {1}'.format(len(dylibs_to_sign), codesign_signature),
+                fg='green')
+    for dylib in dylibs_to_sign:
+        delegator.run('{0} {1} {2} {3}'.format(required_commands['codesign']['location'],
+                                               '-f -v -s',
+                                               codesign_signature,
+                                               dylib))
 
     # zip up the new ipa
     click.secho('Preparing IPA for codesigning...')
