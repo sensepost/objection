@@ -236,13 +236,11 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
     # frida gadget
     dylibs_to_sign = [os.path.join(dp, f) for dp, dn, fn in os.walk(app_folder) for f in fn if f.endswith('.dylib')]
 
-    # add the FridaGadget to the dylibs to sign
-    dylibs_to_sign.append(os.path.join(app_folder, 'Frameworks', 'FridaGadget.dylib'))
-
     # codesign the dylibs in this bundle
     click.secho('Codesigning {0} .dylib\'s with signature {1}'.format(len(dylibs_to_sign), codesign_signature),
                 fg='green')
     for dylib in dylibs_to_sign:
+        click.secho('Code signing: {0}'.format(os.path.basename(dylib)), dim=True)
         delegator.run('{0} {1} {2} {3}'.format(required_commands['codesign']['location'],
                                                '-f -v -s',
                                                codesign_signature,
