@@ -140,7 +140,12 @@ def execute(args: list) -> None:
         click.secho('Error: {0}'.format(e), fg='red')
         return
 
-    click.secho(tabulate(results), bold=True)
+    table_data = []
+    for row in results:
+        row_data = [c.decode('utf-8', 'replace') if isinstance(c, bytes) else c for c in row]
+        table_data.append(row_data)
+
+    click.secho(tabulate(table_data), bold=True)
 
 
 def sync(args: list = None) -> None:
