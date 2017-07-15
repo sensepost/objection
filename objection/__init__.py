@@ -1,6 +1,6 @@
 import sys
 
-__version__ = '0.0.2'
+__version__ = '0.1.0'
 
 # helper containing a python 3 related warning
 # if this is run with python 2
