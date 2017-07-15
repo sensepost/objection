@@ -7,6 +7,7 @@ from tabulate import tabulate
 from ..state.device import device_state
 from ..state.filemanager import file_manager_state
 from ..utils.frida_transport import FridaRunner
+from ..utils.helpers import sizeof_fmt
 from ..utils.templates import ios_hook
 
 
@@ -216,14 +217,6 @@ def _ls_ios(path: str) -> None:
     # get the response data itself
     data = response.data
 
-    # small helper to grab keys where some may or may
-    # not exist
-    def get_key_if_exists(attribs, key):
-        if key in attribs:
-            return attribs[key]
-
-        return 'n/a'
-
     # output display
     if data['readable']:
 
@@ -239,6 +232,32 @@ def _ls_ios(path: str) -> None:
     else:
         click.secho('No Write Access', fg='red')
 
+    def _get_key_if_exists(attribs, key):
+        """
+            Small helper to grab keys where some may or may
+            not exist in the file attributes.
+
+            :param attribs:
+            :param key:
+            :return:
+        """
+
+        if key in attribs:
+            return attribs[key]
+
+        return 'n/a'
+
+    def _humanize_size_if_possible(size: str) -> str:
+        """
+            Small helper method used to 'humanize' file sizes
+            if the file size is not recorded as 'n/a'
+
+            :param size:
+            :return:
+        """
+
+        return sizeof_fmt(int(size)) if size != 'n/a' else 'n/a'
+
     # if the directory was readable, dump the filesytem listing
     # and attributes to screen.
     if data['readable']:
@@ -249,23 +268,23 @@ def _ls_ios(path: str) -> None:
             attributes = file_data['attributes']
 
             table_data.append([
-                get_key_if_exists(attributes, 'NSFileType'),
-                get_key_if_exists(attributes, 'NSFilePosixPermissions'),
+                _get_key_if_exists(attributes, 'NSFileType'),
+                _get_key_if_exists(attributes, 'NSFilePosixPermissions'),
 
                 # read / write permissions
                 file_data['readable'],
                 file_data['writable'],
 
                 # owner name and uid
-                get_key_if_exists(attributes, 'NSFileOwnerAccountName') + ' (' +
-                get_key_if_exists(attributes, 'NSFileOwnerAccountID') + ')',
+                _get_key_if_exists(attributes, 'NSFileOwnerAccountName') + ' (' +
+                _get_key_if_exists(attributes, 'NSFileOwnerAccountID') + ')',
 
                 # group name and gid
-                get_key_if_exists(attributes, 'NSFileGroupOwnerAccountName') + ' (' +
-                get_key_if_exists(attributes, 'NSFileGroupOwnerAccountID') + ')',
+                _get_key_if_exists(attributes, 'NSFileGroupOwnerAccountName') + ' (' +
+                _get_key_if_exists(attributes, 'NSFileGroupOwnerAccountID') + ')',
 
-                get_key_if_exists(attributes, 'NSFileSize'),
-                get_key_if_exists(attributes, 'NSFileCreationDate'),
+                _humanize_size_if_possible(_get_key_if_exists(attributes, 'NSFileSize')),
+                _get_key_if_exists(attributes, 'NSFileCreationDate'),
                 file_name,
             ])
 

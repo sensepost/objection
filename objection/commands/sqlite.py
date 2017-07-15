@@ -32,7 +32,7 @@ def status(args: list) -> None:
     db_file = sqlite_manager_state.file
 
     if not db_file:
-        click.secho('Not connected to any file', fg='blue')
+        click.secho('Not connected to any database file', fg='blue')
 
         return
 
@@ -102,6 +102,13 @@ def disconnect(args: list = None) -> None:
 
 
 def schema(args=None):
+    """
+        Runs a query that dumps the current databases schema.
+
+        :param args:
+        :return:
+    """
+
     if not sqlite_manager_state.is_connected():
         click.secho('Connect using sqlite connect first!', fg='red')
         return
