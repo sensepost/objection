@@ -317,7 +317,7 @@ def download(args: list) -> None:
     """
 
     if len(args) < 2:
-        click.secho('Usage: download <remote location> <local destination>', bold=True)
+        click.secho('Usage: file download <remote location> <local destination>', bold=True)
         return
 
     path = args[0]
@@ -408,7 +408,7 @@ def upload(args: list) -> None:
     """
 
     if len(args) < 2:
-        click.secho('Usage: upload <local source> <remote destination>', bold=True)
+        click.secho('Usage: file upload <local source> <remote destination>', bold=True)
         return
 
     path = args[0]

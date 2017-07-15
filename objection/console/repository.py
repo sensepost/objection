@@ -65,15 +65,19 @@ COMMANDS = {
         },
     },
 
-    'upload': {
-        'meta': 'Upload a file',
-        'exec': filemanager.upload
-    },
-
-    'download': {
-        'meta': 'Download a file',
-        'dynamic': list_files_in_current_fm_directory,
-        'exec': filemanager.download
+    'file': {
+        'meta': 'Work with files on the remote filesystem',
+        'commands': {
+            'upload': {
+                'meta': 'Upload a file',
+                'exec': filemanager.upload
+            },
+            'download': {
+                'meta': 'Download a file',
+                'dynamic': list_files_in_current_fm_directory,
+                'exec': filemanager.download
+            }
+        }
     },
 
     # device and env info commands
@@ -475,34 +479,38 @@ HELP = {
         },
     },
 
-    'upload': {
-        'help': (
-            'Command: upload\n'
-            '\n'
-            'Usage: upload <local source file> <remove destination>\n'
-            '\n'
-            'Upload a file from the local filesystem to the remote filesystem.\n'
-            'If a full path is not specified for the remote destination, the current\n'
-            'working directory is assumed as the relative directory for the upload\n'
-            'destination.\n'
-            'If the file already exists on the remote filesystem, it will be overridden.\n'
-            '\n'
-            'Examples:\n'
-            '   upload test.sqlite Document/Preferences/test.sqlite'
-        ),
-    },
-
-    'download': {
-        'help': (
-            'Command: download\n'
-            '\n'
-            'Usage: download <remote location> <local destination>\n'
-            '\n'
-            'Download a file from a location on the mobile device, to a local destination.\n'
-            '\n'
-            'Examples:\n'
-            '   download Document/Preferences/test.sqlite test.sqlite'
-        ),
+    'file': {
+        'help': 'Contains subcommands to work with files on the remote filesystem',
+        'commands': {
+            'upload': {
+                'help': (
+                    'Command: file upload\n'
+                    '\n'
+                    'Usage: file upload <local source file> <remove destination>\n'
+                    '\n'
+                    'Upload a file from the local filesystem to the remote filesystem.\n'
+                    'If a full path is not specified for the remote destination, the current\n'
+                    'working directory is assumed as the relative directory for the upload\n'
+                    'destination.\n'
+                    'If the file already exists on the remote filesystem, it will be overridden.\n'
+                    '\n'
+                    'Examples:\n'
+                    '   file upload test.sqlite Document/Preferences/test.sqlite'
+                ),
+            },
+            'download': {
+                'help': (
+                    'Command: file download\n'
+                    '\n'
+                    'Usage: file download <remote location> <local destination>\n'
+                    '\n'
+                    'Download a file from a location on the mobile device, to a local destination.\n'
+                    '\n'
+                    'Examples:\n'
+                    '   file download Document/Preferences/test.sqlite test.sqlite'
+                ),
+            }
+        }
     },
 
     # device and env info commands
