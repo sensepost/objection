@@ -104,6 +104,17 @@ def _string_is_true(s: str) -> bool:
     return s.lower() in ('true', 'yes')
 
 
+def _should_include_backtrace(args: list) -> bool:
+    """
+        Check if --include-backtrace is part of the arguments.
+
+        :param args:
+        :return:
+    """
+
+    return '--include-backtrace' in args
+
+
 def _get_ios_classes() -> list:
     """
         Gets a list of all of the classes available in the current
@@ -254,14 +265,16 @@ def watch_class_method(args: list) -> None:
     """
 
     if len(args) <= 0:
-        click.secho('Usage: ios hooking watch method <selector> (eg: -[ClassName methodName:])', bold=True)
+        click.secho(('Usage: ios hooking watch method <selector>'
+                     ' (eg: -[ClassName methodName:]) (optional: --include-backtrace)'), bold=True)
         return
 
     selector = args[0]
 
     runner = FridaRunner()
     runner.set_hook_with_data(
-        ios_hook('hooking/watch-method'), selector=selector)
+        ios_hook('hooking/watch-method'), selector=selector,
+        include_backtrace=_should_include_backtrace(args))
 
     runner.run_as_job(name='watch-method')
 

@@ -1118,15 +1118,19 @@ HELP = {
                                 'help': (
                                     'Command: ios hooking watch method\n'
                                     '\n'
-                                    'Usage: ios hooking method "<full class & selector>"\n'
+                                    'Usage: ios hooking method "<full class & selector> '
+                                    '(optional: --include-backtrace)"\n'
                                     '\n'
                                     'Hooks into a specified Objective-C method and reports on invocations.\n'
                                     'A full class and method is expected, including whether its an instance\n'
                                     'or class method.\n'
+                                    'If the --include-backtrace flag is provided, a full stack trace that\n'
+                                    'lead to the methods invocation will also be dumped.\n'
                                     '\n'
                                     'Examples:\n'
                                     '   ios hooking watch method "+[KeychainDataManager update:forKey:]\n'
-                                    '   ios hooking watch method "-[PinnedNSURLSessionStarwarsApi '
+                                    '   ios hooking watch method "-[PinnedNSURLSessionStarwarsApi\n'
+                                    '   ios hooking watch method "-[PinnedNSURLSessionStarwarsApi --include-backtrace'
                                     'getJsonResponseFrom:onSuccess:onFailure:]"'
                                 ),
                             }

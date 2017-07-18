@@ -28,6 +28,16 @@ if (method.address) {
                 ') (Super: ' + receiver.$superClass +
                 ') [' + receiver.$className + ' ' + ObjC.selectorAsString(args[1]) + ']';
 
+
+            // if we should include a backtrace to here, do that.
+            if ('{{ include_backtrace }}' == 'True') {
+
+                message = message + '\nBacktrace:\n\t' +
+                    Thread.backtrace(this.context, Backtracer.ACCURATE)
+                        .map(DebugSymbol.fromAddress).join('\n\t')
+
+            }
+
             send(JSON.stringify({
                 status: 'success',
                 error_reason: NaN,
