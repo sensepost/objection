@@ -218,7 +218,7 @@ class FridaRunner(object):
         """
 
         if state_connection.get_comms_type() == state_connection.TYPE_USB:
-            return frida.get_usb_device().attach(state_connection.gadget_name)
+            return frida.get_usb_device(5).attach(state_connection.gadget_name)
 
         if state_connection.get_comms_type() == state_connection.TYPE_REMOTE:
             return frida.get_remote_device().attach(state_connection.gadget_name)
