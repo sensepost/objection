@@ -96,6 +96,7 @@ def _get_ios_environment() -> None:
 
     if not response.is_successful():
         click.secho('Failed to get environment directories.', fg='red')
+        return
 
     data = response.data
 
@@ -121,6 +122,7 @@ def _get_android_environment() -> None:
 
     if not response.is_successful():
         click.secho('Failed to get environment directories.', fg='red')
+        return
 
     data = response.data
 

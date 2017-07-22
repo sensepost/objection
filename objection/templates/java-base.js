@@ -4,13 +4,30 @@ if (Java.available) {
 
         // From Frida documentation:
         //  "ensure that the current thread is attached to the VM and call fn"
-        Java.perform(function() {
+        //
+        // We also handle the exception that could happen within the callcack as
+        // it does not seem to bubble outside of it.
+        Java.perform(function () {
 
-            {{ content }}
+            try {
 
+                {{ content }}
+
+            } catch (err) {
+
+                var response = {
+                    status: 'error',
+                    error_reason: err.message,
+                    type: 'java-perform-exception',
+                    data: {}
+                }
+
+                send(JSON.stringify(response));
+            }
         });
 
     } catch (err) {
+
 
         var response = {
             status: 'error',
