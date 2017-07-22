@@ -1,4 +1,6 @@
-var currentApplication = Java.use('android.app.ActivityThread').currentApplication(); 
+var ActivityThread = Java.use('android.app.ActivityThread');
+
+var currentApplication = ActivityThread.currentApplication();
 var context = currentApplication.getApplicationContext();
 
 var data = {

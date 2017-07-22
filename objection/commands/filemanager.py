@@ -1,5 +1,6 @@
 import base64
 import os
+import time
 
 import click
 from tabulate import tabulate
@@ -8,7 +9,7 @@ from ..state.device import device_state
 from ..state.filemanager import file_manager_state
 from ..utils.frida_transport import FridaRunner
 from ..utils.helpers import sizeof_fmt
-from ..utils.templates import ios_hook
+from ..utils.templates import ios_hook, android_hook
 
 
 def cd(args: list) -> None:
@@ -58,18 +59,25 @@ def cd(args: list) -> None:
     # actually exists, and then cd to it if we can
     if os.path.isabs(path):
 
-        runner = FridaRunner()
+        # assume the path does not exist by default
+        does_exist = False
 
-        # populate the template with the path we want to work with
-        runner.set_hook_with_data(
-            ios_hook('filesystem/exists'), path=path)
-        runner.run()
+        # check for existance based on the runtime
+        if device_state.device_type == 'ios':
+            does_exist = _path_exists_ios(path)
 
-        if runner.get_last_message().exists:
+        if device_state.device_type == 'android':
+            does_exist = _path_exists_android(path)
+
+        # if we checked with the device that the path exists
+        # and it did, update the state manager, otherwise
+        # show an error that the path may be invalid
+        if does_exist:
             click.secho(path, fg='green', bold=True)
 
             file_manager_state.cwd = path
             return
+
         else:
             click.secho('Invalid path: `{0}`'.format(path), fg='red')
 
@@ -79,20 +87,61 @@ def cd(args: list) -> None:
 
         proposed_path = os.path.join(current_dir, path)
 
-        runner = FridaRunner()
+        # assume the proposed_path does not exist by default
+        does_exist = False
 
-        # populate the template with the path we want to work with
-        runner.set_hook_with_data(
-            ios_hook('filesystem/exists'), path=proposed_path)
-        runner.run()
+        # check for existance based on the runtime
+        if device_state.device_type == 'ios':
+            does_exist = _path_exists_ios(proposed_path)
 
-        if runner.get_last_message().exists:
+        if device_state.device_type == 'android':
+            does_exist = _path_exists_android(proposed_path)
+
+        # if we checked with the device that the path exists
+        # and it did, update the state manager, otherwise
+        # show an error that the path may be invalid
+        if does_exist:
             click.secho(proposed_path, fg='green', bold=True)
 
             file_manager_state.cwd = proposed_path
             return
+
         else:
             click.secho('Invalid path: `{0}`'.format(proposed_path), fg='red')
+
+
+def _path_exists_ios(path: str) -> bool:
+    """
+        Checks an iOS device if a path exists.
+
+        :param path:
+        :return:
+    """
+
+    runner = FridaRunner()
+
+    # populate the template with the path we want to work with
+    runner.set_hook_with_data(ios_hook('filesystem/exists'), path=path)
+    runner.run()
+
+    return runner.get_last_message().exists
+
+
+def _path_exists_android(path: str) -> bool:
+    """
+        Checks an Android device if a path exists.
+
+        :param path:
+        :return:
+    """
+
+    runner = FridaRunner()
+
+    # populate the template with the path we want to work with
+    runner.set_hook_with_data(android_hook('filesystem/exists'), path=path)
+    runner.run()
+
+    return runner.get_last_message().exists
 
 
 def pwd(args: list = None) -> str:
@@ -155,13 +204,26 @@ def _pwd_ios() -> str:
 
 def _pwd_android() -> None:
     """
-        This would be the method to return the current working
+        Execute a Frida hook that gets the current working
         directory from an Android device.
 
         :return:
     """
 
-    pass
+    hook = android_hook('filesystem/pwd')
+
+    runner = FridaRunner()
+    runner.run(hook=hook)
+
+    response = runner.get_last_message()
+
+    if not response.is_successful():
+        raise Exception('Failed to get cwd')
+
+    # update the file_manager state's cwd
+    file_manager_state.cwd = response.cwd
+
+    return response.cwd
 
 
 def ls(args: list) -> None:
@@ -175,7 +237,7 @@ def ls(args: list) -> None:
 
     # check if we have recevied a path to ls for.
     if len(args) <= 0:
-        path = '.'
+        path = pwd()
     else:
         path = args[0]
 
@@ -197,9 +259,6 @@ def _ls_ios(path: str) -> None:
         :param path:
         :return:
     """
-
-    if path == '.':
-        path = pwd()
 
     runner = FridaRunner()
     runner.set_hook_with_data(
@@ -294,14 +353,86 @@ def _ls_ios(path: str) -> None:
 
 def _ls_android(path: str) -> None:
     """
-        This will be the method used to get directory listings
-        on Android devices.
+        Lit files implementation for Android devices.
 
         :param path:
         :return:
     """
 
-    pass
+    runner = FridaRunner()
+    runner.set_hook_with_data(
+        android_hook('filesystem/ls'), path=path)
+    runner.run()
+
+    # grab the output lets seeeeee
+    response = runner.get_last_message()
+
+    # ensure the response was successful
+    if not response.is_successful():
+        click.secho('Failed to get directory listing with error: {}'.format(response.error_reason))
+        return
+
+    # get the response data itself
+    data = response.data
+
+    # output display
+    if data['readable']:
+
+        click.secho('Read Access', fg='green')
+
+    else:
+        click.secho('No Read Access', fg='red')
+
+    if data['writable']:
+
+        click.secho('Write Access', fg='green')
+
+    else:
+        click.secho('No Write Access', fg='red')
+
+    def _timestamp_to_str(stamp: str) -> str:
+        """
+            Small helper method to convert the timestamps we get
+            from the Android filesystem to human readable ones.
+
+            :param stamp:
+            :return:
+        """
+
+        # convert the time to an integer
+        stamp = int(stamp)
+
+        if stamp > 0:
+            return time.strftime('%Y-%m-%d %H:%M:%S GMT', time.gmtime(stamp / 1000.0))
+
+        return 'n/a'
+
+    # if the directory was readable, dump the filesytem listing
+    # and attributes to screen.
+    if data['readable']:
+
+        table_data = []
+        for file_name, file_data in data['files'].items():
+            attributes = file_data['attributes']
+
+            table_data.append([
+
+                'Directory' if attributes['isDirectory'] else 'File',
+
+                _timestamp_to_str(attributes['lastModified']),
+
+                # read / write permissions
+                file_data['readable'],
+                file_data['writable'],
+                attributes['isHidden'],
+
+                sizeof_fmt(float(attributes['size'])),
+
+                file_name,
+            ])
+
+        click.secho(tabulate(table_data,
+                             headers=['Type', 'Last Modified', 'Read', 'Write', 'Hidden', 'Size', 'Name']))
 
 
 def download(args: list) -> None:
