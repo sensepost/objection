@@ -5,7 +5,10 @@ var data = {
 
     filesDirectory: context.getFilesDir().getAbsolutePath().toString(),
     cacheDirectory: context.getCacheDir().getAbsolutePath().toString(),
+    externalCacheDirectory: context.getExternalCacheDir().getAbsolutePath().toString(),
     codeCacheDirectory: context.getCodeCacheDir().getAbsolutePath().toString(),
+    obbDir: context.getObbDir().getAbsolutePath().toString(),
+    packageCodePath: context.getPackageCodePath().toString(),
 }
 
 var response = {
