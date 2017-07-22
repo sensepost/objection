@@ -28,7 +28,6 @@ if (Java.available) {
 
     } catch (err) {
 
-
         var response = {
             status: 'error',
             error_reason: err.message,
