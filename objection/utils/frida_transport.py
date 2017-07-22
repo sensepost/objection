@@ -198,7 +198,7 @@ class FridaRunner(object):
                 # check if the last message was an error
                 msg = self.get_last_message()
                 if not msg.is_successful():
-                    click.secho('Frida hook failure: {0}'.format(msg.error_reason), fg='red')
+                    click.secho('[hook failure] {0}'.format(msg.error_reason), fg='red')
 
         except Exception as e:
             click.secho('Failed to process an incoming message from hook: {0}'.format(e))
