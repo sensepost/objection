@@ -3,7 +3,7 @@ from tabulate import tabulate
 
 from ..state.device import device_state
 from ..utils.frida_transport import FridaRunner
-from ..utils.templates import generic_hook, ios_hook
+from ..utils.templates import generic_hook, ios_hook, android_hook
 
 
 def get_device_info() -> tuple:
@@ -46,7 +46,16 @@ def get_device_info() -> tuple:
     # android device information
     if runner.get_last_message().device_type == 'android':
         device_state.device_type = 'android'
-        raise Exception('Not implemented yet')
+
+        hook = android_hook('device-information')
+        runner.run(hook=hook)
+        response = runner.get_last_message()
+
+        # we have some device information for iOS, return it!
+        if response.is_successful():
+            return response.model, response.device, response.brand, response.version
+
+        raise Exception('Failed to get device information')
 
 
 def get_environment(args: list = None) -> None:
@@ -59,11 +68,12 @@ def get_environment(args: list = None) -> None:
         :param args:
         :return:
     """
+
     if device_state.device_type == 'ios':
         _get_ios_environment()
 
     if device_state.device_type == 'android':
-        pass
+        _get_android_environment()
 
 
 def _get_ios_environment() -> None:
@@ -80,6 +90,31 @@ def _get_ios_environment() -> None:
     click.secho(tabulate([get_device_info()], headers=['Name', 'System', 'Model', 'Version']))
 
     hook = ios_hook('filesystem/environment')
+    runner = FridaRunner(hook=hook)
+    runner.run()
+    response = runner.get_last_message()
+
+    if not response.is_successful():
+        click.secho('Failed to get environment directories.', fg='red')
+
+    data = response.data
+
+    directories = []
+    for name, directory in data.items():
+        directories.append([name, directory])
+
+    click.secho('')
+    click.secho(tabulate(directories, headers=['Name', 'Path']))
+
+
+def _get_android_environment() -> None:
+    """
+        Prints information about the Android environment.
+
+        :return:
+    """
+
+    hook = android_hook('filesystem/environment')
     runner = FridaRunner(hook=hook)
     runner.run()
     response = runner.get_last_message()

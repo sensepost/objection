@@ -81,5 +81,25 @@ def ios_hook(name: str, skip_trycatch: bool = False) -> str:
     return final_template.render(content=hook)
 
 
-def android_hook(name: str = None) -> None:
-    pass
+def android_hook(name: str = None, skip_trycatch: bool = False) -> str:
+    """
+        Compile a hook from the 'android' directory.
+
+        :param name:
+        :param skip_trycatch:
+        :return:
+    """
+
+    name = _get_name_with_js_suffix(name)
+    tmpl_path = path.join(hook_path, 'android/' + name)
+
+    with open(tmpl_path, 'r') as f:
+        hook = f.readlines()
+
+    hook = ''.join(_cleanup_hook_comments(hook))
+
+    if skip_trycatch:
+        return hook
+
+    final_template = template_env.get_template('java-base.js')
+    return final_template.render(content=hook)
