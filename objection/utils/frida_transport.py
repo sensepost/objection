@@ -4,6 +4,7 @@ from time import strftime
 
 import click
 import frida
+from frida.core import ScriptExports
 from jinja2 import Template
 
 from ..state.connection import state_connection
@@ -176,6 +177,7 @@ class FridaRunner(object):
     def __init__(self, hook: str = None):
 
         self.messages = []
+        self.script = None
 
         if hook:
             self.hook = hook
@@ -237,6 +239,31 @@ class FridaRunner(object):
 
         template = Template(hook)
         self.hook = template.render(**kwargs)
+
+    def rpc_exports(self, hook: str = None) -> ScriptExports:
+        """
+            Loads a Fridascript and returns the exports that
+            are available to use. This will allow for
+            methods that are exposed via 'rpc.exports' in the
+            loaded Frida scripts to be called directory from a
+            runner.
+
+            :param hook:
+            :return:
+        """
+
+        if not hook:
+            hook = self.hook
+
+        if not hook:
+            raise Exception('Like, we need a hook to run y0')
+
+        session = self.get_session()
+        self.script = session.create_script(hook)
+        self.script.on('message', self._on_message)
+        self.script.load()
+
+        return self.script.exports
 
     def run(self, hook: str = None) -> None:
         """
@@ -305,3 +332,15 @@ class FridaRunner(object):
         # tell the state manager about this job
         job_manager_state.add_job(job)
         click.secho('Job: {0} - Started'.format(job.id), fg='green')
+
+    def unload_script(self) -> None:
+        """
+            Unloads a script if one exists in the script property.
+
+            This method would only really be used with hooks that
+            make use of rpc exports.
+
+            :return:
+        """
+        if self.script:
+            self.script.unload()
