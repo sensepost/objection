@@ -93,12 +93,18 @@ def disconnect(args: list = None) -> None:
         :return:
     """
 
-    if sqlite_manager_state.is_connected():
-        click.secho('Disconnecting database: {0}'.format(sqlite_manager_state.file))
-        sqlite_manager_state.cleanup()
+    if not sqlite_manager_state.is_connected():
+        click.secho('Not connected to a database.', fg='yellow')
         return
 
-    click.secho('Not connected to a database.')
+    # confirm if the user wants to disconnect, warn about the need to sync
+    if click.confirm(('Make sure you run \'sqlite sync\' if needed!\n'
+                      'Are you sure you want to disconnect?')):
+        click.secho('Disconnecting database: {0}'.format(sqlite_manager_state.file))
+
+        # cleanup the connection and cached db
+        sqlite_manager_state.cleanup()
+        return
 
 
 def schema(args=None):
