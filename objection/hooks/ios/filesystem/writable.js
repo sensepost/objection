@@ -1,4 +1,4 @@
-// Determines of a path on the iOS device is writable.
+// Determines if a path on the iOS device is writable.
 
 var NSFileManager = ObjC.classes.NSFileManager;
 var NSString = ObjC.classes.NSString;

@@ -458,7 +458,7 @@ def download(args: list) -> None:
         _download_ios(path, destination)
 
     if device_state.device_type == 'android':
-        pass
+        _download_android(path, destination)
 
 
 def _download_ios(path: str, destination: str) -> None:
@@ -527,6 +527,74 @@ def _download_ios(path: str, destination: str) -> None:
         fh.write(file_data)
 
 
+def _download_android(path: str, destination: str) -> None:
+    """
+        Download a file from the Android filesystem and store it locally.
+
+        :param path:
+        :param destination:
+        :return:
+    """
+
+    # if the path we got is not absolute, join it with the
+    # current working directory
+    if not os.path.isabs(path):
+        path = os.path.join(pwd(), path)
+
+    # output about whats about to happen
+    click.secho('Downloading {0} to {1}'.format(path, destination), fg='green', dim=True)
+
+    # start a runner. going to use this a few times
+    # for this method
+    runner = FridaRunner()
+
+    # check that the path is readable
+    runner.set_hook_with_data(android_hook('filesystem/readable'), path=path)
+
+    # run the hook
+    runner.run()
+
+    # get the response message
+    response = runner.get_last_message()
+
+    # if we cant read the file, just stop
+    if not response.is_successful() or not response.readable:
+        click.secho('Unable to download file. File is not readable')
+        return
+
+    # check that its a file
+    runner.set_hook_with_data(android_hook('filesystem/is-type-file'), path=path)
+
+    # run the hook
+    runner.run()
+
+    # get the response message
+    response = runner.get_last_message()
+
+    if not response.is_successful():
+        click.secho('Unable to download file. Not a file.')
+        return
+
+    # run the download hook and get the file from
+    # extra_data
+    runner.set_hook_with_data(android_hook('filesystem/download'), path=path)
+
+    # the download method is an rpc export
+    api = runner.rpc_exports()
+
+    # download the file
+    data = api.download()
+
+    # cleanup the runner
+    runner.unload_script()
+
+    file_data = bytearray(data)
+
+    # finally, write the downloaded file to disk
+    with open(destination, 'wb') as fh:
+        fh.write(file_data)
+
+
 def upload(args: list) -> None:
     """
         Uploads a local file to the remote operating system.
@@ -549,7 +617,7 @@ def upload(args: list) -> None:
         _upload_ios(path, destination)
 
     if device_state.device_type == 'android':
-        pass
+        _upload_android(path, destination)
 
 
 def _upload_ios(path: str, destination: str) -> None:
@@ -594,6 +662,61 @@ def _upload_ios(path: str, destination: str) -> None:
     # prepare the upload hook
     runner.set_hook_with_data(
         ios_hook('filesystem/upload'), destination=destination, base64_data=data)
+
+    # run the upload hook
+    runner.run()
+
+    response = runner.get_last_message()
+
+    if not response.is_successful():
+        click.secho('Failed to upload {}: {}'.format(path, response.error_reason))
+        return
+
+    click.secho('Uploaded: {0}'.format(destination), dim=True)
+
+
+def _upload_android(path: str, destination: str) -> None:
+    """
+        Upload a file to a remote Android filesystem.
+
+        :param path:
+        :param destination:
+        :return:
+    """
+
+    if not os.path.isabs(destination):
+        destination = os.path.join(pwd(), destination)
+
+    # output about whats about to happen
+    click.secho('Uploading {0} to {1}'.format(path, destination), fg='green', dim=True)
+
+    # start a runner. going to use this a few times
+    # for this method
+    runner = FridaRunner()
+
+    # check that the path is readable
+    runner.set_hook_with_data(
+        android_hook('filesystem/writable'), path=os.path.dirname(destination))
+
+    # run the hook
+    runner.run()
+
+    # get the response message
+    response = runner.get_last_message()
+
+    # if we cant read the file, just stop
+    if not response.is_successful() or not response.writable:
+        click.secho('Unable to upload file. Destination is not writable')
+        return
+
+    # read the local file to upload, and base64 encode it
+    with open(path, 'rb') as f:
+        data = f.read()
+        data = str(base64.b64encode(data), 'utf-8')  # the frida hook wants a raw string
+
+    # prepare the upload hook
+    runner.set_hook_with_data(
+        android_hook('filesystem/upload'), destination=destination, base64_data=data)
 
     # run the upload hook
     runner.run()
