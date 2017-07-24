@@ -55,6 +55,7 @@ setup(
     packages=[
         'objection',
         'objection.commands',
+        'objection.commands.android',
         'objection.commands.ios',
         'objection.console',
         'objection.state',
