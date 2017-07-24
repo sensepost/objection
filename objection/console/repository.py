@@ -6,8 +6,9 @@ from ..commands import memory
 from ..commands import sqlite
 from ..commands import ui
 from ..commands.android import command
+from ..commands.android import hooking as android_hooking
 from ..commands.ios import cookies
-from ..commands.ios import hooking
+from ..commands.ios import hooking as ios_hooking
 from ..commands.ios import jailbreak
 from ..commands.ios import keychain
 from ..commands.ios import nsuserdefaults
@@ -212,7 +213,21 @@ COMMANDS = {
             'shell_exec': {
                 'meta': 'Execute a shell command',
                 'exec': command.execute
-            }
+            },
+            'hooking': {
+                'meta': 'Commands used for hooking methods in Android',
+                'commands': {
+                    'list': {
+                        'meta': 'Lists various bits of information',
+                        'commands': {
+                            'classes': {
+                                'meta': 'List the currently loaded classes',
+                                'exec': android_hooking.show_android_classes
+                            },
+                        }
+                    },
+                },
+            },
         },
     },
 
@@ -291,11 +306,11 @@ COMMANDS = {
                         'commands': {
                             'classes': {
                                 'meta': 'List classes available in the current application',
-                                'exec': hooking.show_ios_classes
+                                'exec': ios_hooking.show_ios_classes
                             },
                             'class_methods': {
                                 'meta': 'List the methods in a class',
-                                'exec': hooking.show_ios_class_methods
+                                'exec': ios_hooking.show_ios_class_methods
                             }
                         }
                     },
@@ -304,7 +319,7 @@ COMMANDS = {
                         'commands': {
                             'method_args': {
                                 'meta': 'Attempt to dump arguments for a given method',
-                                'exec': hooking.dump_ios_method_args
+                                'exec': ios_hooking.dump_ios_method_args
                             }
                         }
                     },
@@ -313,11 +328,11 @@ COMMANDS = {
                         'commands': {
                             'class': {
                                 'meta': 'Hook all methods in a class and report on invocations',
-                                'exec': hooking.watch_class
+                                'exec': ios_hooking.watch_class
                             },
                             'method': {
                                 'meta': 'Hook a specific method and report on invocations',
-                                'exec': hooking.watch_class_method
+                                'exec': ios_hooking.watch_class_method
                             }
                         }
                     },
@@ -326,7 +341,7 @@ COMMANDS = {
                         'commands': {
                             'return_value': {
                                 'meta': 'Set a methods return value. Supports only boolean returns.',
-                                'exec': hooking.set_method_return_value
+                                'exec': ios_hooking.set_method_return_value
                             }
                         }
                     }
