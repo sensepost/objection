@@ -5,6 +5,7 @@ from ..commands import jobs
 from ..commands import memory
 from ..commands import sqlite
 from ..commands import ui
+from ..commands.android import command
 from ..commands.ios import cookies
 from ..commands.ios import hooking
 from ..commands.ios import jailbreak
@@ -202,6 +203,17 @@ COMMANDS = {
                 'exec': ui.alert
             }
         }
+    },
+
+    # android commands
+    'android': {
+        'meta': 'Commands specific to Android',
+        'commands': {
+            'shell_exec': {
+                'meta': 'Execute a shell command',
+                'exec': command.execute
+            }
+        },
     },
 
     # ios commands
@@ -842,6 +854,31 @@ HELP = {
                 ),
             }
         }
+    },
+
+    # android commands
+    'android': {
+        'help': (
+            'Contains subcommands to work with Android specific features. These include\n'
+            'shell commands, byassing SSL pinning and simulating a rooted environment.'
+        ),
+        'commands': {
+            'shell_exec': {
+                'help': (
+                    'Command: android shell_exec\n'
+                    '\n'
+                    'Usage: android shell_exec <command to run>\n'
+                    '\n'
+                    'Execute a shell command on an android device. These commands are run from within\n'
+                    'the security context of the application that is being instrumented.\n'
+                    '\n'
+                    'Examples:\n'
+                    '   android shell_exec id\n'
+                    '   android shell_exec ls -lah /\n'
+                    '   android shell_exec rm /data/data/user/0/somefile'
+                )
+            }
+        },
     },
 
     # ios commands
