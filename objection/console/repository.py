@@ -7,6 +7,7 @@ from ..commands import sqlite
 from ..commands import ui
 from ..commands.android import command
 from ..commands.android import hooking as android_hooking
+from ..commands.android import intents
 from ..commands.ios import cookies
 from ..commands.ios import hooking as ios_hooking
 from ..commands.ios import jailbreak
@@ -227,6 +228,15 @@ COMMANDS = {
                         }
                     },
                 },
+            },
+            'intent': {
+                'meta': 'Commands to work with Android intents',
+                'commands': {
+                    'launch_activity': {
+                        'meta': 'Launch an Activity class using an Intent',
+                        'exec': intents.launch_activity
+                    }
+                }
             },
         },
     },
@@ -892,7 +902,30 @@ HELP = {
                     '   android shell_exec ls -lah /\n'
                     '   android shell_exec rm /data/data/user/0/somefile'
                 )
-            }
+            },
+            'intent': {
+                'help': (
+                    'Contains subcommands to work with Android Intents'
+                ),
+                'commands': {
+                    'launch_activity': {
+                        'help': (
+                            'Command: android intent launch_activity\n'
+                            '\n'
+                            'Usage: android intent launch_activity <activity class>\n'
+                            '\n'
+                            'Launches an activity class by building a new Intent and running startActivity()\n'
+                            'with it as an argument. The Intent.FLAG_ACTIVITY_NEW_TASK flag is added to achieve\n'
+                            'this, with the side effect that the history stack may be reset.\n'
+                            '\n'
+                            'Examples:\n'
+                            '   android intent launch_activity com.test.example.MainActivity\n'
+                            '   android intent launch_activity com.test.example.SecretActivity\n'
+                            '   android intent launch_activity com.example.test.Other'
+                        )
+                    }
+                }
+            },
         },
     },
 
