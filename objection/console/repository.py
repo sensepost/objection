@@ -227,6 +227,19 @@ COMMANDS = {
                             },
                         }
                     },
+                    'watch': {
+                        'meta': 'Watch for Android Java incovations',
+                        'commands': {
+                            'class_method': {
+                                'meta': 'Watches for invocations of a specific class method',
+                                'exec': android_hooking.watch_class_method
+                            }
+                        }
+                    },
+                    'dump_args': {
+                        'meta': 'Dumps Android Java class methods',
+                        'exec': android_hooking.dump_android_method_args
+                    }
                 },
             },
             'intent': {
@@ -903,6 +916,71 @@ HELP = {
                     '   android shell_exec rm /data/data/user/0/somefile'
                 )
             },
+            'hooking': {
+                'help': (
+                    'Contains subcommands to hook Android Java methods'
+                ),
+                'commands': {
+                    'list': {
+                        'help': (
+                            'Contains subcommands to list various bits of Java class information'
+                        ),
+                        'commands': {
+                            'classes': {
+                                'help': (
+                                    'Command: android hooking list classes\n'
+                                    '\n'
+                                    'Usage: android hooking list classes\n'
+                                    '\n'
+                                    'List the classes *currently loaded*. As the target application gets used\n'
+                                    'more, this command will return more classes.\n'
+                                    '\n'
+                                    'Examples:\n'
+                                    '   android hooking list classes\n'
+                                )
+                            },
+                        }
+                    },
+                    'watch': {
+                        'help': (
+                            'Contains subcommands to watch for various bits of information on class invocations'
+                        ),
+                        'commands': {
+                            'class_method': {
+                                'help': (
+                                    'Command: android hooking watch class_method\n'
+                                    '\n'
+                                    'Usage: android hooking watch class_method <class> <method>\n'
+                                    '\n'
+                                    'Hooks a specified class method and reports on invocations, together with\n'
+                                    'the number of arguments that method was called with. This command will\n'
+                                    'also hook all of the methods overloads.\n'
+                                    '\n'
+                                    'Examples:\n'
+                                    '   android hooking watch class_method com.example.test login\n'
+                                    '   android hooking watch class_method com.example.test.helper executeQuery'
+                                )
+                            }
+                        }
+                    },
+                    'dump_args': {
+                        'help': (
+                            'Command: android hooking dump_args\n'
+                            '\n'
+                            'Usage: android hooking dump_args <class> <method>\n'
+                            '\n'
+                            'Hooks a specified class method and dumps the calling arguments to\n'
+                            'screen. Arguments are converted to string representations, so naturally\n'
+                            'not everything dumped by be useful immediately. Those arguments can be\n'
+                            'manipulated using external frida scripts imported with the import command.\n'
+                            '\n'
+                            'Examples:\n'
+                            '   android hooking dump_args com.example.test login\n'
+                            '   android hooking dump_args com.example.test.helper executeQuery'
+                        )
+                    }
+                },
+            },
             'intent': {
                 'help': (
                     'Contains subcommands to work with Android Intents'
@@ -923,7 +1001,8 @@ HELP = {
                             '   android intent launch_activity com.test.example.SecretActivity\n'
                             '   android intent launch_activity com.example.test.Other'
                         )
-                    }
+                    },
+
                 }
             },
         },

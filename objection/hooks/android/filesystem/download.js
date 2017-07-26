@@ -1,5 +1,5 @@
 // Downloads a file off the Android filesystem.
-// This method is ready is unbelievably slow!
+// This method is unbelievably slow :(
 //
 // TODO: Fix this slow thing asap!
 

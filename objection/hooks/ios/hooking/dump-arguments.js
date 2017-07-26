@@ -18,7 +18,7 @@ if (method.address) {
     send(JSON.stringify({
         status: 'success',
         error_reason: NaN,
-        type: 'call-to-hooked-method',
+        type: 'ios-argument-dump',
         data: 'Found address for: {{ method }} at ' + method.address
     }));
 
@@ -31,7 +31,7 @@ if (method.address) {
             send(JSON.stringify({
                 status: 'success',
                 error_reason: NaN,
-                type: 'call-to-hooked-method',
+                type: 'ios-argument-dump',
                 data: 'Detected call to: {{ method }}'
             }));
 
@@ -58,7 +58,7 @@ if (method.address) {
                 send(JSON.stringify({
                     status: 'success',
                     error_reason: NaN,
-                    type: 'call-to-hooked-method',
+                    type: 'ios-argument-dump',
                     data: split_method.join(' ')
                 }));
             }
@@ -70,7 +70,7 @@ if (method.address) {
     send(JSON.stringify({
         status: 'error',
         error_reason: 'Unable to find address for {{ method }}. Is the selector valid?',
-        type: 'call-to-hooked-method',
+        type: 'ios-argument-dump',
         data: NaN
     }));
 }
