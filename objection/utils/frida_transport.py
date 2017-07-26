@@ -108,6 +108,7 @@ class FridaJobRunner(object):
         self.id = uuid.uuid4()
         self.started = strftime('%Y-%m-%d %H:%M:%S')
         self.name = name
+        self.has_had_error = False
 
         self.hook = None
         self.session = None
@@ -144,6 +145,9 @@ class FridaJobRunner(object):
                         str(self.id)[-12:], payload['type'],
                         payload['error_reason']), fg='red', bold=True)
 
+                    # mark this job as one that has had an error occur
+                    self.has_had_error = True
+
                 # everything else is.. who knows.
                 else:
 
@@ -151,7 +155,9 @@ class FridaJobRunner(object):
                         str(self.id)[-12:], payload['status'], payload['data']))
 
         except Exception as e:
-            click.secho('Failed to process an incoming message from hook: {0}'.format(e))
+
+            click.secho('Failed to process an incoming message from hook: {0}'.format(e),
+                        fg='red', bold=True)
 
     def end(self) -> None:
         """
@@ -326,8 +332,17 @@ class FridaRunner(object):
 
             return
 
+        # load the job script
         job.script.on('message', job.on_message)
         job.script.load()
+
+        # check if any errors in the script itself were thrown. if there
+        # were, lets assume it failed and unload the script.
+        if job.has_had_error:
+            click.secho('Unloading script due to startup errors.', fg='red')
+            self.unload_script()
+
+            return
 
         # tell the state manager about this job
         job_manager_state.add_job(job)
@@ -342,5 +357,6 @@ class FridaRunner(object):
 
             :return:
         """
+
         if self.script:
             self.script.unload()
