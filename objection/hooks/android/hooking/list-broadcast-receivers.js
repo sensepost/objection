@@ -27,7 +27,10 @@ receivers = receivers.concat(context.getPackageManager().getPackageInfo(context.
     return activity_info.name['value'];
 }))
 
-
+//Unique, will create duplicates if receiver in Manifest has been triggered by a broadcast
+receivers = receivers.filter(function(elem, pos) {
+    return receivers.indexOf(elem) == pos;
+}); 
 
 var response = {
     status: 'success',
