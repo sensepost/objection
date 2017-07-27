@@ -225,6 +225,10 @@ COMMANDS = {
                                 'meta': 'List the currently loaded classes',
                                 'exec': android_hooking.show_android_classes
                             },
+                            'receivers': {
+                                'meta': 'List the currently loaded BroadcastReceivers',
+                                'exec': android_hooking.show_registered_broadcast_receivers
+                            },
                         }
                     },
                     'watch': {
