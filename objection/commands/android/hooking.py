@@ -75,3 +75,31 @@ def dump_android_method_args(args: list) -> None:
                               target_class=target_class, target_method=target_method)
 
     runner.run_as_job(name='dump-arguments')
+
+def show_registered_broadcast_receivers(args: list= None) -> None:
+    """
+        Enumerate all the loaded classes that extend BroadcastReceiver
+        :param args:
+        :return:
+    """
+
+    hook = android_hook('hooking/list-broadcast-receivers')
+    runner = FridaRunner(hook=hook)
+    runner.run()
+
+    response = runner.get_last_message()
+
+    if not response.is_successful():
+        click.secho('Failed to list broadcast receivers with error: {0}'.format(response.error_reason), fg='red')
+        return None
+
+    if not response.data:
+        click.secho('No broadcast receivers were found', fg='yellow')
+        return None
+
+    for class_name in sorted(response.data):
+        click.secho(class_name)
+
+    click.secho('\nFound {0} classes'.format(len(response.data)), bold=True)
+
+    
