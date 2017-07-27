@@ -76,7 +76,8 @@ def dump_android_method_args(args: list) -> None:
 
     runner.run_as_job(name='dump-arguments')
 
-def show_registered_broadcast_receivers(args: list= None) -> None:
+
+def show_registered_broadcast_receivers(args: list = None) -> None:
     """
         Enumerate all the loaded classes that extend BroadcastReceiver
         :param args:
@@ -101,5 +102,3 @@ def show_registered_broadcast_receivers(args: list= None) -> None:
         click.secho(class_name)
 
     click.secho('\nFound {0} classes'.format(len(response.data)), bold=True)
-
-    

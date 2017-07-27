@@ -5,8 +5,8 @@ from .repl import Repl
 from ..__init__ import __version__
 from ..commands.device import get_device_info
 from ..commands.mobile_packages import patch_ios_ipa
-from ..state.connection import state_connection
 from ..state.app import app_state
+from ..state.connection import state_connection
 
 
 # Start the Click command group

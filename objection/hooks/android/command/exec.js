@@ -14,7 +14,7 @@ stderr_input_stream_reader = InputStreamReader.$new(command.getErrorStream());
 buffered_reader = BufferedReader.$new(stderr_input_stream_reader);
 
 stderr_string_builder = StringBuilder.$new();
-line_buffer = "";
+line_buffer = '';
 
 while ((line_buffer = buffered_reader.readLine()) != null) {
     stderr_string_builder.append(line_buffer + '\n');
@@ -25,7 +25,7 @@ stdout_input_stream_reader = InputStreamReader.$new(command.getInputStream());
 buffered_reader = BufferedReader.$new(stdout_input_stream_reader);
 
 stdout_string_builder = StringBuilder.$new();
-line_buffer = "";
+line_buffer = '';
 
 while ((line_buffer = buffered_reader.readLine()) != null) {
     stdout_string_builder.append(line_buffer + '\n');
