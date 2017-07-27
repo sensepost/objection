@@ -5,3 +5,4 @@ jinja2
 tabulate
 delegator.py
 requests
+jsbeautifier

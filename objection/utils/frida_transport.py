@@ -4,9 +4,11 @@ from time import strftime
 
 import click
 import frida
+import jsbeautifier
 from frida.core import ScriptExports
 from jinja2 import Template
 
+from ..state.app import app_state
 from ..state.connection import state_connection
 from ..state.jobs import job_manager_state
 
@@ -211,6 +213,32 @@ class FridaRunner(object):
         except Exception as e:
             click.secho('Failed to process an incoming message from hook: {0}'.format(e))
 
+    def _hook_processor(self, hook: str = None) -> str:
+        """
+
+            Clean up a hook by removing the lines that contain
+            comments and newlines. Lines that start with // are
+            considered comments lines. Thank you Cpt. Verbose.
+
+            :param hook:
+            :return:
+        """
+
+        if not hook:
+            hook = self.hook
+
+        # cleanup any comments
+        hook = '\n'.join([line for line in hook.splitlines() if not line.strip().startswith('//')])
+
+        # remove redundant newlines
+        hook = '\n'.join([x for x in hook.splitlines() if x.strip()])
+
+        # log the hook if needed
+        if app_state.should_debug_hooks():
+            click.secho(jsbeautifier.beautify(hook), dim=True)
+
+        return hook
+
     def get_last_message(self) -> RunnerMessage:
         """
             Reusing a runner would mean multiple messages
@@ -265,7 +293,7 @@ class FridaRunner(object):
             raise Exception('Like, we need a hook to run y0')
 
         session = self.get_session()
-        self.script = session.create_script(hook)
+        self.script = session.create_script(self._hook_processor(hook))
         self.script.on('message', self._on_message)
         self.script.load()
 
@@ -286,7 +314,7 @@ class FridaRunner(object):
             raise Exception('Like, we need a hook to run y0')
 
         session = self.get_session()
-        script = session.create_script(hook)
+        script = session.create_script(self._hook_processor(hook))
         script.on('message', self._on_message)
         script.load()
         script.unload()
@@ -322,7 +350,7 @@ class FridaRunner(object):
         # a try catch to ensure we dont crash the repl
         try:
 
-            job.script = job.session.create_script(job.hook)
+            job.script = job.session.create_script(self._hook_processor(job.hook))
 
         except frida.InvalidArgumentError as e:
 

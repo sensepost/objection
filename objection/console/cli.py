@@ -6,6 +6,7 @@ from ..__init__ import __version__
 from ..commands.device import get_device_info
 from ..commands.mobile_packages import patch_ios_ipa
 from ..state.connection import state_connection
+from ..state.app import app_state
 
 
 # Start the Click command group
@@ -47,11 +48,17 @@ def cli(network: bool, host: str, port: int, gadget: str) -> None:
               help='A command to run before the repl polls the device for information.')
 @click.option('--startup-script', '-S', required=False,
               help='A script to import and run before the repl polls the device for information.')
-def explore(startup_command: str, startup_script: str) -> None:
+@click.option('--hook-debug', '-d', required=False, default=False, is_flag=True,
+              help='Print compiled hooks as they are run to the screen and logfile.')
+def explore(startup_command: str, startup_script: str, hook_debug: bool) -> None:
     """
         Start the objection exploration REPL.
     """
 
+    # specify if hooks should be debugged
+    app_state.debug_hooks = hook_debug
+
+    # start the main REPL
     r = Repl()
 
     # if we have a command to run, do that first before
@@ -76,6 +83,7 @@ def explore(startup_command: str, startup_script: str) -> None:
     except (frida.TimedOutError, frida.ServerNotRunningError) as e:
         click.secho('Error: {0}'.format(e), fg='red')
 
+    # run the REPL
     r.start_repl()
 
 
