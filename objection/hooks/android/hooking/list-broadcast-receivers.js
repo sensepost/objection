@@ -2,9 +2,12 @@
 // runtime.
 
 var BroadcastReceiver = Java.use("android.content.BroadcastReceiver")
+var ActivityThread = Java.use('android.app.ActivityThread');
+
+var currentApplication = ActivityThread.currentApplication();
+var context = currentApplication.getApplicationContext();
 
 var classes = Java.enumerateLoadedClassesSync()
-
 
 var receivers = classes.filter(function(className){
     //Exclude some classes to prevent Java.use blocking (Some memory management issue)
@@ -19,6 +22,11 @@ var receivers = classes.filter(function(className){
     } catch (e){}
     return false;
 })
+
+receivers = receivers.concat(context.getPackageManager().getPackageInfo(context.getPackageName(),0x00000002).receivers['value'].map(function(activity_info){
+    return activity_info.name['value'];
+}))
+
 
 
 var response = {
