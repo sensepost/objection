@@ -42,7 +42,7 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
     if not patcher.are_requirements_met():
         return
 
-    patcher.set_provsioning_profile()
+    patcher.set_provsioning_profile(provision_file=provision_file)
     patcher.extract_ipa(ipa_source=source)
     patcher.set_application_binary(binary=binary_name)
     patcher.patch_and_codesign_binary(
