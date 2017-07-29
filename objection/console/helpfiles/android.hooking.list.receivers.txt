@@ -1,0 +1,10 @@
+Command: android hooking list receivers
+
+Usage: android hooking list receivers
+
+Inspects the application's heap to find all of the Broadcast Receivers 
+that have been registered at Runtime as well as those specified by the
+AndroidManifest.xml.
+
+Examples:
+   android hooking list receivers
