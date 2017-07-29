@@ -17,7 +17,7 @@ def _package_files(directory: str) -> list:
 
     for (path, directories, filenames) in os.walk(directory):
         for filename in filenames:
-            if filename.endswith('.js'):
+            if filename.endswith('.js') or filename.endswith('.txt'):
                 paths.append(os.path.join('..', path, filename))
 
     return paths
@@ -48,7 +48,8 @@ setup(
     # include the hooks!
     package_data={
         '': _package_files(os.path.join(here, 'objection/hooks')) +
-            _package_files(os.path.join(here, 'objection/templates')),
+            _package_files(os.path.join(here, 'objection/templates')) +
+            _package_files(os.path.join(here, 'objection/console/helpfiles')),
     },
 
     python_requires='>=3.3',
