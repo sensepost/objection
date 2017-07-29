@@ -15,7 +15,7 @@ from pygments.style import Style
 from pygments.token import Token
 
 from .completer import CommandCompleter
-from .repository import COMMANDS, HELP
+from .commands import COMMANDS, HELP
 from ..__init__ import __version__
 from ..commands.device import get_device_info
 from ..state.connection import state_connection

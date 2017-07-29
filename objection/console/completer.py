@@ -3,7 +3,7 @@ import collections
 from prompt_toolkit.completion import Completer, Completion, CompleteEvent
 from prompt_toolkit.document import Document
 
-from .repository import COMMANDS
+from .commands import COMMANDS
 from ..utils.helpers import get_tokens
 
 
