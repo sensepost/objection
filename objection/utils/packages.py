@@ -58,6 +58,7 @@ class Github(object):
             :return:
         """
 
+        click.secho('Getting latest Frida version from Github...', dim=True)
         return self._call(self.GITHUB_RELEASE)['tag_name']
 
     def get_assets(self) -> dict:
@@ -466,7 +467,7 @@ class IosPatcher(object):
             :return:
         """
 
-        click.secho('Creating new archive with patched contents.', dim=True)
+        click.secho('Creating new archive with patched contents...', dim=True)
         self.patched_ipa_path = os.path.join(self.temp_directory,
                                              os.path.basename('{0}-frida.ipa'.format(original_name.strip('.ipa'))))
 
