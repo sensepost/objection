@@ -9,13 +9,12 @@ import pygments.styles
 from prompt_toolkit import AbortAction, prompt
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.history import FileHistory
-from prompt_toolkit.interface import AcceptAction
 from prompt_toolkit.styles import default_style_extensions, style_from_dict
 from pygments.style import Style
 from pygments.token import Token
 
+from .commands import COMMANDS
 from .completer import CommandCompleter
-from .commands import COMMANDS, HELP
 from ..__init__ import __version__
 from ..commands.device import get_device_info
 from ..state.connection import state_connection
@@ -85,7 +84,6 @@ class Repl(object):
 
         self.completer = CommandCompleter()
         self.commands_repository = COMMANDS
-        self.help_repository = HELP
 
     def set_prompt_tokens(self, device_info: tuple) -> None:
         """
@@ -176,7 +174,9 @@ class Repl(object):
             command_help = self._find_command_help(tokens)
 
             if not command_help:
-                click.secho('No help found for: {0}'.format(' '.join(tokens)), fg='yellow')
+                click.secho(('No help found for: {0}. Either the command '
+                             'does not exist or contains subcommands with help.'
+                             ).format(' '.join(tokens)), fg='yellow')
                 return
 
             # output the help and leave
@@ -258,46 +258,55 @@ class Repl(object):
 
             Just like how the _find_command_exec_method works, this
             method also walks the command dictionary, searching for
-            the deepest 'help' key.
+            the deepest key. The tokens that match form part of a
+            new list, later joined together to pickup the correct
+            help.txt.
 
             :param tokens:
             :return:
         """
 
         # start with all of the commands we have
-        dict_to_walk = self.help_repository
-        user_help = None
+        dict_to_walk = self.commands_repository
+        helpfile_name = []
+        user_help = ''
 
         for token in tokens:
 
             # check if the token matches a command
             if token in dict_to_walk:
 
-                # matched a dict for the token we have. we need
-                # to have *all* of the tokens match a nested dict
-                # so that we can extract the final 'help' key.
-                # if we encounter a key that does not have nested commands,
-                # chances are we are where we need to get help.
-                if 'help' in dict_to_walk[token]:
-                    user_help = dict_to_walk[token]['help']
+                # add this token to the helpfile
+                helpfile_name.append(token)
 
                 # if there are subcommands, continue with the walk
-                if 'commands' not in dict_to_walk[token]:
-
-                    if 'help' in dict_to_walk[token]:
-                        user_help = dict_to_walk[token]['help']
-                        break
-
-                else:
+                if 'commands' in dict_to_walk[token]:
                     dict_to_walk = dict_to_walk[token]['commands']
 
             # stop if we dont have a token that matches anything
             else:
                 break
 
+        # once we have the help, load its .txt contents
+        if len(helpfile_name) > 0:
+
+            help_file = os.path.join(os.path.abspath(os.path.dirname(__file__)),
+                                     'helpfiles', '.'.join(helpfile_name) + '.txt')
+
+            # no helpfile... warn.
+            if not os.path.exists(help_file):
+                click.secho('Unable to find helpfile {0}'.format(' '.join(helpfile_name), help_file), dim=True)
+
+                return user_help
+
+            # read the helpfile
+            with open(help_file, 'r') as f:
+                user_help = f.read()
+
         return user_help
 
-    def handle_exit(self, document: str) -> None:
+    @staticmethod
+    def handle_exit(document: str) -> None:
         """
             Exit the repl if needed.
 
@@ -368,7 +377,6 @@ class Repl(object):
                     style=PromptStyle().get_style(),
                     history=FileHistory(os.path.expanduser('~/.objection/objection_history')),
                     auto_suggest=AutoSuggestFromHistory(),
-                    accept_action=AcceptAction.RETURN_DOCUMENT,
                     on_abort=AbortAction.RETRY,
                     reserve_space_for_menu=4
                 )

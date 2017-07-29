@@ -1,0 +1,2 @@
+Contains subcommands to dump various bits of information, such as realtime
+method arguments used when a specific method was invoked.

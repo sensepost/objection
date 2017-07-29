@@ -1,0 +1,13 @@
+Command: ui alert
+
+Usage: ui alert (optional: "<alert message>")
+
+Displays an alert popup on iOS devices, or a Toast message on Android devices.
+This is useful to demonstrate that the application was successfully hooked. Providing
+an alert message will display that message instead of the default.
+Note: Currently, once the iOS alert message has been displayed, dismissing the message
+unfortunately crashes the application.
+
+Examples:
+   ui alert
+   ui alert 'custom message!'

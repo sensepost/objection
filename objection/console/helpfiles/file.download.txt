@@ -1,0 +1,8 @@
+Command: file download
+
+Usage: file download <remote location> <local destination>
+
+Download a file from a location on the mobile device, to a local destination.
+
+Examples:
+   file download Document/Preferences/test.sqlite test.sqlite

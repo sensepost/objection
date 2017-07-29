@@ -1,0 +1,10 @@
+Command: ios jailbreak simulate
+
+Usage: ios jailbreak simulate
+
+Attempts to simulate a Jailbroken iOS environment. This is acheived by returning
+positive results for file existance checks from NSFileManager fileExistsAtPath
+as well as indicating that a fork() was successful if that is called.
+
+Examples:
+   ios jailbreak simulate

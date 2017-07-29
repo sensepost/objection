@@ -1,0 +1,13 @@
+Command: ls
+
+Usage: ls (optional: <directory on remote device>)
+
+Display the contents of a directory on the mobile device. The output details
+the permissions of the directory in question, as well as those for each file
+and directory within. If no directory is specified, the current working
+directory is assumed and listed.
+
+Examples:
+   ls Library/Caches
+   ls /
+   ls

@@ -1,0 +1,9 @@
+Command: memory dump all
+
+Usage: memory dump all <local destination>
+
+Dumps all of the current processes' memory that is marked as readable and
+writable (rw-) to a file specified by local destination.
+
+Examples:
+   memory dump all process_memory.dmp

@@ -1,0 +1,9 @@
+Command: ios ui screenshot
+
+Usage: ios ui screenshot <local png destination>
+
+Screenshots the current foregrounded UIView and saves it as a PNG locally.
+Note: Does not work at the moment, may actually need a jailbroken device.
+
+Examples:
+   ios ui screenshot screenshot.png

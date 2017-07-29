@@ -1,0 +1,21 @@
+Command: ios hooking dump method_args
+
+Usage: ios hooking dump method_args <+/-> <class_name> <method_name>
+
+Dumps method invocations in real time, including the arguments used at the
+time. This command tries its best to convert the arguments themselves into
+readable data, but sometimes the pointers used are to data structures not
+easily converted to readable formats.
+
+When issuing this command, a few bits of information is needed to build up
+the full class that should be hooked. The needed information includes:
+   - A '+' or '-' indicating a class or instance method
+   - The ClassName in question
+   - The method name *including* the argument separators (':')
+
+All of the information you need can be sourced with the `ios hooking list *`
+commands, or using the 'class-dump' tool.
+
+Examples:
+   ios hooking dump method_args + KeychainDataManager find:
+   ios hooking dump method_args - PinnedNSURLSessionStarwarsApi getJsonResponseFrom:onSuccess:onFailure:

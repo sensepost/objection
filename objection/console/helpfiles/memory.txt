@@ -1,0 +1,4 @@
+Contains subcommands to work with memory within the current process.
+Examples include commands to dump the current process memory, dump
+the memory of a specific loaded module, list exported modules or
+write raw bytes to memory addresses.

@@ -1,0 +1,15 @@
+Command: ios ui touchid_bypass
+
+Usage: ios ui touchid_bypass
+
+Hooks into the -[LAContext evaluatePolicy:localizedReason:reply:] selector and
+replies with a successful message from the operating system when a touchID prompt
+is dismissed. This is useful in cases where the application relies solely on the
+operating system to tell it if a fingerprint read was successful or not.
+Note: This does *not* bypass cases where TouchID is needed to decrypt a keychain
+entry, simply because the actual data itself is not stored in the keychain but
+instead lives in the Secure Enclave. The keychain simply contains a token to the
+data itself.
+
+Examples:
+   ios ui touchid_bypass

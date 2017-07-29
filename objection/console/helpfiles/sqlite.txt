@@ -1,0 +1,5 @@
+Contains subcommands to work with SQLite databases on the remote device.
+Connecting to a SQLite database will result in a copy of the database from
+the remote device being downloaded locally. All queries that are run will
+be run on the locally cached database. If the changes need to be available
+on the remote device, the database should be `sync`'ed back.

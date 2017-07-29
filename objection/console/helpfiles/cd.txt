@@ -1,0 +1,14 @@
+Usage: cd <directory on remote device>
+
+Changes the current working directory on the device.
+Many commands within objection are mindful and aware of the current
+working directory. An example of this includes the sqlite command, that
+allows you to connect to a file in the current path, or to a file specified
+with a full path relative to root (/).
+For more directories that are applicable to the current app, inspect the
+output of the `env` command.
+
+Examples:
+   cd Library/Caches
+   cd Preferences
+   cd /

@@ -1,0 +1,10 @@
+Command: ios ui alert
+
+Usage: ios ui alert (optional: "<alert message>")
+
+Displays an alert popup on an iOS device. A message to display may be specified
+optionally.
+
+Examples:
+   ios ui alert
+   ios ui alert 'my message'

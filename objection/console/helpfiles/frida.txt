@@ -1,0 +1,9 @@
+Command: frida
+
+Usage: frida
+
+Displays information about Frida. This includes the version of the Frida gadget,
+process architecture and platform.
+
+Examples:
+   frida

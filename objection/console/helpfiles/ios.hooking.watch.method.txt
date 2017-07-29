@@ -1,0 +1,14 @@
+Command: ios hooking watch method
+
+Usage: ios hooking method "<full class & selector> (optional: --include-backtrace)"
+
+Hooks into a specified Objective-C method and reports on invocations.
+A full class and method is expected, including whether its an instance
+or class method.
+If the --include-backtrace flag is provided, a full stack trace that
+lead to the methods invocation will also be dumped.
+
+Examples:
+   ios hooking watch method "+[KeychainDataManager update:forKey:]
+   ios hooking watch method "-[PinnedNSURLSessionStarwarsApi
+   ios hooking watch method "-[PinnedNSURLSessionStarwarsApi --include-backtracegetJsonResponseFrom:onSuccess:onFailure:]"

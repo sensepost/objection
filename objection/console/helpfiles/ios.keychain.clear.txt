@@ -1,0 +1,13 @@
+Command: ios keychain clear
+
+Usage: ios keychain clear
+
+Clears all the keychain items for the current application. This is achieved by
+iterating over the keychain type classes available in iOS and populating a search
+dictionary with them. This dictionary is then used as a query to SecItemDelete(),
+deleting the entries.
+Items that will be deleted include everything stored with the entitlement group used
+during the patching/signing process.
+
+Examples:
+   ios keychain clear

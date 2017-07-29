@@ -1,0 +1,9 @@
+Command: ios nsuserdefaults get
+
+Usage: ios nsuserdefaults get
+
+Queries the applications NSUserDefaults class for all of the entries in
+the current application bundle and echoes the entries to screen.
+
+Examples:
+   ios nsuserdefaults get

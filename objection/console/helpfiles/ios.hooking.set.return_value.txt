@@ -1,0 +1,11 @@
+Command: ios hooking set return_value
+
+Usage: ios hooking set return_value "<full class & selector>" <true/false>
+
+Hooks into a specified Objective-C method and sets its return value to
+either True or False. This is useful in cases where simple methods are used
+to determine things like 'Should SSL pinning be enabled?' as an example.
+
+Examples:
+   ios hooking set return_value "+[JailbreakDetection isJailbroken]" false
+   ios hooking set return_value "-[SecurityHelper shouldPinSSL:]" true

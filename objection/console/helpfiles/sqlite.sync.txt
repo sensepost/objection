@@ -1,0 +1,10 @@
+Command: sqlite sync
+
+Usage: sqlite sync
+
+Sync the locally cached SQLite database with the remote database.
+Any changes made since the last `sqlite connect` will be available on the
+device post-sync.
+
+Examples:
+   sqlite sync

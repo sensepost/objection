@@ -1,0 +1,12 @@
+Command: ios jailbreak disable
+
+Usage: ios jailbreak disable
+
+Attempts to disable Jailbreak detection on iOS devices. This is acheived by
+hooking the NSFileManager fileExistsAtPath method, and checking if it was
+called with a path to common Jailbroken path artifacts. Calls to the fork()
+method are also hooked and will respond with a 0, indicating that it was
+unsuccessful.
+
+Examples:
+   ios jailbreak disable

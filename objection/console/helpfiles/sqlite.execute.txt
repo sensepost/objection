@@ -1,0 +1,1 @@
+Contains subcommands to execute queries against a connected SQLite database.

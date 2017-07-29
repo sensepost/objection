@@ -1,0 +1,2 @@
+Contains subcommands to work with Android specific features. These include
+shell commands, byassing SSL pinning and simulating a rooted environment.

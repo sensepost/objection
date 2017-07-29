@@ -1,0 +1,13 @@
+Command: android hooking dump_args
+
+Usage: android hooking dump_args <class> <method>
+
+Hooks a specified class method and dumps the calling arguments to
+screen. Arguments are converted to string representations, so naturally
+not everything dumped by be useful immediately. Those arguments can be
+manipulated using external frida scripts imported with the import command.
+
+Examples:
+   android hooking dump_args com.example.test login
+   android hooking dump_args com.example.test.helper executeQuery
+   

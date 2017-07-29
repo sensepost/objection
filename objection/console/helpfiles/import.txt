@@ -1,0 +1,19 @@
+Command: import
+
+Usage: import <path to local fridascript> (optional: <job name>) (optional: --no-exception-handler)
+
+Imports Fridascript from a file on the local filesystem and executes it as a job.
+To 'unload' the script, the job that was started to should be killed.
+You can list all of the current jobs using the `jobs list` command. If no name was
+specified for your job, a generic name of 'user-script' will be used for the 
+job started as a result of the import.
+
+Scripts that are run using this command get wrapped in a global, generic JavaScript try/catch
+block. If this is not something that you want, the '--no-exception-handler' flag may be specified.
+
+Examples:
+   import ~/home/myscript.js
+   import ~/home/hooks/custom.js custom-hook-name
+   import ~/home/hooks/custom.js custom-hook-name --no-exception-handler
+   import ~/home/script.js --no-exception-handler
+   

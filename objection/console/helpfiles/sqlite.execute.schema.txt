@@ -1,0 +1,8 @@
+Command: sqlite execute schema
+
+Usage: sqlite execute schema
+
+Get the database schema for the currently connected SQLite database.
+
+Examples:
+   sqlite execute schema

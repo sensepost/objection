@@ -1,0 +1,10 @@
+Command: ios hooking list classes
+
+Usage: ios hooking list classes (optional: --ignore-native)
+
+Lists all of the classes in the current Objective-C runtime. Specifying
+the --ignore-native flag, filters out classes with common prefixes such as
+'NS' and 'CF'.
+
+Examples:
+   ios hooking list classes --ignore-native

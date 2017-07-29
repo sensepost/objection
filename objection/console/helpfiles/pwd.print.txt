@@ -1,0 +1,8 @@
+Command: pwd print
+
+Usage: pwd print
+
+Display the current working directory.
+
+Examples:
+   pwd print

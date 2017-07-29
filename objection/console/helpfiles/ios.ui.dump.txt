@@ -1,0 +1,9 @@
+Command: ios ui dump
+
+Usage: ios ui dump
+
+Dumps the current, serialized user interface. This is useful to see which values
+or classes may be attached to UI elements.
+
+Examples:
+   ios dump

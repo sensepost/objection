@@ -1,0 +1,13 @@
+Command: memory dump all
+
+Usage: memory dump <base address> <size to dump> <local destination>
+
+Dumps memory from within the current process from a base address, for a set number
+of bytes to a local file specified by local destination. For example addresses and
+sizes, the `memory list modules` command may be used.
+Specifying addresses or sizes that are outside of the current processes sandbox
+has a *high* chance of crashing the application. Use with caution.
+
+Examples:
+   memory dump from_base 0x10009c000 442368 main
+   memory dump from_base 0x10f88e000 548864 CoreAudio

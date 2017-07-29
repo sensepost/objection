@@ -1,0 +1,3 @@
+Contains subcommands to interact with the iOS user interface. This includes commands
+to dump the current view hierarchy as well as bypassing screens that require TouchID
+to proceed.

@@ -1,0 +1,11 @@
+Command: ios cookies get
+
+Usage: ios cookies get
+
+Queries iOS's NSHTTPCookieStorage class, extracting cookie values out of the
+sharedHTTPCookieStorage. Various URL fetching methods use the
+sharedHTTPCookieStorage to store cookie data. This information may be useful
+to get session cookies for web services to reuse in other tools/browsers.
+
+Examples:
+   ios cookies get

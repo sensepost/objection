@@ -1,0 +1,10 @@
+Command: ios pasteboard monitor
+
+Usage: ios pasteboard monitor
+
+Hooks into the iOS UIPasteboard class and polls the generalPasteboard every
+5 seconds for data. If new data is found, different from the previous poll,
+that data will be dumped to screen.
+
+Examples:
+   ios pasteboard monitor

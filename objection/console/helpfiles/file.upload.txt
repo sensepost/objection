@@ -1,0 +1,12 @@
+Command: file upload
+
+Usage: file upload <local source file> <remove destination>
+
+Upload a file from the local filesystem to the remote filesystem.
+If a full path is not specified for the remote destination, the current
+working directory is assumed as the relative directory for the upload
+destination.
+If the file already exists on the remote filesystem, it will be overridden.
+
+Examples:
+   file upload test.sqlite Document/Preferences/test.sqlite

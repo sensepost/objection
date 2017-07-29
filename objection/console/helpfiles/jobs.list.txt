@@ -1,0 +1,11 @@
+Command: jobs list
+
+Usage: jobs list
+
+List the currently running jobs. Jobs are asynchronous Fridascripts that were
+submitted and have not yet been unloaded from the process. Examples of such
+jobs include the iOS method argument dumper and pasteboard monitor. To unload
+a job, the `jobs kill <jobid>` command may be used.
+
+Examples:
+   jobs list

@@ -1,0 +1,12 @@
+Command: ios hooking watch class
+
+Usage: ios hooking watch <class_name> (--include-parents)
+
+Hooks into all of the methods available in the Objective-C class specified
+by class_name and reports on invocations of any methods contained within.
+If the --include-parents flag is specified, all methods inherited from a
+parent class will also be hooked and reported on.
+
+Examples:
+   ios hooking watch KeychainDataManager
+   ios hooking watch PinnedNSURLSessionStarwarsApi --include-parents

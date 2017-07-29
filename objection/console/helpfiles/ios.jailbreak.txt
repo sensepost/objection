@@ -1,0 +1,2 @@
+Contains subcommands to work with iOS Jailbreak detection, such as disabling
+it, or simulating that a device is Jailbroken.

@@ -1,0 +1,12 @@
+Command: android intent launch_activity
+
+Usage: android intent launch_activity <activity class>
+
+Launches an activity class by building a new Intent and running startActivity()
+with it as an argument. The Intent.FLAG_ACTIVITY_NEW_TASK flag is added to achieve
+this, with the side effect that the history stack may be reset.
+
+Examples:
+   android intent launch_activity com.test.example.MainActivity
+   android intent launch_activity com.test.example.SecretActivity
+   android intent launch_activity com.example.test.Other

@@ -1,0 +1,10 @@
+Command: ios hooking list class_methods
+
+Usage: ios hooking list class_methods <class_name> (--include-parents)
+
+Lists the methods within an Objective-C class. Adding the --include-parents
+flag will also list methods available due to class inheritance.
+
+Examples:
+   ios hooking list class_methods KeychainDataManager
+   ios hooking list class_methods KeychainDataManager --include-parents

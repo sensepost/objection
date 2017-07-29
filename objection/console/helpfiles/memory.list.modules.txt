@@ -1,0 +1,9 @@
+Command: memory list modules
+
+Usage: memory list modules
+
+List all of the modules loaded in the current process, detailing their base
+address, size and location on disk.
+
+Examples:
+   memory list modules

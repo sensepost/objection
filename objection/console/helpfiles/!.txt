@@ -1,0 +1,13 @@
+Command: !
+
+Usage: ! <shell command>
+
+Executes operating system commands using pythons Subprocess module.
+Commands that have caused an error, or when there is output to
+display from stderr, will show in red. Commands that have output
+that was sent to stdout will display in white.\n'
+
+Examples:
+   !ls
+   !uname -a
+   

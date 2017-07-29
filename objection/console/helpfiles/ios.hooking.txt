@@ -1,0 +1,3 @@
+Contains subcommands helpful when developing custom hooks. This includes discovery
+of Objective-C classes and methods in those classes, as well as dumping method
+arguments as they are called in real time.

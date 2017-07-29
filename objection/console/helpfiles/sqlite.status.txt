@@ -1,0 +1,9 @@
+Command: sqlite status
+
+Usage: sqlite status
+
+Check the status of the SQLite connection. Outputs the the locally cached
+location as well as the remote source it was cached from.
+
+Examples:
+   sqlite status

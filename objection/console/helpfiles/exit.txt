@@ -1,0 +1,1 @@
+Performs cleanups operations and quits the objection REPL.

@@ -1,0 +1,16 @@
+Command: ios keychain dump
+
+Usage: ios keychain dump (optional: --json <filename>)
+
+Extracts the keychain items for the current application. This is achieved by iterating
+over the keychain type classes available in iOS and populating a search dictionary
+with them. This dictionary is then used as a query to SecItemCopyMatching() and the
+results parsed.
+Items that will be accessible include everything stored with the entitlement group used
+during the patching/signing process.
+Providing a filename with the --json flag will dump all of the keychain attributes
+to the file specified for later inspection.
+
+Examples:
+   ios keychain dump
+   ios keychain dump --json keychain.json

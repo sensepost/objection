@@ -1,0 +1,18 @@
+Command: ios sslpinning disable
+
+Usage: ios sslpinning disable
+
+Attempts to disable SSL Pinning on iOS devices. This is achieved by hooking
+into methods commonly used by Frameworks and Libraries such as AFNetworking,
+NSURLSession and the now deprecated NSURLConnection.
+This command also implements the bypass techniques used in the well-known
+SSL-Killswitch2 app, including a new technique reportedly working in iOS10.
+
+If this method does not disable the applications SSL pinning implementation,
+then it may still be possible to bypass it via 'helper' methods commonly
+used by developers to help when testing in development / staging environments.
+Be on the lookout for classes / methods that relate to pinning that may simply
+return a BOOL value.
+
+Examples:
+   ios sslpinning disable

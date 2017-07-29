@@ -1,0 +1,1 @@
+Sets various bits of hooking related information.

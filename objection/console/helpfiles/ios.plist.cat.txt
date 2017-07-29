@@ -1,0 +1,10 @@
+Command: ios plist cat
+
+Usage: ios plist cat <remote plist filename>
+
+Parses and echoes a plist file on the remote iOS device to screen. If this
+parsing is not sufficient, one can always `download` the plist file itself
+for parsing using other tools.
+
+Examples:
+   ios plist cat Info.plist

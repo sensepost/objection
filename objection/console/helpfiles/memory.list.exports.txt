@@ -1,0 +1,12 @@
+Command: memory list exports
+
+Usage: memory list exports <module name>
+
+List exports in a specific loaded module. Exports found using this command
+could be used in Fridascripts to hook with module.findExportByName().
+For a list of modules to list exports from the `memory list modules` command
+may be used.
+
+Examples:
+   memory list exports libsystem_configuration.dylib
+   memory list exports UserManagement

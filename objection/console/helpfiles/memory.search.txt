@@ -1,0 +1,16 @@
+Command: memory search
+
+Usage: memory search "<pattern>" (optional: --string)
+
+Search the current processes' heap for a pattern. A pattern is represented by a
+byte sequence such as eb ff aa. It is also possible to specify wildcards such as
+eb ff ?? aa, indicating that you are looking for a pattern that starts with eb ff,
+has any other byte and then has aa.
+It is also possible to  provide a raw string, which should be suffixed with the
+--string flag, indicating to the command that it should convert the string to
+bytes before executing the search. Wildcards are not supported in string searches.
+
+Examples:
+   memory search "41 41 41 41"
+   memory search "41 ?? de ad"
+   memory search "deadbeef" --string

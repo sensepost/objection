@@ -1,0 +1,10 @@
+Command: reconnect
+
+Usage: reconnect
+
+Attempts to reconnect to the Frida Gadget specified with --gadget on startup.
+The connection mode (ie: usb / network) can not be changed unless the repl
+is restarted.
+
+Examples:
+   reconnect

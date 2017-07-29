@@ -1,0 +1,11 @@
+Command: sqlite disconnect
+
+Usage: sqlite disconnect
+
+Disconnect from the currently connected SQLite database file. This command will clean
+the locally cached version of the database file. If you made changes you want to save,
+run the `sqlite sync` command before disconnecting. This command is also run if the
+REPL is existed.
+
+Examples:
+   sqlite disconnect

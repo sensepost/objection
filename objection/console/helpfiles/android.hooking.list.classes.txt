@@ -1,0 +1,9 @@
+Command: android hooking list classes
+
+Usage: android hooking list classes
+
+List the classes *currently loaded*. As the target application gets used
+more, this command will return more classes.
+
+Examples:
+   android hooking list classes

@@ -1,0 +1,11 @@
+Command: sqlite execute query
+
+Usage: sqlite execute query <sql query>
+
+Execute a query against the cached copy of the connected SQLite database.
+If your changes need to be effective on the device, execute the `sqlite sync`
+command to upload the modified database back to the device.
+
+Examples:
+   sqlite execute query select * from data
+   sqlite execute query delete from data

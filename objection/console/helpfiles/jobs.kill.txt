@@ -1,0 +1,8 @@
+Command: jobs kill
+
+Usage: jobs kill <job uuid>
+
+Kills a running job identified by its UUID. When a job is killed, objection will
+unload the Fridascript from the process' memory.
+Examples:
+   jobs kill 9415c4c7-2824-46a5-8539-d2d35ba2158c

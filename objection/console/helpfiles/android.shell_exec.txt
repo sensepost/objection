@@ -1,0 +1,11 @@
+Command: android shell_exec
+
+Usage: android shell_exec <command to run>
+
+Execute a shell command on an android device. These commands are run from within
+the security context of the application that is being instrumented.
+
+Examples:
+   android shell_exec id
+   android shell_exec ls -lah /
+   android shell_exec rm /data/data/user/0/somefile
