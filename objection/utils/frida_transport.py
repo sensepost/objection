@@ -1,4 +1,5 @@
 import json
+import random
 import uuid
 from time import strftime
 
@@ -116,6 +117,9 @@ class FridaJobRunner(object):
         self.session = None
         self.script = None
 
+        # set a color for this jobs output
+        self.success_color = random.choice(['green', 'blue', 'magenta', 'cyan'])
+
     def on_message(self, message: dict, data) -> None:
         """
             This handler is used to echoing data instead of
@@ -137,15 +141,13 @@ class FridaJobRunner(object):
                 if payload['status'] == 'success':
 
                     click.secho('[{0}] [{1}] {2}'.format(
-                        str(self.id)[-12:], payload['type'],
-                        payload['data']), fg='green', bold=True)
+                        str(self.id)[-12:], payload['type'], payload['data']), fg=self.success_color, bold=True)
 
                 # ... errors are red ...
                 elif payload['status'] == 'error':
 
                     click.secho('[{0}] [{1}] {2}'.format(
-                        str(self.id)[-12:], payload['type'],
-                        payload['error_reason']), fg='red', bold=True)
+                        str(self.id)[-12:], payload['type'], payload['error_reason']), fg='red', bold=True)
 
                     # mark this job as one that has had an error occur
                     self.has_had_error = True
