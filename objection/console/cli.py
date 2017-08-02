@@ -4,7 +4,7 @@ import frida
 from .repl import Repl
 from ..__init__ import __version__
 from ..commands.device import get_device_info
-from ..commands.mobile_packages import patch_ios_ipa
+from ..commands.mobile_packages import patch_ios_ipa, patch_android_apk
 from ..state.app import app_state
 from ..state.connection import state_connection
 
@@ -90,7 +90,7 @@ def explore(startup_command: str, startup_script: str, hook_debug: bool) -> None
 @cli.command()
 def version() -> None:
     """
-        Prints the current version and exists
+        Prints the current version and exists.
     """
 
     click.secho('objection: {0}'.format(__version__))
@@ -117,7 +117,7 @@ def device_type():
 
 
 @cli.command()
-@click.option('--source', '-s', help='The source IPA to path', required=True)
+@click.option('--source', '-s', help='The source IPA to patch', required=True)
 @click.option('--codesign-signature', '-c',
               help='Codesigning Identity to use. Get it with: `security find-identity -p codesigning -v`',
               required=True)
@@ -129,6 +129,21 @@ def patchipa(source: str, codesign_signature: str, provision_file: str, binary_n
     """
 
     patch_ios_ipa(**locals())
+
+
+@cli.command()
+@click.option('--source', '-s', help='The source APK to patch', required=True)
+@click.option('--architecture', '-a', help=('The architecture of the device the patched '
+                                            'APK will run on. This can be determined with '
+                                            '`adb shell getprop ro.product.cpu.abi`. If it '
+                                            'is not specified, this command will try and '
+                                            'determine it automatically.'), required=False)
+def patchapk(source: str, architecture: str) -> None:
+    """
+        Patch an APK with the frida-gadget.so.
+    """
+
+    patch_android_apk(**locals())
 
 
 if __name__ == '__main__':

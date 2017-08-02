@@ -5,9 +5,9 @@ from setuptools import setup
 from objection.__init__ import __version__
 
 
-def _package_files(directory: str) -> list:
+def _package_files(directory: str, suffix: str) -> list:
     """
-        Get all of the .js file paths in the directory specified
+        Get all of the file paths in the directory specified by suffix.
 
         :param directory:
         :return:
@@ -17,7 +17,7 @@ def _package_files(directory: str) -> list:
 
     for (path, directories, filenames) in os.walk(directory):
         for filename in filenames:
-            if filename.endswith('.js') or filename.endswith('.txt'):
+            if filename.endswith(suffix):
                 paths.append(os.path.join('..', path, filename))
 
     return paths
@@ -47,9 +47,10 @@ setup(
 
     # include the hooks!
     package_data={
-        '': _package_files(os.path.join(here, 'objection/hooks')) +
-            _package_files(os.path.join(here, 'objection/templates')) +
-            _package_files(os.path.join(here, 'objection/console/helpfiles')),
+        '': _package_files(os.path.join(here, 'objection/hooks'), '.js') +
+            _package_files(os.path.join(here, 'objection/templates'), '.js') +
+            _package_files(os.path.join(here, 'objection/console/helpfiles'), '.txt') +
+            _package_files(os.path.join(here, 'objection/utils/assets'), '.jks'),
     },
 
     python_requires='>=3.3',

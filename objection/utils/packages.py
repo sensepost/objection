@@ -4,6 +4,7 @@ import os
 import plistlib
 import shutil
 import tempfile
+import xml.etree.ElementTree as ElementTree
 import zipfile
 
 import click
@@ -12,8 +13,6 @@ import requests
 
 # default paths
 objection_path = os.path.join(os.path.expanduser('~'), '.objection')
-
-android_library_path = os.path.join(objection_path, 'android')
 gadget_versions = os.path.join(objection_path, 'gadget_versions')
 
 
@@ -58,7 +57,6 @@ class Github(object):
             :return:
         """
 
-        click.secho('Getting latest Frida version from Github...', dim=True)
         return self._call(self.GITHUB_RELEASE)['tag_name']
 
     def get_assets(self) -> dict:
@@ -71,26 +69,17 @@ class Github(object):
         return self._call(self.GITHUB_RELEASE)['assets']
 
 
-class IosGadget(object):
-    """ Class used to work with the iOS Frida Gadget """
-
-    ios_dylib_path = os.path.join(objection_path, 'ios')
-    ios_dylib_gadget_path = os.path.join(ios_dylib_path, 'FridaGadget.dylib')
-    ios_dylib_gadget_archive_path = os.path.join(ios_dylib_path, 'FridaGadget.dylib.xz')
+class BasePlatformGadget(object):
+    """ Class with base methods for any platforms Gadget downloaded """
 
     def __init__(self, github: Github) -> None:
         """
-            Instantiate a new IosGadget class, providing an already
-            instantiated Github instance.
+            Build a new instance with an existing Github instance.
 
             :param github:
         """
 
         self.github = github
-
-        # ensure we have the ios gadget path available
-        if not os.path.exists(self.ios_dylib_path):
-            os.makedirs(self.ios_dylib_path)
 
     @staticmethod
     def get_local_version() -> str:
@@ -121,6 +110,68 @@ class IosGadget(object):
 
         return self
 
+
+class BasePlatformPatcher(object):
+    """ Base class with methods used by any platform patcher. """
+
+    def __init__(self):
+
+        # check dependencies
+        self.have_all_commands = self._check_commands()
+
+    def _check_commands(self) -> bool:
+        """
+            Check if the shell commands in required_commands are
+            available.
+
+            :return:
+        """
+
+        for cmd, attributes in self.required_commands.items():
+
+            location = delegator.run('which {0}'.format(cmd)).out.strip()
+
+            if len(location) <= 0:
+                click.secho('Unable to find {0}. Install it with: {1} before continuing.'.format(
+                    cmd, attributes['installation']), fg='red', bold=True)
+
+                return False
+
+            self.required_commands[cmd]['location'] = location
+
+        return True
+
+    def are_requirements_met(self):
+        """
+            Checks if the command requirements have all been met.
+
+            :return:
+        """
+
+        return self.have_all_commands
+
+
+class IosGadget(BasePlatformGadget):
+    """ Class used to work with the iOS Frida Gadget """
+
+    ios_dylib_path = os.path.join(objection_path, 'ios')
+    ios_dylib_gadget_path = os.path.join(ios_dylib_path, 'FridaGadget.dylib')
+    ios_dylib_gadget_archive_path = os.path.join(ios_dylib_path, 'FridaGadget.dylib.xz')
+
+    def __init__(self, github: Github) -> None:
+        """
+            Build a new instance, ensuring that the paths needed
+            are available.
+
+            :param github:
+        """
+
+        super(IosGadget, self).__init__(github)
+
+        # ensure we have the ios gadget path available
+        if not os.path.exists(self.ios_dylib_path):
+            os.makedirs(self.ios_dylib_path)
+
     def get_gadget_path(self) -> str:
         """
             Returns the path on disk where the iOS FridaGadget
@@ -130,6 +181,15 @@ class IosGadget(object):
         """
 
         return self.ios_dylib_gadget_path
+
+    def gadget_exists(self):
+        """
+            Checks if the iOS gadget exists on disk.
+
+            :return:
+        """
+
+        return os.path.exists(self.ios_dylib_gadget_path)
 
     def download(self):
         """
@@ -199,7 +259,7 @@ class IosGadget(object):
         os.remove(self.ios_dylib_gadget_archive_path)
 
 
-class IosPatcher(object):
+class IosPatcher(BasePlatformPatcher):
     """ Class used to Patch iOS applications """
 
     required_commands = {
@@ -232,15 +292,14 @@ class IosPatcher(object):
             Init a new instance of the IosPatcher class.
         """
 
+        super(IosPatcher, self).__init__()
+
         self.provision_file = None
         self.payload_directory = None
         self.app_folder = None
         self.app_binary = None
         self.patched_ipa_path = None
         self.patched_codesigned_ipa_path = None
-
-        # check dependencies
-        self.have_all_commands = self._check_commands()
 
         # temp_file to copy an IPA to
         _, self.temp_file = tempfile.mkstemp(suffix='.ipa')
@@ -250,37 +309,6 @@ class IosPatcher(object):
 
         # cleanup the temp_directory to work with
         self._cleanup_extracted_data()
-
-    def _check_commands(self) -> bool:
-        """
-            Check if the shell commands in required_commands are
-            available.
-
-            :return:
-        """
-
-        for cmd, attributes in self.required_commands.items():
-
-            location = delegator.run('which {0}'.format(cmd)).out.strip()
-
-            if len(location) <= 0:
-                click.secho('Unable to find {0}. Install it with: {1} before continuing.'.format(
-                    cmd, attributes['installation']), fg='red', bold=True)
-
-                return False
-
-            self.required_commands[cmd]['location'] = location
-
-        return True
-
-    def are_requirements_met(self):
-        """
-            Checks if the command requirements have all been met.
-
-            :return:
-        """
-
-        return self.have_all_commands
 
     def set_provsioning_profile(self, provision_file: str = None) -> None:
         """
@@ -534,6 +562,474 @@ class IosPatcher(object):
             os.remove(self.temp_file)
             os.remove(self.patched_ipa_path)
             os.remove(self.patched_codesigned_ipa_path)
+
+        except Exception as err:
+            click.secho('Failed to cleanup with error: {0}'.format(err), fg='red')
+
+
+class AndroidGadget(BasePlatformGadget):
+    """ Class used to download Android Frida libraries """
+
+    android_library_path = os.path.join(objection_path, 'android')
+
+    # Lists the supported architectures. Key matches Android support
+    # https://developer.android.com/ndk/guides/abis.html#sa
+    # Value matches library arch for frida.
+    architectures = {
+        'armeabi': 'arm',
+        'armeabi-v7a': 'arm',
+        'arm64': 'arm64',
+        'arm64-v8a': 'arm64',
+        'x86': 'x86',
+        'x86_64': 'x86_64',
+    }
+
+    def __init__(self, github: Github) -> None:
+        """
+            Build a new instance, ensuring that the paths needed
+            are available.
+
+            :param github:
+        """
+
+        super(AndroidGadget, self).__init__(github)
+
+        self.architecture = None
+
+        # prep paths. if they dont exist, create them
+        for path in self.architectures.keys():
+
+            d = os.path.join(self.android_library_path, path)
+
+            if not os.path.exists(d):
+                os.makedirs(d)
+
+    def set_architecture(self, architecture: str):
+        """
+            Set the CPU architecture we will work with.
+
+            :param architecture:
+            :return:
+        """
+
+        if architecture not in self.architectures.keys():
+            raise Exception('Invalid architecture `{0}` set. Valid options are: {1}'.format(
+                architecture, ', '.join(self.architectures)))
+
+        self.architecture = architecture
+
+        return self
+
+    def get_architecture(self) -> str:
+        """
+            Get the architecture we are working with.
+
+            :return:
+        """
+
+        return self.architecture
+
+    def get_frida_library_path(self, packed: bool = False) -> str:
+        """
+            Get the path to a frida-library, both in the packed and
+
+            :param packed:
+            :return:
+        """
+
+        if not self.architecture:
+            raise Exception('Unable to determine path without architecture')
+
+        return os.path.join(self.android_library_path, self.architecture,
+                            'libfrida-gadget.so' + ('.xz' if packed else ''))
+
+    def gadget_exists(self) -> bool:
+        """
+            Determines of a frida-gadget library exists.
+
+            :return:
+        """
+
+        if not self.architecture:
+            raise Exception('Unable to determine path without architecture')
+
+        return os.path.exists(self.get_frida_library_path())
+
+    def download(self):
+        """
+            Downloads the latest Android gadget for this
+            architecture.
+
+            :return:
+        """
+
+        download_url = self._get_download_url()
+        print(download_url)
+
+        # stream the download using requests
+        library = requests.get(download_url, stream=True)
+        library_destination = self.get_frida_library_path(packed=True)
+
+        # save the requests stream to file
+        with open(library_destination, 'wb') as f:
+            click.secho('Downloading {0} library to {1}...'.format(self.architecture,
+                                                                   library_destination), fg='green', dim=True)
+
+            shutil.copyfileobj(library.raw, f)
+
+        return self
+
+    def _get_download_url(self) -> str:
+        """
+            Determines the download URL to use for the iOS
+            gadget.
+
+            :return:
+        """
+
+        url = ''
+
+        # url should contain 'frida-gadget-{version}-android-{arch}.so.xz
+        url_start = 'frida-gadget-'
+        url_end = 'android-' + self.architectures[self.architecture] + '.so.xz'
+
+        for asset in self.github.get_assets():
+            if asset['name'].startswith(url_start) and asset['name'].endswith(url_end):
+                url = asset['browser_download_url']
+
+        if not url:
+            click.secho('Unable to determine URL to download the library', fg='red')
+            raise Exception('Unable to determine URL for iOS gadget download.')
+
+        return url
+
+    def unpack(self):
+        """
+            Unpacks a downloaded .xz gadget.
+
+            :return:
+        """
+
+        click.secho('Unpacking {0}...'.format(self.get_frida_library_path(packed=True)), dim=True)
+
+        with lzma.open(self.get_frida_library_path(packed=True)) as f:
+            with open(self.get_frida_library_path(), 'wb') as g:
+                g.write(f.read())
+
+        return self
+
+    def cleanup(self):
+        """
+            Cleans up a downloaded iOS .xz gadget.
+
+            :return:
+        """
+
+        click.secho('Cleaning up downloaded archives...', dim=True)
+
+        os.remove(self.get_frida_library_path(packed=True))
+
+
+class AndroidPatcher(BasePlatformPatcher):
+    """ Class used to patch Android APK's"""
+
+    required_commands = {
+        'aapt': {
+            'installation': 'apt install appt (Kali Linux)'
+        },
+        'adb': {
+            'installation': 'apt install adb (Kali Linux); brew install adb (macOS)'
+        },
+        'jarsigner': {
+            'installation': '#TODO'
+        },
+        'apktool': {
+            'installation': 'apt install apktool (Kali Linux)'
+        }
+    }
+
+    def __init__(self):
+        super(AndroidPatcher, self).__init__()
+
+        self.apk_source = None
+        self.apk_temp_directory = tempfile.mkdtemp(suffix='.apktemp')
+        self.apk_temp_frida_patched = self.apk_temp_directory + '.objection.apk'
+        self.aapt = None
+
+    def set_apk_source(self, source: str):
+        """
+            Set the source APK to work with.
+
+            :param source:
+            :return:
+        """
+
+        if not os.path.exists(source):
+            raise Exception('Source {0} not found.'.format(source))
+
+        self.apk_source = source
+
+        return self
+
+    def _get_android_manifest(self) -> ElementTree:
+        """
+            Get the AndroidManifest as a parsed ElementTree
+
+            :return:
+        """
+
+        return ElementTree.parse(os.path.join(self.apk_temp_directory, 'AndroidManifest.xml'))
+
+    def _write_android_manifest(self, manifest: str) -> None:
+        """
+            Writes a string as a new AndroidManifest.xml
+
+            :param manifest:
+            :return:
+        """
+
+        with open(os.path.join(self.apk_temp_directory, 'AndroidManifest.xml'), 'wb') as f:
+            f.write(manifest)
+
+    def _get_appt_output(self):
+        """
+            Get the output of `aapt dump badging`.
+
+            :return:
+        """
+
+        if not self.aapt:
+            o = delegator.run('{0} dump badging {1}'.format(
+                self.required_commands['aapt']['location'],
+                self.apk_source
+            ))
+
+            if len(o.err) > 0:
+                click.secho('An error may have occured while running aapt.', fg='red')
+                click.secho(o.err, fg='red')
+
+            self.aapt = o.out
+
+        return self.aapt
+
+    def _get_launchable_activity(self) -> str:
+        """
+            Determines the class name for the activity that is
+            launched on application startup.
+
+            :return:
+        """
+
+        activity = ''
+        aapt = self._get_appt_output().split('\n')
+
+        for line in aapt:
+            if 'launchable-activity' in line:
+                # ['launchable-activity: name=', 'com.app.activity', '  label=', 'bob']
+                activity = line.split('\'')[1]
+
+        return activity
+
+    def get_patched_apk_path(self) -> str:
+        """
+            Returns the path of the patched APK.
+
+            :return:
+        """
+
+        return self.apk_temp_frida_patched
+
+    def unpack_apk(self):
+        """
+            Unpack an APK with apktool.
+
+            :return:
+        """
+
+        click.secho('Unpacking {0}'.format(self.apk_source), dim=True)
+
+        o = delegator.run('{0} d -f {1} -o {2}'.format(
+            self.required_commands['apktool']['location'],
+            self.apk_source,
+            self.apk_temp_directory
+        ))
+
+        if len(o.err) > 0:
+            click.secho('An error may have occured while extracting the APK.', fg='red')
+            click.secho(o.err, fg='red')
+
+    def inject_internet_permission(self):
+        """
+            Checks the status of the source APK to see if it
+            has the INTERNET permission. If not, the manifest file
+            is parsed and the permission injected.
+
+            :return:
+        """
+
+        internet_permission = 'android.permission.INTERNET'
+
+        # if the app already has the internet permission, easymode :D
+        if internet_permission in self._get_appt_output():
+            click.secho('App already has android.permission.INTERNET', fg='green')
+            return
+
+        # if not, we need to inject an element with it
+        xml = self._get_android_manifest()
+        root = xml.getroot()
+
+        click.secho('Injecting permission: {0}'.format(internet_permission), fg='green')
+
+        # prepare a new 'uses-permission' tag
+        child = ElementTree.Element('uses-permission')
+        child.set('android:name', internet_permission)
+        root.append(child)
+
+        click.secho('Writing new Android manifest...', dim=True)
+        self._write_android_manifest(ElementTree.tostring(root))
+
+    def inject_load_library(self):
+        """
+            Injects a loadLibrary call into the launchable
+            activity of a target APK.
+
+            Most of the idea for this comes from:
+                https://koz.io/using-frida-on-android-without-root/
+
+            :return:
+        """
+
+        # raw smali to inject.
+        # ref: https://koz.io/using-frida-on-android-without-root/
+        load_library = ('.method static constructor <clinit>()V\n'
+                        '   .locals 1\n'
+                        '\n'
+                        '   .prologue\n'
+                        '   const-string v0, "frida-gadget"\n'
+                        '\n'
+                        '   invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V\n'
+                        '\n'
+                        '   return-void\n'
+                        '.end method\n')
+
+        # the path to the smali we should inject the load_library call
+        # into. we get a class name from the internal method of this
+        # class, so replace .'s to /'s to get the path apktool would
+        # have left it on disk.
+        activity = self._get_launchable_activity().replace('.', '/')
+        activity_path = os.path.join(self.apk_temp_directory, 'smali', activity) + '.smali'
+
+        click.secho('Reading smali from: {0}'.format(activity_path), dim=True)
+
+        # apktool d smali will have a commentline line: '# direct methods'
+        with open(activity_path, 'r') as f:
+            smali_lines = f.readlines()
+
+        # search for the line starting with '# direct methods' in it
+        inject_marker = [i for i, x in enumerate(smali_lines) if '# direct methods' in x]
+
+        # ensure we got a marker
+        if len(inject_marker) <= 0:
+            raise Exception('Unable to determine position to inject a loadLibrary call', fg='red')
+
+        # pick the first position for the inject. add one line as we
+        # want to inject right be low the comment we matched
+        inject_marker = inject_marker[0] + 1
+
+        click.secho('Injecting loadLibrary call at line: {0}'.format(inject_marker), dim=True, fg='green')
+
+        # inject the load_library code between
+        patched_smali = \
+            smali_lines[:inject_marker] + load_library.splitlines(keepends=True) + smali_lines[inject_marker:]
+
+        click.secho('Writing patched smali back to: {0}'.format(activity_path), dim=True)
+
+        with open(activity_path, 'w') as f:
+            f.write(''.join(patched_smali))
+
+    def add_gadget_to_apk(self, architecture: str, gadget_source: str):
+        """
+            Copies a frida gadget for a specific architecture to
+            an extracted APK's lib path.
+
+            :param architecture:
+            :param gadget_source:
+            :return:
+        """
+
+        libs_path = os.path.join(self.apk_temp_directory, 'lib', architecture)
+
+        # check if the libs path exists
+        if not os.path.exists(libs_path):
+            click.secho('Creating library path: {0}'.format(libs_path), dim=True)
+            os.makedirs(libs_path)
+
+        click.secho('Copying Frida gadget to libs path...', fg='green', dim=True)
+        shutil.copyfile(gadget_source, os.path.join(libs_path, 'libfrida-gadget.so'))
+
+    def build_new_apk(self):
+        """
+            Build a new .apk with the frida-gadget patched in.
+
+            :return:
+        """
+
+        click.secho('Rebuilding the APK with the frida-gadget loaded...', fg='green', dim=True)
+        o = delegator.run('{0} b {1} -o {2}'.format(
+            self.required_commands['apktool']['location'],
+            self.apk_temp_directory,
+            self.apk_temp_frida_patched
+        ))
+
+        if len(o.err) > 0:
+            click.secho(('Rebuilding the APK may have failed. Read the following '
+                         'output to determine if APKTool actually had an error.'), fg='red')
+            click.secho(o.err, fg='red', dim=True)
+
+        click.secho('Built new APK with injected loadLibrary and frida-gadget', fg='green')
+
+    def sign_apk(self):
+        """
+            Signs an APK with the objection key.
+
+            The keystore itself was created with:
+                keytool -genkey -v -keystore objection.jks -alias objection -keyalg RSA -keysize 2048 -validity 3650
+                pass: basil-joule-bug
+        :return:
+        """
+
+        click.secho('Signing new APK.', dim=True)
+
+        here = os.path.abspath(os.path.dirname(__file__))
+        keystore = os.path.join(here, 'assets', 'objection.jks')
+
+        o = delegator.run('{0} -sigalg SHA1withRSA -digestalg SHA1 -storepass {1} -keystore {2} {3} {4}'.format(
+            self.required_commands['jarsigner']['location'],
+            'basil-joule-bug',
+            keystore,
+            self.apk_temp_frida_patched,
+            'objection'
+        ))
+
+        if len(o.err) > 0:
+            click.secho('Signing the new APK may have failed.', fg='red')
+            click.secho(o.err, fg='red')
+
+        click.secho('Signed the new APK', fg='green')
+
+    def __del__(self):
+        """
+            Cleanup after ourselves.
+
+            :return:
+        """
+
+        click.secho('Cleaning up temp files...', dim=True)
+
+        try:
+
+            shutil.rmtree(self.apk_temp_directory, ignore_errors=True)
+            os.remove(self.apk_temp_frida_patched)
 
         except Exception as err:
             click.secho('Failed to cleanup with error: {0}'.format(err), fg='red')

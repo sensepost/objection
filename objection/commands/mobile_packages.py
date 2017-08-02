@@ -2,9 +2,10 @@ import os
 import shutil
 
 import click
+import delegator
 from pkg_resources import parse_version
 
-from ..utils.packages import Github, IosGadget, IosPatcher
+from ..utils.packages import Github, IosGadget, IosPatcher, AndroidGadget, AndroidPatcher
 
 
 def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, binary_name: str) -> None:
@@ -22,8 +23,11 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
     github = Github()
     ios_gadget = IosGadget(github)
 
-    # check if the local version needs updating
-    if parse_version(github.get_latest_version()) > parse_version(ios_gadget.get_local_version()):
+    # check if the local version needs updating. this can be either because
+    # the version is outdated or we simply dont have the gadget yet
+    if parse_version(github.get_latest_version()) > parse_version(
+            ios_gadget.get_local_version()) or not ios_gadget.gadget_exists():
+        # download!
         click.secho('Github FridaGadget is v{0}, local is v{1}. Updating...'.format(
             github.get_latest_version(), ios_gadget.get_local_version()), fg='green')
 
@@ -53,3 +57,70 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
     shutil.copyfile(
         patcher.get_patched_ipa_path(),
         os.path.join(os.path.abspath('.'), os.path.basename(patcher.get_patched_ipa_path())))
+
+
+def patch_android_apk(source: str, architecture: str) -> None:
+    """
+        Patches an Android APK by extracting, patching SMALI, repackiging
+        and signing a new APK.
+
+        :param source:
+        :param architecture:
+        :return:
+    """
+
+    github = Github()
+    android_gadget = AndroidGadget(github)
+
+    # without an architecture set, attempt to determine one using adb
+    if not architecture:
+        click.secho('No architecture specified. Determining it using `adb`...', dim=True)
+        o = delegator.run('adb shell getprop ro.product.cpu.abi')
+
+        # read the ach from the process' output
+        architecture = o.out.strip()
+
+        if len(architecture) <= 0:
+            click.secho('Failed to determine architecture. Is the device connected and authorized?',
+                        fg='red', bold=True)
+            return
+
+        click.secho('Detected the architecture as: {0}'.format(architecture), fg='green', bold=True)
+
+    # set the architecture we are interested in
+    android_gadget.set_architecture(architecture)
+
+    # check if the local version needs updating. this can be either because
+    # the version is outdated or we simply dont have the gadget yet
+    if parse_version(github.get_latest_version()) > parse_version(
+            android_gadget.get_local_version()) or not android_gadget.gadget_exists():
+        # download!
+        click.secho('Github FridaGadget is v{0}, local is v{1}. Updating...'.format(
+            github.get_latest_version(), android_gadget.get_local_version()), fg='green')
+
+        # download, unpack, update local version and cleanup the temp files.
+        android_gadget.download() \
+            .unpack() \
+            .set_local_version(github.get_latest_version()) \
+            .cleanup()
+
+    patcher = AndroidPatcher()
+
+    # ensure that we have all of the commandline requirements
+    if not patcher.are_requirements_met():
+        return
+
+    # work on patching the APK
+    patcher.set_apk_source(source=source)
+    patcher.unpack_apk()
+    patcher.inject_internet_permission()
+    patcher.inject_load_library()
+    patcher.add_gadget_to_apk(architecture, android_gadget.get_frida_library_path())
+    patcher.build_new_apk()
+    patcher.sign_apk()
+
+    # woohoo, get the APK!
+    click.secho('Copying final apk from {0} to current directory...'.format(patcher.get_patched_apk_path()))
+    destination = ''.join(source.split('.')[:-1]) + '.objection.apk'
+    print(destination)
+    shutil.copyfile(patcher.get_patched_apk_path(), os.path.join(os.path.abspath('.'), destination))
