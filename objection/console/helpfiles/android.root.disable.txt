@@ -1,0 +1,19 @@
+Command: android root disable
+
+Usage: android root disable
+
+Attempts to disable root detection on Android devices. This is achieved by
+hooking numerous classes such as java.lang.String (for contains()),
+java.lang.Runtime (for exec()) and java.io.File (for exists()). These hooked
+methods have their properties or arguments inspected to determine if artefacts
+commonly checked for in root detection is used, and manipulated.
+
+If this method does not effectively disable root detection for you, keep in
+mind that it us very common for applications to have helper methods such as
+isRooted() that perform a number of checks in one class method. Using the
+boolean return module on one of these utility methods may achieve a similar
+effect.
+
+Examples:
+   android root disable
+

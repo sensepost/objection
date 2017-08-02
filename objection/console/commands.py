@@ -8,6 +8,7 @@ from ..commands import ui
 from ..commands.android import command
 from ..commands.android import hooking as android_hooking
 from ..commands.android import intents
+from ..commands.android import root
 from ..commands.ios import cookies
 from ..commands.ios import hooking as ios_hooking
 from ..commands.ios import jailbreak
@@ -253,6 +254,15 @@ COMMANDS = {
                     'launch_activity': {
                         'meta': 'Launch an Activity class using an Intent',
                         'exec': intents.launch_activity
+                    }
+                }
+            },
+            'root': {
+                'meta': 'Commands to work with Android root detection',
+                'commands': {
+                    'disable': {
+                        'meta': 'Attempt to disable root detection',
+                        'exec': root.disable
                     }
                 }
             },
