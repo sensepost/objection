@@ -815,18 +815,10 @@ class AndroidPatcher(BasePlatformPatcher):
             :return:
         """
 
+        # use the android namespace
+        ElementTree.register_namespace('android', 'http://schemas.android.com/apk/res/android')
+
         return ElementTree.parse(os.path.join(self.apk_temp_directory, 'AndroidManifest.xml'))
-
-    def _write_android_manifest(self, manifest: str) -> None:
-        """
-            Writes a string as a new AndroidManifest.xml
-
-            :param manifest:
-            :return:
-        """
-
-        with open(os.path.join(self.apk_temp_directory, 'AndroidManifest.xml'), 'wb') as f:
-            f.write(manifest)
 
     def _get_appt_output(self):
         """
@@ -923,7 +915,9 @@ class AndroidPatcher(BasePlatformPatcher):
         root.append(child)
 
         click.secho('Writing new Android manifest...', dim=True)
-        self._write_android_manifest(ElementTree.tostring(root))
+
+        xml.write(os.path.join(self.apk_temp_directory, 'AndroidManifest.xml'),
+                  encoding='utf-8', xml_declaration=True)
 
     def inject_load_library(self):
         """
