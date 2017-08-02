@@ -1,4 +1,5 @@
 import datetime
+import json
 import lzma
 import os
 import plistlib
@@ -82,10 +83,10 @@ class BasePlatformGadget(object):
         self.github = github
 
     @staticmethod
-    def get_local_version() -> str:
+    def get_local_version(gadget_type: str) -> str:
         """
             Check and return the local version of the FridaGadget
-            we have.
+            type we have.
 
             :return:
         """
@@ -94,19 +95,40 @@ class BasePlatformGadget(object):
             return '0'
 
         with open(gadget_versions, 'r') as f:
-            return f.read()
+            versions = f.read()
 
-    def set_local_version(self, version: str):
+        # load the json
+        versions = json.loads(versions)
+
+        if gadget_type in versions:
+            return versions[gadget_type]
+
+        return '0'
+
+    def set_local_version(self, gadget_type: str, version: str):
         """
             Writes the version number to file, recording it as
             the current local version.
 
+            :param gadget_type:
             :param version:
             :return:
         """
 
+        # read the current versions if it exists, else start
+        # a new dictionary for it
+        if os.path.exists(gadget_versions):
+            with open(gadget_versions, 'r') as f:
+                versions = json.loads(f.read())
+        else:
+            versions = {}
+
+        # add the new version
+        versions[gadget_type] = version
+
+        # and write it to file
         with open(gadget_versions, 'w') as f:
-            f.write(version)
+            f.write(json.dumps(versions))
 
         return self
 
@@ -664,7 +686,6 @@ class AndroidGadget(BasePlatformGadget):
         """
 
         download_url = self._get_download_url()
-        print(download_url)
 
         # stream the download using requests
         library = requests.get(download_url, stream=True)
@@ -927,6 +948,8 @@ class AndroidPatcher(BasePlatformPatcher):
 
         # search for the line starting with '# direct methods' in it
         inject_marker = [i for i, x in enumerate(smali_lines) if '# direct methods' in x]
+
+        # TODO: check if <clinit> doesnt already exist
 
         # ensure we got a marker
         if len(inject_marker) <= 0:

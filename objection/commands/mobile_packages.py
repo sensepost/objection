@@ -23,21 +23,24 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
     github = Github()
     ios_gadget = IosGadget(github)
 
+    # get the gadget version numbers
+    github_version = github.get_latest_version()
+    local_version = ios_gadget.get_local_version('ios_universal')
+
     # check if the local version needs updating. this can be either because
     # the version is outdated or we simply dont have the gadget yet
-    if parse_version(github.get_latest_version()) > parse_version(
-            ios_gadget.get_local_version()) or not ios_gadget.gadget_exists():
+    if parse_version(github_version) > parse_version(local_version) or not ios_gadget.gadget_exists():
         # download!
         click.secho('Github FridaGadget is v{0}, local is v{1}. Updating...'.format(
-            github.get_latest_version(), ios_gadget.get_local_version()), fg='green')
+            github_version, local_version), fg='green')
 
         # download, unpack, update local version and cleanup the temp files.
         ios_gadget.download() \
             .unpack() \
-            .set_local_version(github.get_latest_version()) \
+            .set_local_version('ios_universal', github_version) \
             .cleanup()
 
-    click.secho('Using Gadget version: {0}'.format(ios_gadget.get_local_version()), fg='green')
+    click.secho('Using Gadget version: {0}'.format(github_version), fg='green')
 
     # start the patching process
     patcher = IosPatcher()
@@ -90,19 +93,24 @@ def patch_android_apk(source: str, architecture: str) -> None:
     # set the architecture we are interested in
     android_gadget.set_architecture(architecture)
 
+    # get the gadget version numbers
+    github_version = github.get_latest_version()
+    local_version = android_gadget.get_local_version('android_' + architecture)
+
     # check if the local version needs updating. this can be either because
     # the version is outdated or we simply dont have the gadget yet
-    if parse_version(github.get_latest_version()) > parse_version(
-            android_gadget.get_local_version()) or not android_gadget.gadget_exists():
+    if parse_version(github_version) > parse_version(local_version) or not android_gadget.gadget_exists():
         # download!
         click.secho('Github FridaGadget is v{0}, local is v{1}. Updating...'.format(
-            github.get_latest_version(), android_gadget.get_local_version()), fg='green')
+            github_version, local_version), fg='green')
 
         # download, unpack, update local version and cleanup the temp files.
         android_gadget.download() \
             .unpack() \
-            .set_local_version(github.get_latest_version()) \
+            .set_local_version('android_' + architecture, github.get_latest_version()) \
             .cleanup()
+
+    click.secho('Using Gadget version: {0}'.format(github_version), fg='green')
 
     patcher = AndroidPatcher()
 
@@ -122,5 +130,4 @@ def patch_android_apk(source: str, architecture: str) -> None:
     # woohoo, get the APK!
     click.secho('Copying final apk from {0} to current directory...'.format(patcher.get_patched_apk_path()))
     destination = ''.join(source.split('.')[:-1]) + '.objection.apk'
-    print(destination)
     shutil.copyfile(patcher.get_patched_apk_path(), os.path.join(os.path.abspath('.'), destination))
