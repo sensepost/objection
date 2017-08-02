@@ -153,6 +153,7 @@ class BasePlatformPatcher(object):
 
         # check dependencies
         self.have_all_commands = self._check_commands()
+        self.command_run_timeout = 60 * 5
 
     def _check_commands(self) -> bool:
         """
@@ -384,7 +385,7 @@ class IosPatcher(BasePlatformPatcher):
                     self.required_commands['security']['location'],
                     pf,
                     decoded_location
-                )
+                ), timeout=self.command_run_timeout
             )
 
             # read the expiration date from the profile
@@ -495,7 +496,8 @@ class IosPatcher(BasePlatformPatcher):
                 '--strip-codesig',
                 '--inplace',
                 '@executable_path/Frameworks/FridaGadget.dylib',
-                self.app_binary)
+                self.app_binary),
+            timeout=self.command_run_timeout
         )
 
         # check if the insert_dylib call may have failed
@@ -557,7 +559,8 @@ class IosPatcher(BasePlatformPatcher):
                 self.provision_file,
                 self.patched_codesigned_ipa_path,
                 self.patched_ipa_path,
-            )
+            ),
+            timeout=self.command_run_timeout
         )
 
         click.secho(ipa_codesign.err, dim=True)
@@ -836,7 +839,7 @@ class AndroidPatcher(BasePlatformPatcher):
             o = delegator.run('{0} dump badging {1}'.format(
                 self.required_commands['aapt']['location'],
                 self.apk_source
-            ))
+            ), timeout=self.command_run_timeout)
 
             if len(o.err) > 0:
                 click.secho('An error may have occured while running aapt.', fg='red')
@@ -886,7 +889,7 @@ class AndroidPatcher(BasePlatformPatcher):
             self.required_commands['apktool']['location'],
             self.apk_source,
             self.apk_temp_directory
-        ))
+        ), timeout=self.command_run_timeout)
 
         if len(o.err) > 0:
             click.secho('An error may have occured while extracting the APK.', fg='red')
@@ -953,6 +956,34 @@ class AndroidPatcher(BasePlatformPatcher):
         activity = self._get_launchable_activity().replace('.', '/')
         activity_path = os.path.join(self.apk_temp_directory, 'smali', activity) + '.smali'
 
+        # check if the activity path exists. If not, try and see if this may have been
+        # a multidex setup
+        if not os.path.exists(activity_path):
+
+            click.secho('Smali not found in smali directory. This might be a multidex APK. Searching...', dim=True)
+
+            # apk tool will dump the dex classes to a smali directory. in multidex setups
+            # we have folders such as smali_classes2, smali_classes3 etc. we will search
+            # those paths for the launch activity we detected.
+            for x in range(2, 100):
+                smali_path = os.path.join(self.apk_temp_directory, 'smali_classes{0}'.format(x))
+
+                # stop if the smali_classes directory does not exist.
+                if not os.path.exists(smali_path):
+                    break
+
+                # determine the path to the launchable activity again
+                activity_path = os.path.join(smali_path, activity) + '.smali'
+
+                # if we found the activity, stop the loop
+                if os.path.exists(activity_path):
+                    click.secho('Found smali at: {0}'.format(activity_path), dim=True)
+                    break
+
+        # one final check to ensure we have the target .smali file
+        if not os.path.exists(activity_path):
+            raise Exception('Unable to find smali to patch!')
+
         click.secho('Reading smali from: {0}'.format(activity_path), dim=True)
 
         # apktool d smali will have a commentline line: '# direct methods'
@@ -1015,12 +1046,12 @@ class AndroidPatcher(BasePlatformPatcher):
             self.required_commands['apktool']['location'],
             self.apk_temp_directory,
             self.apk_temp_frida_patched
-        ))
+        ), timeout=self.command_run_timeout)
 
         if len(o.err) > 0:
             click.secho(('Rebuilding the APK may have failed. Read the following '
-                         'output to determine if APKTool actually had an error.'), fg='red')
-            click.secho(o.err, fg='red', dim=True)
+                         'output to determine if apktool actually had an error: \n'), fg='red')
+            click.secho(o.err, fg='red')
 
         click.secho('Built new APK with injected loadLibrary and frida-gadget', fg='green')
 
