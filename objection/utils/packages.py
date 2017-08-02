@@ -97,8 +97,13 @@ class BasePlatformGadget(object):
         with open(gadget_versions, 'r') as f:
             versions = f.read()
 
-        # load the json
-        versions = json.loads(versions)
+        # load the json.
+        try:
+
+            versions = json.loads(versions)
+
+        except json.decoder.JSONDecodeError:
+            return '0'
 
         if gadget_type in versions:
             return versions[gadget_type]
@@ -118,8 +123,16 @@ class BasePlatformGadget(object):
         # read the current versions if it exists, else start
         # a new dictionary for it
         if os.path.exists(gadget_versions):
-            with open(gadget_versions, 'r') as f:
-                versions = json.loads(f.read())
+
+            # load the json from disk
+            try:
+
+                with open(gadget_versions, 'r') as f:
+                    versions = json.loads(f.read())
+
+            except json.decoder.JSONDecodeError:
+                versions = {}
+
         else:
             versions = {}
 
