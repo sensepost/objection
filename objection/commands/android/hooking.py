@@ -4,6 +4,17 @@ from objection.utils.frida_transport import FridaRunner
 from objection.utils.templates import android_hook
 
 
+def _string_is_true(s: str) -> bool:
+    """
+        Check if a string should be considered as "True"
+
+        :param s:
+        :return:
+    """
+
+    return s.lower() in ('true', 'yes')
+
+
 def show_android_classes(args: list = None) -> None:
     """
         Show the currently loaded classes.
@@ -102,3 +113,30 @@ def show_registered_broadcast_receivers(args: list = None) -> None:
         click.secho(class_name)
 
     click.secho('\nFound {0} classes'.format(len(response.data)), bold=True)
+
+
+def set_method_return_value(args: list = None) -> None:
+    """
+        Sets a Java methods return value to a specified boolean.
+
+        :param args:
+        :return:
+    """
+
+    if len(args) < 2:
+        click.secho(('Usage: android hooking set return_value '
+                     '"<fully qualified class>" (eg: "com.example.test") '
+                     '"<method (with overload if needed)>" (eg: see help for details) '
+                     '<true/false>'),
+                    bold=True)
+        return
+
+    class_name = args[0]
+    method_name = args[1]
+    retval = args[2]
+
+    runner = FridaRunner()
+    runner.set_hook_with_data(
+        android_hook('hooking/set-return'), class_name=class_name, method_name=method_name, retval=retval)
+
+    runner.run_as_job(name='set-return-value')

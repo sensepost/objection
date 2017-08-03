@@ -14,3 +14,17 @@ def disable(args: list = None) -> None:
     runner.set_hook_with_data(android_hook('root/disable'))
 
     runner.run_as_job(name='root-disable')
+
+
+def simulate(args: list = None) -> None:
+    """
+        Simulate a rooted environment.
+
+        :param args:
+        :return:
+    """
+
+    runner = FridaRunner()
+    runner.set_hook_with_data(android_hook('root/simulate'))
+
+    runner.run_as_job(name='root-simulate')

@@ -245,6 +245,15 @@ COMMANDS = {
                     'dump_args': {
                         'meta': 'Dumps Android Java class methods',
                         'exec': android_hooking.dump_android_method_args
+                    },
+                    'set': {
+                        'meta': 'Set various values',
+                        'commands': {
+                            'return_value': {
+                                'meta': 'Set a methods return value. Supports only boolean returns.',
+                                'exec': android_hooking.set_method_return_value
+                            }
+                        }
                     }
                 },
             },
@@ -263,6 +272,10 @@ COMMANDS = {
                     'disable': {
                         'meta': 'Attempt to disable root detection',
                         'exec': root.disable
+                    },
+                    'simulate': {
+                        'meta': 'Attempt to simulate a rooted environment',
+                        'exec': root.simulate
                     }
                 }
             },

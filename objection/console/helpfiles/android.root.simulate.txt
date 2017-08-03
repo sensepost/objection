@@ -1,0 +1,11 @@
+Command: android root simulate
+
+Usage: android root simulate
+
+Attempts to simulate a rooted Android environment. This is achieved by
+responding positively to common checks that are performed within Android
+applications.
+
+Examples:
+   android root simluate
+
