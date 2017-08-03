@@ -11,12 +11,15 @@ var common_paths = [
     '/data/local/bin/su',
     '/data/local/su',
     '/data/local/xbin/su',
+    '/dev/com.koushikdutta.superuser.daemon/',
     '/sbin/su',
     '/system/app/Superuser.apk',
     '/system/bin/failsafe/su',
     '/system/bin/su',
+    '/system/etc/init.d/99SuperSUDaemon',
     '/system/sd/xbin/su',
     '/system/xbin/busybox',
+    '/system/xbin/daemonsu',
     '/system/xbin/su',
 ];
 
@@ -51,7 +54,7 @@ Runtime.exec.overload('java.lang.String').implementation = function (command) {
             data: 'Check for su detected with command \'' + command + '\'. Throwing an IOExeption.'
         }));
 
-        throw IOException.$new('anti-jailbreak');
+        throw IOException.$new('anti-root');
     }
 
     // call the original method

@@ -9,6 +9,7 @@ def disable(args: list = None) -> None:
         :param args:
         :return:
     """
+
     runner = FridaRunner()
     runner.set_hook_with_data(android_hook('root/disable'))
 
