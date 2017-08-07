@@ -90,7 +90,7 @@ def dump_android_method_args(args: list) -> None:
 
 def show_registered_broadcast_receivers(args: list = None) -> None:
     """
-        Enumerate all the loaded classes that extend BroadcastReceiver
+        Enumerate all registered BroadcastReceivers
         :param args:
         :return:
     """
