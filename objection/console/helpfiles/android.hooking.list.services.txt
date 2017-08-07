@@ -1,0 +1,9 @@
+Command: android hooking list services
+
+Usage: android hooking list services
+
+List all the Services that have been registered at Runtime as well
+as those specified by the AndroidManifest.xml.
+
+Examples:
+   android hooking list services
