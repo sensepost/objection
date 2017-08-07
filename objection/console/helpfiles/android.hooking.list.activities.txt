@@ -1,0 +1,10 @@
+Command: android hooking list activities
+
+Usage: android hooking list activities
+
+List all the Activities that have been specified by the AndroidManifest.xml.
+Activity classes found using this command could be used with the
+`android intent launch_activity` command to launch them.
+
+Examples:
+   android hooking list activities
