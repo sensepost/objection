@@ -231,6 +231,10 @@ COMMANDS = {
                                 'meta': 'List the registered BroadcastReceivers',
                                 'exec': android_hooking.show_registered_broadcast_receivers
                             },
+                            'services': {
+                                'meta': 'List the registered Services',
+                                'exec': android_hooking.show_registered_services
+                            },
                         }
                     },
                     'watch': {
