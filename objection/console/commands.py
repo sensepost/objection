@@ -8,6 +8,7 @@ from ..commands import ui
 from ..commands.android import command
 from ..commands.android import hooking as android_hooking
 from ..commands.android import intents
+from ..commands.android import pinning as android_pinning
 from ..commands.android import root
 from ..commands.ios import cookies
 from ..commands.ios import hooking as ios_hooking
@@ -15,7 +16,7 @@ from ..commands.ios import jailbreak
 from ..commands.ios import keychain
 from ..commands.ios import nsuserdefaults
 from ..commands.ios import pasteboard
-from ..commands.ios import pinning
+from ..commands.ios import pinning as ios_pinning
 from ..commands.ios import plist
 from ..utils.helpers import list_current_jobs
 from ..utils.helpers import list_files_in_current_fm_directory
@@ -291,6 +292,15 @@ COMMANDS = {
                     }
                 }
             },
+            'sslpinning': {
+                'meta': 'Work with Android SSL pinning',
+                'commands': {
+                    'disable': {
+                        'meta': 'Attempt to disable SSL pinning in various Javav libraries/classes',
+                        'exec': android_pinning.android_disable
+                    }
+                }
+            }
         },
     },
 
@@ -424,7 +434,7 @@ COMMANDS = {
                 'commands': {
                     'disable': {
                         'meta': 'Attempt to disable SSL pinning in various iOS libraries/classes',
-                        'exec': pinning.ios_disable
+                        'exec': ios_pinning.ios_disable
                     }
                 }
             },

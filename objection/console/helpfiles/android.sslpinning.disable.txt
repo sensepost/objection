@@ -1,0 +1,16 @@
+Command: android sslpinning disable
+
+Usage: android sslpinning disable
+
+Attempts to disable SSL Pinning on Android devices. This is achieved by creating
+a new TrustManager that will accept any certificate irrespective of its validity,
+and providing that to calls to SSLContext.init().
+
+If this method does not disable the applications SSL pinning implementation,
+then it may still be possible to bypass it via 'helper' methods commonly
+used by developers to help when testing in development / staging environments.
+Be on the lookout for classes / methods that relate to pinning that may simply
+return a boolean value.
+
+Examples:
+   android sslpinning disable
