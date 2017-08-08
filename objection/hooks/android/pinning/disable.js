@@ -35,7 +35,7 @@ var SSLContext_init = SSLContext.init.overload(
     '[Ljavax.net.ssl.KeyManager;', '[Ljavax.net.ssl.TrustManager;', 'java.security.SecureRandom');
 
 // Override the init method, specifying our new TrustManager
-SSLContext_init.implementation = function (a, b, c) {
+SSLContext_init.implementation = function (keyManager, trustManager, secureRandom) {
 
     send(JSON.stringify({
         status: 'success',
@@ -44,5 +44,5 @@ SSLContext_init.implementation = function (a, b, c) {
         data: 'Overriding SSLContext.init() with the custom TrustManager'
     }));
 
-    SSLContext_init.call(this, a, TrustManagers, c);
+    SSLContext_init.call(this, keyManager, TrustManagers, secureRandom);
 }
