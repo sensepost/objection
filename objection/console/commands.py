@@ -227,6 +227,10 @@ COMMANDS = {
                                 'meta': 'List the currently loaded classes',
                                 'exec': android_hooking.show_android_classes
                             },
+                            'class_methods': {
+                                'meta': 'List the methods available on a class',
+                                'exec': android_hooking.show_android_class_methods
+                            },
                             'activities': {
                                 'meta': 'List the registered Activities',
                                 'exec': android_hooking.show_registered_activities

@@ -1,0 +1,10 @@
+Command: android hooking list class_methods
+
+Usage: android hooking list class_methods <class_name>
+
+Lists the methods declared in a Java class, together with the arguments
+that they may required using getDeclaredMethods().
+
+Examples:
+   android hooking list class_methods com.example.utils.RootUtils
+   android hooking list class_methods com.test.Helpers.Communications

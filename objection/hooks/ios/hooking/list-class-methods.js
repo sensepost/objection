@@ -27,7 +27,7 @@ for (var class_name in ObjC.classes) {
 var response = {
     status: 'success',
     error_reason: NaN,
-    type: 'ios-classes',
+    type: 'ios-class-methods',
     data: methods
 }
 

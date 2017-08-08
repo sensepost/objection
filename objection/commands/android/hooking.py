@@ -40,6 +40,37 @@ def show_android_classes(args: list = None) -> None:
     click.secho('\nFound {0} classes'.format(len(response.data)), bold=True)
 
 
+def show_android_class_methods(args: list = None) -> None:
+    """
+        Shows the methods available on an Android class.
+
+        :param args:
+        :return:
+    """
+
+    if len(args) <= 0:
+        click.secho('Usage: android hooking list class_methods <class name>', bold=True)
+        return
+
+    class_name = args[0]
+
+    runner = FridaRunner()
+    runner.set_hook_with_data(android_hook('hooking/list-class-methods'), class_name=class_name)
+
+    runner.run()
+    response = runner.get_last_message()
+
+    if not response.is_successful():
+        click.secho('Failed to list class methods with error: {0}'.format(response.error_reason), fg='red')
+        return None
+
+    # print the enumerated classes
+    for class_name in sorted(response.data):
+        click.secho(class_name)
+
+    click.secho('\nFound {0} method(s)'.format(len(response.data)), bold=True)
+
+
 def watch_class_method(args: list) -> None:
     """
         Watches for invocations of an Android Java class method.
