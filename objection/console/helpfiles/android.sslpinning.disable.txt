@@ -4,7 +4,19 @@ Usage: android sslpinning disable
 
 Attempts to disable SSL Pinning on Android devices. This is achieved by creating
 a new TrustManager that will accept any certificate irrespective of its validity,
-and providing that to calls to SSLContext.init().
+and providing that to calls to SSLContext.init(). Additionally, to support the
+OkHTTP v3 library, the okhttp3.CertificatePinner.check() method is replaced with
+one that will not throw an exception in the case of an invalid certificate being
+presented.
+
+With these two implementations, the following request libraries should have its
+pinning checks disabled with this command:
+
+- Traditional HttpsURLConnection
+- OkHTTP
+- Retrofit (Wraps OkHTTP)
+- Volley (Uses a TrustManager)
+- Picasso (Uses a TrustManager)
 
 If this method does not disable the applications SSL pinning implementation,
 then it may still be possible to bypass it via 'helper' methods commonly
