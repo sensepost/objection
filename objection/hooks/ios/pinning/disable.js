@@ -51,52 +51,90 @@ if (ObjC.classes.AFHTTPSessionManager && ObjC.classes.AFSecurityPolicy) {
         data: 'Found AFNetworking 3.0 library'
     }));
 
-    Interceptor.attach(ObjC.classes.AFSecurityPolicy['+ policyWithPinningMode:'].implementation, {
-        onEnter: function (args) {
-
-            // typedef NS_ENUM(NSUInteger, AFSSLPinningMode) {
-            //     AFSSLPinningModeNone,
-            //     AFSSLPinningModePublicKey,
-            //     AFSSLPinningModeCertificate,
-            // };
-
-            if (args[2] != '0x0') {
-
-                send(JSON.stringify({
-                    status: 'success',
-                    error_reason: NaN,
-                    type: 'ios-ssl-pinning-bypass',
-                    data: '[AFNetworking 3.0] setting AFSSLPinningModeNone for policyWithPinningMode:'
-                }));
-
-                args[2] = '0x0';
-            }
-        }
+    var AFSecurityPolicy_policyWithPinningMode = {};
+    resolver.enumerateMatches('+[AFSecurityPolicy policyWithPinningMode:]', {
+        onMatch: function (match) {
+            AFSecurityPolicy_policyWithPinningMode.name = match.name;
+            AFSecurityPolicy_policyWithPinningMode.address = match.address;
+        },
+        onComplete: function () { }
     });
 
-    Interceptor.attach(ObjC.classes.AFSecurityPolicy['+ policyWithPinningMode:withPinnedCertificates:'].implementation, {
-        onEnter: function (args) {
+    if (AFSecurityPolicy_policyWithPinningMode.address) {
 
-            // typedef NS_ENUM(NSUInteger, AFSSLPinningMode) {
-            //     AFSSLPinningModeNone,
-            //     AFSSLPinningModePublicKey,
-            //     AFSSLPinningModeCertificate,
-            // };
+        send(JSON.stringify({
+            status: 'success',
+            error_reason: NaN,
+            type: 'ios-ssl-pinning-bypass',
+            data: 'Found +[AFSecurityPolicy policyWithPinningMode:]'
+        }));
 
-            if (args[2] != '0x0') {
+        Interceptor.attach(AFSecurityPolicy_policyWithPinningMode.address, {
+            onEnter: function (args) {
 
-                send(JSON.stringify({
-                    status: 'success',
-                    error_reason: NaN,
-                    type: 'ios-ssl-pinning-bypass',
-                    data: '[AFNetworking 3.0] setting AFSSLPinningModeNone for policyWithPinningMode:withPinnedCertificates:'
-                }));
+                // typedef NS_ENUM(NSUInteger, AFSSLPinningMode) {
+                //     AFSSLPinningModeNone,
+                //     AFSSLPinningModePublicKey,
+                //     AFSSLPinningModeCertificate,
+                // };
 
-                args[2] = '0x0';
+                if (args[2] != '0x0') {
+
+                    send(JSON.stringify({
+                        status: 'success',
+                        error_reason: NaN,
+                        type: 'ios-ssl-pinning-bypass',
+                        data: '[AFNetworking 3.0] setting AFSSLPinningModeNone for policyWithPinningMode:'
+                    }));
+
+                    args[2] = '0x0';
+                }
             }
-        }
+        });
+    }
+
+    var AFSecurityPolicy_policyWithPinningModewithPinnedCertificates = {};
+    resolver.enumerateMatches('+[AFSecurityPolicy policyWithPinningMode:withPinnedCertificates:]', {
+        onMatch: function (match) {
+            AFSecurityPolicy_policyWithPinningModewithPinnedCertificates.name = match.name;
+            AFSecurityPolicy_policyWithPinningModewithPinnedCertificates.address = match.address;
+        },
+        onComplete: function () { }
     });
-}
+
+    if (AFSecurityPolicy_policyWithPinningModewithPinnedCertificates.address) {
+
+        send(JSON.stringify({
+            status: 'success',
+            error_reason: NaN,
+            type: 'ios-ssl-pinning-bypass',
+            data: 'Found +[AFSecurityPolicy policyWithPinningMode:withPinnedCertificates:]'
+        }));
+
+        Interceptor.attach(AFSecurityPolicy_policyWithPinningModewithPinnedCertificates.address, {
+            onEnter: function (args) {
+
+                // typedef NS_ENUM(NSUInteger, AFSSLPinningMode) {
+                //     AFSSLPinningModeNone,
+                //     AFSSLPinningModePublicKey,
+                //     AFSSLPinningModeCertificate,
+                // };
+
+                if (args[2] != '0x0') {
+
+                    send(JSON.stringify({
+                        status: 'success',
+                        error_reason: NaN,
+                        type: 'ios-ssl-pinning-bypass',
+                        data: '[AFNetworking 3.0] setting AFSSLPinningModeNone for policyWithPinningMode:withPinnedCertificates:'
+                    }));
+
+                    args[2] = '0x0';
+                }
+            }
+        });
+    }
+};
 
 // NSURLSession
 var search = resolver.enumerateMatchesSync('-[* URLSession:didReceiveChallenge:completionHandler:]');
