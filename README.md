@@ -20,38 +20,60 @@
 
 The project's name quite literally explains the approach as well, whereby runtime specific objects are injected into a running process and executed using Frida.
 
-**Note** This is not some form of jailbreak / root bypass. By using `objection`, you are still limited by all of the restrictions imposed by the applicable sandbox you are facing.
+**Note:** This is not some form of jailbreak / root bypass. By using `objection`, you are still limited by all of the restrictions imposed by the applicable sandbox you are facing.
 
 ## features
-Currently, only iOS is supported with Android support coming soon.
+Supporting both iOS and Android and having new features and improvements added regularly as the tool is used in real world scenarios, the following is a short list of only a few key features:
 
-For iOS, `objection` allows you to:
+For all supported platforms, `objection` allows you to:
 
-- Interact with the iOS filesystem, listing entries as well as upload & download files where permitted.
+- Patch iOS and Android applications, embedding a Frida gadget that can be used with `objection` or just Frida itself.
+- Interact with the filesystem, listing entries as well as upload & download files where permitted.
 - Perform various memory related tasks, such as listing loaded modules and their respective exports.
-- Dump the iOS keychain, and export it to a file.
-- Attempt to bypass and simulate Jailbreak detections.
+- Attempt to bypass and simulate jailbroken or rooted environments.
+- Discover loaded classes and list their respective methods.
 - Perform common SSL pinning bypasses.
-- Dump data from NSUserDefaults and the shared NSHTTPCookieStorage.
 - Dynamically dump arguments from methods called as you use the target application.
-- Dump various formats of information in human readable forms.
-- Bypass certain forms of TouchID restrictions.
+- Interact with SQLite databases inline without the need to download the targetted database and use an external tool.
 - Execute custom Frida scripts.
 
+iOS specific features in `objection` include the ability to:
+
+- Dump the iOS keychain, and export it to a file.
+- Dump data from common storage such as NSUserDefaults and the shared NSHTTPCookieStorage.
+- Dump various formats of information in human readable forms.
+- Bypass certain forms of TouchID restrictions.
+- Watch for method executions by targetting all methods in a class, or just a single method.
+- Monitor the iOS pasteboard.
+- Dump encoded `.plist` files in a human readable format without relying on external parsers.
+
+Android specific features in `objection` inclulde the ability to:
+
+- List the applications Activities, Services and Broadcast reveivers.
+- Start arbitrary Activities available in the target application.
+- Watch a class method, reporting execution as it happens.
+
+
 ## screenshots
-The following screenshots show the main `objection` repl, connected to a test application on an iPad running iOS 10.2.1.
+The following screenshots show the main `objection` repl, connected to a test application on both an iPad running iOS 10.2.1, and Samsung Galaxy S5 running Android 6.
 
-#### A file system listing of the applications main bundle
-![ls](images/objection_ls.png)
+#### A file system listing of the iOS applications main bundle
+![ls-ios](images/ios_ls.png)
 
-#### iOS Keychain dumped for the current application (short version)
-![keychain](images/objection_keychain.png)
+#### A file system listing of the Android applications bundle
+![ls-android](images/android_ls.png)
+
+#### iOS Keychain dumped for the current application, and later written to a file called `keychain.json`
+![keychain](images/ios_keychain.png)
 
 #### Inline SQLite query tool
-![sqlite](images/objection_sqlite.png)
+![sqlite](images/sqlite_example.png)
 
-#### SSL Pinning bypass
-![sslpinning](images/objection_ssl_pinning.png)
+#### SSL Pinning bypass running for an iOS application
+![sslpinning](images/ios_ssl_pinning_bypass.png)
+
+#### SSL Pinning bypass running for an Android application
+![sslpinning](images/android_ssl_pinning_bypass.png)
 
 ## sample usage
 A sample session, where `objection` is used to explore the applications environment:
@@ -60,21 +82,12 @@ A sample session, where `objection` is used to explore the applications environm
 ## prerequisites
 To run `objection`, all you need is the python3 interpreter to be available. The installation via `pip` should take care of all of the dependencies needed.
 
-As for the mobile applications though, for iOS, an unencrypted IPA is needed. If you have the source code of the application you want to explore, then you can simply embed and load the `FridaGadget.gylib` in the project.
+As for the target mobile applications though, for iOS, an unencrypted IPA is needed and Android just the normal APK should be find. If you have the source code of the iOS application you want to explore, then you can simply embed and load the `FridaGadget.gylib` in the project.
 
 ## installation
 Installation is simply a matter of `pip3 install objection`. This will give you the `objection` command.
 
 For more detailed update and installation instructions, please refer to the wiki page [here](https://github.com/sensepost/objection/wiki/Installation).
-
-## todo:
-There is still a ton of work left to do.
-
-- Android support!
-- Automatically unarchive keychain items that are bplist00ԁX$versionX$objectsY$archiverT$top
-- Detect more argument types in ios argument dumper
-- Touchid `kSecAccessControlTouchIDAny` keychain item experiment
-- Implement `rpc.exports` for the filemanager to help with performance and timeouts
 
 ## powered by
 
@@ -83,4 +96,3 @@ There is still a ton of work left to do.
 ## license
 
 Objection is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License (http://creativecommons.org/licenses/by-nc-sa/4.0/) Permissions beyond the scope of this license may be available at http://sensepost.com/contact/.
-
