@@ -1,5 +1,7 @@
-// Attempts to bypass SSL pinning implementations by providing
-// a new TrustManager that will accept any SSL certificate.
+// Attempts to bypass SSL pinning implementations in a number of
+// ways. These include implementing a new TrustManager that will
+// accept any SSL certificate, overriding OkHTTP v3 check()
+// methode etc.
 
 var X509TrustManager = Java.use('javax.net.ssl.X509TrustManager');
 var SSLContext = Java.use('javax.net.ssl.SSLContext');
@@ -46,3 +48,69 @@ SSLContext_init.implementation = function (keyManager, trustManager, secureRando
 
     SSLContext_init.call(this, keyManager, TrustManagers, secureRandom);
 }
+
+// OkHTTP v3.x
+
+// Wrap the logic in a try/catch as not all applications will have
+// okhttp as part of the app.
+try {
+
+    var CertificatePinner = Java.use('okhttp3.CertificatePinner');
+
+    CertificatePinner.check.overload('java.lang.String', 'java.util.List').implementation = function () {
+
+        send(JSON.stringify({
+            status: 'success',
+            error_reason: NaN,
+            type: 'android-ssl-pinning-bypass',
+            data: 'OkHTTP 3.x check() called. Not throwing an exception.'
+        }));
+    }
+
+} catch (err) {
+
+    // could not find the class. thats ok.
+    if (err.message.indexOf('java.lang.ClassNotFoundException') !== -1) {
+        return;
+    }
+
+    console.log(err.message);
+
+    // something else went wrong, report that.
+    throw new Error(err);
+}
+
+// -- Sample Java
+//
+// "Generic" TrustManager Example
+//
+// TrustManager[] trustAllCerts = new TrustManager[] {
+//     new X509TrustManager() {
+//         public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+//             return null;
+//         }
+//         public void checkClientTrusted(X509Certificate[] certs, String authType) {  }
+
+//         public void checkServerTrusted(X509Certificate[] certs, String authType) {  }
+
+//     }
+// };
+
+// SSLContext sslcontect = SSLContext.getInstance("TLS");
+// sslcontect.init(null, trustAllCerts, null);
+
+// OkHTTP 3 Pinning Example
+// String hostname = "swapi.co";
+// CertificatePinner certificatePinner = new CertificatePinner.Builder()
+//         .add(hostname, "sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
+//         .build();
+
+// OkHttpClient client = new OkHttpClient.Builder()
+//         .certificatePinner(certificatePinner)
+//         .build();
+
+// Request request = new Request.Builder()
+//         .url("https://swapi.co/api/people/1")
+//         .build();
+
+// Response response = client.newCall(request).execute();
