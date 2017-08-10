@@ -1,7 +1,7 @@
 // Attempts to bypass SSL pinning implementations in a number of
 // ways. These include implementing a new TrustManager that will
 // accept any SSL certificate, overriding OkHTTP v3 check()
-// methode etc.
+// method etc.
 
 var X509TrustManager = Java.use('javax.net.ssl.X509TrustManager');
 var SSLContext = Java.use('javax.net.ssl.SSLContext');
@@ -73,8 +73,6 @@ try {
     if (err.message.indexOf('java.lang.ClassNotFoundException') !== -1) {
         return;
     }
-
-    console.log(err.message);
 
     // something else went wrong, report that.
     throw new Error(err);
