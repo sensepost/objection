@@ -48,7 +48,6 @@ setup(
     # include the hooks!
     package_data={
         '': _package_files(os.path.join(here, 'objection/hooks'), '.js') +
-            _package_files(os.path.join(here, 'objection/templates'), '.js') +
             _package_files(os.path.join(here, 'objection/console/helpfiles'), '.txt') +
             _package_files(os.path.join(here, 'objection/utils/assets'), '.jks'),
     },

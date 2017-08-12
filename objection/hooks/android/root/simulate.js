@@ -4,21 +4,8 @@
 var String = Java.use('java.lang.String');
 var File = Java.use('java.io.File');
 
-var common_paths = [
-    '/data/local/bin/su',
-    '/data/local/su',
-    '/data/local/xbin/su',
-    '/dev/com.koushikdutta.superuser.daemon/',
-    '/sbin/su',
-    '/system/app/Superuser.apk',
-    '/system/bin/failsafe/su',
-    '/system/bin/su',
-    '/system/etc/init.d/99SuperSUDaemon',
-    '/system/sd/xbin/su',
-    '/system/xbin/busybox',
-    '/system/xbin/daemonsu',
-    '/system/xbin/su',
-];
+// Get the common_paths for Android
+//jinja: include 'android/root/_common_paths.js'
 
 // 'test-keys' check.
 String.contains.implementation = function (check) {

@@ -2,7 +2,9 @@ from os import path
 
 from jinja2 import Environment, PackageLoader
 
-template_env = Environment(loader=PackageLoader('objection', 'templates'))
+template_env = Environment(loader=PackageLoader('objection', 'hooks'),
+                           line_statement_prefix='//jinja:',  # replaces the {% %} tokens
+                           keep_trailing_newline=True)
 hook_path = path.realpath(path.abspath(path.dirname(__file__) + '/../hooks'))
 
 
@@ -29,8 +31,7 @@ def generic_hook(name: str, skip_trycarch: bool = False) -> str:
         :return:
     """
 
-    name = _get_name_with_js_suffix(name)
-    tmpl_path = path.join(hook_path, 'generic/' + name)
+    tmpl_path = path.join(hook_path, 'generic/' + _get_name_with_js_suffix(name))
 
     with open(tmpl_path, 'r') as f:
         hook = f.readlines()
@@ -40,7 +41,7 @@ def generic_hook(name: str, skip_trycarch: bool = False) -> str:
 
     hook = ''.join(hook)
 
-    final_template = template_env.get_template('generic-base.js')
+    final_template = template_env.get_template('base/generic-base.js')
     return final_template.render(content=hook)
 
 
@@ -53,8 +54,7 @@ def ios_hook(name: str, skip_trycatch: bool = False) -> str:
         :return:
     """
 
-    name = _get_name_with_js_suffix(name)
-    tmpl_path = path.join(hook_path, 'ios/' + name)
+    tmpl_path = path.join(hook_path, 'ios/' + _get_name_with_js_suffix(name))
 
     with open(tmpl_path, 'r') as f:
         hook = f.readlines()
@@ -64,7 +64,7 @@ def ios_hook(name: str, skip_trycatch: bool = False) -> str:
     if skip_trycatch:
         return hook
 
-    final_template = template_env.get_template('objc-base.js')
+    final_template = template_env.get_template('base/objc-base.js')
     return final_template.render(content=hook)
 
 
@@ -77,8 +77,7 @@ def android_hook(name: str = None, skip_trycatch: bool = False) -> str:
         :return:
     """
 
-    name = _get_name_with_js_suffix(name)
-    tmpl_path = path.join(hook_path, 'android/' + name)
+    tmpl_path = path.join(hook_path, 'android/' + _get_name_with_js_suffix(name))
 
     with open(tmpl_path, 'r') as f:
         hook = f.readlines()
@@ -88,5 +87,5 @@ def android_hook(name: str = None, skip_trycatch: bool = False) -> str:
     if skip_trycatch:
         return hook
 
-    final_template = template_env.get_template('java-base.js')
+    final_template = template_env.get_template('base/java-base.js')
     return final_template.render(content=hook)

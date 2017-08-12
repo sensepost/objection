@@ -12,6 +12,7 @@ from jinja2 import Template
 from ..state.app import app_state
 from ..state.connection import state_connection
 from ..state.jobs import job_manager_state
+from ..utils.templates import template_env
 
 
 class RunnerMessage(object):
@@ -228,6 +229,10 @@ class FridaRunner(object):
 
         if not hook:
             hook = self.hook
+
+        # perform a final compile of the hook, processing any
+        # remaining expressions and statements
+        hook = template_env.from_string(hook).render()
 
         # cleanup any comments
         hook = '\n'.join([line for line in hook.splitlines() if not line.strip().startswith('//')])
