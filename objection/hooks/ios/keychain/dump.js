@@ -146,7 +146,7 @@ function odas(raw_data) {
 // helper to lookup the constant name of a constant value
 function get_constant_for_value(v) {
 
-    for (k in kSecConstantReverse) {
+    for (var k in kSecConstantReverse) {
         if (k == v) {
             return kSecConstantReverse[v];
         }

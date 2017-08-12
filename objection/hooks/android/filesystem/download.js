@@ -17,7 +17,7 @@ var bytes = ByteArrayOutputStream.$new(parseInt(file_length)).toByteArray();
 var populate_bytes = function () {
 
     // console.log('Reading ' + file_length + ' bytes...');
-    for (i = 0; i < file.length(); i++) {
+    for (var i = 0; i < file.length(); i++) {
 
         // Cause this is sooooo slowwwwwww, progress report
         // on the download.

@@ -46,7 +46,7 @@ if (method.address) {
                 // 2. The first arg
                 //
                 // For this reason do we adjust it by 2 positions
-                for (i=0; i < ac; i++) {
+                for (var i=0; i < ac; i++) {
 
                     var obj = ObjC.Object(args[i+2]);
                     var selector = split_method[i];

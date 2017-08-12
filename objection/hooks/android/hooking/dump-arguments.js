@@ -14,7 +14,7 @@ send(JSON.stringify({
 }));
 
 // Hook all of the overloads found for this class.method
-for (i = 0; i < overload_count; i++) {
+for (var i = 0; i < overload_count; i++) {
 
     send(JSON.stringify({
         status: 'success',
@@ -34,7 +34,7 @@ for (i = 0; i < overload_count; i++) {
         }));
 
         // Loop the arguments and dump the values.toString()
-        for (h = 0; h < arguments.length; h++) {
+        for (var h = 0; h < arguments.length; h++) {
 
             send(JSON.stringify({
                 status: 'success',

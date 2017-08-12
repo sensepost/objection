@@ -295,7 +295,7 @@ class Repl(object):
 
             # no helpfile... warn.
             if not os.path.exists(help_file):
-                click.secho('Unable to find helpfile {0}'.format(' '.join(helpfile_name), help_file), dim=True)
+                click.secho('Unable to find helpfile {0}'.format(' '.join(helpfile_name)), dim=True)
 
                 return user_help
 
