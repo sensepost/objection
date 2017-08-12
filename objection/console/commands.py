@@ -19,8 +19,6 @@ from ..commands.ios import pasteboard
 from ..commands.ios import pinning as ios_pinning
 from ..commands.ios import plist
 from ..utils.helpers import list_current_jobs
-from ..utils.helpers import list_files_in_current_fm_directory
-from ..utils.helpers import list_folders_in_current_fm_directory
 
 # commands are defined with their name being the key, then optionally
 # have a meta, dynamic and commands key.
@@ -52,7 +50,7 @@ COMMANDS = {
 
     'cd': {
         'meta': 'Change the current working directory',
-        'dynamic': list_folders_in_current_fm_directory,
+        'dynamic': filemanager.list_folders_in_current_fm_directory,
         'exec': filemanager.cd
     },
 
@@ -80,7 +78,7 @@ COMMANDS = {
             },
             'download': {
                 'meta': 'Download a file',
-                'dynamic': list_files_in_current_fm_directory,
+                'dynamic': filemanager.list_files_in_current_fm_directory,
                 'exec': filemanager.download
             }
         }
@@ -156,7 +154,7 @@ COMMANDS = {
 
             'connect': {
                 'meta': 'Connect to a SQLite database (file)',
-                'dynamic': list_files_in_current_fm_directory,
+                'dynamic': filemanager.list_files_in_current_fm_directory,
                 'exec': sqlite.connect
             },
             'disconnect': {
@@ -326,7 +324,7 @@ COMMANDS = {
                 'commands': {
                     'cat': {
                         'meta': 'Cat a plist',
-                        'dynamic': list_files_in_current_fm_directory,
+                        'dynamic': filemanager.list_files_in_current_fm_directory,
                         'exec': plist.cat
                     }
                 }
