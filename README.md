@@ -34,7 +34,7 @@ For all supported platforms, `objection` allows you to:
 - Discover loaded classes and list their respective methods.
 - Perform common SSL pinning bypasses.
 - Dynamically dump arguments from methods called as you use the target application.
-- Interact with SQLite databases inline without the need to download the targetted database and use an external tool.
+- Interact with SQLite databases inline without the need to download the targeted database and use an external tool.
 - Execute custom Frida scripts.
 
 iOS specific features in `objection` include the ability to:
@@ -43,13 +43,13 @@ iOS specific features in `objection` include the ability to:
 - Dump data from common storage such as NSUserDefaults and the shared NSHTTPCookieStorage.
 - Dump various formats of information in human readable forms.
 - Bypass certain forms of TouchID restrictions.
-- Watch for method executions by targetting all methods in a class, or just a single method.
+- Watch for method executions by targeting all methods in a class, or just a single method.
 - Monitor the iOS pasteboard.
 - Dump encoded `.plist` files in a human readable format without relying on external parsers.
 
-Android specific features in `objection` inclulde the ability to:
+Android specific features in `objection` include the ability to:
 
-- List the applications Activities, Services and Broadcast reveivers.
+- List the applications Activities, Services and Broadcast receivers.
 - Start arbitrary Activities available in the target application.
 - Watch a class method, reporting execution as it happens.
 
@@ -82,7 +82,7 @@ A sample session, where `objection` is used to explore the applications environm
 ## prerequisites
 To run `objection`, all you need is the python3 interpreter to be available. The installation via `pip` should take care of all of the dependencies needed.
 
-As for the target mobile applications though, for iOS, an unencrypted IPA is needed and Android just the normal APK should be find. If you have the source code of the iOS application you want to explore, then you can simply embed and load the `FridaGadget.gylib` in the project.
+As for the target mobile applications though, for iOS, an unencrypted IPA is needed and Android just the normal APK should be fine. If you have the source code of the iOS application you want to explore, then you can simply embed and load the `FridaGadget.dylib` from within the Xcode project.
 
 ## installation
 Installation is simply a matter of `pip3 install objection`. This will give you the `objection` command.
