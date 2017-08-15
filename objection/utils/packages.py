@@ -167,7 +167,7 @@ class BasePlatformPatcher(object):
 
             location = shutil.which(cmd)
 
-            if len(location) <= 0:
+            if location is None:
                 click.secho('Unable to find {0}. Install it with: {1} before continuing.'.format(
                     cmd, attributes['installation']), fg='red', bold=True)
 
