@@ -380,12 +380,15 @@ class IosPatcher(BasePlatformPatcher):
             _, decoded_location = tempfile.mkstemp('decoded_provision')
 
             # Decode the mobile provision using macOS's security cms tool
-            delegator.run(
-                '{0} cms -D -i {1} > {2}'.format(
-                    self.required_commands['security']['location'],
-                    pf,
-                    decoded_location
-                ), timeout=self.command_run_timeout
+            delegator.run([
+                self.required_commands['security']['location'],
+                'cms',
+                '-D',
+                '-i',
+                pf,
+                '-o',
+                decoded_location
+                ], timeout=self.command_run_timeout
             )
 
             # read the expiration date from the profile
@@ -490,14 +493,12 @@ class IosPatcher(BasePlatformPatcher):
         shutil.copyfile(frida_gadget, os.path.join(self.app_folder, 'Frameworks', 'FridaGadget.dylib'))
 
         # patch the app binary
-        load_library_output = delegator.run(
-            '{0} {1} {2} {3} "{4}"'.format(
-                self.required_commands['insert_dylib']['location'],
-                '--strip-codesig',
-                '--inplace',
-                '@executable_path/Frameworks/FridaGadget.dylib',
-                self.app_binary),
-            timeout=self.command_run_timeout
+        load_library_output = delegator.run([
+            self.required_commands['insert_dylib']['location'],
+            '--strip-codesig',
+            '--inplace',
+            '@executable_path/Frameworks/FridaGadget.dylib',
+            self.app_binary], timeout=self.command_run_timeout
         )
 
         # check if the insert_dylib call may have failed
@@ -518,10 +519,14 @@ class IosPatcher(BasePlatformPatcher):
                     fg='green')
         for dylib in dylibs_to_sign:
             click.secho('Code signing: {0}'.format(os.path.basename(dylib)), dim=True)
-            delegator.run('{0} {1} {2} {3}'.format(self.required_commands['codesign']['location'],
-                                                   '-f -v -s',
-                                                   codesign_signature,
-                                                   dylib))
+            delegator.run([
+                self.required_commands['codesign']['location'],
+                '-f',
+                '-v',
+                '-s',
+                codesign_signature,
+                dylib]
+            )
 
     def archive_and_codesign(self, original_name: str, codesign_signature: str) -> None:
         """
@@ -552,15 +557,15 @@ class IosPatcher(BasePlatformPatcher):
         self.patched_codesigned_ipa_path = os.path.join(self.temp_directory, os.path.basename(
             '{0}-frida-codesigned.ipa'.format(original_name.strip('.ipa'))))
 
-        ipa_codesign = delegator.run(
-            '{0} -i {1} -m "{2}" -o "{3}" "{4}"'.format(
-                self.required_commands['applesign']['location'],
-                codesign_signature,
-                self.provision_file,
-                self.patched_codesigned_ipa_path,
-                self.patched_ipa_path,
-            ),
-            timeout=self.command_run_timeout
+        ipa_codesign = delegator.run([
+            self.required_commands['applesign']['location'],
+            '-i',
+            codesign_signature,
+            '-m',
+            self.provision_file,
+            '-o',
+            self.patched_codesigned_ipa_path,
+            self.patched_ipa_path], timeout=self.command_run_timeout
         )
 
         click.secho(ipa_codesign.err, dim=True)
@@ -828,10 +833,13 @@ class AndroidPatcher(BasePlatformPatcher):
         """
 
         if not self.aapt:
-            o = delegator.run('{0} dump badging {1}'.format(
+            o = delegator.run([
                 self.required_commands['aapt']['location'],
+                'dump',
+                'badging',
                 self.apk_source
-            ), timeout=self.command_run_timeout)
+                ], timeout=self.command_run_timeout
+            )
 
             if len(o.err) > 0:
                 click.secho('An error may have occured while running aapt.', fg='red')
@@ -877,11 +885,15 @@ class AndroidPatcher(BasePlatformPatcher):
 
         click.secho('Unpacking {0}'.format(self.apk_source), dim=True)
 
-        o = delegator.run('{0} d -f {1} -o {2}'.format(
+        o = delegator.run([
             self.required_commands['apktool']['location'],
-            self.apk_source,
-            self.apk_temp_directory
-        ), timeout=self.command_run_timeout)
+            'decode',
+            '-f',
+            '-o',
+            self.apk_temp_directory,
+            self.apk_source
+            ], timeout=self.command_run_timeout
+        )
 
         if len(o.err) > 0:
             click.secho('An error may have occured while extracting the APK.', fg='red')
@@ -1036,11 +1048,14 @@ class AndroidPatcher(BasePlatformPatcher):
         """
 
         click.secho('Rebuilding the APK with the frida-gadget loaded...', fg='green', dim=True)
-        o = delegator.run('{0} b {1} -o {2}'.format(
+        o = delegator.run([
             self.required_commands['apktool']['location'],
+            'build',
             self.apk_temp_directory,
+            '-o',
             self.apk_temp_frida_patched
-        ), timeout=self.command_run_timeout)
+            ], timeout=self.command_run_timeout
+        )
 
         if len(o.err) > 0:
             click.secho(('Rebuilding the APK may have failed. Read the following '
@@ -1064,13 +1079,19 @@ class AndroidPatcher(BasePlatformPatcher):
         here = os.path.abspath(os.path.dirname(__file__))
         keystore = os.path.join(here, 'assets', 'objection.jks')
 
-        o = delegator.run('{0} -sigalg SHA1withRSA -digestalg SHA1 -storepass {1} -keystore {2} {3} {4}'.format(
+        o = delegator.run([
             self.required_commands['jarsigner']['location'],
+            '-sigalg',
+            'SHA1withRSA',
+            '-digestalg',
+            'SHA1',
+            '-storepass',
             'basil-joule-bug',
+            '-keystore',
             keystore,
             self.apk_temp_frida_patched,
-            'objection'
-        ))
+            'objection']
+        )
 
         if len(o.err) > 0:
             click.secho('Signing the new APK may have failed.', fg='red')
