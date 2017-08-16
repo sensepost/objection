@@ -9,16 +9,24 @@ var ByteArrayOutputStream = Java.use("java.io.ByteArrayOutputStream");
 var CompressFormat = Java.use("android.graphics.Bitmap$CompressFormat");
 var Base64 = Java.use('android.util.Base64');
 
-var activityThread = ActivityThread.currentActivityThread();
-var currentApplication = ActivityThread.currentApplication();
-var context = currentApplication.getApplicationContext();
+var data;
 
-var activityRecords = activityThread.mActivities['value'].values().toArray().filter(function(activityRecord) {
-    return !Java.cast(activityRecord,ActivityClientRecord).paused['value'];
-});
+var populate_bytes = function () {
+    var activityThread = ActivityThread.currentActivityThread();
+    var currentApplication = ActivityThread.currentApplication();
+    var context = currentApplication.getApplicationContext();
+    var t0 = new Date().getTime();
+    var activityRecords = activityThread.mActivities['value'].values().toArray();
 
-if (activityRecords.length > 0) {
-    var currentActivity = Java.cast(Java.cast(activityRecords[0],ActivityClientRecord).activity['value'],Activity);
+    var currentActivity;
+
+    for (var i in activityRecords){
+        var activityRecord =  Java.cast(activityRecords[i],ActivityClientRecord);
+        if (!activityRecord.paused['value']){
+            currentActivity = Java.cast(Java.cast(activityRecord,ActivityClientRecord).activity['value'],Activity);
+            break;
+        }
+    }
 
     if (currentActivity){
         var view = currentActivity.getWindow().getDecorView().getRootView();
@@ -27,21 +35,13 @@ if (activityRecords.length > 0) {
         view.setDrawingCacheEnabled(false);
         var outputStream = ByteArrayOutputStream.$new();
         bitmap.compress(CompressFormat.PNG['value'],100,outputStream); 
-        send(JSON.stringify({
-            status: 'success',
-            error_reason: NaN,
-            type: 'android-screenshot',
-            data: Base64.encodeToString(outputStream.toByteArray(),0)
-        }));      
-        return;
-    }
-} else {
-    send(JSON.stringify({
-        status: 'error',
-        error_reason: 'Could not find current Activity. Is the application in the foreground?',
-        type: 'android-screenshot',
-        data: NaN
-    }));  
+        bytes = outputStream.buf['value'];
+    } 
 }
 
-
+rpc.exports = {
+    screenshot: function () {
+        Java.perform(function () { populate_bytes(); });
+        return bytes;
+    },
+};

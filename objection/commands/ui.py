@@ -127,15 +127,23 @@ def android_screenshot(args: list = None) -> None:
     hook = android_hook('screenshot/take')
 
     runner = FridaRunner(hook=hook)
-    runner.run()
+ 
+    api = runner.rpc_exports()
 
-    response = runner.get_last_message()
+    # download the file
+    data = api.screenshot()
 
-    if not response.is_successful():
-        click.secho('Failed to screenshot with error: {0}'.format(response.error_reason), fg='red')
+    # cleanup the runner
+    runner.unload_script()
+
+    if not data:
+        click.secho('Failed to take screenshot')
         return
 
+    image = bytearray(map(lambda x: x % 256, data))
+
     with open(destination, 'wb') as f:
-        f.write(base64.b64decode(response.data))
+        f.write(image)
 
     click.secho('Screenshot saved to: {0}'.format(destination), fg='green')
+
