@@ -1,0 +1,8 @@
+Command: android ui screenshot
+
+Usage: android ui screenshot <local png destination>
+
+Screenshots the current foregrounded Activity and saves it as a PNG locally.
+
+Examples:
+    android ios ui screenshot screenshot.png
