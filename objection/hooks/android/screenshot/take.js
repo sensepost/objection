@@ -15,7 +15,6 @@ var populate_bytes = function () {
     var activityThread = ActivityThread.currentActivityThread();
     var currentApplication = ActivityThread.currentApplication();
     var context = currentApplication.getApplicationContext();
-    var t0 = new Date().getTime();
     var activityRecords = activityThread.mActivities['value'].values().toArray();
 
     var currentActivity;
