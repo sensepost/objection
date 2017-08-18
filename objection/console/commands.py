@@ -298,7 +298,16 @@ COMMANDS = {
                         'exec': android_pinning.android_disable
                     }
                 }
-            }
+            },
+            'ui': {
+                'meta': 'Android user interface commands',
+                'commands': {
+                    'screenshot': {
+                        'meta': 'Screenshot the current Activity',
+                        'exec': ui.android_screenshot
+                    },
+                }
+            },
         },
     },
 

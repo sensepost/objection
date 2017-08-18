@@ -1,8 +1,9 @@
+import base64
 import click
 
 from ..state.device import device_state
 from ..utils.frida_transport import FridaRunner
-from ..utils.templates import ios_hook
+from ..utils.templates import ios_hook, android_hook
 
 
 def alert(args: list = None) -> None:
@@ -107,3 +108,42 @@ def bypass_touchid(args: list = None) -> None:
 
     runner = FridaRunner(hook=hook)
     runner.run_as_job(name='touchid-bypass')
+
+
+def android_screenshot(args: list = None) -> None:
+    """
+        Take an Android screenshot.
+
+        :param args:
+        :return:
+    """
+
+    if len(args) <= 0:
+        click.secho('Usage: android ui screenshot <local png destination>', bold=True)
+        return
+
+    destination = args[0]
+
+    hook = android_hook('screenshot/take')
+
+    runner = FridaRunner(hook=hook)
+ 
+    api = runner.rpc_exports()
+
+    # download the file
+    data = api.screenshot()
+
+    # cleanup the runner
+    runner.unload_script()
+
+    if not data:
+        click.secho('Failed to take screenshot')
+        return
+
+    image = bytearray(map(lambda x: x % 256, data))
+
+    with open(destination, 'wb') as f:
+        f.write(image)
+
+    click.secho('Screenshot saved to: {0}'.format(destination), fg='green')
+
