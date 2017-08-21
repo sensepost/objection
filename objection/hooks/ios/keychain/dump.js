@@ -143,6 +143,57 @@ function odas(raw_data) {
     }
 }
 
+function decodeACL(entry){
+    var SecAccessControlGetConstraints = new NativeFunction(ptr(Module.findExportByName("Security","SecAccessControlGetConstraints")),'pointer',['pointer']);
+    var finalDecodedValue = "";
+    if (entry.containsKey_(kSecAttrAccessControl)){
+        var accessControls = ObjC.Object(SecAccessControlGetConstraints(entry.objectForKey_(kSecAttrAccessControl)));
+        if (accessControls.handle != 0x00){
+            var accessControlEnumerator = accessControls.keyEnumerator();
+            var accessControlItemKey;
+            var finalUserPresence = "";
+            while ((accessControlItemKey = accessControlEnumerator.nextObject()) !== null) {
+            var accessControlItem = accessControls.objectForKey_(accessControlItemKey);
+            switch (odas(accessControlItemKey)) {
+                case "dacl":
+                    return "Default ACL";
+                case "osgn":
+                    finalDecodedValue += "PrivateKeyUsage "
+                case "od":
+                    var constraints = accessControlItem;
+                    var constraintEnumerator = constraints.keyEnumerator();
+                    var constraintItemKey;
+                    while ((constraintItemKey = constraintEnumerator.nextObject()) !== null){
+                        switch (odas(constraintItemKey)) {
+                            case "cpo":
+                                finalDecodedValue += " UserPresence "
+                                break;
+                            case "cup":
+                                finalDecodedValue += " DevicePasscode "
+                                break;
+                            case "pkofn":
+                                finalDecodedValue += (constraints.objectForKey_("pkofn") == 1 ? " Or " : " And ")
+                                break;
+                            case "cbio":
+                                finalDecodedValue += ((constraints.objectForKey_("cbio").count()) == 1 ? " TouchIDAny " : " TouchIDCurrentSet ")
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    break;
+                case "prp":
+                    finalDecodedValue += "ApplicationPassword"
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+    }
+    return finalDecodedValue;
+}
+
 // helper to lookup the constant name of a constant value
 function get_constant_for_value(v) {
 
@@ -259,7 +310,7 @@ for (item_class_index in item_classes) {
                 'negative': odas(search_result.objectForKey_(kSecAttrIsNegative)),
                 'custom_icon': odas(search_result.objectForKey_(kSecAttrHasCustomIcon)),
                 'protected': odas(search_result.objectForKey_(kSecProtectedDataItemAttr)),
-                'access_control': odas(search_result.objectForKey_(kSecAttrAccessControl)),
+                'access_control': decodeACL(search_result),
                 'accessible_attribute': get_constant_for_value(odas(search_result.objectForKey_(kSecAttrAccessible))),
                 'entitlement_group': odas(search_result.objectForKey_(kSecAttrAccessGroup)),
                 'generic': odas(search_result.objectForKey_(kSecAttrGeneric)),
