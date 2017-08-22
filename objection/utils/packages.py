@@ -12,9 +12,7 @@ import click
 import delegator
 import requests
 
-# Added
-import subprocess
-import sys
+from subprocess import list2cmdline
 
 # default paths
 objection_path = os.path.join(os.path.expanduser('~'), '.objection')
@@ -395,17 +393,6 @@ class IosPatcher(BasePlatformPatcher):
                 ]), timeout=self.command_run_timeout
             )
 
-            # Output not used, using 'call' instead of 'check_output'
-#            subprocess.call([
-#                self.required_commands['security']['location'],
-#                'cms',
-#                '-D',
-#                '-i',
-#                pf,
-#                '-o',
-#                decoded_location
-#                ])
-
             # read the expiration date from the profile
             with open(decoded_location, 'rb') as f:
                 parsed_data = plistlib.load(f)
@@ -515,13 +502,6 @@ class IosPatcher(BasePlatformPatcher):
             '@executable_path/Frameworks/FridaGadget.dylib',
             self.app_binary]), timeout=self.command_run_timeout
         )
-#        load_library_output = str(subprocess.check_output([
-#            self.required_commands['insert_dylib']['location'],
-#            '--strip-codesig',
-#            '--inplace',
-#            '@executable_path/Frameworks/FridaGadget.dylib',
-#            self.app_binary]), sys.stdout.encoding
-#        )
 
         # check if the insert_dylib call may have failed
         if 'Added LC_LOAD_DYLIB' not in load_library_output.out:
@@ -549,15 +529,6 @@ class IosPatcher(BasePlatformPatcher):
                 codesign_signature,
                 dylib])
             )
-            # No output checked, using 'call' instead of check_output
-#            subprocess.call([
-#                self.required_commands['codesign']['location'],
-#                '-f',
-#                '-v',
-#                '-s',
-#                codesign_signature,
-#                dylib]
-#            )
 
     def archive_and_codesign(self, original_name: str, codesign_signature: str) -> None:
         """
@@ -598,16 +569,6 @@ class IosPatcher(BasePlatformPatcher):
             self.patched_codesigned_ipa_path,
             self.patched_ipa_path]), timeout=self.command_run_timeout
         )
-#        ipa_codesign = str(subprocess.check_output([
-#            self.required_commands['applesign']['location'],
-#            '-i',
-#            codesign_signature,
-#            '-m',
-#            self.provision_file,
-#            '-o',
-#            self.patched_codesigned_ipa_path,
-#            self.patched_ipa_path]), sys.stdout.encoding
-#        )
 
         click.secho(ipa_codesign.err, dim=True)
 
@@ -881,13 +842,6 @@ class AndroidPatcher(BasePlatformPatcher):
                 self.apk_source
                 ]), timeout=self.command_run_timeout
             )
-#            o = str(subprocess.check_output([
-#                self.required_commands['aapt']['location'],
-#                'dump',
-#                'badging',
-#                self.apk_source
-#                ]), sys.stdout.encoding
-#            )
 
             if len(o.err) > 0:
                 click.secho('An error may have occured while running aapt.', fg='red')
@@ -942,15 +896,6 @@ class AndroidPatcher(BasePlatformPatcher):
             self.apk_source
             ]), timeout=self.command_run_timeout
         )
-#        o = str(subprocess.check_output([
-#            self.required_commands['apktool']['location'],
-#            'decode',
-#            '-f',
-#            '-o',
-#            self.apk_temp_directory,
-#            self.apk_source
-#            ]), sys.stdout.encoding
-#        )
 
         if len(o.err) > 0:
             click.secho('An error may have occured while extracting the APK.', fg='red')
@@ -1113,14 +1058,6 @@ class AndroidPatcher(BasePlatformPatcher):
             self.apk_temp_frida_patched
             ]), timeout=self.command_run_timeout
         )
-#        o = str(subprocess.check_output([
-#            self.required_commands['apktool']['location'],
-#            'build',
-#            self.apk_temp_directory,
-#            '-o',
-#            self.apk_temp_frida_patched
-#            ]), sys.stdout.encoding
-#        )
 
         if len(o.err) > 0:
             click.secho(('Rebuilding the APK may have failed. Read the following '
@@ -1157,19 +1094,6 @@ class AndroidPatcher(BasePlatformPatcher):
             self.apk_temp_frida_patched,
             'objection'])
         )
-#        o = str(subprocess.check_output([
-#            self.required_commands['jarsigner']['location'],
-#            '-sigalg',
-#            'SHA1withRSA',
-#            '-digestalg',
-#            'SHA1',
-#            '-storepass',
-#            'basil-joule-bug',
-#            '-keystore',
-#            keystore,
-#            self.apk_temp_frida_patched,
-#            'objection']), sys.stdout.encoding
-#        )
 
         if len(o.err) > 0:
             click.secho('Signing the new APK may have failed.', fg='red')
