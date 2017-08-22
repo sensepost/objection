@@ -382,7 +382,7 @@ class IosPatcher(BasePlatformPatcher):
             _, decoded_location = tempfile.mkstemp('decoded_provision')
 
             # Decode the mobile provision using macOS's security cms tool
-            delegator.run(subprocess.list2cmdline([
+            delegator.run(list2cmdline([
                 self.required_commands['security']['location'],
                 'cms',
                 '-D',
@@ -495,7 +495,7 @@ class IosPatcher(BasePlatformPatcher):
         shutil.copyfile(frida_gadget, os.path.join(self.app_folder, 'Frameworks', 'FridaGadget.dylib'))
 
         # patch the app binary
-        load_library_output = delegator.run(subprocess.list2cmdline([
+        load_library_output = delegator.run(list2cmdline([
             self.required_commands['insert_dylib']['location'],
             '--strip-codesig',
             '--inplace',
@@ -521,7 +521,7 @@ class IosPatcher(BasePlatformPatcher):
                     fg='green')
         for dylib in dylibs_to_sign:
             click.secho('Code signing: {0}'.format(os.path.basename(dylib)), dim=True)
-            delegator.run(subprocess.list2cmdline([
+            delegator.run(list2cmdline([
                 self.required_commands['codesign']['location'],
                 '-f',
                 '-v',
@@ -559,7 +559,7 @@ class IosPatcher(BasePlatformPatcher):
         self.patched_codesigned_ipa_path = os.path.join(self.temp_directory, os.path.basename(
             '{0}-frida-codesigned.ipa'.format(original_name.strip('.ipa'))))
 
-        ipa_codesign = delegator.run(subprocess.list2cmdline([
+        ipa_codesign = delegator.run(list2cmdline([
             self.required_commands['applesign']['location'],
             '-i',
             codesign_signature,
@@ -835,7 +835,7 @@ class AndroidPatcher(BasePlatformPatcher):
         """
 
         if not self.aapt:
-            o = delegator.run(subprocess.list2cmdline([
+            o = delegator.run(list2cmdline([
                 self.required_commands['aapt']['location'],
                 'dump',
                 'badging',
@@ -887,7 +887,7 @@ class AndroidPatcher(BasePlatformPatcher):
 
         click.secho('Unpacking {0}'.format(self.apk_source), dim=True)
 
-        o = delegator.run(subprocess.list2cmdline([
+        o = delegator.run(list2cmdline([
            self.required_commands['apktool']['location'],
             'decode',
             '-f',
@@ -1050,7 +1050,7 @@ class AndroidPatcher(BasePlatformPatcher):
         """
 
         click.secho('Rebuilding the APK with the frida-gadget loaded...', fg='green', dim=True)
-        o = delegator.run(subprocess.list2cmdline([
+        o = delegator.run(list2cmdline([
             self.required_commands['apktool']['location'],
             'build',
             self.apk_temp_directory,
@@ -1081,7 +1081,7 @@ class AndroidPatcher(BasePlatformPatcher):
         here = os.path.abspath(os.path.dirname(__file__))
         keystore = os.path.join(here, 'assets', 'objection.jks')
 
-        o = delegator.run(subprocess.list2cmdline([
+        o = delegator.run(list2cmdline([
             self.required_commands['jarsigner']['location'],
             '-sigalg',
             'SHA1withRSA',
