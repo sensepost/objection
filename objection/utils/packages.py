@@ -508,7 +508,7 @@ class IosPatcher(BasePlatformPatcher):
             click.secho('Injecting the load library to {0} might have failed.'.format(self.app_binary),
                         fg='yellow')
             click.secho(load_library_output.out, fg='red', dim=True)
-#            click.secho(load_library_output.err, fg='red')
+            click.secho(load_library_output.err, fg='red')
 
         # get the paths of all of the .dylib files in this applications
         # bundle. we will have to codesign all of them and not just the
