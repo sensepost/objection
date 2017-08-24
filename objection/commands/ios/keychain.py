@@ -58,11 +58,11 @@ def dump(args: list = None) -> None:
 
     if response.data:
         for entry in response.data:
-            data.append([entry['item_class'], entry['account'], entry['service'], entry['generic'], entry['data'], ])
+            data.append([entry['item_class'], entry['account'], entry['service'], entry['generic'], entry['access_control'], entry['data'], ])
 
         click.secho('Get all of the attributes by adding `--json keychain.json` to this command', dim=True)
         click.secho('')
-        click.secho(tabulate(data, headers=['Class', 'Account', 'Service', 'Generic', 'Data']))
+        click.secho(tabulate(data, headers=['Class', 'Account', 'Service', 'Generic', 'Access Control', 'Data']))
 
     else:
         click.secho('No keychain data could be found', fg='yellow')
