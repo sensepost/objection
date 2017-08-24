@@ -10,6 +10,9 @@ var NSKeyedUnarchiver = ObjC.classes.NSKeyedUnarchiver;
 var kCFBooleanTrue = ObjC.classes.__NSCFBoolean.numberWithBool_(true);
 var SecItemCopyMatching = new NativeFunction(
     ptr(Module.findExportByName('Security', 'SecItemCopyMatching')), 'pointer', ['pointer', 'pointer']);
+var SecAccessControlGetConstraints = new NativeFunction(
+    ptr(Module.findExportByName('Security', 'SecAccessControlGetConstraints')),
+    'pointer', ['pointer']);
 
 // constants
 var kSecReturnAttributes = 'r_Attributes',
@@ -143,55 +146,87 @@ function odas(raw_data) {
     }
 }
 
-function decodeACL(entry){
-    var SecAccessControlGetConstraints = new NativeFunction(ptr(Module.findExportByName("Security","SecAccessControlGetConstraints")),'pointer',['pointer']);
-    var finalDecodedValue = "";
-    if (entry.containsKey_(kSecAttrAccessControl)){
-        var accessControls = ObjC.Object(SecAccessControlGetConstraints(entry.objectForKey_(kSecAttrAccessControl)));
-        if (accessControls.handle != 0x00){
-            var accessControlEnumerator = accessControls.keyEnumerator();
-            var accessControlItemKey;
-            var finalUserPresence = "";
-            while ((accessControlItemKey = accessControlEnumerator.nextObject()) !== null) {
-            var accessControlItem = accessControls.objectForKey_(accessControlItemKey);
-            switch (odas(accessControlItemKey)) {
-                case "dacl":
-                    return "Default ACL";
-                case "osgn":
-                    finalDecodedValue += "PrivateKeyUsage "
-                case "od":
-                    var constraints = accessControlItem;
-                    var constraintEnumerator = constraints.keyEnumerator();
-                    var constraintItemKey;
-                    while ((constraintItemKey = constraintEnumerator.nextObject()) !== null){
-                        switch (odas(constraintItemKey)) {
-                            case "cpo":
-                                finalDecodedValue += " UserPresence "
-                                break;
-                            case "cup":
-                                finalDecodedValue += " DevicePasscode "
-                                break;
-                            case "pkofn":
-                                finalDecodedValue += (constraints.objectForKey_("pkofn") == 1 ? " Or " : " And ")
-                                break;
-                            case "cbio":
-                                finalDecodedValue += ((constraints.objectForKey_("cbio").count()) == 1 ? " TouchIDAny " : " TouchIDCurrentSet ")
-                                break;
-                            default:
-                                break;
-                        }
+// Decode the access control attributes on a keychain
+// entry into a human readable string. Getting an idea of what the
+// constriants actually are is done using an undocumented method,
+// SecAccessControlGetConstraints.
+function decode_acl(entry) {
+
+    // No access control? Move along.
+    if (!entry.containsKey_(kSecAttrAccessControl)) {
+        return '';
+    }
+
+    var access_controls = ObjC.Object(
+        SecAccessControlGetConstraints(entry.objectForKey_(kSecAttrAccessControl)));
+
+    // Ensure we were able to get the SecAccessControlRef
+    if (access_controls.handle == 0x00) {
+        return '';
+    }
+
+    var flags = [];
+    var access_control_enumerator = access_controls.keyEnumerator();
+    var access_control_item_key;
+
+    while ((access_control_item_key = access_control_enumerator.nextObject()) !== null) {
+
+        var access_control_item = access_controls.objectForKey_(access_control_item_key);
+
+        switch (odas(access_control_item_key)) {
+
+            // Defaults?
+            case 'dacl':
+                break;
+
+            case 'osgn':
+                flags.push['PrivateKeyUsage'];
+
+            case 'od':
+                var constraints = access_control_item;
+                var constraint_enumerator = constraints.keyEnumerator();
+                var constraint_item_key;
+
+                while ((constraint_item_key = constraint_enumerator.nextObject()) !== null) {
+
+                    switch (odas(constraint_item_key)) {
+                        case 'cpo':
+                            flags.push('kSecAccessControlUserPresence');
+                            break;
+
+                        case 'cup':
+                            flags.push('kSecAccessControlDevicePasscode');
+                            break;
+
+                        case 'pkofn':
+                            constraints.objectForKey_('pkofn') == 1 ?
+                                flags.push('Or') :
+                                flags.push('And');
+                            break;
+
+                        case 'cbio':
+                            constraints.objectForKey_('cbio').count() == 1 ?
+                                flags.push('kSecAccessControlTouchIDAny') :
+                                flags.push('kSecAccessControlTouchIDCurrentSet');
+                            break;
+
+                        default:
+                            break;
                     }
-                    break;
-                case "prp":
-                    finalDecodedValue += "ApplicationPassword"
-                    break;
-                default:
-                    break;
                 }
-            }
+
+                break;
+
+            case 'prp':
+                flags.push('ApplicationPassword');
+                break;
+
+            default:
+                break;
         }
     }
-    return finalDecodedValue;
+
+    return flags.join(' ');
 }
 
 // helper to lookup the constant name of a constant value
@@ -310,7 +345,7 @@ for (item_class_index in item_classes) {
                 'negative': odas(search_result.objectForKey_(kSecAttrIsNegative)),
                 'custom_icon': odas(search_result.objectForKey_(kSecAttrHasCustomIcon)),
                 'protected': odas(search_result.objectForKey_(kSecProtectedDataItemAttr)),
-                'access_control': decodeACL(search_result),
+                'access_control': decode_acl(search_result),
                 'accessible_attribute': get_constant_for_value(odas(search_result.objectForKey_(kSecAttrAccessible))),
                 'entitlement_group': odas(search_result.objectForKey_(kSecAttrAccessGroup)),
                 'generic': odas(search_result.objectForKey_(kSecAttrGeneric)),
