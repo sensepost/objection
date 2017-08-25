@@ -31,7 +31,12 @@ def dump(args: list = None) -> None:
         click.secho('Usage: ios keychain dump (--json <local destination>)', bold=True)
         return
 
-    click.secho('Reading the keychain...', dim=True)
+    click.secho('Note: You may be asked to authenticate using the devices passcode or TouchID')
+
+    if not _should_output_json(args):
+        click.secho('Get all of the attributes by adding `--json keychain.json` to this command', dim=True)
+
+    click.secho('Reading the iOS keychain...', dim=True)
     hook = ios_hook('keychain/dump')
     runner = FridaRunner(hook=hook)
     runner.run()
@@ -43,14 +48,20 @@ def dump(args: list = None) -> None:
         return
 
     if _should_output_json(args):
-        click.secho('Writing full keychain as json...', dim=True)
 
-        destination = args[1] if len(args[1]) > 0 else 'keychain.json'
-        with open(destination, 'w') as f:
-            f.write(json.dumps(response.data, indent=2))
+        destination = args[1]
 
-        click.secho('Dumped full keychain to: {0}'.format(destination), fg='green')
-        return
+        if destination:
+            click.secho('Writing full keychain as json to {0}...'.format(destination), dim=True)
+
+            with open(destination, 'w') as f:
+                f.write(json.dumps(response.data, indent=2))
+
+            click.secho('Dumped full keychain to: {0}'.format(destination), fg='green')
+            return
+
+        # simply output the json to the screen.
+        click.secho(json.dumps(response.data), indent=2)
 
     # refer to hooks/ios/keychain/dump.js for a key,value reference
 
@@ -58,11 +69,10 @@ def dump(args: list = None) -> None:
 
     if response.data:
         for entry in response.data:
-            data.append([entry['item_class'], entry['account'], entry['service'], entry['generic'], entry['access_control'], entry['data'], ])
+            data.append([entry['item_class'], entry['account'], entry['service'], entry['generic'], entry['data'], ])
 
-        click.secho('Get all of the attributes by adding `--json keychain.json` to this command', dim=True)
         click.secho('')
-        click.secho(tabulate(data, headers=['Class', 'Account', 'Service', 'Generic', 'Access Control', 'Data']))
+        click.secho(tabulate(data, headers=['Class', 'Account', 'Service', 'Generic', 'Data']))
 
     else:
         click.secho('No keychain data could be found', fg='yellow')

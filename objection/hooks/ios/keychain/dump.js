@@ -329,8 +329,6 @@ for (item_class_index in item_classes) {
             // agrp	kSecAttrAccessGroup	Keychain access group
             // pdmn	kSecAttrAccessible	Access restrictions (Data protection classes)
 
-            // TODO: Decode accc (eg: kSecAccessControlTouchIDCurrentSet)
-
             var keychain_entry = {
                 'item_class': get_constant_for_value(item_class),
                 'create_date': odas(search_result.objectForKey_(kSecAttrCreationDate)),
