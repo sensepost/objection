@@ -7,12 +7,11 @@ import shutil
 import tempfile
 import xml.etree.ElementTree as ElementTree
 import zipfile
+from subprocess import list2cmdline
 
 import click
 import delegator
 import requests
-
-from subprocess import list2cmdline
 
 # default paths
 objection_path = os.path.join(os.path.expanduser('~'), '.objection')
@@ -382,16 +381,17 @@ class IosPatcher(BasePlatformPatcher):
             _, decoded_location = tempfile.mkstemp('decoded_provision')
 
             # Decode the mobile provision using macOS's security cms tool
-            delegator.run(list2cmdline([
-                self.required_commands['security']['location'],
-                'cms',
-                '-D',
-                '-i',
-                pf,
-                '-o',
-                decoded_location
-                ]), timeout=self.command_run_timeout
-            )
+            delegator.run(list2cmdline(
+                [
+                    self.required_commands['security']['location'],
+                    'cms',
+                    '-D',
+                    '-i',
+                    pf,
+                    '-o',
+                    decoded_location
+                ]
+            ), timeout=self.command_run_timeout)
 
             # read the expiration date from the profile
             with open(decoded_location, 'rb') as f:
@@ -495,13 +495,15 @@ class IosPatcher(BasePlatformPatcher):
         shutil.copyfile(frida_gadget, os.path.join(self.app_folder, 'Frameworks', 'FridaGadget.dylib'))
 
         # patch the app binary
-        load_library_output = delegator.run(list2cmdline([
-            self.required_commands['insert_dylib']['location'],
-            '--strip-codesig',
-            '--inplace',
-            '@executable_path/Frameworks/FridaGadget.dylib',
-            self.app_binary]), timeout=self.command_run_timeout
-        )
+        load_library_output = delegator.run(list2cmdline(
+            [
+                self.required_commands['insert_dylib']['location'],
+                '--strip-codesig',
+                '--inplace',
+                '@executable_path/Frameworks/FridaGadget.dylib',
+                self.app_binary
+            ]
+        ), timeout=self.command_run_timeout)
 
         # check if the insert_dylib call may have failed
         if 'Added LC_LOAD_DYLIB' not in load_library_output.out:
@@ -559,16 +561,18 @@ class IosPatcher(BasePlatformPatcher):
         self.patched_codesigned_ipa_path = os.path.join(self.temp_directory, os.path.basename(
             '{0}-frida-codesigned.ipa'.format(original_name.strip('.ipa'))))
 
-        ipa_codesign = delegator.run(list2cmdline([
-            self.required_commands['applesign']['location'],
-            '-i',
-            codesign_signature,
-            '-m',
-            self.provision_file,
-            '-o',
-            self.patched_codesigned_ipa_path,
-            self.patched_ipa_path]), timeout=self.command_run_timeout
-        )
+        ipa_codesign = delegator.run(list2cmdline(
+            [
+                self.required_commands['applesign']['location'],
+                '-i',
+                codesign_signature,
+                '-m',
+                self.provision_file,
+                '-o',
+                self.patched_codesigned_ipa_path,
+                self.patched_ipa_path
+            ]
+        ), timeout=self.command_run_timeout)
 
         click.secho(ipa_codesign.err, dim=True)
 
@@ -835,13 +839,14 @@ class AndroidPatcher(BasePlatformPatcher):
         """
 
         if not self.aapt:
-            o = delegator.run(list2cmdline([
-                self.required_commands['aapt']['location'],
-                'dump',
-                'badging',
-                self.apk_source
-                ]), timeout=self.command_run_timeout
-            )
+            o = delegator.run(list2cmdline(
+                [
+                    self.required_commands['aapt']['location'],
+                    'dump',
+                    'badging',
+                    self.apk_source
+                ]
+            ), timeout=self.command_run_timeout)
 
             if len(o.err) > 0:
                 click.secho('An error may have occured while running aapt.', fg='red')
@@ -887,15 +892,16 @@ class AndroidPatcher(BasePlatformPatcher):
 
         click.secho('Unpacking {0}'.format(self.apk_source), dim=True)
 
-        o = delegator.run(list2cmdline([
-           self.required_commands['apktool']['location'],
-            'decode',
-            '-f',
-            '-o',
-            self.apk_temp_directory,
-            self.apk_source
-            ]), timeout=self.command_run_timeout
-        )
+        o = delegator.run(list2cmdline(
+            [
+                self.required_commands['apktool']['location'],
+                'decode',
+                '-f',
+                '-o',
+                self.apk_temp_directory,
+                self.apk_source
+            ]
+        ), timeout=self.command_run_timeout)
 
         if len(o.err) > 0:
             click.secho('An error may have occured while extracting the APK.', fg='red')
@@ -1050,14 +1056,15 @@ class AndroidPatcher(BasePlatformPatcher):
         """
 
         click.secho('Rebuilding the APK with the frida-gadget loaded...', fg='green', dim=True)
-        o = delegator.run(list2cmdline([
-            self.required_commands['apktool']['location'],
-            'build',
-            self.apk_temp_directory,
-            '-o',
-            self.apk_temp_frida_patched
-            ]), timeout=self.command_run_timeout
-        )
+        o = delegator.run(list2cmdline(
+            [
+                self.required_commands['apktool']['location'],
+                'build',
+                self.apk_temp_directory,
+                '-o',
+                self.apk_temp_frida_patched
+            ]
+        ), timeout=self.command_run_timeout)
 
         if len(o.err) > 0:
             click.secho(('Rebuilding the APK may have failed. Read the following '
