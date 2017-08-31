@@ -88,7 +88,7 @@ def load_script(args: list) -> None:
     # handler as there is no way to know which environment
     # it may be for here.
     if not _should_disable_exception_handler(args):
-        err_handler = template_env.get_template('generic-base.js')
+        err_handler = template_env.get_template('base/generic-base.js')
         hook = err_handler.render(content=hook)
 
     runner = FridaRunner(hook=hook)
