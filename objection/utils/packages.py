@@ -861,6 +861,10 @@ class AndroidPatcher(BasePlatformPatcher):
             Determines the class name for the activity that is
             launched on application startup.
 
+            This is done by first trying to parse the output of
+            aapt dump badging, then falling back to manually
+            parsing the AndroidManifest for activity-alias tags.
+
             :return:
         """
 
@@ -872,11 +876,44 @@ class AndroidPatcher(BasePlatformPatcher):
                 # ['launchable-activity: name=', 'com.app.activity', '  label=', 'bob']
                 activity = line.split('\'')[1]
 
-        if activity == '':
-            click.secho('Unable to determine the launchable activity for this app.', fg='red')
-            raise Exception('Unable to determine launchable activity')
+        # If we got the activity using aapt, great, return that.
+        if activity != '':
+            return activity
 
-        return activity
+        # if we dont have the activity yet, check out activity aliases
+
+        click.secho(('Unable to determine the launchable activity using aapt, trying '
+                     'to manually parse the AndroidManifest for activity aliases...'), dim=True, fg='yellow')
+
+        # Try and parse the manifest manually
+        manifest = self._get_android_manifest()
+        root = manifest.getroot()
+
+        # grab all of the activity-alias tags
+        for alias in root.findall('./application/activity-alias'):
+
+            # Take not of the current activity
+            current_activity = alias.get('{http://schemas.android.com/apk/res/android}targetActivity')
+            categories = alias.findall('./intent-filter/category')
+
+            # make sure we have categories for this alias
+            if categories is None:
+                continue
+
+            for category in categories:
+
+                # check if the name of this category is that of LAUNCHER
+                # its possible to have multiples, but once we determine one
+                # that fits we can just return and move on
+                category_name = category.get('{http://schemas.android.com/apk/res/android}name')
+
+                if category_name == 'android.intent.category.LAUNCHER':
+                    return current_activity
+
+        # getting here means we were unable to determine what the launchable
+        # activity is
+        click.secho('Unable to determine the launchable activity for this app.', fg='red')
+        raise Exception('Unable to determine launchable activity')
 
     def get_patched_apk_path(self) -> str:
         """
@@ -1118,6 +1155,7 @@ class AndroidPatcher(BasePlatformPatcher):
 
             :return:
         """
+        return
 
         click.secho('Cleaning up temp files...', dim=True)
 
