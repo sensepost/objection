@@ -872,6 +872,10 @@ class AndroidPatcher(BasePlatformPatcher):
                 # ['launchable-activity: name=', 'com.app.activity', '  label=', 'bob']
                 activity = line.split('\'')[1]
 
+        if activity == '':
+            click.secho('Unable to determine the launchable activity for this app.', fg='red')
+            raise Exception('Unable to determine launchable activity')
+
         return activity
 
     def get_patched_apk_path(self) -> str:
