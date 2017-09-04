@@ -332,8 +332,10 @@ def _ls_ios(path: str) -> None:
             attributes = file_data['attributes']
 
             table_data.append([
-                _get_key_if_exists(attributes, 'NSFileType'),
+                _get_key_if_exists(attributes, 'NSFileType').replace('NSFileType', ''),
                 _get_key_if_exists(attributes, 'NSFilePosixPermissions'),
+
+                _get_key_if_exists(attributes, 'NSFileProtectionKey').replace('NSFileProtection', ''),
 
                 # read / write permissions
                 file_data['readable'],
@@ -353,7 +355,8 @@ def _ls_ios(path: str) -> None:
             ])
 
         click.secho(tabulate(table_data,
-                             headers=['Type', 'Perms', 'Read', 'Write', 'Owner', 'Group', 'Size', 'Creation', 'Name']))
+                             headers=['NSFileType', 'Perms', 'NSFileProtection', 'Read',
+                                      'Write', 'Owner', 'Group', 'Size', 'Creation', 'Name']))
 
 
 def _ls_android(path: str) -> None:
