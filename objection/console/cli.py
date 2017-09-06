@@ -50,7 +50,9 @@ def cli(network: bool, host: str, port: int, gadget: str) -> None:
               help='A script to import and run before the repl polls the device for information.')
 @click.option('--hook-debug', '-d', required=False, default=False, is_flag=True,
               help='Print compiled hooks as they are run to the screen and logfile.')
-def explore(startup_command: str, startup_script: str, hook_debug: bool) -> None:
+@click.option('--quiet', '-q', required=False, default=False, is_flag=True,
+              help='Do not display the objection logo on startup.')
+def explore(startup_command: str, startup_script: str, hook_debug: bool, quiet: bool) -> None:
     """
         Start the objection exploration REPL.
     """
@@ -84,7 +86,7 @@ def explore(startup_command: str, startup_script: str, hook_debug: bool) -> None
         click.secho('Error: {0}'.format(e), fg='red')
 
     # run the REPL
-    r.start_repl()
+    r.start_repl(quiet=quiet)
 
 
 @cli.command()

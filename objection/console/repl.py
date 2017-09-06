@@ -346,7 +346,7 @@ class Repl(object):
 
         return False
 
-    def start_repl(self) -> None:
+    def start_repl(self, quiet: bool) -> None:
         """
             Start the objection repl.
         """
@@ -362,8 +362,9 @@ class Repl(object):
         by: @leonjza from @sensepost
 """).format(__version__)
 
-        click.secho(banner, bold=True)
-        click.secho('[tab] for command suggestions', fg='white', dim=True)
+        if not quiet:
+            click.secho(banner, bold=True)
+            click.secho('[tab] for command suggestions', fg='white', dim=True)
 
         # the main application loop is here, reading inputs provided by
         # prompt_toolkit and sending it off the the needed handlers
