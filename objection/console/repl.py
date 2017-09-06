@@ -64,7 +64,7 @@ class PromptStyle(Style):
         return style_from_dict(styles)
 
     def get_style(self) -> dict:
-        self.return_ = """
+        """
             Return the style for this Class.
 
             :return:
