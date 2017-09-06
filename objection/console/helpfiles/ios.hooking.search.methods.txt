@@ -1,0 +1,10 @@
+Command: ios hooking search methods
+
+Usage: ios hooking search methods <search string>
+
+Search for methods in classes in the current Objective-C runtime with the 
+search string as part of the method name.
+
+Examples:
+   ios hooking search methods keychain
+   ios hooking search methods sslpinning

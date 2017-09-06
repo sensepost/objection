@@ -8,9 +8,9 @@ from ..commands import ui
 from ..commands.android import command
 from ..commands.android import hooking as android_hooking
 from ..commands.android import intents
+from ..commands.android import keystore
 from ..commands.android import pinning as android_pinning
 from ..commands.android import root
-from ..commands.android import keystore
 from ..commands.ios import cookies
 from ..commands.ios import hooking as ios_hooking
 from ..commands.ios import jailbreak
@@ -434,8 +434,21 @@ COMMANDS = {
                         'meta': 'Set various values',
                         'commands': {
                             'return_value': {
-                                'meta': 'Set a methods return value. Supports only boolean returns.',
+                                'meta': 'Set a methods return value. Supports only boolean returns',
                                 'exec': ios_hooking.set_method_return_value
+                            }
+                        }
+                    },
+                    'search': {
+                        'meta': 'Search for various classes and or methods',
+                        'commands': {
+                            'classes': {
+                                'meta': 'Search for Objective-C classes matching a name',
+                                'exec': ios_hooking.search_class
+                            },
+                            'methods': {
+                                'meta': 'Search for Objective-C method matching a name',
+                                'exec': ios_hooking.search_method
                             }
                         }
                     }

@@ -301,3 +301,78 @@ def set_method_return_value(args: list) -> None:
         ios_hook('hooking/set-return'), selector=selector, retval=_string_is_true(retval))
 
     runner.run_as_job(name='set-return-value')
+
+
+def search_class(args: list) -> None:
+    """
+        Searching for Objective-C classes in the current
+        application by name.
+
+        :param args:
+        :return:
+    """
+
+    if len(args) < 1:
+        click.secho('Usage: ios hooking search classes <name>', bold=True)
+        return
+
+    search = args[0]
+
+    runner = FridaRunner()
+    runner.set_hook_with_data(
+        ios_hook('hooking/search-class'), search=search)
+    runner.run()
+
+    response = runner.get_last_message()
+
+    if not response.is_successful():
+        click.secho('Failed to search for classes with error: {0}'.format(response.error_reason), fg='red')
+        return None
+
+    if response.data:
+
+        # dump the classes to screen
+        for classname in response.data:
+            click.secho(classname)
+
+        click.secho('\nFound {0} classes'.format(len(response.data)), bold=True)
+
+    else:
+        click.secho('No classes found')
+
+
+def search_method(args: list) -> None:
+    """
+        Search for Objective-C methods by name.
+
+        :param args:
+        :return:
+    """
+
+    if len(args) < 1:
+        click.secho('Usage: ios hooking search methods <name>', bold=True)
+        return
+
+    search = args[0]
+
+    runner = FridaRunner()
+    runner.set_hook_with_data(
+        ios_hook('hooking/search-method'), search=search)
+    runner.run()
+
+    response = runner.get_last_message()
+
+    if not response.is_successful():
+        click.secho('Failed to search for methods with error: {0}'.format(response.error_reason), fg='red')
+        return None
+
+    if response.data:
+
+        # dump the methods to screen
+        for method in response.data:
+            click.secho(method)
+
+        click.secho('\nFound {0} methods'.format(len(response.data)), bold=True)
+
+    else:
+        click.secho('No methods found')

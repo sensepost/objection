@@ -1,0 +1,10 @@
+Command: ios hooking search classes
+
+Usage: ios hooking search classes <search string>
+
+Search for classes in the current Objective-C runtime with the search string
+as part of the class name.
+
+Examples:
+   ios hooking search classes jailbreak
+   ios hooking search classes sslpinning
