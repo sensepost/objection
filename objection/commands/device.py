@@ -3,6 +3,7 @@ from tabulate import tabulate
 
 from ..state.device import device_state
 from ..utils.frida_transport import FridaRunner
+from ..utils.helpers import pretty_concat
 from ..utils.templates import generic_hook, ios_hook, android_hook
 
 
@@ -39,7 +40,8 @@ def get_device_info() -> tuple:
 
         # we have some device information for iOS, return it!
         if response.is_successful():
-            return response.deviceName, response.systemName, response.model, response.systemVersion
+            return pretty_concat(response.applicationName, 30, left=True), \
+                   response.systemName, response.model, response.systemVersion
 
         raise Exception('Failed to get device information')
 
@@ -53,7 +55,8 @@ def get_device_info() -> tuple:
 
         # we have some device information for iOS, return it!
         if response.is_successful():
-            return response.model, response.device, response.brand, response.version
+            return pretty_concat(response.application_name, 30, left=True), \
+                   response.device, response.brand, response.version
 
         raise Exception('Failed to get device information')
 

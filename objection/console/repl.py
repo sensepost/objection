@@ -54,7 +54,7 @@ class PromptStyle(Style):
             Token: '#ff0066',
 
             # Prompt.
-            Token.Devicename: '#ff0000',
+            Token.Applicationname: '#ff0000',
             Token.On: '#00aa00',
             Token.Devicetype: '#00ff48',
             Token.Version: '#00ff48',
@@ -64,7 +64,7 @@ class PromptStyle(Style):
         return style_from_dict(styles)
 
     def get_style(self) -> dict:
-        """
+        self.return_ = """
             Return the style for this Class.
 
             :return:
@@ -97,7 +97,7 @@ class Repl(object):
         device_name, system_name, model, system_version = device_info
 
         self.prompt_tokens = [
-            (Token.Devicename, device_name),
+            (Token.Applicationname, device_name),
             (Token.On, ' on '),
             (Token.Devicetype, '(' + model + ': '),
             (Token.Version, system_version + ') '),
@@ -119,7 +119,7 @@ class Repl(object):
             return self.prompt_tokens
 
         return [
-            (Token.Devicename, 'unknown device'),
+            (Token.Applicationname, 'unknown application'),
             (Token.On, ''),
             (Token.Devicetype, ''),
             (Token.Version, ' '),
