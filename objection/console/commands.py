@@ -10,6 +10,7 @@ from ..commands.android import hooking as android_hooking
 from ..commands.android import intents
 from ..commands.android import pinning as android_pinning
 from ..commands.android import root
+from ..commands.android import keystore
 from ..commands.ios import cookies
 from ..commands.ios import hooking as ios_hooking
 from ..commands.ios import jailbreak
@@ -144,6 +145,7 @@ COMMANDS = {
     },
 
     # sqlite commands
+
     'sqlite': {
         'meta': 'Work with SQLite databases',
         'commands': {
@@ -182,6 +184,7 @@ COMMANDS = {
     },
 
     # jobs commands
+
     'jobs': {
         'meta': 'Work with objection jobs',
         'commands': {
@@ -198,6 +201,7 @@ COMMANDS = {
     },
 
     # generic ui commands
+
     'ui': {
         'meta': 'Generic user interface commands',
         'commands': {
@@ -209,6 +213,7 @@ COMMANDS = {
     },
 
     # android commands
+
     'android': {
         'meta': 'Commands specific to Android',
         'commands': {
@@ -267,6 +272,15 @@ COMMANDS = {
                         }
                     }
                 },
+            },
+            'keystore': {
+                'meta': 'Commands to work with the Android KeyStore',
+                'commands': {
+                    'list': {
+                        'meta': 'Lists entries in the Android KeyStore',
+                        'exec': keystore.entries
+                    }
+                }
             },
             'intent': {
                 'meta': 'Commands to work with Android intents',
