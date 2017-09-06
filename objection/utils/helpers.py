@@ -17,17 +17,28 @@ def list_current_jobs() -> dict:
     return resp
 
 
-def pretty_concat(data: str, at_most: int = 75) -> str:
+def pretty_concat(data: str, at_most: int = 75, left: bool = False) -> str:
     """
         Limits a string to the maximum value of 'at_most',
-        ending it off with 3 '.'s.
+        ending it off with 3 '.'s. If true is specified for
+        the left parameter, the end of the string will be
+        used with 3 '.'s prefixed.
 
         :param data:
         :param at_most:
+        :param left:
         :return:
+
     """
 
-    return data[:at_most] + (data[at_most:] and '...')
+    # do nothing if we are below the max length
+    if len(data) <= at_most:
+        return data
+
+    if left:
+        return '...' + data[len(data) - at_most:]
+
+    return data[:at_most] + '...'
 
 
 def sizeof_fmt(num: float, suffix: str = 'B') -> str:
