@@ -1,0 +1,10 @@
+Command: android hooking search classes
+
+Usage: android hooking search classes <search string>
+
+Search for classes in the current Java runtime with the search string
+as part of the class name.
+
+Examples:
+   android hooking search classes jailbreak
+   android hooking search classes sslpinning

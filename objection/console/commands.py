@@ -270,6 +270,15 @@ COMMANDS = {
                                 'exec': android_hooking.set_method_return_value
                             }
                         }
+                    },
+                    'search': {
+                        'meta': 'Search for various classess and or methods',
+                        'commands': {
+                            'classes': {
+                                'meta': 'Search for Java classes matching a name',
+                                'exec': android_hooking.search_class
+                            }
+                        }
                     }
                 },
             },

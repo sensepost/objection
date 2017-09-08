@@ -228,3 +228,40 @@ def set_method_return_value(args: list = None) -> None:
         android_hook('hooking/set-return'), class_name=class_name, method_name=method_name, retval=retval)
 
     runner.run_as_job(name='set-return-value')
+
+
+def search_class(args: list) -> None:
+    """
+        Searches the current Android application for instances
+        of a class.
+
+        :param args:
+        :return:
+    """
+
+    if len(args) < 1:
+        click.secho('Usage: android hooking search classes <name>', bold=True)
+        return
+
+    search = args[0]
+
+    runner = FridaRunner()
+    runner.set_hook_with_data(android_hook('hooking/search-class'), search=search)
+    runner.run()
+
+    response = runner.get_last_message()
+
+    if not response.is_successful():
+        click.secho('Failed to search for classes with error: {0}'.format(response.error_reason), fg='red')
+        return None
+
+    if response.data:
+
+        # dump the classes to screen
+        for classname in response.data:
+            click.secho(classname)
+
+        click.secho('\nFound {0} classes'.format(len(response.data)), bold=True)
+
+    else:
+        click.secho('No classes found')
