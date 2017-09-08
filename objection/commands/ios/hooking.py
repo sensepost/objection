@@ -319,8 +319,7 @@ def search_class(args: list) -> None:
     search = args[0]
 
     runner = FridaRunner()
-    runner.set_hook_with_data(
-        ios_hook('hooking/search-class'), search=search)
+    runner.set_hook_with_data(ios_hook('hooking/search-class'), search=search)
     runner.run()
 
     response = runner.get_last_message()
@@ -356,8 +355,7 @@ def search_method(args: list) -> None:
     search = args[0]
 
     runner = FridaRunner()
-    runner.set_hook_with_data(
-        ios_hook('hooking/search-method'), search=search)
+    runner.set_hook_with_data(ios_hook('hooking/search-method'), search=search)
     runner.run()
 
     response = runner.get_last_message()
