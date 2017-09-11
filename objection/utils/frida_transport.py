@@ -255,6 +255,7 @@ class FridaRunner(object):
 
         return self.messages[-1]
 
+    @staticmethod
     def get_session(self):
         """
             Attempt to get a Frida session.

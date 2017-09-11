@@ -1052,7 +1052,7 @@ class AndroidPatcher(BasePlatformPatcher):
 
         # ensure we got a marker
         if len(inject_marker) <= 0:
-            raise Exception('Unable to determine position to inject a loadLibrary call', fg='red')
+            raise Exception('Unable to determine position to inject a loadLibrary call')
 
         # pick the first position for the inject. add one line as we
         # want to inject right be low the comment we matched
