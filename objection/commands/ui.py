@@ -1,4 +1,3 @@
-import base64
 import click
 
 from ..state.device import device_state
@@ -127,7 +126,7 @@ def android_screenshot(args: list = None) -> None:
     hook = android_hook('screenshot/take')
 
     runner = FridaRunner(hook=hook)
- 
+
     api = runner.rpc_exports()
 
     # download the file
@@ -146,4 +145,3 @@ def android_screenshot(args: list = None) -> None:
         f.write(image)
 
     click.secho('Screenshot saved to: {0}'.format(destination), fg='green')
-
