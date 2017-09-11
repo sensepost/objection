@@ -13,7 +13,7 @@ var response = {
     data: {
         cwd: context.getFilesDir().getAbsolutePath().toString(),
     }
-}
+};
 
 send(JSON.stringify(response));
 

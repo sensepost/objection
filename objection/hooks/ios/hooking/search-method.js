@@ -29,6 +29,6 @@ var response = {
     error_reason: NaN,
     type: 'ios-method-search',
     data: methods
-}
+};
 
 send(JSON.stringify(response));

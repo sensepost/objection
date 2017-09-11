@@ -32,7 +32,7 @@ var response = {
     error_reason: NaN,
     type: 'android-keystore-list',
     data: entries
-}
+};
 
 send(JSON.stringify(response));
 

@@ -15,7 +15,7 @@ var response = {
         systemVersion: String(UIDevice.currentDevice().systemVersion()),
         identifierForVendor: String(UIDevice.currentDevice().identifierForVendor()),
     }
-}
+};
 
 send(JSON.stringify(response));
 

@@ -29,4 +29,4 @@ ObjC.schedule(ObjC.mainQueue, function () {
     // on the heap, we have direct access through UIApplication:
     UIApplication.sharedApplication().keyWindow()
         .rootViewController().presentViewController_animated_completion_(alert, true, NULL);
-})
+});

@@ -16,6 +16,6 @@ var response = {
     data: {
         exports
     }
-}
+};
 
 send(JSON.stringify(response));

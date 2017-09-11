@@ -27,7 +27,7 @@ if (cookieJar.count() > 0) {
             // partition: cookie.partition().toString(),
             path: cookie.path().toString(),
             isSecure: cookie.isSecure().toString()
-        }
+        };
 
         cookies.push(cookie_data);
     }
@@ -38,7 +38,7 @@ var response = {
     error_reason: NaN,
     type: 'cookies-get',
     data: cookies
-}
+};
 
 send(JSON.stringify(response));
 

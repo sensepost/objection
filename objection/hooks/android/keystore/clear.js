@@ -24,7 +24,7 @@ var response = {
     error_reason: NaN,
     type: 'android-keystore-clear',
     data: NaN
-}
+};
 
 send(JSON.stringify(response));
 

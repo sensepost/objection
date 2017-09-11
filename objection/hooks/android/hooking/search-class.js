@@ -15,6 +15,6 @@ var response = {
     error_reason: NaN,
     type: 'android-class-search',
     data: classes
-}
+};
 
 send(JSON.stringify(response));

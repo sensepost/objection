@@ -2,7 +2,7 @@
 // operating system response to evaluatePolicy.
 
 var resolver = new ApiResolver('objc');
-var LAContext_evaluatePolicy_localizedReason_reply = {}
+var LAContext_evaluatePolicy_localizedReason_reply = {};
 
 resolver.enumerateMatches('-[LAContext evaluatePolicy:localizedReason:reply:]', {
     onMatch: function (match) {

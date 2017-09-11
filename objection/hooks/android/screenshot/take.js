@@ -42,7 +42,7 @@ var populate_bytes = function () {
         bitmap.compress(CompressFormat.PNG['value'], 100, outputStream);
         bytes = outputStream.buf['value'];
     }
-}
+};
 
 rpc.exports = {
     screenshot: function () {

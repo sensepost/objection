@@ -21,7 +21,7 @@ var response = {
     error_reason: NaN,
     type: 'file-upload',
     data: 'File written to: ' + destination
-}
+};
 
 // send the response message
 send(JSON.stringify(response));

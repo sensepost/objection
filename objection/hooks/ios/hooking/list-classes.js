@@ -12,6 +12,6 @@ var response = {
     error_reason: NaN,
     type: 'ios-classes',
     data: classes
-}
+};
 
 send(JSON.stringify(response));

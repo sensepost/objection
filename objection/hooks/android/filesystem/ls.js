@@ -22,7 +22,7 @@ var data = {
     readable: Boolean(readable),
     writable: Boolean(writable),
     files: {}
-}
+};
 
 // if we can read the directory, process the files.
 if (Boolean(readable)) {
@@ -44,7 +44,7 @@ if (Boolean(readable)) {
                 lastModified: file.lastModified(),
                 size: file.length(),
             }
-        }
+        };
 
         data.files[file.getName()] = file_data;
 
@@ -56,7 +56,7 @@ var response = {
     error_reason: NaN,
     type: 'list-directory-contents',
     data: data
-}
+};
 
 send(JSON.stringify(response));
 

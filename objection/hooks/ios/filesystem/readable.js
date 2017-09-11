@@ -18,7 +18,7 @@ var response = {
         path: '{{ path }}',
         readable: Boolean(readable)
     }
-}
+};
 
 send(JSON.stringify(response));
 

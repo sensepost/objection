@@ -47,7 +47,7 @@ SSLContext_init.implementation = function (keyManager, trustManager, secureRando
     }));
 
     SSLContext_init.call(this, keyManager, TrustManagers, secureRandom);
-}
+};
 
 // OkHTTP v3.x
 

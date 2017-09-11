@@ -40,7 +40,7 @@ var response = {
         stdout: stdout_string_builder.toString(),
         stderr: stderr_string_builder.toString(),
     }
-}
+};
 
 send(JSON.stringify(response));
 

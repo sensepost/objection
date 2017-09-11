@@ -16,6 +16,6 @@ var response = {
     data: {
         modules
     }
-}
+};
 
 send(JSON.stringify(response));

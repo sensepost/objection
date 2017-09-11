@@ -11,7 +11,7 @@ var response = {
     data: {
         cwd: String(BundleURL),
     }
-}
+};
 
 send(JSON.stringify(response));
 

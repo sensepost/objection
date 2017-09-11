@@ -37,7 +37,7 @@ var response = {
     error_reason: NaN,
     type: 'ios-keychaindump',
     data: {}
-}
+};
 
 send(JSON.stringify(response), image_data);
 

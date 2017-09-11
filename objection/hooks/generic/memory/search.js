@@ -25,6 +25,6 @@ var response = {
     error_reason: NaN,
     type: 'memory-search',
     data: match_adresses
-}
+};
 
 send(JSON.stringify(response));

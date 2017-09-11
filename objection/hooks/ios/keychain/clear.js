@@ -41,7 +41,7 @@ var response = {
     error_reason: NaN,
     type: 'ios-keychaindump',
     data: 'Keychain cleared'
-}
+};
 
 send(JSON.stringify(response));
 

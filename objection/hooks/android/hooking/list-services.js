@@ -10,7 +10,7 @@ var GET_SERVICES = PackageManager.GET_SERVICES.value;
 var currentApplication = ActivityThread.currentApplication();
 var context = currentApplication.getApplicationContext();
 
-var services = []
+var services = [];
 
 currentApplication.mLoadedApk['value'].mServices['value'].values().toArray().map(function (arrayMap) {
 
@@ -32,6 +32,6 @@ var response = {
     error_reason: NaN,
     type: 'android-services',
     data: services
-}
+};
 
 send(JSON.stringify(response));

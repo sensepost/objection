@@ -22,6 +22,6 @@ var response = {
         user: Build.USER.value.toString(),
         version: Java.androidVersion,
     }
-}
+};
 
 send(JSON.stringify(response));

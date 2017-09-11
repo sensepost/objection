@@ -9,7 +9,7 @@ try {
         error_reason: err.message,
         type: 'global-exception',
         data: {}
-    }
+    };
 
     send(JSON.stringify(response));
 }

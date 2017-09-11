@@ -5,6 +5,6 @@ var response = {
     error_reason: NaN,
     type: 'ios-ui-dump',
     data: ObjC.classes.UIWindow.keyWindow().recursiveDescription().toString()
-}
+};
 
 send(JSON.stringify(response));

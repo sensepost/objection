@@ -20,7 +20,7 @@ if (Java.available) {
                     error_reason: err.message,
                     type: 'java-perform-exception',
                     data: {}
-                }
+                };
 
                 send(JSON.stringify(response));
             }
@@ -33,7 +33,7 @@ if (Java.available) {
             error_reason: err.message,
             type: 'global-exception',
             data: {}
-        }
+        };
 
         send(JSON.stringify(response));
     }
@@ -45,7 +45,7 @@ if (Java.available) {
         error_reason: 'Java runtime is not available.',
         type: 'global-exception',
         data: {}
-    }
+    };
 
     send(JSON.stringify(response));
 }

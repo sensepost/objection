@@ -3,7 +3,7 @@
 
 var resolver = new ApiResolver('objc');
 var method = {};
-var argument_count = '{{ argument_count }}'
+var argument_count = '{{ argument_count }}';
 
 resolver.enumerateMatches('{{ method }}', {
     onMatch: function (match) {

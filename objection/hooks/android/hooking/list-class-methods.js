@@ -12,6 +12,6 @@ var response = {
     error_reason: NaN,
     type: 'android-class-methods',
     data: methods
-}
+};
 
 send(JSON.stringify(response));

@@ -10,6 +10,6 @@ var response = {
         process_platform: Process.platform,
         process_has_debugger: Process.isDebuggerAttached()
     }
-}
+};
 
 send(JSON.stringify(response));

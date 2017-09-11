@@ -27,7 +27,7 @@ String.contains.implementation = function (check) {
 
     // call the original method
     this.contains.apply(this, arguments);
-}
+};
 
 // exec check for su command.
 Runtime.exec.overload('java.lang.String').implementation = function (command) {
@@ -46,7 +46,7 @@ Runtime.exec.overload('java.lang.String').implementation = function (command) {
 
     // call the original method
     this.contains.apply(this, arguments);
-}
+};
 
 // file existance checks.
 File.exists.implementation = function () {
@@ -69,4 +69,4 @@ File.exists.implementation = function () {
 
     // call the original method
     this.contains.apply(this, arguments);
-}
+};

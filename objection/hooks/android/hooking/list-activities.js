@@ -9,7 +9,7 @@ var GET_ACTIVITIES = PackageManager.GET_ACTIVITIES.value;
 var currentApplication = ActivityThread.currentApplication();
 var context = currentApplication.getApplicationContext();
 
-var activities = []
+var activities = [];
 
 activities = activities.concat(context.getPackageManager()
     .getPackageInfo(context.getPackageName(), GET_ACTIVITIES).activities['value'].map(function (activity_info) {
@@ -23,6 +23,6 @@ var response = {
     error_reason: NaN,
     type: 'android-activities',
     data: activities
-}
+};
 
 send(JSON.stringify(response));

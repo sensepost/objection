@@ -19,4 +19,4 @@ eval('target_class.{{ method_name }}').implementation = function () {
     }));
 
     return '{{ retval }}' == 'True' ? true : false
-}
+};

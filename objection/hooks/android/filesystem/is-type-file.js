@@ -9,7 +9,7 @@ var response = {
     error_reason: NaN,
     type: 'is-type-file',
     data: Boolean(file.isFile())
-}
+};
 
 send(JSON.stringify(response));
 

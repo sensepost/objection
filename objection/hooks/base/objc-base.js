@@ -11,7 +11,7 @@ if (ObjC.available) {
             error_reason: err.message,
             type: 'global-exception',
             data: {}
-        }
+        };
 
         send(JSON.stringify(response));
     }
@@ -23,7 +23,7 @@ if (ObjC.available) {
         error_reason: 'Objective-C runtime is not available.',
         type: 'global-exception',
         data: {}
-    }
+    };
 
     send(JSON.stringify(response));
 }

@@ -19,7 +19,7 @@ var response = {
     data: {
         path: '{{ path }}'
     }
-}
+};
 
 // send the response message and the bytes 'downloaded'
 send(JSON.stringify(response), bytes);

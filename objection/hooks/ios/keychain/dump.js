@@ -94,7 +94,7 @@ var kSecConstantReverse = {
     'aku': 'kSecAttrAccessibleWhenUnlockedThisDeviceOnly',
     'cku': 'kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly',
     'dku': 'kSecAttrAccessibleAlwaysThisDeviceOnly',
-}
+};
 
 // the base query dictionary to use for the keychain lookups
 var search_dictionary = NSMutableDictionary.alloc().init();
@@ -363,7 +363,7 @@ var response = {
     error_reason: NaN,
     type: 'ios-keychaindump',
     data: keychain_items
-}
+};
 
 send(JSON.stringify(response));
 

@@ -18,7 +18,7 @@ var response = {
         path: '{{ path }}',
         writable: Boolean(writable)
     }
-}
+};
 
 send(JSON.stringify(response));
 

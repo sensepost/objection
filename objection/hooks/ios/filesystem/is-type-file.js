@@ -25,7 +25,7 @@ var response = {
     error_reason: 'Not a file or could not read attributes',
     type: 'is-type-file',
     data: false
-}
+};
 
 // if we were able to get attributes for the path, try and
 // read the NSFileType key 

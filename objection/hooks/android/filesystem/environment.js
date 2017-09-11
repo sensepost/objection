@@ -11,14 +11,14 @@ var data = {
     codeCacheDirectory: context.getCodeCacheDir().getAbsolutePath().toString(),
     obbDir: context.getObbDir().getAbsolutePath().toString(),
     packageCodePath: context.getPackageCodePath().toString(),
-}
+};
 
 var response = {
     status: 'success',
     error_reason: NaN,
     type: 'environment-directories',
     data: data 
-}
+};
 
 send(JSON.stringify(response));
 

@@ -25,7 +25,7 @@ var response = {
     error_reason: NaN,
     type: 'file-upload',
     data: 'File written to: ' + file.getAbsolutePath()
-}
+};
 
 // send the response message
 send(JSON.stringify(response));

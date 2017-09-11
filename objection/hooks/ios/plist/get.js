@@ -9,7 +9,7 @@ var response = {
     error_reason: NaN,
     type: 'plist-get',
     data: data.toString() 
-}
+};
 
 send(JSON.stringify(response));
 

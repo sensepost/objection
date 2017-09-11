@@ -49,7 +49,7 @@ var NSApplicationDirectory = 1,
 function getPathForNSLocation(NSSomeLocationDirectory) {
 
     var p = fm.URLsForDirectory_inDomains_(NSSomeLocationDirectory, NSUserDomainMask)
-        .lastObject()
+        .lastObject();
 
     // check that the lookup had data
     if (p) {
@@ -81,14 +81,14 @@ var data = {
     // data from the NSBundle
     ReceiptPath: mb.appStoreReceiptURL().path().toString(),
     ResourcePath: mb.resourcePath().toString(),
-}
+};
 
 var response = {
     status: 'success',
     error_reason: NaN,
     type: 'environment-directories',
     data: data 
-}
+};
 
 send(JSON.stringify(response));
 

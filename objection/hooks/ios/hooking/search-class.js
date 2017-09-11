@@ -17,6 +17,6 @@ var response = {
     error_reason: NaN,
     type: 'ios-class-search',
     data: classes
-}
+};
 
 send(JSON.stringify(response));

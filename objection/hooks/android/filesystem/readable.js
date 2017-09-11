@@ -10,7 +10,7 @@ var response = {
         path: '{{ path }}',
         readable: Boolean(file.canRead())
     }
-}
+};
 
 send(JSON.stringify(response));
 

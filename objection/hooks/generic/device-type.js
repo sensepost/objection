@@ -11,7 +11,7 @@ if (ObjC.available) {
             device_type: 'ios',
             frida_version: Frida.version
         }
-    }
+    };
 
     send(JSON.stringify(response));
 
@@ -25,7 +25,7 @@ if (ObjC.available) {
             device_type: 'android',
             frida_version: Frida.version
         }
-    }
+    };
 
     send(JSON.stringify(response));
 
@@ -38,7 +38,7 @@ if (ObjC.available) {
         data: {
             device_type: 'unknown',
         }
-    }
+    };
 
     send(JSON.stringify(response));
 }

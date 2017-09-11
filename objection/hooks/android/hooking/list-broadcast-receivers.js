@@ -10,7 +10,7 @@ var GET_RECEIVERS = PackageManager.GET_RECEIVERS.value;
 var currentApplication = ActivityThread.currentApplication();
 var context = currentApplication.getApplicationContext();
 
-var receivers = []
+var receivers = [];
 
 currentApplication.mLoadedApk['value'].mReceivers['value'].values().toArray().map(function (arrayMap) {
 
@@ -32,6 +32,6 @@ var response = {
     error_reason: NaN,
     type: 'android-broadcast-receivers',
     data: receivers
-}
+};
 
 send(JSON.stringify(response));

@@ -18,7 +18,7 @@ var response = {
         path: '{{ path }}',
         exists: Boolean(exists)
     }
-}
+};
 
 send(JSON.stringify(response));
 

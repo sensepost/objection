@@ -11,7 +11,7 @@ var response = {
         path: '{{ path }}',
         writable: Boolean(file.canWrite())
     }
-}
+};
 
 send(JSON.stringify(response));
 
