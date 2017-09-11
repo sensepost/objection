@@ -76,7 +76,7 @@ The following screenshots show the main `objection` repl, connected to a test ap
 ![sslpinning](images/android_ssl_pinning_bypass.png)
 
 ## sample usage
-A sample session, where `objection` is used to explore the applications environment:
+A sample session, where `objection` version 0.1 is used to explore the applications environment. Newer versions have the REPL prompt set to the current applications name, however usage has remained the same:
 [![asciicast](https://asciinema.org/a/8O6fjDHOdVKgPYeqITHXPp6HV.png)](https://asciinema.org/a/8O6fjDHOdVKgPYeqITHXPp6HV)
 
 ## prerequisites
