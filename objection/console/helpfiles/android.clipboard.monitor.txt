@@ -1,0 +1,10 @@
+Command: android clipboard monitor
+
+Usage: android clipboard monitor
+
+Gets a handle on the Android clipboard service and polls it every 5 seconds
+for data. If new data is found, different from the previous poll, that data
+will be dumped to screen.
+
+Examples:
+   android clipboard monitor

@@ -5,6 +5,7 @@ from ..commands import jobs
 from ..commands import memory
 from ..commands import sqlite
 from ..commands import ui
+from ..commands.android import clipboard
 from ..commands.android import command
 from ..commands.android import hooking as android_hooking
 from ..commands.android import intents
@@ -292,6 +293,15 @@ COMMANDS = {
                     'clear': {
                         'meta': 'Clears the Android KeyStore',
                         'exec': keystore.clear
+                    }
+                }
+            },
+            'clipboard': {
+                'meta': 'Work with the Android Clipboard',
+                'commands': {
+                    'monitor': {
+                        'meta': 'Monitor the Android Clipbpard',
+                        'exec': clipboard.monitor
                     }
                 }
             },

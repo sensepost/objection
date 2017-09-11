@@ -1,4 +1,4 @@
-// Monitors the iOS pasteboard and reports in changes to
+// Monitors the iOS pasteboard and reports changes to
 // its contents.
 
 var UIPasteboard = ObjC.classes.UIPasteboard;
@@ -32,7 +32,7 @@ function check_string_data() {
     }));
 }
 
-// Poll every 5 minutes
+// Poll every 5 seconds
 setInterval(check_string_data, 1000 * 5);
 
 // -- Sample Objective-C
