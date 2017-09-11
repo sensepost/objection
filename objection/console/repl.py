@@ -389,8 +389,17 @@ class Repl(object):
                 if self.handle_reconnect(document):
                     continue
 
-                # find something to run
-                self.run_command(document)
+                # dispatch to the command handler. if something goes horribly
+                # wrong, catch it instead of crashing the REPL
+                try:
+
+                    # find something to run
+                    self.run_command(document)
+
+                except Exception as e:
+                    click.secho(('\n\nAn exception occured while processing the command. If this '
+                                 'looks like a code related error, please file a bug report!'), fg='red')
+                    click.secho('Error: {0}'.format(e), fg='red', bold=True)
 
             except (KeyboardInterrupt, EOFError):
 
