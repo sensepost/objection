@@ -1,5 +1,5 @@
 class DeviceState(object):
-    """ A class reprsenting the state of a device and its runtime. """
+    """ A class representing the state of a device and its runtime. """
 
     def __init__(self) -> None:
         self.device_type = None

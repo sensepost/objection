@@ -251,7 +251,7 @@ COMMANDS = {
                         }
                     },
                     'watch': {
-                        'meta': 'Watch for Android Java incovations',
+                        'meta': 'Watch for Android Java invocations',
                         'commands': {
                             'class_method': {
                                 'meta': 'Watches for invocations of a specific class method',
@@ -273,7 +273,7 @@ COMMANDS = {
                         }
                     },
                     'search': {
-                        'meta': 'Search for various classess and or methods',
+                        'meta': 'Search for various classes and or methods',
                         'commands': {
                             'classes': {
                                 'meta': 'Search for Java classes matching a name',
@@ -300,7 +300,7 @@ COMMANDS = {
                 'meta': 'Work with the Android Clipboard',
                 'commands': {
                     'monitor': {
-                        'meta': 'Monitor the Android Clipbpard',
+                        'meta': 'Monitor the Android Clipboard',
                         'exec': clipboard.monitor
                     }
                 }
@@ -331,7 +331,7 @@ COMMANDS = {
                 'meta': 'Work with Android SSL pinning',
                 'commands': {
                     'disable': {
-                        'meta': 'Attempt to disable SSL pinning in various Javav libraries/classes',
+                        'meta': 'Attempt to disable SSL pinning in various Java libraries/classes',
                         'exec': android_pinning.android_disable
                     }
                 }

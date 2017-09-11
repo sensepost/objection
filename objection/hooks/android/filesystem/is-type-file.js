@@ -2,7 +2,7 @@
 var File = Java.use('java.io.File');
 var file = File.$new('{{ path }}');
 
-// prep the reponse array with some default values. we assume
+// prep the response array with some default values. we assume
 // failure.
 var response = {
     status: 'success',

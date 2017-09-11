@@ -57,7 +57,7 @@ def get_tokens(text: str) -> list:
     """
         Split the text line, shell-style.
 
-        Sometimes we will have strings that dont have the last
+        Sometimes we will have strings that don't have the last
         quotes added yet. In those cases, we can just ignore
         shlex errors. :)
 

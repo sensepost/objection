@@ -30,7 +30,7 @@ Interceptor.attach(ObjC.classes.NSFileManager['- fileExistsAtPath:'].implementat
     onLeave: function (retval) {
 
         // check if the method call matched a common_path.
-        // if thats the case, respond with a failure instead if needed.
+        // if that's the case, respond with a failure instead if needed.
         if (this.is_common_path) {
 
             if (retval != 0x0) {
@@ -39,7 +39,7 @@ Interceptor.attach(ObjC.classes.NSFileManager['- fileExistsAtPath:'].implementat
                     status: 'success',
                     error_reason: NaN,
                     type: 'jailbreak-bypass',
-                    data: 'A successful lookup for ' + this.path + ' occured. Marking it as failed.'
+                    data: 'A successful lookup for ' + this.path + ' occurred. Marking it as failed.'
                 }));
 
                 retval.replace(0x0);

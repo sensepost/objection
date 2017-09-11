@@ -129,7 +129,7 @@ class Repl(object):
 
     def run_command(self, document: str) -> None:
         """
-            Process a command as recevied by prompt_toolkit.
+            Process a command as received by prompt_toolkit.
 
             :param document:
             :return:
@@ -169,7 +169,7 @@ class Repl(object):
         # starts with the word 'help'
         if len(tokens) > 0 and 'help' == tokens[0]:
 
-            # stip the 'help' entry from the tokens list so that
+            # skip the 'help' entry from the tokens list so that
             # the following method can find the correct help
             tokens.remove('help')
             command_help = self._find_command_help(tokens)
@@ -284,7 +284,7 @@ class Repl(object):
                 if 'commands' in dict_to_walk[token]:
                     dict_to_walk = dict_to_walk[token]['commands']
 
-            # stop if we dont have a token that matches anything
+            # stop if we don't have a token that matches anything
             else:
                 break
 
@@ -338,7 +338,7 @@ class Repl(object):
 
             try:
                 self.set_prompt_tokens(get_device_info())
-                click.secho('Reconnection succesful!', fg='green')
+                click.secho('Reconnection successful!', fg='green')
 
             except frida.ServerNotRunningError as e:
                 click.secho('Failed to reconnect with error: {0}'.format(e), fg='red')
@@ -398,7 +398,7 @@ class Repl(object):
                     self.run_command(document)
 
                 except Exception as e:
-                    click.secho(('\n\nAn exception occured while processing the command. If this '
+                    click.secho(('\n\nAn exception occurred while processing the command. If this '
                                  'looks like a code related error, please file a bug report!'), fg='red')
                     click.secho('Error: {0}'.format(e), fg='red', bold=True)
 

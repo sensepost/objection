@@ -22,7 +22,7 @@ def _get_connection() -> sqlite3.Connection:
 
 def status(args: list) -> None:
     """
-        Prints the status of the currently 'connected' (actually just cachesd)
+        Prints the status of the currently 'connected' (actually just cached)
         SQLite database.
 
         :param args:
@@ -175,4 +175,4 @@ def sync(args: list = None) -> None:
         return
 
     upload([sqlite_manager_state.temp_file, sqlite_manager_state.full_remote_file])
-    click.secho('Databse sync complete')
+    click.secho('Database sync complete')

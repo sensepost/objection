@@ -77,7 +77,7 @@ def explore(startup_command: str, startup_script: str, hook_debug: bool, quiet: 
 
     try:
 
-        # poll the device for informations and populate the
+        # poll the device for information and populate the
         # repls prompt.
         device_info = get_device_info()
         r.set_prompt_tokens(device_info)

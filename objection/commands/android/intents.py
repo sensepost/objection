@@ -6,7 +6,7 @@ from objection.utils.templates import android_hook
 
 def launch_activity(args: list) -> None:
     """
-        Launces an activity class using an Android Intent
+        Launches an activity class using an Android Intent
 
         :param args:
         :return:

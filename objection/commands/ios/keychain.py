@@ -9,7 +9,7 @@ from objection.utils.templates import ios_hook
 
 def _should_output_json(args: list) -> bool:
     """
-        Checks if --json is in the list of tokens recieved from the
+        Checks if --json is in the list of tokens received from the
         command line.
 
         :param args:

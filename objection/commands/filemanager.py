@@ -67,7 +67,7 @@ def cd(args: list) -> None:
         # assume the path does not exist by default
         does_exist = False
 
-        # check for existance based on the runtime
+        # check for existence based on the runtime
         if device_state.device_type == 'ios':
             does_exist = _path_exists_ios(path)
 
@@ -95,7 +95,7 @@ def cd(args: list) -> None:
         # assume the proposed_path does not exist by default
         does_exist = False
 
-        # check for existance based on the runtime
+        # check for existence based on the runtime
         if device_state.device_type == 'ios':
             does_exist = _path_exists_ios(proposed_path)
 
@@ -240,7 +240,7 @@ def ls(args: list) -> None:
         :return:
     """
 
-    # check if we have recevied a path to ls for.
+    # check if we have received a path to ls for.
     if len(args) <= 0:
         path = pwd()
     else:
@@ -322,7 +322,7 @@ def _ls_ios(path: str) -> None:
 
         return sizeof_fmt(int(size)) if size != 'n/a' else 'n/a'
 
-    # if the directory was readable, dump the filesytem listing
+    # if the directory was readable, dump the filesystem listing
     # and attributes to screen.
     if data['readable']:
 
@@ -415,7 +415,7 @@ def _ls_android(path: str) -> None:
 
         return 'n/a'
 
-    # if the directory was readable, dump the filesytem listing
+    # if the directory was readable, dump the filesystem listing
     # and attributes to screen.
     if data['readable']:
 
@@ -449,7 +449,7 @@ def download(args: list) -> None:
         it locally.
 
         This method is simply a proxy to the actual download methods
-        used for the appopriate environment.
+        used for the appropriate environment.
 
         :param args:
         :return:
@@ -765,7 +765,7 @@ def _get_short_ios_listing() -> list:
     response = runner.get_last_message()
 
     if not response.is_successful():
-        # cache an empty response as an error occured
+        # cache an empty response as an error occurred
         _ls_cache[directory] = resp
 
         return resp
@@ -820,7 +820,7 @@ def _get_short_android_listing() -> list:
     response = runner.get_last_message()
 
     if not response.is_successful():
-        # cache an empty response as an error occured
+        # cache an empty response as an error occurred
         _ls_cache[directory] = resp
 
         return resp
@@ -880,7 +880,7 @@ def list_files_in_current_fm_directory() -> dict:
 
     resp = {}
 
-    # check for existance based on the runtime
+    # check for existence based on the runtime
     if device_state.device_type == 'ios':
         response = _get_short_ios_listing()
 

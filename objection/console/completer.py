@@ -47,7 +47,7 @@ class CommandCompleter(Completer):
         # when the tokens are extracted, we are expecting something in
         # the format of:
         #   command sub_command sub_sub_command
-        # so, lets use that and serach the the COMMAND dictionary for
+        # so, lets use that and search the the COMMAND dictionary for
         # the last dictionary with a correct suggestion
         for token in tokens:
 

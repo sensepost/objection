@@ -3,7 +3,7 @@ Command: memory write
 Usage: memory write "<address>" "<pattern>" (optional: --string)
 
 Write an arbitrary set of bytes to an address in memory. Using this command has a high
-chance of crashing the applications process if you attempt to write to adresses outside
+chance of crashing the applications process if you attempt to write to addresses outside
 of the applications heap, or your bytes specified cause to go outside of some memory
 boundary.
 

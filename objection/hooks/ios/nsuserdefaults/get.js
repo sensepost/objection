@@ -1,4 +1,4 @@
-// Dumps all of the entires stored in NSUserDefaults.
+// Dumps all of the entries stored in NSUserDefaults.
 
 var NSUserDefaults = ObjC.classes.NSUserDefaults;
 

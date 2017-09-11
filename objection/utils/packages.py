@@ -150,6 +150,9 @@ class BasePlatformGadget(object):
 class BasePlatformPatcher(object):
     """ Base class with methods used by any platform patcher. """
 
+    # extended classes should fill this property
+    required_commands = {}
+
     def __init__(self):
 
         # check dependencies

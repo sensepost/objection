@@ -98,7 +98,7 @@ class RunnerMessage(object):
 
 class FridaJobRunner(object):
     """
-        Jobs that need to be continously running
+        Jobs that need to be continuously running
         are represented by an instance of this class
     """
 
@@ -309,7 +309,7 @@ class FridaRunner(object):
 
     def run(self, hook: str = None) -> None:
         """
-            Run a hook syncronously and unload once finished.
+            Run a hook synchronously and unload once finished.
 
             :param hook:
             :return:
@@ -355,7 +355,7 @@ class FridaRunner(object):
         # attempt to load the hook. external scripts are also
         # loaded (with the import command) and may have some severe
         # syntax errors etc. to cater for this we wrap the load in
-        # a try catch to ensure we dont crash the repl
+        # a try catch to ensure we don't crash the repl
         try:
 
             job.script = job.session.create_script(self._hook_processor(job.hook))

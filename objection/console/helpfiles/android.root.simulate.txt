@@ -7,5 +7,5 @@ responding positively to common checks that are performed within Android
 applications.
 
 Examples:
-   android root simluate
+   android root simulate
 

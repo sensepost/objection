@@ -1,4 +1,4 @@
-// Retreives some information about the iOS device.
+// Retrieves some information about the iOS device.
 
 var UIDevice = ObjC.classes.UIDevice;
 var NSBundle = ObjC.classes.NSBundle;

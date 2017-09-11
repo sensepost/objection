@@ -26,7 +26,7 @@ String.contains.implementation = function (check) {
     this.contains.apply(this, arguments);
 };
 
-// file existance checks.
+// file existence checks.
 File.exists.implementation = function () {
 
     // grab the filename we are working with

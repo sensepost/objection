@@ -24,7 +24,7 @@ def show(args: list = None) -> None:
 
 def kill(args: list) -> None:
     """
-        Kills a specific objbection job.
+        Kills a specific objection job.
 
         :param args:
         :return:

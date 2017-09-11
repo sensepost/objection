@@ -21,7 +21,7 @@ def _should_disable_exception_handler(args: list = None) -> bool:
 
 def frida_environment(args: list = None) -> None:
     """
-        Prints information about the cirrent Frida environment.
+        Prints information about the current Frida environment.
 
         :param args:
         :return:
@@ -84,7 +84,7 @@ def load_script(args: list) -> None:
         hook = ''.join(f.read())
 
     # wrap the user script in an exception handler, unless we
-    # explicitly shouldnt. we also use the generic exception
+    # explicitly shouldn't. we also use the generic exception
     # handler as there is no way to know which environment
     # it may be for here.
     if not _should_disable_exception_handler(args):

@@ -27,7 +27,7 @@ Interceptor.attach(ObjC.classes.NSFileManager['- fileExistsAtPath:'].implementat
     onLeave: function (retval) {
 
         // check if the method call matched a common_path.
-        // if thats the case, respond with success instead if needed.
+        // if that's the case, respond with success instead if needed.
         if (this.is_common_path) {
 
             if (retval == 0x0) {

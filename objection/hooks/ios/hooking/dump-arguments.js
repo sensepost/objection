@@ -1,5 +1,5 @@
 // Hooks an Objective-C class method and attempts to dump its
-// arguements as it is called.
+// arguments as it is called.
 
 var resolver = new ApiResolver('objc');
 var method = {};

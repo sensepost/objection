@@ -38,7 +38,7 @@ Runtime.exec.overload('java.lang.String').implementation = function (command) {
             status: 'success',
             error_reason: NaN,
             type: 'root-bypass',
-            data: 'Check for su detected with command \'' + command + '\'. Throwing an IOExeption.'
+            data: 'Check for su detected with command \'' + command + '\'. Throwing an IOException.'
         }));
 
         throw IOException.$new('anti-root');
@@ -48,7 +48,7 @@ Runtime.exec.overload('java.lang.String').implementation = function (command) {
     this.contains.apply(this, arguments);
 };
 
-// file existance checks.
+// file existence checks.
 File.exists.implementation = function () {
 
     // grab the filename we are working with

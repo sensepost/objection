@@ -9,7 +9,7 @@ class JobManagerState(object):
     def __init__(self) -> None:
         """
             Init a new job state manager. This method will also
-            register an atexit(), ensiring that cleanup operations
+            register an atexit(), ensuring that cleanup operations
             are performed on jobs when this class is GC'd.
         """
 
@@ -41,7 +41,7 @@ class JobManagerState(object):
         """
             Clean up all of the job in the job manager.
 
-            This method is typicall called when at the end of an
+            This method is typical called when at the end of an
             objection session.
 
             :return:

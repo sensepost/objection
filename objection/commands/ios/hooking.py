@@ -78,7 +78,7 @@ def _should_include_parent_methods(args: list) -> bool:
 
 def _class_is_prefixed_with_native(class_name: str) -> bool:
     """
-        Check if a class name recieved is prefixed with one of the
+        Check if a class name received is prefixed with one of the
         prefixes in the native_prefixes list.
 
         :param class_name:

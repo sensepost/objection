@@ -8,7 +8,7 @@ from objection.utils.templates import ios_hook
 def get(args: list = None) -> None:
     """
         Gets cookies using the iOS NSHTTPCookieStorage sharedHTTPCookieStorage
-        and primpts them to the screen.
+        and prints them to the screen.
 
         :param args:
         :return:

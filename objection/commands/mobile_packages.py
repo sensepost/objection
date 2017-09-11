@@ -28,7 +28,7 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
     local_version = ios_gadget.get_local_version('ios_universal')
 
     # check if the local version needs updating. this can be either because
-    # the version is outdated or we simply dont have the gadget yet
+    # the version is outdated or we simply don't have the gadget yet
     if parse_version(github_version) > parse_version(local_version) or not ios_gadget.gadget_exists():
         # download!
         click.secho('Github FridaGadget is v{0}, local is v{1}. Updating...'.format(
@@ -64,7 +64,7 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
 
 def patch_android_apk(source: str, architecture: str) -> None:
     """
-        Patches an Android APK by extracting, patching SMALI, repackiging
+        Patches an Android APK by extracting, patching SMALI, repackaging
         and signing a new APK.
 
         :param source:
@@ -98,7 +98,7 @@ def patch_android_apk(source: str, architecture: str) -> None:
     local_version = android_gadget.get_local_version('android_' + architecture)
 
     # check if the local version needs updating. this can be either because
-    # the version is outdated or we simply dont have the gadget yet
+    # the version is outdated or we simply don't have the gadget yet
     if parse_version(github_version) > parse_version(local_version) or not android_gadget.gadget_exists():
         # download!
         click.secho('Github FridaGadget is v{0}, local is v{1}. Updating...'.format(

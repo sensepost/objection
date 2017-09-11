@@ -4,7 +4,7 @@
 
 // so, here is a workaround reading the attributes of the file :D
 
-// TODO: Dont be dumb. We can init the pointer we need with Memory.alloc(Process.pointerSize);
+// TODO: Don't be dumb. We can init the pointer we need with Memory.alloc(Process.pointerSize);
 
 var NSFileManager = ObjC.classes.NSFileManager;
 var NSString = ObjC.classes.NSString;
@@ -18,7 +18,7 @@ var path = NSString.stringWithString_('{{ path }}');
 // get the attributes for the pathed item
 var attributes = fm.attributesOfItemAtPath_error_(path, NULL);
 
-// prep the reponse array with some default values. we assume
+// prep the response array with some default values. we assume
 // failure.
 var response = {
     status: 'failure',

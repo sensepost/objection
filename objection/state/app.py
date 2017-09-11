@@ -1,5 +1,5 @@
 class AppState(object):
-    """ A class representing geenric state variable for this app """
+    """ A class representing generic state variable for this app """
 
     def __init__(self):
         self.debug_hooks = False

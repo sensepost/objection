@@ -29,7 +29,7 @@ def entries(args: list = None) -> None:
 
     output = [[x['alias'], x['is_key'], x['is_certificate']] for x in response.data]
 
-    click.secho(tabulate(output, headers=['Alias', 'Is Key', 'Is Certifiate']))
+    click.secho(tabulate(output, headers=['Alias', 'Is Key', 'Is Certificate']))
 
 
 def clear(args: list = None) -> None:

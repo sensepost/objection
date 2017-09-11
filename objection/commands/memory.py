@@ -25,7 +25,7 @@ def _is_string_input(args: list) -> bool:
 
 def dump_all(args: list) -> None:
     """
-        Dump memory from the currently injected procress.
+        Dump memory from the currently injected process.
         Loosely based on:
             https://github.com/Nightbringer21/fridump
 
@@ -162,7 +162,7 @@ def dump_exports(args: list) -> None:
 
 def find_pattern(args: list) -> None:
     """
-        Searches the  current processes accesible memory for a pspecific pattern.
+        Searches the current processes accessible memory for a specific pattern.
 
         :param args:
         :return:
@@ -193,7 +193,7 @@ def find_pattern(args: list) -> None:
     data = response.data
 
     if data and len(data) > 0:
-        click.secho('Pattern matched at {0} adresses'.format(len(data)), fg='green')
+        click.secho('Pattern matched at {0} addresses'.format(len(data)), fg='green')
         for address in data:
             click.secho(address)
 
@@ -218,7 +218,7 @@ def write(args: list) -> None:
     destination = args[0]
     pattern = args[1]
 
-    # TODO: Fix this method up to be pytnon3 compatible
+    # TODO: Fix this method up to be python3 compatible
 
     if _is_string_input(args):
         pattern = ' '.join(x.encode('hex') for x in args[0])

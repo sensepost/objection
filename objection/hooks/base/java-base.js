@@ -5,7 +5,7 @@ if (Java.available) {
         // From Frida documentation:
         //  "ensure that the current thread is attached to the VM and call fn"
         //
-        // We also handle the exception that could happen within the callcack as
+        // We also handle the exception that could happen within the callback as
         // it does not seem to bubble outside of it.
         Java.perform(function () {
 
