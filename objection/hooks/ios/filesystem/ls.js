@@ -1,7 +1,6 @@
 // Obtains a directory listing for a specified path.
 
 var NSFileManager = ObjC.classes.NSFileManager;
-var NSBundle = ObjC.classes.NSBundle;
 var NSString = ObjC.classes.NSString;
 
 // get a file manager instance to work with

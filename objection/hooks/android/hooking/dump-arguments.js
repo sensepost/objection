@@ -3,7 +3,6 @@
 // is also watched.
 
 var target_class = Java.use('{{ target_class }}');
-var target_method = '{{ target_method }}';
 var overload_count = eval('target_class.{{ target_method }}.overloads.length');
 
 send(JSON.stringify({

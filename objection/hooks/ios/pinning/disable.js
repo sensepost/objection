@@ -162,7 +162,6 @@ if (search.length > 0) {
                 // get handlers on some arguments
                 var receiver = new ObjC.Object(args[0]);
                 var selector = ObjC.selectorAsString(args[1]);
-                var session = new ObjC.Object(args[2]);
                 var challenge = new ObjC.Object(args[3]);
 
                 send(JSON.stringify({

@@ -2,9 +2,7 @@
 // application.
 
 var NSMutableDictionary = ObjC.classes.NSMutableDictionary;
-var NSArray = ObjC.classes.NSArray;
 var NSString = ObjC.classes.NSString;
-var NSKeyedUnarchiver = ObjC.classes.NSKeyedUnarchiver;
 
 // Ref: http://nshipster.com/bool/
 var kCFBooleanTrue = ObjC.classes.__NSCFBoolean.numberWithBool_(true);

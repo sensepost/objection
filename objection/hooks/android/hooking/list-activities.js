@@ -1,7 +1,6 @@
 // Lists the registered activities from the android packageManager.
 
 var ActivityThread = Java.use('android.app.ActivityThread');
-var ArrayMap = Java.use('android.util.ArrayMap');
 var PackageManager = Java.use('android.content.pm.PackageManager');
 
 var GET_ACTIVITIES = PackageManager.GET_ACTIVITIES.value;

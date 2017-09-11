@@ -1,7 +1,5 @@
 var File = Java.use('java.io.File');
 var String = Java.use('java.lang.String');
-var Date = Java.use('java.util.Date');
-var SimpleDateFormat = Java.use('java.text.SimpleDateFormat');
 
 // get a string of the path to work with
 var path = String.$new('{{ path }}');
