@@ -281,21 +281,6 @@ def _ls_ios(path: str) -> None:
     # get the response data itself
     data = response.data
 
-    # output display
-    if data['readable']:
-
-        click.secho('Read Access', fg='green')
-
-    else:
-        click.secho('No Read Access', fg='red')
-
-    if data['writable']:
-
-        click.secho('Write Access', fg='green')
-
-    else:
-        click.secho('No Write Access', fg='red')
-
     def _get_key_if_exists(attribs, key):
         """
             Small helper to grab keys where some may or may
@@ -358,6 +343,20 @@ def _ls_ios(path: str) -> None:
                              headers=['NSFileType', 'Perms', 'NSFileProtection', 'Read',
                                       'Write', 'Owner', 'Group', 'Size', 'Creation', 'Name']))
 
+    # handle the permissions summary for this directory
+    permissions = {
+        'readable': 'No',
+        'writable': 'No'
+    }
+
+    if data['readable']:
+        permissions['readable'] = 'Yes'
+
+    if data['writable']:
+        permissions['writable'] = 'Yes'
+
+    click.secho('\nReadable: {0}  Writable: {0}'.format(permissions['readable'], permissions['writable']), bold=True)
+
 
 def _ls_android(path: str) -> None:
     """
@@ -382,21 +381,6 @@ def _ls_android(path: str) -> None:
 
     # get the response data itself
     data = response.data
-
-    # output display
-    if data['readable']:
-
-        click.secho('Read Access', fg='green')
-
-    else:
-        click.secho('No Read Access', fg='red')
-
-    if data['writable']:
-
-        click.secho('Write Access', fg='green')
-
-    else:
-        click.secho('No Write Access', fg='red')
 
     def _timestamp_to_str(stamp: str) -> str:
         """
@@ -441,6 +425,20 @@ def _ls_android(path: str) -> None:
 
         click.secho(tabulate(table_data,
                              headers=['Type', 'Last Modified', 'Read', 'Write', 'Hidden', 'Size', 'Name']))
+
+    # handle the permissions summary for this directory
+    permissions = {
+        'readable': 'No',
+        'writable': 'No'
+    }
+
+    if data['readable']:
+        permissions['readable'] = 'Yes'
+
+    if data['writable']:
+        permissions['writable'] = 'Yes'
+
+    click.secho('\nReadable: {0}  Writable: {0}'.format(permissions['readable'], permissions['writable']), bold=True)
 
 
 def download(args: list) -> None:
