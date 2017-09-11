@@ -55,7 +55,7 @@ class PromptStyle(Style):
             Token: '#ff0066',
 
             # Prompt.
-            Token.Applicationname: '#ff0000',
+            Token.Applicationname: '#007cff',
             Token.On: '#00aa00',
             Token.Devicetype: '#00ff48',
             Token.Version: '#00ff48',
