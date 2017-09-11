@@ -90,8 +90,6 @@ def _get_ios_environment() -> None:
         :return:
     """
 
-    click.secho(tabulate([get_device_info()], headers=['Name', 'System', 'Model', 'Version']))
-
     hook = ios_hook('filesystem/environment')
     runner = FridaRunner(hook=hook)
     runner.run()
