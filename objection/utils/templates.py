@@ -36,10 +36,10 @@ def generic_hook(name: str, skip_trycarch: bool = False) -> str:
     with open(tmpl_path, 'r') as f:
         hook = f.readlines()
 
+    hook = ''.join(hook)
+
     if skip_trycarch:
         return hook
-
-    hook = ''.join(hook)
 
     final_template = template_env.get_template('base/generic-base.js')
     return final_template.render(content=hook)

@@ -31,7 +31,7 @@ class PromptStyle(Style):
         self.style = self._init_style()
 
     @staticmethod
-    def _init_style(self) -> dict:
+    def _init_style() -> dict:
         """
             Grab the values for the prompt styling.
 

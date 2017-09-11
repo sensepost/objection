@@ -207,7 +207,7 @@ def _pwd_ios() -> str:
     return response.cwd
 
 
-def _pwd_android() -> None:
+def _pwd_android() -> str:
     """
         Execute a Frida hook that gets the current working
         directory from an Android device.

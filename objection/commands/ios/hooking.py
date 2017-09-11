@@ -131,7 +131,7 @@ def _get_ios_classes() -> list:
 
     if not response.is_successful():
         click.secho('Failed to list classes with error: {0}'.format(response.error_reason), fg='red')
-        return None
+        return []
 
     return response.data
 

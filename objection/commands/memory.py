@@ -6,7 +6,7 @@ from ..utils.helpers import sizeof_fmt, pretty_concat
 from ..utils.templates import generic_hook
 
 
-def _is_string_input(args: list) -> None:
+def _is_string_input(args: list) -> bool:
     """
         Checks if --string is in the list of tokens received form the
         command line.

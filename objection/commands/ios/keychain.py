@@ -7,7 +7,7 @@ from objection.utils.frida_transport import FridaRunner
 from objection.utils.templates import ios_hook
 
 
-def _should_output_json(args: list) -> None:
+def _should_output_json(args: list) -> bool:
     """
         Checks if --json is in the list of tokens recieved from the
         command line.

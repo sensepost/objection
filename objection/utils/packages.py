@@ -1155,7 +1155,6 @@ class AndroidPatcher(BasePlatformPatcher):
 
             :return:
         """
-        return
 
         click.secho('Cleaning up temp files...', dim=True)
 
