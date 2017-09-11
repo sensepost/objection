@@ -8,10 +8,10 @@ var cookies = [];
 
 if (cookieJar.count() > 0) {
 
-    for (i = 0; i < cookieJar.count(); i++) {
+    for (var i = 0; i < cookieJar.count(); i++) {
 
         // get the actual cookie from the jar
-        cookie = cookieJar.objectAtIndex_(i);
+        var cookie = cookieJar.objectAtIndex_(i);
 
         // <NSHTTPCookie version:0 name:"__cfduid" value:"d2546c60b09a710a151d974e662f40c081498064665"
         // expiresDate:2018-06-21 17:04:25 +0000 created:2017-06-21 17:04:26 +0000 sessionOnly:FALSE

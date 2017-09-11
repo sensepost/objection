@@ -38,7 +38,7 @@ var response = {
     data: {
         command: '{{ command }}',
         stdout: stdout_string_builder.toString(),
-        stderr: stderr_string_builder.toString(),
+        stderr: stderr_string_builder.toString()
     }
 };
 

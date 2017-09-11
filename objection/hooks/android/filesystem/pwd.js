@@ -11,7 +11,7 @@ var response = {
     error_reason: NaN,
     type: 'current-working-directory',
     data: {
-        cwd: context.getFilesDir().getAbsolutePath().toString(),
+        cwd: context.getFilesDir().getAbsolutePath().toString()
     }
 };
 

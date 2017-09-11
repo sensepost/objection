@@ -4,7 +4,7 @@ var resolver = new ApiResolver('objc');
 var method = {};
 var return_values = {
     'True': 0x1,
-    'False': 0x0,
+    'False': 0x0
 };
 
 resolver.enumerateMatches('{{ selector }}', {

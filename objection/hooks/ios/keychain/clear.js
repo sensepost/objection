@@ -22,10 +22,10 @@ var item_classes = [
     kSecClassIdentity,
     kSecClassCertificate,
     kSecClassGenericPassword,
-    kSecClassInternetPassword,
+    kSecClassInternetPassword
 ];
 
-for (item_class_index in item_classes) {
+for (var item_class_index in item_classes) {
 
     var item_class = item_classes[item_class_index];
 

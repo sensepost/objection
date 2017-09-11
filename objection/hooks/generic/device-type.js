@@ -36,7 +36,7 @@ if (ObjC.available) {
         error_reason: 'Unknown Platform',
         type: 'device-type-enumeration',
         data: {
-            device_type: 'unknown',
+            device_type: 'unknown'
         }
     };
 

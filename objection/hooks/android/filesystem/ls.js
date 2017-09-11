@@ -27,7 +27,7 @@ var data = {
 // if we can read the directory, process the files.
 if (Boolean(readable)) {
 
-    for (i = 0; i < files.length; i++) {
+    for (var i = 0; i < files.length; i++) {
 
         // reference a specific file. This will be an instance
         // of java.io.File already
@@ -42,7 +42,7 @@ if (Boolean(readable)) {
                 isFile: file.isFile(),
                 isHidden: file.isHidden(),
                 lastModified: file.lastModified(),
-                size: file.length(),
+                size: file.length()
             }
         };
 

@@ -40,7 +40,7 @@ for (var i = 0; i < overload_count; i++) {
                 status: 'success',
                 error_reason: NaN,
                 type: 'java-argument-dump',
-                data: '{{ target_method }} - Arg ' + h +  ': ' + arguments[h].toString(),
+                data: '{{ target_method }} - Arg ' + h +  ': ' + arguments[h].toString()
             }));
         }
 

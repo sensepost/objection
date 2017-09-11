@@ -80,7 +80,7 @@ var data = {
 
     // data from the NSBundle
     ReceiptPath: mb.appStoreReceiptURL().path().toString(),
-    ResourcePath: mb.resourcePath().toString(),
+    ResourcePath: mb.resourcePath().toString()
 };
 
 var response = {

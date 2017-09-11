@@ -93,7 +93,7 @@ var kSecConstantReverse = {
     'dk': 'kSecAttrAccessibleAlways',
     'aku': 'kSecAttrAccessibleWhenUnlockedThisDeviceOnly',
     'cku': 'kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly',
-    'dku': 'kSecAttrAccessibleAlwaysThisDeviceOnly',
+    'dku': 'kSecAttrAccessibleAlwaysThisDeviceOnly'
 };
 
 // the base query dictionary to use for the keychain lookups
@@ -109,7 +109,7 @@ var item_classes = [
     kSecClassIdentity,
     kSecClassCertificate,
     kSecClassGenericPassword,
-    kSecClassInternetPassword,
+    kSecClassInternetPassword
 ];
 
 // get the string representation of some data
@@ -244,7 +244,7 @@ function get_constant_for_value(v) {
 // a list of keychain items that will return 
 var keychain_items = [];
 
-for (item_class_index in item_classes) {
+for (var item_class_index in item_classes) {
 
     var item_class = item_classes[item_class_index];
 
@@ -272,7 +272,7 @@ for (item_class_index in item_classes) {
         for (var i = 0; i < search_results.count(); i++) {
 
             // the *actual* keychain item is here!
-            search_result = search_results.objectAtIndex_(i);
+            var search_result = search_results.objectAtIndex_(i);
 
             // dumped entries from NSLog() look like
             // 2017-06-20 11:25:07.645 PewPew[51023:7644106] {
@@ -350,7 +350,7 @@ for (item_class_index in item_classes) {
                 'service': odas(search_result.objectForKey_(kSecAttrService)),
                 'account': odas(search_result.objectForKey_(kSecAttrAccount)),
                 'label': odas(search_result.objectForKey_(kSecAttrLabel)),
-                'data': odas(search_result.objectForKey_('v_Data')),
+                'data': odas(search_result.objectForKey_('v_Data'))
             };
 
             keychain_items.push(keychain_entry);

@@ -20,7 +20,7 @@ var response = {
         id: Build.ID.value.toString(),
         product: Build.PRODUCT.value.toString(),
         user: Build.USER.value.toString(),
-        version: Java.androidVersion,
+        version: Java.androidVersion
     }
 };
 

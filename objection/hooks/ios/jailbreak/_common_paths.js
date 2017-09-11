@@ -32,5 +32,5 @@ var common_paths = [
     '/var/cache/apt',
     '/var/lib/cydia',
     '/var/log/syslog',
-    '/var/tmp/cydia.log',
+    '/var/tmp/cydia.log'
 ];

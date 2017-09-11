@@ -49,5 +49,5 @@ rpc.exports = {
 
         Java.perform(function () { populate_bytes(); });
         return bytes;
-    },
+    }
 };

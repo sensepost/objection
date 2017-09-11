@@ -134,7 +134,7 @@ if (ObjC.classes.AFHTTPSessionManager && ObjC.classes.AFSecurityPolicy) {
             }
         });
     }
-};
+}
 
 // NSURLSession
 var search = resolver.enumerateMatchesSync('-[* URLSession:didReceiveChallenge:completionHandler:]');
@@ -148,7 +148,7 @@ if (search.length > 0) {
         data: '[NSURLSession] Found ' + search.length + ' matches for URLSession:didReceiveChallenge:completionHandler:'
     }));
 
-    for (i = 0; i < search.length; i++) {
+    for (var i = 0; i < search.length; i++) {
 
         Interceptor.attach(search[i].address, {
             onEnter: function (args) {
@@ -229,7 +229,7 @@ if (search.length > 0) {
         data: '[NSURLConnection] Found ' + search.length + ' matches for connection:willSendRequestForAuthenticationChallenge:'
     }));
 
-    for (i = 0; i < search.length; i++) {
+    for (var i = 0; i < search.length; i++) {
 
         Interceptor.replace(search[i].address, new NativeCallback(function (a, b, connection, challenge) {
 

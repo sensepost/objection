@@ -10,7 +10,7 @@ var data = {
     externalCacheDirectory: context.getExternalCacheDir().getAbsolutePath().toString(),
     codeCacheDirectory: context.getCodeCacheDir().getAbsolutePath().toString(),
     obbDir: context.getObbDir().getAbsolutePath().toString(),
-    packageCodePath: context.getPackageCodePath().toString(),
+    packageCodePath: context.getPackageCodePath().toString()
 };
 
 var response = {

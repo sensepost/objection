@@ -9,7 +9,7 @@ var response = {
     error_reason: NaN,
     type: 'current-working-directory',
     data: {
-        cwd: String(BundleURL),
+        cwd: String(BundleURL)
     }
 };
 

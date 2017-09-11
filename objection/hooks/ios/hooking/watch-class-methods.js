@@ -3,7 +3,7 @@
 // variable, the class in questions parent methods may also be
 // hooked.
 
-for (class_name in ObjC.classes) {
+for (var class_name in ObjC.classes) {
 
     if (class_name == '{{ class_name }}') {
 
@@ -26,7 +26,7 @@ for (class_name in ObjC.classes) {
         }
 
         // hook into all of the methods in this class
-        for (i = 0; i < methods.length; i++) {
+        for (var i = 0; i < methods.length; i++) {
 
             // the current method
             var method = methods[i];

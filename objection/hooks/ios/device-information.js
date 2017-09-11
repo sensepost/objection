@@ -13,7 +13,7 @@ var response = {
         systemName: String(UIDevice.currentDevice().systemName()),
         model: String(UIDevice.currentDevice().model()),
         systemVersion: String(UIDevice.currentDevice().systemVersion()),
-        identifierForVendor: String(UIDevice.currentDevice().identifierForVendor()),
+        identifierForVendor: String(UIDevice.currentDevice().identifierForVendor())
     }
 };
 

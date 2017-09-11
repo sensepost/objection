@@ -15,5 +15,5 @@ var common_paths = [
     '/system/sd/xbin/su',
     '/system/xbin/busybox',
     '/system/xbin/daemonsu',
-    '/system/xbin/su',
+    '/system/xbin/su'
 ];
