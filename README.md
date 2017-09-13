@@ -80,7 +80,7 @@ A sample session, where `objection` version 0.1 is used to explore the applicati
 [![asciicast](https://asciinema.org/a/8O6fjDHOdVKgPYeqITHXPp6HV.png)](https://asciinema.org/a/8O6fjDHOdVKgPYeqITHXPp6HV)
 
 ## prerequisites
-To run `objection`, all you need is the python3 interpreter to be available. The installation via `pip` should take care of all of the dependencies needed.
+To run `objection`, all you need is the python3 interpreter to be available. Installation via `pip` should take care of all of the dependencies needed. For more details, please see the [prerequisites](https://github.com/sensepost/objection/wiki/Installation#prerequisites) section on the project wiki.
 
 As for the target mobile applications though, for iOS, an unencrypted IPA is needed and Android just the normal APK should be fine. If you have the source code of the iOS application you want to explore, then you can simply embed and load the `FridaGadget.dylib` from within the Xcode project.
 
