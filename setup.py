@@ -52,7 +52,7 @@ setup(
             _package_files(os.path.join(here, 'objection/utils/assets'), '.jks'),
     },
 
-    python_requires='>=3.3',
+    python_requires='>=3.4',
     packages=[
         'objection',
         'objection.commands',
