@@ -307,7 +307,7 @@ class IosPatcher(BasePlatformPatcher):
             'installation': 'Install XCode on macOS via the Appstore'
         },
         'applesign': {
-            'installation': 'npm install -g node-applesign'
+            'installation': 'npm install -g applesign'
         },
         'insert_dylib': {
             'installation': ('git clone https://github.com/Tyilo/insert_dylib && cd insert_dylib &&'
