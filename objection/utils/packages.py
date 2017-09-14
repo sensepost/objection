@@ -545,8 +545,9 @@ class IosPatcher(BasePlatformPatcher):
         """
 
         click.secho('Creating new archive with patched contents...', dim=True)
-        self.patched_ipa_path = os.path.join(self.temp_directory,
-                                             os.path.basename('{0}-frida.ipa'.format(original_name.strip('.ipa'))))
+        self.patched_ipa_path = os.path.join(
+            self.temp_directory, os.path.basename(
+                '{0}-frida.ipa'.format(os.path.splitext(original_name)[0])))
 
         def zipdir(path, ziph):
             # ziph is a zipfile handle
@@ -562,7 +563,7 @@ class IosPatcher(BasePlatformPatcher):
         # codesign the new ipa
         click.secho('Codesigning patched IPA...', fg='green')
         self.patched_codesigned_ipa_path = os.path.join(self.temp_directory, os.path.basename(
-            '{0}-frida-codesigned.ipa'.format(original_name.strip('.ipa'))))
+            '{0}-frida-codesigned.ipa'.format(os.path.splitext(original_name)[0])))
 
         ipa_codesign = delegator.run(list2cmdline(
             [
