@@ -39,7 +39,8 @@ def get(args: list = None) -> None:
             cookie['expiresDate'],
             cookie['domain'],
             cookie['path'],
-            cookie['isSecure']
+            cookie['isSecure'],
+            cookie['isHTTPOnly']
         ])
 
-    click.secho(tabulate(data, headers=['Name', 'Value', 'Expires', 'Domain', 'Path', 'Secure']), bold=True)
+    click.secho(tabulate(data, headers=['Name', 'Value', 'Expires', 'Domain', 'Path', 'Secure', 'HTTPOnly']), bold=True)

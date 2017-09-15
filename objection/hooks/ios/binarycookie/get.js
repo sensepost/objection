@@ -26,7 +26,8 @@ if (cookieJar.count() > 0) {
             domain: cookie.domain().toString(),
             // partition: cookie.partition().toString(),
             path: cookie.path().toString(),
-            isSecure: cookie.isSecure().toString()
+            isSecure: cookie.isSecure().toString(),
+            isHTTPOnly: cookie.isHTTPOnly().toString()
         };
 
         cookies.push(cookie_data);
