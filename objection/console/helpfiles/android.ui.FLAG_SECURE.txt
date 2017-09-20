@@ -1,0 +1,8 @@
+Command: android ui FLAG_SECURE
+
+Usage: android ui FLAG_SECURE <true/false>
+
+Control FLAG_SECURE of the current Activity
+
+Examples:
+    android ui FLAG_SECURE false

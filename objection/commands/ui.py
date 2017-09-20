@@ -145,3 +145,28 @@ def android_screenshot(args: list = None) -> None:
         f.write(image)
 
     click.secho('Screenshot saved to: {0}'.format(destination), fg='green')
+
+def android_flag_secure(args: list = None) -> None:
+    """
+        Control FLAG_SECURE of the current Activity, allowing or disallowing
+        the use of hardware key combinations and screencap to take screenshots.
+
+        :param args:
+        :return:
+    """
+
+    if (len(args) <= 0 or (args[0] != 'true' and args[0] != 'false')):
+        click.secho('Usage: android ui FLAG_SECURE <true/false>', bold=True)
+        return
+    runner = FridaRunner()
+    runner.set_hook_with_data(android_hook('screenshot/flag-secure'), value=args[0])
+
+    runner.run()
+
+    response = runner.get_last_message()
+
+    if not response.is_successful():
+        click.secho('Failed to set FLAG_SECURE'.format(response.error_message), fg='red')
+        return
+
+    click.secho("Successfuly set FLAG_SECURE" if response.data else "Successfully removed FLAG_SECURE")

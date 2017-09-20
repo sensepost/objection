@@ -343,6 +343,10 @@ COMMANDS = {
                         'meta': 'Screenshot the current Activity',
                         'exec': ui.android_screenshot
                     },
+                    'FLAG_SECURE': {
+                        'meta': 'Control FLAG_SECURE of the current Activity',
+                        'exec': ui.android_flag_secure
+                    },
                 }
             },
         },
