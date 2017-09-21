@@ -9,6 +9,7 @@ from ..commands.android import clipboard
 from ..commands.android import command
 from ..commands.android import hooking as android_hooking
 from ..commands.android import intents
+from ..commands.android import services
 from ..commands.android import keystore
 from ..commands.android import pinning as android_pinning
 from ..commands.android import root
@@ -311,6 +312,10 @@ COMMANDS = {
                     'launch_activity': {
                         'meta': 'Launch an Activity class using an Intent',
                         'exec': intents.launch_activity
+                    },
+                            'launch_service': {
+                                'meta': 'Launch a Service class using an Intent',
+                                'exec': services.launch_service
                     }
                 }
             },
