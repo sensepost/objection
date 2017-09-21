@@ -90,6 +90,38 @@ def explore(startup_command: str, startup_script: str, hook_debug: bool, quiet: 
 
 
 @cli.command()
+@click.option('--hook-debug', '-d', required=False, default=False, is_flag=True,
+              help='Print compiled hooks as they are run to the screen and logfile.')
+@click.argument('command', nargs=-1)
+def run(hook_debug: bool, command: tuple) -> None:
+    """
+        Run a single objection command.
+    """
+
+    if len(command) <= 0:
+        click.secho('Please specify a command to run', fg='red')
+        return
+
+    # specify if hooks should be debugged
+    app_state.debug_hooks = hook_debug
+
+    try:
+
+        click.secho('Determining environment...', dim=True)
+        get_device_info()
+
+    except (frida.TimedOutError, frida.ServerNotRunningError) as e:
+        click.secho('Error: {0}'.format(e), fg='red')
+        return
+
+    command = ' '.join(command)
+
+    # use the methods in the main REPL to run the command
+    click.secho('Running command... `{0}`'.format(command), dim=True)
+    Repl().run_command(command)
+
+
+@cli.command()
 def version() -> None:
     """
         Prints the current version and exists.
