@@ -266,20 +266,16 @@ def _ls_ios(path: str) -> None:
     """
 
     runner = FridaRunner()
-    runner.set_hook_with_data(
-        ios_hook('filesystem/ls'), path=path)
-    runner.run()
+    runner.set_hook_with_data(ios_hook('filesystem/ls'), path=path)
 
-    # grab the output lets seeeeee
-    response = runner.get_last_message()
+    # the ls method is an rpc export
+    api = runner.rpc_exports()
 
-    # ensure the response was successful
-    if not response.is_successful():
-        click.secho('Failed to get directory listing with error: {}'.format(response.error_reason))
-        return
+    # get the directory listing
+    data = api.ls()
 
-    # get the response data itself
-    data = response.data
+    # cleanup the runner
+    runner.unload_script()
 
     def _get_key_if_exists(attribs, key):
         """
@@ -758,20 +754,20 @@ def _get_short_ios_listing() -> list:
     # fetch a fresh listing
     runner = FridaRunner()
     runner.set_hook_with_data(ios_hook('filesystem/ls'), path=directory)
-    runner.run()
 
-    response = runner.get_last_message()
+    # the ls method is an rpc export
+    api = runner.rpc_exports()
 
-    if not response.is_successful():
-        # cache an empty response as an error occurred
-        _ls_cache[directory] = resp
+    # get the directory listing
+    data = api.ls()
 
-        return resp
+    # cleanup the runner
+    runner.unload_script()
 
     # loop the response, marking entries as either being
     # a file or a directory. this response will be stored
     # in the _ls_cache too.
-    for name, attribs in response.data['files'].items():
+    for name, attribs in data['files'].items():
 
         # attributes key contains the type
         attributes = attribs['attributes']

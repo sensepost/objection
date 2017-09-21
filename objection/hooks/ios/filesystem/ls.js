@@ -21,8 +21,12 @@ var data = {
     files: {}
 };
 
-// if we can read the directory, get each files attributes
-if (Boolean(readable)) {
+var perform_ls = function () {
+
+    // If this directory is not readable, stop.
+    if (!Boolean(readable)) {
+        return;
+    }
 
     // get the directory listing
     var contents = fm.contentsOfDirectoryAtPath_error_(path, NULL);
@@ -76,14 +80,14 @@ if (Boolean(readable)) {
     }
 }
 
-var response = {
-    status: 'success',
-    error_reason: NaN,
-    type: 'list-directory-contents',
-    data: data
-};
+rpc.exports = {
+    ls: function () {
 
-send(JSON.stringify(response));
+        perform_ls();
+
+        return data;
+    }
+}
 
 // -- Sample Objective-C
 //
