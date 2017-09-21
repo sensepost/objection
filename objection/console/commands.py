@@ -9,6 +9,7 @@ from ..commands.android import clipboard
 from ..commands.android import command
 from ..commands.android import hooking as android_hooking
 from ..commands.android import intents
+from ..commands.android import services
 from ..commands.android import keystore
 from ..commands.android import pinning as android_pinning
 from ..commands.android import root
@@ -32,35 +33,35 @@ from ..utils.helpers import list_current_jobs
 # commands help is stored in the helpfiles directory as a txt file.
 
 COMMANDS = {
-
+    
     '!': {
         'meta': 'Execute an Operating System command',
         'exec': None,  # handled in the Repl class itself
     },
-
+    
     'reconnect': {
         'meta': 'Reconnect to the current device',
         'exec': None,  # handled in the Repl class itself
     },
-
+    
     'import': {
         'meta': 'Import fridascript from a full path',
         'exec': frida_commands.load_script
     },
-
+    
     # file manager commands
-
+    
     'cd': {
         'meta': 'Change the current working directory',
         'dynamic': filemanager.list_folders_in_current_fm_directory,
         'exec': filemanager.cd
     },
-
+    
     'ls': {
         'meta': 'List files in the current working directory',
         'exec': filemanager.ls,
     },
-
+    
     'pwd': {
         'meta': 'Work with the current directory',
         'commands': {
@@ -71,8 +72,8 @@ COMMANDS = {
         },
     },
 
-    'file': {
-        'meta': 'Work with files on the remote filesystem',
+'file': {
+    'meta': 'Work with files on the remote filesystem',
         'commands': {
             'upload': {
                 'meta': 'Upload a file',
@@ -82,24 +83,24 @@ COMMANDS = {
                 'meta': 'Download a file',
                 'dynamic': filemanager.list_files_in_current_fm_directory,
                 'exec': filemanager.download
-            }
         }
-    },
-
+    }
+},
+    
     # device and env info commands
-
+    
     'env': {
         'meta': 'Print information about the environment',
         'exec': device.get_environment
-    },
-
+},
+    
     'frida': {
         'meta': 'Get information about the Frida environment',
         'exec': frida_commands.frida_environment
-    },
-
+},
+    
     # memory commands
-
+    
     'memory': {
         'meta': 'Work with the current processes memory',
         'commands': {
@@ -110,14 +111,14 @@ COMMANDS = {
                         'meta': 'Dump the entire memory of the current process',
                         'exec': memory.dump_all
                     },
-
+                    
                     'from_base': {
                         'meta': 'Dump (x) bytes of memory from a base address to file',
                         'exec': memory.dump_from_base
-                    }
+            }
                 },
             },
-
+            
             'list': {
                 'meta': 'List memory related information about the current process',
                 'commands': {
@@ -125,36 +126,36 @@ COMMANDS = {
                         'meta': 'List loaded modules in the current process',
                         'exec': memory.list_modules
                     },
-
+                    
                     'exports': {
                         'meta': 'List the exports of a module',
                         'exec': memory.dump_exports
-                    }
+            }
                 },
             },
-
+            
             'search': {
                 'meta': 'Search for pattern in the applications memory',
                 'exec': memory.find_pattern
-            },
+                        },
+                
+                        'write': {
+                            'meta': 'Write raw bytes to a memory address. Use with caution!',
+                                'exec': memory.write
+                                }
+                                    },
+                                },
 
-            'write': {
-                'meta': 'Write raw bytes to a memory address. Use with caution!',
-                'exec': memory.write
-            }
-        },
-    },
+# sqlite commands
 
-    # sqlite commands
-
-    'sqlite': {
-        'meta': 'Work with SQLite databases',
+'sqlite': {
+    'meta': 'Work with SQLite databases',
         'commands': {
             'status': {
                 'meta': 'Show the status of the SQLite database connection',
                 'exec': sqlite.status
             },
-
+            
             'connect': {
                 'meta': 'Connect to a SQLite database (file)',
                 'dynamic': filemanager.list_files_in_current_fm_directory,
@@ -175,17 +176,17 @@ COMMANDS = {
                         'meta': 'Execute a query on the connected SQLite database',
                         'exec': sqlite.execute
                     },
-                }
+            }
             },
             'sync': {
                 'meta': 'Sync the locally cached SQLite database with one on the device',
                 'exec': sqlite.sync
-            }
-        }
+}
+}
     },
-
+    
     # jobs commands
-
+    
     'jobs': {
         'meta': 'Work with objection jobs',
         'commands': {
@@ -197,24 +198,24 @@ COMMANDS = {
                 'meta': 'Kill a job. This unloads the script',
                 'dynamic': list_current_jobs,
                 'exec': jobs.kill
-            }
         }
-    },
-
+    }
+},
+    
     # generic ui commands
-
+    
     'ui': {
         'meta': 'Generic user interface commands',
         'commands': {
             'alert': {
                 'meta': 'Show an alert message, optionally specifying the message to show. (Currently crashes iOS)',
                 'exec': ui.alert
-            }
         }
-    },
-
+    }
+},
+    
     # android commands
-
+    
     'android': {
         'meta': 'Commands specific to Android',
         'commands': {
@@ -248,7 +249,7 @@ COMMANDS = {
                                 'meta': 'List the registered Services',
                                 'exec': android_hooking.show_registered_services
                             },
-                        }
+                    }
                     },
                     'watch': {
                         'meta': 'Watch for Android Java invocations',
@@ -256,21 +257,21 @@ COMMANDS = {
                             'class_method': {
                                 'meta': 'Watches for invocations of a specific class method',
                                 'exec': android_hooking.watch_class_method
-                            }
                         }
+                    }
                     },
                     'dump_args': {
                         'meta': 'Dumps Android Java class methods',
                         'exec': android_hooking.dump_android_method_args
-                    },
-                    'set': {
-                        'meta': 'Set various values',
-                        'commands': {
-                            'return_value': {
-                                'meta': 'Set a methods return value. Supports only boolean returns.',
-                                'exec': android_hooking.set_method_return_value
-                            }
+    },
+        'set': {
+            'meta': 'Set various values',
+                'commands': {
+                    'return_value': {
+                        'meta': 'Set a methods return value. Supports only boolean returns.',
+                            'exec': android_hooking.set_method_return_value
                         }
+                    }
                     },
                     'search': {
                         'meta': 'Search for various classes and or methods',
@@ -278,10 +279,10 @@ COMMANDS = {
                             'classes': {
                                 'meta': 'Search for Java classes matching a name',
                                 'exec': android_hooking.search_class
-                            }
                         }
                     }
-                },
+        }
+            },
             },
             'keystore': {
                 'meta': 'Commands to work with the Android KeyStore',
@@ -293,17 +294,17 @@ COMMANDS = {
                     'clear': {
                         'meta': 'Clears the Android KeyStore',
                         'exec': keystore.clear
-                    }
                 }
-            },
-            'clipboard': {
-                'meta': 'Work with the Android Clipboard',
-                'commands': {
-                    'monitor': {
-                        'meta': 'Monitor the Android Clipboard',
+            }
+},
+    'clipboard': {
+        'meta': 'Work with the Android Clipboard',
+            'commands': {
+                'monitor': {
+                    'meta': 'Monitor the Android Clipboard',
                         'exec': clipboard.monitor
-                    }
                 }
+            }
             },
             'intent': {
                 'meta': 'Commands to work with Android intents',
@@ -311,6 +312,10 @@ COMMANDS = {
                     'launch_activity': {
                         'meta': 'Launch an Activity class using an Intent',
                         'exec': intents.launch_activity
+                    },
+                    'launch_service': {
+                        'meta': 'Launch a Service class using an Intent',
+                        'exec': services.launch_service
                     }
                 }
             },
@@ -324,8 +329,8 @@ COMMANDS = {
                     'simulate': {
                         'meta': 'Attempt to simulate a rooted environment',
                         'exec': root.simulate
-                    }
                 }
+            }
             },
             'sslpinning': {
                 'meta': 'Work with Android SSL pinning',
@@ -333,25 +338,25 @@ COMMANDS = {
                     'disable': {
                         'meta': 'Attempt to disable SSL pinning in various Java libraries/classes',
                         'exec': android_pinning.android_disable
-                    }
                 }
-            },
-            'ui': {
-                'meta': 'Android user interface commands',
-                'commands': {
-                    'screenshot': {
-                        'meta': 'Screenshot the current Activity',
+            }
+},
+    'ui': {
+        'meta': 'Android user interface commands',
+            'commands': {
+                'screenshot': {
+                    'meta': 'Screenshot the current Activity',
                         'exec': ui.android_screenshot
                     },
                     'FLAG_SECURE': {
                         'meta': 'Control FLAG_SECURE of the current Activity',
                         'exec': ui.android_flag_secure
-                    },
-                }
+                },
+        }
             },
         },
-    },
-
+},
+    
     # ios commands
     'ios': {
         'meta': 'Commands specific to iOS',
@@ -367,7 +372,7 @@ COMMANDS = {
                         'meta': 'Delete all keychain entries for the current app\s entitlement group',
                         'exec': keychain.clear
                     },
-                }
+            }
             },
             'plist': {
                 'meta': 'Work with iOS Plists',
@@ -376,8 +381,8 @@ COMMANDS = {
                         'meta': 'Cat a plist',
                         'dynamic': filemanager.list_files_in_current_fm_directory,
                         'exec': plist.cat
-                    }
                 }
+            }
             },
             'nsuserdefaults': {
                 'meta': 'Work with NSUserDefaults',
@@ -385,8 +390,8 @@ COMMANDS = {
                     'get': {
                         'meta': 'Get all of the entries',
                         'exec': nsuserdefaults.get
-                    }
                 }
+            }
             },
             'cookies': {
                 'meta': 'Work with shared cookies',
@@ -394,31 +399,31 @@ COMMANDS = {
                     'get': {
                         'meta': 'Get the current apps shared cookies',
                         'exec': cookies.get
-                    }
                 }
-            },
-            'ui': {
-                'meta': 'iOS user interface commands',
-                'commands': {
-                    'alert': {
-                        'meta': ('Show an alert message, optionally specifying the message to'
-                                 'show. (Currently crashes iOS)'),
+            }
+},
+    'ui': {
+        'meta': 'iOS user interface commands',
+            'commands': {
+                'alert': {
+                    'meta': ('Show an alert message, optionally specifying the message to'
+                             'show. (Currently crashes iOS)'),
                         'exec': ui.alert
-                    },
-                    'dump': {
-                        'meta': 'Dump the serialized UI',
-                        'exec': ui.dump_ios_ui
-                    },
+                             },
+                             'dump': {
+                             'meta': 'Dump the serialized UI',
+                             'exec': ui.dump_ios_ui
+                },
                     'screenshot': {
                         'meta': 'Screenshot the current UIView',
                         'exec': ui.ios_screenshot
-                    },
+                },
                     'touchid_bypass': {
                         'meta': 'Hook the iOS TouchID class and respond with successful fingerprints',
                         'exec': ui.bypass_touchid
-                    }
-                }
-            },
+    }
+    }
+        },
             'hooking': {
                 'meta': 'Commands used for hooking methods in iOS',
                 'commands': {
@@ -432,8 +437,8 @@ COMMANDS = {
                             'class_methods': {
                                 'meta': 'List the methods in a class',
                                 'exec': ios_hooking.show_ios_class_methods
-                            }
                         }
+                    }
                     },
                     'dump': {
                         'meta': 'Dumps various bits of information',
@@ -441,8 +446,8 @@ COMMANDS = {
                             'method_args': {
                                 'meta': 'Attempt to dump arguments for a given method',
                                 'exec': ios_hooking.dump_ios_method_args
-                            }
                         }
+                    }
                     },
                     'watch': {
                         'meta': 'Watch invocations of classes and methods',
@@ -454,8 +459,8 @@ COMMANDS = {
                             'method': {
                                 'meta': 'Hook a specific method and report on invocations',
                                 'exec': ios_hooking.watch_class_method
-                            }
                         }
+                    }
                     },
                     'set': {
                         'meta': 'Set various values',
@@ -463,8 +468,8 @@ COMMANDS = {
                             'return_value': {
                                 'meta': 'Set a methods return value. Supports only boolean returns',
                                 'exec': ios_hooking.set_method_return_value
-                            }
                         }
+                    }
                     },
                     'search': {
                         'meta': 'Search for various classes and or methods',
@@ -476,19 +481,19 @@ COMMANDS = {
                             'methods': {
                                 'meta': 'Search for Objective-C method matching a name',
                                 'exec': ios_hooking.search_method
-                            }
                         }
                     }
-                }
-            },
+    }
+    }
+        },
             'pasteboard': {
                 'meta': 'Work with the iOS pasteboard',
                 'commands': {
                     'monitor': {
                         'meta': 'Monitor the iOS pasteboard',
                         'exec': pasteboard.monitor
-                    }
                 }
+            }
             },
             'sslpinning': {
                 'meta': 'Work with iOS SSL pinning',
@@ -496,26 +501,26 @@ COMMANDS = {
                     'disable': {
                         'meta': 'Attempt to disable SSL pinning in various iOS libraries/classes',
                         'exec': ios_pinning.ios_disable
-                    }
                 }
-            },
-            'jailbreak': {
-                'meta': 'Work with iOS Jailbreak detection',
-                'commands': {
-                    'disable': {
-                        'meta': 'Attempt to disable Jailbreak detection',
+            }
+},
+    'jailbreak': {
+        'meta': 'Work with iOS Jailbreak detection',
+            'commands': {
+                'disable': {
+                    'meta': 'Attempt to disable Jailbreak detection',
                         'exec': jailbreak.disable
                     },
                     'simulate': {
                         'meta': 'Attempt to simulate a Jailbroken environment',
                         'exec': jailbreak.simulate
-                    },
-                }
-            }
+                },
         }
-    },
+        }
+                }
+                },
 
-    'exit': {
-        'meta': 'Exit',
+'exit': {
+    'meta': 'Exit',
     },
 }
