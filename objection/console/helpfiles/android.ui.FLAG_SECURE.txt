@@ -2,7 +2,13 @@ Command: android ui FLAG_SECURE
 
 Usage: android ui FLAG_SECURE <true/false>
 
-Control FLAG_SECURE of the current Activity
+Control the value of FLAG_SECURE for the current Activity. Setting the value
+to false in activities where it is true by default may enable you to take
+screenshots using the hardware keys.
+
+NOTE: This command currently crashes the target application on 32bit devices due to
+an SELinux DENY. For more information see this PR:
+    https://github.com/sensepost/objection/pull/24
 
 Examples:
     android ui FLAG_SECURE false

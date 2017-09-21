@@ -146,6 +146,7 @@ def android_screenshot(args: list = None) -> None:
 
     click.secho('Screenshot saved to: {0}'.format(destination), fg='green')
 
+
 def android_flag_secure(args: list = None) -> None:
     """
         Control FLAG_SECURE of the current Activity, allowing or disallowing
@@ -155,11 +156,12 @@ def android_flag_secure(args: list = None) -> None:
         :return:
     """
 
-    if (len(args) <= 0 or (args[0] != 'true' and args[0] != 'false')):
+    if len(args) <= 0 or args[0] not in ('true', 'false'):
         click.secho('Usage: android ui FLAG_SECURE <true/false>', bold=True)
         return
+
     runner = FridaRunner()
-    runner.set_hook_with_data(android_hook('screenshot/flag-secure'), value=args[0])
+    runner.set_hook_with_data(android_hook('ui/flag-secure'), value=args[0])
 
     runner.run()
 
@@ -169,4 +171,4 @@ def android_flag_secure(args: list = None) -> None:
         click.secho('Failed to set FLAG_SECURE'.format(response.error_message), fg='red')
         return
 
-    click.secho("Successfuly set FLAG_SECURE" if response.data else "Successfully removed FLAG_SECURE")
+    click.secho('Successfuly set FLAG_SECURE' if response.data else 'Successfully removed FLAG_SECURE')

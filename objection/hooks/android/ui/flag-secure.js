@@ -1,4 +1,5 @@
-const VALUE = {{ value }};
+// Sets the FLAG_SECURE FLAG for the current activity.
+const VALUE = eval('{{ value }}');
 
 const FLAG_SECURE = 0x00002000;
 
@@ -16,21 +17,25 @@ for (var i in activityRecords) {
     var activityRecord = Java.cast(activityRecords[i], ActivityClientRecord);
 
     if (!activityRecord.paused['value']) {
+
         currentActivity = Java.cast(Java.cast(activityRecord, ActivityClientRecord)
             .activity['value'], Activity);
+
         break;
     }
 }
 
-if (currentActivity){
+if (currentActivity) {
+
     // Somehow the next line prevents Frida from throwing an abort error
     currentActivity.getWindow();
 
     // Set flag and trigger update (Throws abort without first calling getWindow())
-    Java.scheduleOnMainThread(function(){
+    Java.scheduleOnMainThread(function () {
 
-        currentActivity.getWindow().setFlags(VALUE ? FLAG_SECURE : 0,FLAG_SECURE);
+        currentActivity.getWindow().setFlags(VALUE ? FLAG_SECURE : 0, FLAG_SECURE);
     });
+
     send(JSON.stringify({
         status: 'success',
         error_reason: NaN,
