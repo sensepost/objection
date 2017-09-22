@@ -10,8 +10,8 @@ def launch_service(args: list) -> None:
         
         :param args:
         :return:
-        """
-    
+    """
+
     if len(args) < 1:
         click.secho('Usage: android intent launch_service <service_class>', bold=True)
         return
@@ -19,6 +19,7 @@ def launch_service(args: list) -> None:
     intent_class = args[0]
 
     click.secho('Launching Service: {0}...'.format(intent_class), dim=True)
+
     runner = FridaRunner()
     runner.set_hook_with_data(android_hook('intent/start-service'), intent_class=intent_class)
     runner.run()
