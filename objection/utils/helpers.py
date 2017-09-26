@@ -75,3 +75,23 @@ def get_tokens(text: str) -> list:
         tokens = ['lajfhlaksjdfhlaskjfhafsdlkjh']
 
     return tokens
+
+
+def normalize_gadget_name(gadget_name: str):
+    """
+        Takes a string input and converts it into an integer
+        if possible. This helps the attach() process in the Frida
+        API determine if it should be attaching to a process name or a PID.
+
+        :param gadget_name:
+        :return:
+    """
+
+    try:
+
+        gadget_name = int(gadget_name)
+
+    except ValueError:
+        pass
+
+    return gadget_name

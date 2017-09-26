@@ -7,6 +7,7 @@ from ..commands.device import get_device_info
 from ..commands.mobile_packages import patch_ios_ipa, patch_android_apk
 from ..state.app import app_state
 from ..state.connection import state_connection
+from ..utils.helpers import normalize_gadget_name
 
 
 # Start the Click command group
@@ -40,7 +41,7 @@ def cli(network: bool, host: str, port: int, gadget: str) -> None:
         state_connection.host = host
         state_connection.port = port
 
-    state_connection.gadget_name = gadget
+    state_connection.gadget_name = normalize_gadget_name(gadget_name=gadget)
 
 
 @cli.command()
