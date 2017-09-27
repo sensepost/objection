@@ -15,6 +15,17 @@ def _string_is_true(s: str) -> bool:
     return s.lower() in ('true', 'yes')
 
 
+def _should_include_backtrace(args: list) -> bool:
+    """
+        Check if --include-backtrace is part of the arguments.
+
+        :param args:
+        :return:
+    """
+
+    return '--include-backtrace' in args
+
+
 def show_android_classes(args: list = None) -> None:
     """
         Show the currently loaded classes.
@@ -82,7 +93,7 @@ def watch_class_method(args: list) -> None:
 
     if len(args) < 2:
         click.secho(('Usage: android hooking watch class_method <class> <method>'
-                     ' (eg: com.example.test dologin)'), bold=True)
+                     ' (eg: com.example.test dologin) (optional: --include-backtrace)'), bold=True)
         return
 
     target_class = args[0]
@@ -90,7 +101,8 @@ def watch_class_method(args: list) -> None:
 
     runner = FridaRunner()
     runner.set_hook_with_data(android_hook('hooking/watch-method'),
-                              target_class=target_class, target_method=target_method)
+                              target_class=target_class, target_method=target_method,
+                              include_backtrace=_should_include_backtrace(args))
 
     runner.run_as_job(name='watch-java-method')
 

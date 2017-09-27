@@ -5,7 +5,10 @@ Usage: android hooking watch class_method <class> <method>
 Hooks a specified class method and reports on invocations, together with
 the number of arguments that method was called with. This command will
 also hook all of the methods overloads.
+If the --include-backtrace flag is provided, a full stack trace that
+lead to the methods invocation will also be dumped.
 
 Examples:
    android hooking watch class_method com.example.test login
    android hooking watch class_method com.example.test.helper executeQuery
+   android hooking watch class_method com.example.test.helper executeQuery --include-backtrace
