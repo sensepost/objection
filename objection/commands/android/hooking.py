@@ -220,7 +220,7 @@ def set_method_return_value(args: list = None) -> None:
         return
 
     class_name = args[0]
-    method_name = args[1]
+    method_name = args[1].replace('\'', '"')  # fun!
     retval = args[2]
 
     runner = FridaRunner()
