@@ -336,8 +336,7 @@ var tls_helper_create_peer_trust_export = Module.findExportByName('libcoretls_cf
 // would not have been found.
 if (tls_helper_create_peer_trust_export) {
 
-    var tls_helper_create_peer_trust = new NativeFunction(
-        Module.findExportByName('libcoretls_cfhelpers.dylib', 'tls_helper_create_peer_trust'),
+    var tls_helper_create_peer_trust = new NativeFunction(tls_helper_create_peer_trust_export,
         'int', ['void', 'bool', 'pointer']);
 
     Interceptor.replace(tls_helper_create_peer_trust, new NativeCallback(function (hdsk, server, SecTrustRef) {
