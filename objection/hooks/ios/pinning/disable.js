@@ -329,18 +329,26 @@ Interceptor.replace(SSLHandshake, new NativeCallback(function (context) {
 // iOS 10
 
 // tls_helper_create_peer_trust
-var tls_helper_create_peer_trust = new NativeFunction(
-    Module.findExportByName('libcoretls_cfhelpers.dylib', 'tls_helper_create_peer_trust'),
-    'int', ['void', 'bool', 'pointer']);
+var tls_helper_create_peer_trust_export = Module.findExportByName('libcoretls_cfhelpers.dylib',
+    'tls_helper_create_peer_trust');
 
-Interceptor.replace(tls_helper_create_peer_trust, new NativeCallback(function (hdsk, server, SecTrustRef) {
+// In the case of devices older than iOS 10, this export
+// would not have been found.
+if (tls_helper_create_peer_trust_export) {
 
-    send(JSON.stringify({
-        status: 'success',
-        error_reason: NaN,
-        type: 'ios-ssl-pinning-bypass',
-        data: '[tls_helper_create_peer_trust] Called'
-    }));
+    var tls_helper_create_peer_trust = new NativeFunction(
+        Module.findExportByName('libcoretls_cfhelpers.dylib', 'tls_helper_create_peer_trust'),
+        'int', ['void', 'bool', 'pointer']);
 
-    return errSecSuccess;
-}, 'int', ['void', 'bool', 'pointer']));
+    Interceptor.replace(tls_helper_create_peer_trust, new NativeCallback(function (hdsk, server, SecTrustRef) {
+
+        send(JSON.stringify({
+            status: 'success',
+            error_reason: NaN,
+            type: 'ios-ssl-pinning-bypass',
+            data: '[tls_helper_create_peer_trust] Called'
+        }));
+
+        return errSecSuccess;
+    }, 'int', ['void', 'bool', 'pointer']));
+}
