@@ -409,8 +409,10 @@ class IosPatcher(BasePlatformPatcher):
 
         # ensure that we got some valid mobileprovisions to work with
         if len(expirations) <= 0:
-            click.secho('Could not find a non-expired provisioning file. Please specify or generate one.', fg='red')
-            return
+            message = 'Could not find a non-expired provisioning file. Please specify or generate one.'
+
+            click.secho(message, fg='red')
+            raise Exception(message)
 
         # sort the results so that the mobileprovision with the most time is at
         # the top of the list
