@@ -178,7 +178,7 @@ function decode_acl(entry) {
                 break;
 
             case 'osgn':
-                flags.push['PrivateKeyUsage'];
+                flags.push('PrivateKeyUsage');
 
             case 'od':
                 var constraints = access_control_item;
