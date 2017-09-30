@@ -1,6 +1,7 @@
 import atexit
 
 import click
+import frida
 
 
 class JobManagerState(object):
@@ -48,8 +49,16 @@ class JobManagerState(object):
         """
 
         for job in self.jobs:
-            click.secho('[job manager] Job: {0} - Stopping'.format(job.id), dim=True)
-            job.end()
+
+            try:
+
+                click.secho('[job manager] Job: {0} - Stopping'.format(job.id), dim=True)
+                job.end()
+
+            except frida.InvalidOperationError:
+
+                click.secho(('[job manager] Job: {0} - An error occured stopping job. Device may '
+                             'no longer be available.'.format(job.id)), fg='red', dim=True)
 
 
 job_manager_state = JobManagerState()
