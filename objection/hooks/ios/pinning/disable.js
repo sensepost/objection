@@ -44,12 +44,12 @@ var NSURLCredential = ObjC.classes.NSURLCredential;
 // AFNetworking
 if (ObjC.classes.AFHTTPSessionManager && ObjC.classes.AFSecurityPolicy) {
 
-    send(JSON.stringify({
+    send({
         status: 'success',
         error_reason: NaN,
         type: 'ios-ssl-pinning-bypass',
         data: 'Found AFNetworking 3.0 library'
-    }));
+    });
 
     var AFSecurityPolicy_policyWithPinningMode = {};
     resolver.enumerateMatches('+[AFSecurityPolicy policyWithPinningMode:]', {
@@ -62,12 +62,12 @@ if (ObjC.classes.AFHTTPSessionManager && ObjC.classes.AFSecurityPolicy) {
 
     if (AFSecurityPolicy_policyWithPinningMode.address) {
 
-        send(JSON.stringify({
+        send({
             status: 'success',
             error_reason: NaN,
             type: 'ios-ssl-pinning-bypass',
             data: 'Found +[AFSecurityPolicy policyWithPinningMode:]'
-        }));
+        });
 
         Interceptor.attach(AFSecurityPolicy_policyWithPinningMode.address, {
             onEnter: function (args) {
@@ -80,12 +80,12 @@ if (ObjC.classes.AFHTTPSessionManager && ObjC.classes.AFSecurityPolicy) {
 
                 if (args[2] != '0x0') {
 
-                    send(JSON.stringify({
+                    send({
                         status: 'success',
                         error_reason: NaN,
                         type: 'ios-ssl-pinning-bypass',
                         data: '[AFNetworking 3.0] setting AFSSLPinningModeNone for policyWithPinningMode:'
-                    }));
+                    });
 
                     args[2] = '0x0';
                 }
@@ -104,12 +104,12 @@ if (ObjC.classes.AFHTTPSessionManager && ObjC.classes.AFSecurityPolicy) {
 
     if (AFSecurityPolicy_policyWithPinningModewithPinnedCertificates.address) {
 
-        send(JSON.stringify({
+        send({
             status: 'success',
             error_reason: NaN,
             type: 'ios-ssl-pinning-bypass',
             data: 'Found +[AFSecurityPolicy policyWithPinningMode:withPinnedCertificates:]'
-        }));
+        });
 
         Interceptor.attach(AFSecurityPolicy_policyWithPinningModewithPinnedCertificates.address, {
             onEnter: function (args) {
@@ -122,12 +122,12 @@ if (ObjC.classes.AFHTTPSessionManager && ObjC.classes.AFSecurityPolicy) {
 
                 if (args[2] != '0x0') {
 
-                    send(JSON.stringify({
+                    send({
                         status: 'success',
                         error_reason: NaN,
                         type: 'ios-ssl-pinning-bypass',
                         data: '[AFNetworking 3.0] setting AFSSLPinningModeNone for policyWithPinningMode:withPinnedCertificates:'
-                    }));
+                    });
 
                     args[2] = '0x0';
                 }
@@ -141,12 +141,12 @@ var search = resolver.enumerateMatchesSync('-[* URLSession:didReceiveChallenge:c
 
 if (search.length > 0) {
 
-    send(JSON.stringify({
+    send({
         status: 'success',
         error_reason: NaN,
         type: 'ios-ssl-pinning-bypass',
         data: '[NSURLSession] Found ' + search.length + ' matches for URLSession:didReceiveChallenge:completionHandler:'
-    }));
+    });
 
     for (var i = 0; i < search.length; i++) {
 
@@ -164,12 +164,12 @@ if (search.length > 0) {
                 var selector = ObjC.selectorAsString(args[1]);
                 var challenge = new ObjC.Object(args[3]);
 
-                send(JSON.stringify({
+                send({
                     status: 'success',
                     error_reason: NaN,
                     type: 'ios-ssl-pinning-bypass',
                     data: '[NSURLSession] Got call to -[' + receiver + ' ' + selector + ']. Ensuring pinning passes.'
-                }));
+                });
 
                 // get the original completion handler, and save it
                 var completion_handler = new ObjC.Block(args[4]);
@@ -221,12 +221,12 @@ var search = resolver.enumerateMatchesSync('-[* connection:willSendRequestForAut
 
 if (search.length > 0) {
 
-    send(JSON.stringify({
+    send({
         status: 'success',
         error_reason: NaN,
         type: 'ios-ssl-pinning-bypass',
         data: '[NSURLConnection] Found ' + search.length + ' matches for connection:willSendRequestForAuthenticationChallenge:'
-    }));
+    });
 
     for (var i = 0; i < search.length; i++) {
 
@@ -242,13 +242,13 @@ if (search.length > 0) {
 // Process the lower level methods, just like SSL-Killswitch2
 //  https://github.com/nabla-c0d3/ssl-kill-switch2/blob/master/SSLKillSwitch/SSLKillSwitch.m
 
-send(JSON.stringify({
+send({
     status: 'success',
     error_reason: NaN,
     type: 'ios-ssl-pinning-bypass',
     data: 'Hooking lower level methods: SSLSetSessionOption, SSLCreateContext, ' +
     'SSLHandshake and tls_helper_create_peer_trust'
-}));
+});
 
 // iOS9 and below
 
@@ -265,12 +265,12 @@ var SSLSetSessionOption = new NativeFunction(
 
 Interceptor.replace(SSLSetSessionOption, new NativeCallback(function (context, option, value) {
 
-    send(JSON.stringify({
+    send({
         status: 'success',
         error_reason: NaN,
         type: 'ios-ssl-pinning-bypass',
         data: '[SSLSetSessionOption] Called'
-    }));
+    });
 
     if (option === kSSLSessionOptionBreakOnServerAuth) {
 
@@ -287,12 +287,12 @@ var SSLCreateContext = new NativeFunction(
 
 Interceptor.replace(SSLCreateContext, new NativeCallback(function (alloc, protocolSide, connectionType) {
 
-    send(JSON.stringify({
+    send({
         status: 'success',
         error_reason: NaN,
         type: 'ios-ssl-pinning-bypass',
         data: '[SSLCreateContext] Called'
-    }));
+    });
 
     var sslContext = SSLCreateContext(alloc, protocolSide, connectionType);
     SSLSetSessionOption(sslContext, kSSLSessionOptionBreakOnServerAuth, 1);
@@ -308,12 +308,12 @@ var SSLHandshake = new NativeFunction(
 
 Interceptor.replace(SSLHandshake, new NativeCallback(function (context) {
 
-    send(JSON.stringify({
+    send({
         status: 'success',
         error_reason: NaN,
         type: 'ios-ssl-pinning-bypass',
         data: '[SSLHandshake] Called'
-    }));
+    });
 
     var result = SSLHandshake(context);
 
@@ -341,12 +341,12 @@ if (tls_helper_create_peer_trust_export) {
 
     Interceptor.replace(tls_helper_create_peer_trust, new NativeCallback(function (hdsk, server, SecTrustRef) {
 
-        send(JSON.stringify({
+        send({
             status: 'success',
             error_reason: NaN,
             type: 'ios-ssl-pinning-bypass',
             data: '[tls_helper_create_peer_trust] Called'
-        }));
+        });
 
         return errSecSuccess;
     }, 'int', ['void', 'bool', 'pointer']));

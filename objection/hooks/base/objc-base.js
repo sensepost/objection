@@ -13,7 +13,7 @@ if (ObjC.available) {
             data: {}
         };
 
-        send(JSON.stringify(response));
+        send(response);
     }
 
 } else {
@@ -25,5 +25,5 @@ if (ObjC.available) {
         data: {}
     };
 
-    send(JSON.stringify(response));
+    send(response);
 }

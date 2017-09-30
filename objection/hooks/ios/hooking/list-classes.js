@@ -14,4 +14,4 @@ var response = {
     data: classes
 };
 
-send(JSON.stringify(response));
+send(response);

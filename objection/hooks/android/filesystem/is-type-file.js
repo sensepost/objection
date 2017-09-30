@@ -11,7 +11,7 @@ var response = {
     data: Boolean(file.isFile())
 };
 
-send(JSON.stringify(response));
+send(response);
 
 // -- Sample Java Code
 //

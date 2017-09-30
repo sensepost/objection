@@ -41,4 +41,4 @@ if (attributes) {
     }
 }
 
-send(JSON.stringify(response));
+send(response);

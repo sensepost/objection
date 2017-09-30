@@ -13,7 +13,7 @@ if (ObjC.available) {
         }
     };
 
-    send(JSON.stringify(response));
+    send(response);
 
 } else if (Java.available) {
 
@@ -27,7 +27,7 @@ if (ObjC.available) {
         }
     };
 
-    send(JSON.stringify(response));
+    send(response);
 
 } else {
 
@@ -40,5 +40,5 @@ if (ObjC.available) {
         }
     };
 
-    send(JSON.stringify(response));
+    send(response);
 }

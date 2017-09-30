@@ -25,12 +25,12 @@ var TrustManager = Java.registerClass({
 // Prepare the TrustManagers array to pass to SSLContext.init()
 var TrustManagers = [TrustManager.$new()];
 
-send(JSON.stringify({
+send({
     status: 'success',
     error_reason: NaN,
     type: 'android-ssl-pinning-bypass',
     data: 'Custom TrustManager ready'
-}));
+});
 
 // Get a handle on the init() on the SSLContext class
 var SSLContext_init = SSLContext.init.overload(
@@ -39,12 +39,12 @@ var SSLContext_init = SSLContext.init.overload(
 // Override the init method, specifying our new TrustManager
 SSLContext_init.implementation = function (keyManager, trustManager, secureRandom) {
 
-    send(JSON.stringify({
+    send({
         status: 'success',
         error_reason: NaN,
         type: 'android-ssl-pinning-bypass',
         data: 'Overriding SSLContext.init() with the custom TrustManager'
-    }));
+    });
 
     SSLContext_init.call(this, keyManager, TrustManagers, secureRandom);
 };
@@ -59,12 +59,12 @@ try {
 
     CertificatePinner.check.overload('java.lang.String', 'java.util.List').implementation = function () {
 
-        send(JSON.stringify({
+        send({
             status: 'success',
             error_reason: NaN,
             type: 'android-ssl-pinning-bypass',
             data: 'OkHTTP 3.x check() called. Not throwing an exception.'
-        }));
+        });
     }
 
 } catch (err) {

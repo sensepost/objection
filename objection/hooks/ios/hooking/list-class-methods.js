@@ -31,4 +31,4 @@ var response = {
     data: methods
 };
 
-send(JSON.stringify(response));
+send(response);

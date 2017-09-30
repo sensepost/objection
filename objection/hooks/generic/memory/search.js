@@ -27,4 +27,4 @@ var response = {
     data: match_addresses
 };
 
-send(JSON.stringify(response));
+send(response);

@@ -35,12 +35,12 @@ Interceptor.attach(ObjC.classes.NSFileManager['- fileExistsAtPath:'].implementat
 
             if (retval != 0x0) {
 
-                send(JSON.stringify({
+                send({
                     status: 'success',
                     error_reason: NaN,
                     type: 'jailbreak-bypass',
                     data: 'A successful lookup for ' + this.path + ' occurred. Marking it as failed.'
-                }));
+                });
 
                 retval.replace(0x0);
             }
@@ -57,22 +57,22 @@ if (libSystem_B_dylib_fork) {
     Interceptor.attach(libSystem_B_dylib_fork, {
         onLeave: function (retval) {
 
-            send(JSON.stringify({
+            send({
                 status: 'success',
                 error_reason: NaN,
                 type: 'jailbreak-bypass',
                 data: 'Making call to libSystem.B.dylib::fork() return 0x0'
-            }));
+            });
 
             retval.replace(0x0);
         }
     });
 } else {
 
-    send(JSON.stringify({
+    send({
         status: 'error',
         error_reason: 'Unable to find libSystem.B.dylib::fork(). Running on simulator?',
         type: 'jailbreak-bypass',
         data: NaN
-    }));
+    });
 }

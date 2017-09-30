@@ -22,7 +22,7 @@ var response = {
 };
 
 // send the response message and the bytes 'downloaded'
-send(JSON.stringify(response), bytes);
+send(response, bytes);
 
 // -- Sample Objective-C
 //

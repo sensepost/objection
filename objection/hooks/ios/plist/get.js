@@ -11,7 +11,7 @@ var response = {
     data: data.toString() 
 };
 
-send(JSON.stringify(response));
+send(response);
 
 // -- Sample Objective-C
 //

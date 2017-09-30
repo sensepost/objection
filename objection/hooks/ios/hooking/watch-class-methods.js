@@ -7,12 +7,12 @@ for (var class_name in ObjC.classes) {
 
     if (class_name == '{{ class_name }}') {
 
-        send(JSON.stringify({
+        send({
             status: 'success',
             error_reason: NaN,
             type: 'call-to-hooked-method',
             data: 'Found class: {{ class_name }}, hooking methods...'
-        }));
+        });
 
         // if we should include parent classes, do that.
         if ('{{ include_parents }}' == 'True') {
@@ -43,22 +43,22 @@ for (var class_name in ObjC.classes) {
                             ') (Super: ' + receiver.$superClass +
                             ') [' + receiver.$className + ' ' + ObjC.selectorAsString(args[1]) + ']';
 
-                        send(JSON.stringify({
+                        send({
                             status: 'success',
                             error_reason: NaN,
                             type: 'call-to-hooked-method',
                             data: 'Hit: ' + message
-                        }));
+                        });
                     }
                 });
             } catch (err) {
 
-                send(JSON.stringify({
+                send({
                     status: 'success',
                     error_reason: 'Hooking method ' + method + 'failed with: ' + err.message,
                     type: 'call-to-hooked-method',
                     data: NaN
-                }));
+                });
             }
         }
     }

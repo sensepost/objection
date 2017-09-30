@@ -43,7 +43,7 @@ var response = {
     data: 'Keychain cleared'
 };
 
-send(JSON.stringify(response));
+send(response);
 
 // -- Sample Objective-C
 //

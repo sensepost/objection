@@ -1,4 +1,3 @@
-import json
 import random
 import uuid
 from time import strftime
@@ -136,7 +135,7 @@ class FridaJobRunner(object):
             if message and 'payload' in message:
 
                 # extract the payload and echo the message to the tty
-                payload = json.loads(message['payload'])
+                payload = message['payload']
 
                 # success messages are green...
                 if payload['status'] == 'success':
@@ -205,8 +204,8 @@ class FridaRunner(object):
         try:
 
             if message and 'payload' in message:
-                payload = json.loads(message['payload'])
-                self.messages.append(RunnerMessage(payload, data))
+
+                self.messages.append(RunnerMessage(message['payload'], data))
 
                 # check if the last message was an error
                 msg = self.get_last_message()
@@ -214,7 +213,8 @@ class FridaRunner(object):
                     click.secho('[hook failure] {0}'.format(msg.error_reason), fg='red')
 
         except Exception as e:
-            click.secho('Failed to process an incoming message from hook: {0}'.format(e))
+            click.secho('Failed to process an incoming message from hook: {0}'.format(e), fg='red', bold=True)
+            raise e
 
     def _hook_processor(self, hook: str = None) -> str:
         """

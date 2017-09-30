@@ -15,12 +15,12 @@ resolver.enumerateMatches('{{ method }}', {
 
 if (method.address) {
 
-    send(JSON.stringify({
+    send({
         status: 'success',
         error_reason: NaN,
         type: 'ios-argument-dump',
         data: 'Found address for: {{ method }} at ' + method.address
-    }));
+    });
 
     // check the argument count that we need to loop over
     var ac = parseInt(argument_count);
@@ -28,12 +28,12 @@ if (method.address) {
     Interceptor.attach(method.address, {
         onEnter: function (args) {
 
-            send(JSON.stringify({
+            send({
                 status: 'success',
                 error_reason: NaN,
                 type: 'ios-argument-dump',
                 data: 'Detected call to: {{ method }}'
-            }));
+            });
 
             if (ac > 0) {
 
@@ -55,22 +55,22 @@ if (method.address) {
                     split_method[i] = selector;
                 }
 
-                send(JSON.stringify({
+                send({
                     status: 'success',
                     error_reason: NaN,
                     type: 'ios-argument-dump',
                     data: split_method.join(' ')
-                }));
+                });
             }
         }
     });
 
 } else {
 
-    send(JSON.stringify({
+    send({
         status: 'error',
         error_reason: 'Unable to find address for {{ method }}. Is the selector valid?',
         type: 'ios-argument-dump',
         data: NaN
-    }));
+    });
 }

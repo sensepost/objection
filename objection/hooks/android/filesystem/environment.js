@@ -20,7 +20,7 @@ var response = {
     data: data 
 };
 
-send(JSON.stringify(response));
+send(response);
 
 // -- Sample Java
 //

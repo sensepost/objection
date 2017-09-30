@@ -39,7 +39,7 @@ var response = {
     data: {}
 };
 
-send(JSON.stringify(response), image_data);
+send(response, image_data);
 
 // -- Sample Objective-C
 //

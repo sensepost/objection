@@ -13,12 +13,12 @@ resolver.enumerateMatches('{{ selector }}', {
 
 if (method.address) {
 
-    send(JSON.stringify({
+    send({
         status: 'success',
         error_reason: NaN,
         type: 'watch-class-method',
         data: 'Found address for: {{ selector }} at ' + method.address
-    }));
+    });
 
     Interceptor.attach(method.address, {
         onEnter: function (args) {
@@ -38,21 +38,21 @@ if (method.address) {
 
             }
 
-            send(JSON.stringify({
+            send({
                 status: 'success',
                 error_reason: NaN,
                 type: 'watch-class-method',
                 data: 'Hit: ' + message
-            }));
+            });
         }
     });
 
 } else {
 
-    send(JSON.stringify({
+    send({
         status: 'error',
         error_reason: 'Unable to find address for {{ selector }}. Is the selector valid?',
         type: 'watch-class-method',
         data: NaN
-    }));
+    });
 }

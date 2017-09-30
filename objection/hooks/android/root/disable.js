@@ -15,12 +15,12 @@ String.contains.implementation = function (check) {
 
     if (check == 'test-keys') {
 
-        send(JSON.stringify({
+        send({
             status: 'success',
             error_reason: NaN,
             type: 'root-bypass',
             data: 'Check for test-keys was detected. Marking it as failed.'
-        }));
+        });
 
         return false;
     }
@@ -34,12 +34,12 @@ Runtime.exec.overload('java.lang.String').implementation = function (command) {
 
     if (command.endsWith('su')) {
 
-        send(JSON.stringify({
+        send({
             status: 'success',
             error_reason: NaN,
             type: 'root-bypass',
             data: 'Check for su detected with command \'' + command + '\'. Throwing an IOException.'
-        }));
+        });
 
         throw IOException.$new('anti-root');
     }
@@ -57,12 +57,12 @@ File.exists.implementation = function () {
     // check if the looked up path is in the list of common_paths
     if (common_paths.indexOf(filename) >= 0) {
 
-        send(JSON.stringify({
+        send({
             status: 'success',
             error_reason: NaN,
             type: 'root-bypass',
             data: 'Check for \'' + filename + '\' was detected. Returning false.'
-        }));
+        });
 
         return false
     }

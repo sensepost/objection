@@ -41,7 +41,7 @@ var response = {
     data: cookies
 };
 
-send(JSON.stringify(response));
+send(response);
 
 // -- Sample Objective-C
 //

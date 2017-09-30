@@ -22,7 +22,7 @@ if (Java.available) {
                     data: {}
                 };
 
-                send(JSON.stringify(response));
+                send(response);
             }
         });
 
@@ -35,7 +35,7 @@ if (Java.available) {
             data: {}
         };
 
-        send(JSON.stringify(response));
+        send(response);
     }
 
 } else {
@@ -47,5 +47,5 @@ if (Java.available) {
         data: {}
     };
 
-    send(JSON.stringify(response));
+    send(response);
 }

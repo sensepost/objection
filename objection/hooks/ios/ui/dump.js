@@ -7,4 +7,4 @@ var response = {
     data: ObjC.classes.UIWindow.keyWindow().recursiveDescription().toString()
 };
 
-send(JSON.stringify(response));
+send(response);

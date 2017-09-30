@@ -34,4 +34,4 @@ var response = {
     data: services
 };
 
-send(JSON.stringify(response));
+send(response);

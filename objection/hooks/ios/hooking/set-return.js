@@ -17,24 +17,24 @@ resolver.enumerateMatches('{{ selector }}', {
 
 if (method.address) {
 
-    send(JSON.stringify({
+    send({
         status: 'success',
         error_reason: NaN,
         type: 'set-return-value',
         data: 'Found address for: {{ selector }} at ' + method.address
-    }));
+    });
 
     Interceptor.attach(method.address, {
         onLeave: function (retval) {
 
             if (retval != return_values['{{ retval }}']) {
 
-                send(JSON.stringify({
+                send({
                     status: 'success',
                     error_reason: NaN,
                     type: 'set-return-value',
                     data: 'Return value was not {{ retval }}, making it so.'
-                }));
+                });
 
                 retval.replace(return_values['{{ retval }}']);
             }
@@ -43,10 +43,10 @@ if (method.address) {
 
 } else {
 
-    send(JSON.stringify({
+    send({
         status: 'error',
         error_reason: 'Unable to find address for {{ selector }}. Is the selector valid?',
         type: 'set-return-value',
         data: NaN
-    }));
+    });
 }

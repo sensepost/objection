@@ -34,7 +34,7 @@ var response = {
     data: entries
 };
 
-send(JSON.stringify(response));
+send(response);
 
 // - Sample Java
 //

@@ -36,10 +36,10 @@ if (currentActivity) {
         currentActivity.getWindow().setFlags(VALUE ? FLAG_SECURE : 0, FLAG_SECURE);
     });
 
-    send(JSON.stringify({
+    send({
         status: 'success',
         error_reason: NaN,
         type: 'android-flag-secure',
         data: VALUE
-    }));
+    });
 }

@@ -24,4 +24,4 @@ var response = {
     data: activities
 };
 
-send(JSON.stringify(response));
+send(response);

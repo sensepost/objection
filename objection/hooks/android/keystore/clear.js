@@ -26,7 +26,7 @@ var response = {
     data: NaN
 };
 
-send(JSON.stringify(response));
+send(response);
 
 // - Sample Java
 //

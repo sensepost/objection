@@ -11,5 +11,5 @@ try {
         data: {}
     };
 
-    send(JSON.stringify(response));
+    send(response);
 }

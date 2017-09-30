@@ -24,12 +24,12 @@ function check_string_data() {
     string_data = current_string;
 
     // ... and send the update along
-    send(JSON.stringify({
+    send({
         status: 'success',
         error_reason: NaN,
         type: 'pasteboard-monitor-string',
         data: current_string
-    }));
+    });
 }
 
 // Poll every 5 seconds

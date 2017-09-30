@@ -12,12 +12,12 @@ String.contains.implementation = function (check) {
 
     if (check == 'test-keys') {
 
-        send(JSON.stringify({
+        send({
             status: 'success',
             error_reason: NaN,
             type: 'root-simulate',
             data: 'Check for test-keys was detected. Marking it as successful.'
-        }));
+        });
 
         return true;
     }
@@ -35,12 +35,12 @@ File.exists.implementation = function () {
     // check if the looked up path is in the list of common_paths
     if (common_paths.indexOf(filename) >= 0) {
 
-        send(JSON.stringify({
+        send({
             status: 'success',
             error_reason: NaN,
             type: 'root-simulate',
             data: 'Check for \'' + filename + '\' was detected. Returning true.'
-        }));
+        });
 
         return true
     }

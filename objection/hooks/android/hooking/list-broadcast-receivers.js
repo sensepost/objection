@@ -34,4 +34,4 @@ var response = {
     data: receivers
 };
 
-send(JSON.stringify(response));
+send(response);

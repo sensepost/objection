@@ -36,12 +36,12 @@ function check_clipboard_data() {
             // Update the data with the new string and report back.
             string_data = data;
 
-            send(JSON.stringify({
+            send({
                 status: 'success',
                 error_reason: NaN,
                 type: 'clipboard-monitor-string',
                 data: data
-            }));
+            });
         }
     });
 }

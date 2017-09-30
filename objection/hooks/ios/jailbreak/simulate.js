@@ -32,12 +32,12 @@ Interceptor.attach(ObjC.classes.NSFileManager['- fileExistsAtPath:'].implementat
 
             if (retval == 0x0) {
 
-                send(JSON.stringify({
+                send({
                     status: 'success',
                     error_reason: NaN,
                     type: 'jailbreak-simulate',
                     data: 'A failed lookup for ' + this.path + ' occurred. Marking it as successful.'
-                }));
+                });
 
                 retval.replace(0x1);
             }
@@ -51,12 +51,12 @@ var libSystem_B_dylib_fork = Module.findExportByName('libSystem.B.dylib', 'fork'
 Interceptor.attach(libSystem_B_dylib_fork, {
     onLeave: function (retval) {
 
-        send(JSON.stringify({
+        send({
             status: 'success',
             error_reason: NaN,
             type: 'jailbreak-simulate',
             data: 'Making call to libSystem.B.dylib::fork() return 0x1'
-        }));
+        });
 
         retval.replace(0x1);
     }

@@ -24,7 +24,7 @@ var response = {
 };
 
 // send the response message
-send(JSON.stringify(response));
+send(response);
 
 // -- Sample Objective-C
 //
