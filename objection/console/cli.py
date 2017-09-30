@@ -86,6 +86,11 @@ def explore(startup_command: str, startup_script: str, hook_debug: bool, quiet: 
     except (frida.TimedOutError, frida.ServerNotRunningError) as e:
         click.secho('Error: {0}'.format(e), fg='red')
 
+    except (frida.ProcessNotFoundError, frida.NotSupportedError) as e:
+        click.secho('Error: {0}'.format(e), fg='red')
+
+        return
+
     # run the REPL
     r.start_repl(quiet=quiet)
 
