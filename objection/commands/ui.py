@@ -121,7 +121,8 @@ def android_screenshot(args: list = None) -> None:
         click.secho('Usage: android ui screenshot <local png destination>', bold=True)
         return
 
-    destination = args[0]
+    # add the .png extention if it does not already exist
+    destination = args[0] if args[0].endswith('.png') else args[0] + '.png'
 
     hook = android_hook('screenshot/take')
 

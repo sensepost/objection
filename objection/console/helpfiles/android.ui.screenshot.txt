@@ -3,6 +3,9 @@ Command: android ui screenshot
 Usage: android ui screenshot <local png destination>
 
 Screenshots the current foregrounded Activity and saves it as a PNG locally.
+If the `.png` extention is not used in the resultant filename, it will be automatically
+added.
 
 Examples:
-    android ios ui screenshot screenshot.png
+    android ui screenshot application_image
+    android ui screenshot app_screenshot.png
