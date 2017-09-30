@@ -1,3 +1,4 @@
+import json
 import random
 import uuid
 from time import strftime
@@ -132,6 +133,13 @@ class FridaJobRunner(object):
 
         try:
 
+            # log the hook response if needed
+            if app_state.should_debug_hooks():
+                click.secho('- [response] ' + '-' * 18, dim=True)
+                click.secho(json.dumps(message, indent=2), dim=True)
+                click.secho('- [./response] ' + '-' * 16, dim=True)
+
+            # process the response
             if message and 'payload' in message:
 
                 # extract the payload and echo the message to the tty
@@ -203,6 +211,13 @@ class FridaRunner(object):
 
         try:
 
+            # log the hook response if needed
+            if app_state.should_debug_hooks():
+                click.secho('- [response] ' + '-' * 18, dim=True)
+                click.secho(json.dumps(message, indent=2), dim=True)
+                click.secho('- [./response] ' + '-' * 16, dim=True)
+
+            # process the response
             if message and 'payload' in message:
 
                 self.messages.append(RunnerMessage(message['payload'], data))
@@ -242,7 +257,9 @@ class FridaRunner(object):
 
         # log the hook if needed
         if app_state.should_debug_hooks():
+            click.secho('- [hook] ' + '-' * 22, dim=True)
             click.secho(jsbeautifier.beautify(hook), dim=True)
+            click.secho('- [./hook] ' + '-' * 20, dim=True)
 
         return hook
 
