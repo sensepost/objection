@@ -78,7 +78,7 @@ var perform_ls = function () {
         // finally, add the file to the final response
         data.files[file] = file_data;
     }
-}
+};
 
 rpc.exports = {
     ls: function () {
@@ -87,7 +87,7 @@ rpc.exports = {
 
         return data;
     }
-}
+};
 
 // -- Sample Objective-C
 //
