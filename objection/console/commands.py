@@ -12,7 +12,6 @@ from ..commands.android import intents
 from ..commands.android import keystore
 from ..commands.android import pinning as android_pinning
 from ..commands.android import root
-from ..commands.android import services
 from ..commands.ios import cookies
 from ..commands.ios import hooking as ios_hooking
 from ..commands.ios import jailbreak
@@ -315,7 +314,7 @@ COMMANDS = {
                     },
                     'launch_service': {
                         'meta': 'Launch a Service class using an Intent',
-                        'exec': services.launch_service
+                        'exec': intents.launch_service
                     }
                 }
             },
