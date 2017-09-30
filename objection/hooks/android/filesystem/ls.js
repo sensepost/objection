@@ -31,7 +31,7 @@ if (Boolean(readable)) {
         // of java.io.File already
         var file = files[i];
 
-        var file_data = {
+        data.files[file.getName()] = {
             fileName: file.getName(),
             readable: file.canRead(),
             writable: file.canWrite(),
@@ -43,9 +43,6 @@ if (Boolean(readable)) {
                 size: file.length()
             }
         };
-
-        data.files[file.getName()] = file_data;
-
     }
 }
 
