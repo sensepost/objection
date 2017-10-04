@@ -8,7 +8,8 @@ from pkg_resources import parse_version
 from ..utils.packages import Github, IosGadget, IosPatcher, AndroidGadget, AndroidPatcher
 
 
-def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, binary_name: str) -> None:
+def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, binary_name: str,
+                  skip_cleanup: bool) -> None:
     """
         Patches an iOS IPA by extracting, injecting the Frida dylib,
         codesigning the dylib and app executable and rezipping the IPA.
@@ -17,6 +18,7 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
         :param codesign_signature:
         :param provision_file:
         :param binary_name:
+        :param skip_cleanup:
         :return:
     """
 
@@ -43,7 +45,7 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
     click.secho('Using Gadget version: {0}'.format(github_version), fg='green')
 
     # start the patching process
-    patcher = IosPatcher()
+    patcher = IosPatcher(skip_cleanup=skip_cleanup)
 
     # return of we do not have all of the requirements.
     if not patcher.are_requirements_met():
@@ -62,13 +64,14 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
         os.path.join(os.path.abspath('.'), os.path.basename(patcher.get_patched_ipa_path())))
 
 
-def patch_android_apk(source: str, architecture: str) -> None:
+def patch_android_apk(source: str, architecture: str, skip_cleanup: bool = True) -> None:
     """
         Patches an Android APK by extracting, patching SMALI, repackaging
         and signing a new APK.
 
         :param source:
         :param architecture:
+        :param skip_cleanup:
         :return:
     """
 
@@ -112,7 +115,7 @@ def patch_android_apk(source: str, architecture: str) -> None:
 
     click.secho('Using Gadget version: {0}'.format(github_version), fg='green')
 
-    patcher = AndroidPatcher()
+    patcher = AndroidPatcher(skip_cleanup=skip_cleanup)
 
     # ensure that we have all of the commandline requirements
     if not patcher.are_requirements_met():

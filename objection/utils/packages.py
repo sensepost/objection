@@ -327,7 +327,7 @@ class IosPatcher(BasePlatformPatcher):
         }
     }
 
-    def __init__(self):
+    def __init__(self, skip_cleanup: bool = False):
         """
             Init a new instance of the IosPatcher class.
         """
@@ -340,6 +340,7 @@ class IosPatcher(BasePlatformPatcher):
         self.app_binary = None
         self.patched_ipa_path = None
         self.patched_codesigned_ipa_path = None
+        self.skip_cleanup = skip_cleanup
 
         # temp_file to copy an IPA to
         _, self.temp_file = tempfile.mkstemp(suffix='.ipa')
@@ -609,6 +610,10 @@ class IosPatcher(BasePlatformPatcher):
             :return:
         """
 
+        if self.skip_cleanup:
+            click.secho('Not cleaning up temporary files', dim=True)
+            return
+
         click.secho('Cleaning up temp files...', dim=True)
 
         try:
@@ -802,13 +807,14 @@ class AndroidPatcher(BasePlatformPatcher):
         }
     }
 
-    def __init__(self):
+    def __init__(self, skip_cleanup: bool = False):
         super(AndroidPatcher, self).__init__()
 
         self.apk_source = None
         self.apk_temp_directory = tempfile.mkdtemp(suffix='.apktemp')
         self.apk_temp_frida_patched = self.apk_temp_directory + '.objection.apk'
         self.aapt = None
+        self.skip_cleanup = skip_cleanup
 
     def set_apk_source(self, source: str):
         """
@@ -1161,6 +1167,10 @@ class AndroidPatcher(BasePlatformPatcher):
 
             :return:
         """
+
+        if self.skip_cleanup:
+            click.secho('Not cleaning up temporary files', dim=True)
+            return
 
         click.secho('Cleaning up temp files...', dim=True)
 

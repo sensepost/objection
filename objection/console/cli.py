@@ -163,7 +163,9 @@ def device_type():
               required=True)
 @click.option('--provision-file', '-p', help='The .mobileprovision file to use in the patched .ipa')
 @click.option('--binary-name', '-b', help='Name of the Mach-O binary in the IPA (used to patch with Frida)')
-def patchipa(source: str, codesign_signature: str, provision_file: str, binary_name: str) -> None:
+@click.option('--skip-cleanup', '-k', is_flag=True,
+              help='Do not clean temporary files once finished.', show_default=True)
+def patchipa(source: str, codesign_signature: str, provision_file: str, binary_name: str, skip_cleanp: bool) -> None:
     """
         Patch an IPA with the FridaGadget dylib.
     """
@@ -178,7 +180,9 @@ def patchipa(source: str, codesign_signature: str, provision_file: str, binary_n
                                             '`adb shell getprop ro.product.cpu.abi`. If it '
                                             'is not specified, this command will try and '
                                             'determine it automatically.'), required=False)
-def patchapk(source: str, architecture: str) -> None:
+@click.option('--skip-cleanup', '-k', is_flag=True,
+              help='Do not clean temporary files once finished.', show_default=True)
+def patchapk(source: str, architecture: str, skip_cleanup: bool) -> None:
     """
         Patch an APK with the frida-gadget.so.
     """
