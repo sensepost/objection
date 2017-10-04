@@ -1005,16 +1005,24 @@ class AndroidPatcher(BasePlatformPatcher):
 
         # raw smali to inject.
         # ref: https://koz.io/using-frida-on-android-without-root/
-        load_library = ('.method static constructor <clinit>()V\n'
-                        '   .locals 1\n'
-                        '\n'
-                        '   .prologue\n'
-                        '   const-string v0, "frida-gadget"\n'
-                        '\n'
-                        '   invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V\n'
-                        '\n'
-                        '   return-void\n'
-                        '.end method\n')
+
+        # if no constructor is present, the full_load_library is used
+        full_load_library = ('.method static constructor <clinit>()V\n'
+                             '   .locals 1\n'
+                             '\n'
+                             '   .prologue\n'
+                             '   const-string v0, "frida-gadget"\n'
+                             '\n'
+                             '   invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V\n'
+                             '\n'
+                             '   return-void\n'
+                             '.end method\n')
+
+        # if an existing constructor is present, this partial_load_library
+        # will be used instead
+        partial_load_library = ('    const-string v0, "frida-gadget"\n'
+                                '\n'
+                                '    invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V\n')
 
         # the path to the smali we should inject the load_library call
         # into. we get a class name from the internal method of this
@@ -1067,14 +1075,50 @@ class AndroidPatcher(BasePlatformPatcher):
             raise Exception('Unable to determine position to inject a loadLibrary call')
 
         # pick the first position for the inject. add one line as we
-        # want to inject right be low the comment we matched
+        # want to inject right below the comment we matched
         inject_marker = inject_marker[0] + 1
 
-        click.secho('Injecting loadLibrary call at line: {0}'.format(inject_marker), dim=True, fg='green')
+        # Check if there is an existing clinit here. If there is, then we need
+        # to determine where the constructor ends and inject a simple loadLibrary
+        # just before the end
+        if 'clinit' in smali_lines[inject_marker]:
+            click.secho('Injecting into an existing constructor', fg='yellow')
 
-        # inject the load_library code between
-        patched_smali = \
-            smali_lines[:inject_marker] + load_library.splitlines(keepends=True) + smali_lines[inject_marker:]
+            # need to find the end of the existing call. so, enumerate all of
+            # the lines in the orignal smali sources and mark the offsets of the
+            # lines that contain '.end method'. the search starts right after the
+            # original inject marker so that we can pick the top most .end method
+            # when we are done searching. this is also why the # represented in the
+            # inject marker is added to the calculated marker in the list of end methods.
+            end_methods = [(i + inject_marker) for i, x in enumerate(smali_lines[inject_marker:]) if '.end method' in x]
+
+            # ensure that we found at least one .end method
+            if len(end_methods) <= 0:
+                raise Exception('Unable to find the end of the constructor')
+
+            # set the last line of the constructors method to the one
+            # just before the .end method line
+            end_of_constructor = end_methods[0] - 1
+
+            # check if the constructor has a return type call. if it does,
+            # move up one line again to inject our loadLibrary before the return
+            if 'return' in smali_lines[end_of_constructor]:
+                end_of_constructor -= 1
+
+            click.secho('Injecting loadLibrary call at line: {0}'.format(end_of_constructor), dim=True, fg='green')
+
+            patched_smali = \
+                smali_lines[:end_of_constructor] + partial_load_library.splitlines(keepends=True) + \
+                smali_lines[end_of_constructor:]
+
+        else:
+
+            # if there is no constructor, we can simply inject a fresh constructor
+            click.secho('Injecting loadLibrary call at line: {0}'.format(inject_marker), dim=True, fg='green')
+
+            # inject the load_library code between
+            patched_smali = \
+                smali_lines[:inject_marker] + full_load_library.splitlines(keepends=True) + smali_lines[inject_marker:]
 
         click.secho('Writing patched smali back to: {0}'.format(activity_path), dim=True)
 

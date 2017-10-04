@@ -91,7 +91,7 @@ def patch_android_apk(source: str, architecture: str, skip_cleanup: bool = True)
                         fg='red', bold=True)
             return
 
-        click.secho('Detected the architecture as: {0}'.format(architecture), fg='green', bold=True)
+        click.secho('Detected target device architecture as: {0}'.format(architecture), fg='green', bold=True)
 
     # set the architecture we are interested in
     android_gadget.set_architecture(architecture)
