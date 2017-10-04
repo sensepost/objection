@@ -789,7 +789,7 @@ class AndroidPatcher(BasePlatformPatcher):
 
     required_commands = {
         'aapt': {
-            'installation': 'apt install appt (Kali Linux)'
+            'installation': 'apt install aapt (Kali Linux)'
         },
         'adb': {
             'installation': 'apt install adb (Kali Linux); brew install adb (macOS)'
