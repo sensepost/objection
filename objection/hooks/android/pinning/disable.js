@@ -29,7 +29,7 @@ send({
     status: 'success',
     error_reason: NaN,
     type: 'android-ssl-pinning-bypass',
-    data: 'Custom TrustManager ready'
+    data: 'Custom, Empty TrustManager ready'
 });
 
 // Get a handle on the init() on the SSLContext class
@@ -57,6 +57,13 @@ try {
 
     var CertificatePinner = Java.use('okhttp3.CertificatePinner');
 
+    send({
+        status: 'success',
+        error_reason: NaN,
+        type: 'android-ssl-pinning-bypass',
+        data: 'OkHTTP 3.x Found'
+    });
+
     CertificatePinner.check.overload('java.lang.String', 'java.util.List').implementation = function () {
 
         send({
@@ -69,13 +76,47 @@ try {
 
 } catch (err) {
 
-    // could not find the class. that's ok.
-    if (err.message.indexOf('java.lang.ClassNotFoundException') !== -1) {
-        return;
+    // If we dont have a ClassNotFoundException exception, raise the
+    // problem encountered.
+    if (!err.message.indexOf('java.lang.ClassNotFoundException') === 0) {
+
+        throw new Error(err);
+    }
+}
+
+// Appcelerator Titanium PinningTrustManager
+
+// Wrap the logic in a try/catch as not all applications will have
+// appcelerator as part of the app.
+try {
+
+    var PinningTrustManager = Java.use('appcelerator.https.PinningTrustManager');
+
+    send({
+        status: 'success',
+        error_reason: NaN,
+        type: 'android-ssl-pinning-bypass',
+        data: 'Appcelerator Titanium Found'
+    });
+
+    PinningTrustManager.checkServerTrusted.implementation = function () {
+
+        send({
+            status: 'success',
+            error_reason: NaN,
+            type: 'android-ssl-pinning-bypass',
+            data: 'Appcelerator checkServerTrusted() called. Not throwing an exception.'
+        });
     }
 
-    // something else went wrong, report that.
-    throw new Error(err);
+} catch (err) {
+
+    // If we dont have a ClassNotFoundException exception, raise the
+    // problem encountered.
+    if (!err.message.indexOf('java.lang.ClassNotFoundException') === 0) {
+
+        throw new Error(err);
+    }
 }
 
 // -- Sample Java
