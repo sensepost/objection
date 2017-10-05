@@ -71,6 +71,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
 
         :param source:
         :param architecture:
+        :param pause:
         :param skip_cleanup:
         :return:
     """
