@@ -1,17 +1,17 @@
-import datetime
-import json
-import lzma
 import os
-import plistlib
 import shutil
 import tempfile
+
+import click
+import datetime
+import delegator
+import json
+import lzma
+import plistlib
+import requests
 import xml.etree.ElementTree as ElementTree
 import zipfile
 from subprocess import list2cmdline
-
-import click
-import delegator
-import requests
 
 # default paths
 objection_path = os.path.join(os.path.expanduser('~'), '.objection')
@@ -935,6 +935,15 @@ class AndroidPatcher(BasePlatformPatcher):
         """
 
         return self.apk_temp_frida_patched
+
+    def get_temp_working_directory(self) -> str:
+        """
+            Returns the temporary working directory used by this patcher.
+
+            :return:
+        """
+
+        return self.apk_temp_directory
 
     def unpack_apk(self):
         """

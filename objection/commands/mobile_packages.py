@@ -64,7 +64,7 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
         os.path.join(os.path.abspath('.'), os.path.basename(patcher.get_patched_ipa_path())))
 
 
-def patch_android_apk(source: str, architecture: str, skip_cleanup: bool = True) -> None:
+def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup: bool = True) -> None:
     """
         Patches an Android APK by extracting, patching SMALI, repackaging
         and signing a new APK.
@@ -127,6 +127,16 @@ def patch_android_apk(source: str, architecture: str, skip_cleanup: bool = True)
     patcher.inject_internet_permission()
     patcher.inject_load_library()
     patcher.add_gadget_to_apk(architecture, android_gadget.get_frida_library_path())
+
+    # if we are required to pause, do that.
+    if pause:
+        click.secho(('Patching paused. The next step is to rebuild the APK. '
+                     'If you require any manual fixes, the current temp '
+                     'directory is:'), bold=True)
+        click.secho('{0}'.format(patcher.get_temp_working_directory()), fg='green', bold=True)
+
+        input('Press ENTER to continue...')
+
     patcher.build_new_apk()
     patcher.sign_apk()
 

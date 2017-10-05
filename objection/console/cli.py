@@ -180,9 +180,11 @@ def patchipa(source: str, codesign_signature: str, provision_file: str, binary_n
                                             '`adb shell getprop ro.product.cpu.abi`. If it '
                                             'is not specified, this command will try and '
                                             'determine it automatically.'), required=False)
+@click.option('--pause', '-p', is_flag=True, help='Pause the patcher before rebuilding the APK.',
+              show_default=True)
 @click.option('--skip-cleanup', '-k', is_flag=True,
               help='Do not clean temporary files once finished.', show_default=True)
-def patchapk(source: str, architecture: str, skip_cleanup: bool) -> None:
+def patchapk(source: str, architecture: str, pause: bool, skip_cleanup: bool) -> None:
     """
         Patch an APK with the frida-gadget.so.
     """
