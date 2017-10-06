@@ -227,7 +227,7 @@ class IosPatcher(BasePlatformPatcher):
 
                 if parsed_data['ExpirationDate'] > current_time:
                     expirations[pf] = parsed_data['ExpirationDate'] - current_time
-                    click.secho('Found provision {0} expiring {1}'.format(pf, expirations[pf]), dim=True)
+                    click.secho('Found provision file {0} expiring in {1}'.format(pf, expirations[pf]), dim=True)
 
             # cleanup the temp path
             os.remove(decoded_location)
