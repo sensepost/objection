@@ -758,7 +758,7 @@ class AndroidGadget(BasePlatformGadget):
 
         if not url:
             click.secho('Unable to determine URL to download the library', fg='red')
-            raise Exception('Unable to determine URL for iOS gadget download.')
+            raise Exception('Unable to determine URL for Android gadget download.')
 
         return url
 
