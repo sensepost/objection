@@ -61,6 +61,7 @@ setup(
         'objection.console',
         'objection.state',
         'objection.utils',
+        'objection.utils.patchers',
     ],
     install_requires=requirements,
     classifiers=[
