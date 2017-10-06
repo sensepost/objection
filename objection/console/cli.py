@@ -165,7 +165,7 @@ def device_type():
 @click.option('--binary-name', '-b', help='Name of the Mach-O binary in the IPA (used to patch with Frida)')
 @click.option('--skip-cleanup', '-k', is_flag=True,
               help='Do not clean temporary files once finished.', show_default=True)
-def patchipa(source: str, codesign_signature: str, provision_file: str, binary_name: str, skip_cleanp: bool) -> None:
+def patchipa(source: str, codesign_signature: str, provision_file: str, binary_name: str, skip_cleanup: bool) -> None:
     """
         Patch an IPA with the FridaGadget dylib.
     """
