@@ -390,6 +390,5 @@ class Repl(object):
                     click.secho('Error: {0}'.format(e), fg='red', bold=True)
 
             except (KeyboardInterrupt, EOFError):
-
-                # attempt to cleanly exit
-                self.handle_exit('exit')
+                click.secho('Exiting...', dim=True)
+                break
