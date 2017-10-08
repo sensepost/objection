@@ -340,7 +340,7 @@ class Repl(object):
                 self.set_prompt_tokens(get_device_info())
                 click.secho('Reconnection successful!', fg='green')
 
-            except frida.ServerNotRunningError as e:
+            except (frida.ServerNotRunningError, frida.TimedOutError) as e:
                 click.secho('Failed to reconnect with error: {0}'.format(e), fg='red')
 
             return True
