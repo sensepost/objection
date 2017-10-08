@@ -1,6 +1,5 @@
 import logging
 import os
-import sys
 
 import click
 import delegator
@@ -306,20 +305,6 @@ class Repl(object):
 
         return user_help
 
-    @staticmethod
-    def handle_exit(document: str) -> None:
-        """
-            Exit the repl if needed.
-
-            Running sys.exit() will also run all of the atext()
-            registrations used to cleanups jobs and cleanup some
-            cache entries.
-        """
-
-        if document.strip() in ('quit', 'exit', 'bye'):
-            click.secho('Exiting...', dim=True)
-            sys.exit()
-
     def handle_reconnect(self, document: str) -> bool:
         """
             Handles a reconnection attempt to a device.
@@ -384,7 +369,9 @@ class Repl(object):
                 )
 
                 # check if this is an exit command
-                self.handle_exit(document)
+                if document.strip() in ('quit', 'exit', 'bye'):
+                    click.secho('Exiting...', dim=True)
+                    break
 
                 # if we got the reconnect command, handle just that
                 if self.handle_reconnect(document):
