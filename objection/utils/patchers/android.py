@@ -578,7 +578,7 @@ class AndroidPatcher(BasePlatformPatcher):
         click.secho('Signing new APK.', dim=True)
 
         here = os.path.abspath(os.path.dirname(__file__))
-        keystore = os.path.join(here, 'assets', 'objection.jks')
+        keystore = os.path.join(here, '../assets', 'objection.jks')
 
         o = delegator.run(list2cmdline([
             self.required_commands['jarsigner']['location'],
