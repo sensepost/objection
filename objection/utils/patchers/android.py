@@ -202,6 +202,9 @@ class AndroidPatcher(BasePlatformPatcher):
         self.aapt = None
         self.skip_cleanup = skip_cleanup
 
+        self.keystore = os.path.join(os.path.abspath(os.path.dirname(__file__)),
+                                     '../assets', 'objection.jks')
+
     def set_apk_source(self, source: str):
         """
             Set the source APK to work with.
@@ -572,13 +575,11 @@ class AndroidPatcher(BasePlatformPatcher):
             The keystore itself was created with:
                 keytool -genkey -v -keystore objection.jks -alias objection -keyalg RSA -keysize 2048 -validity 3650
                 pass: basil-joule-bug
-        :return:
+
+            :return:
         """
 
         click.secho('Signing new APK.', dim=True)
-
-        here = os.path.abspath(os.path.dirname(__file__))
-        keystore = os.path.join(here, '../assets', 'objection.jks')
 
         o = delegator.run(list2cmdline([
             self.required_commands['jarsigner']['location'],
@@ -589,10 +590,13 @@ class AndroidPatcher(BasePlatformPatcher):
             '-storepass',
             'basil-joule-bug',
             '-keystore',
-            keystore,
+            self.keystore,
             self.apk_temp_frida_patched,
             'objection'])
         )
+
+        if len(o.out) > 0:
+            click.secho(o.out, dim=True)
 
         if len(o.err) > 0:
             click.secho('Signing the new APK may have failed.', fg='red')
