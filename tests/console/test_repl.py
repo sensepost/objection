@@ -6,7 +6,7 @@ from frida import TimedOutError
 from objection.__init__ import __version__
 from objection.commands.android.hooking import show_registered_activities
 from objection.console.repl import Repl
-from .helpers import capture
+from ..helpers import capture
 
 
 class TestRepl(unittest.TestCase):
