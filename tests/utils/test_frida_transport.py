@@ -169,9 +169,9 @@ class TestFridaJobRunner(unittest.TestCase):
         expected_value = """- [response] ------------------
 {
   "payload": {
-    "type": "send",
+    "data": "data for unittest",
     "status": "success",
-    "data": "data for unittest"
+    "type": "send"
   }
 }
 - [./response] ----------------
@@ -252,10 +252,10 @@ send(response);"""
         expected_output = """- [response] ------------------
 {
   "payload": {
-    "type": "send",
-    "status": "success",
+    "data": "data for unittest",
     "error_reason": null,
-    "data": "data for unittest"
+    "status": "success",
+    "type": "send"
   }
 }
 - [./response] ----------------

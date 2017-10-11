@@ -136,7 +136,7 @@ class FridaJobRunner(object):
             # log the hook response if needed
             if app_state.should_debug_hooks():
                 click.secho('- [response] ' + '-' * 18, dim=True)
-                click.secho(json.dumps(message, indent=2), dim=True)
+                click.secho(json.dumps(message, indent=2, sort_keys=True), dim=True)
                 click.secho('- [./response] ' + '-' * 16, dim=True)
 
             # process the response
@@ -214,7 +214,7 @@ class FridaRunner(object):
             # log the hook response if needed
             if app_state.should_debug_hooks():
                 click.secho('- [response] ' + '-' * 18, dim=True)
-                click.secho(json.dumps(message, indent=2), dim=True)
+                click.secho(json.dumps(message, indent=2, sort_keys=True), dim=True)
                 click.secho('- [./response] ' + '-' * 16, dim=True)
 
             # process the response
