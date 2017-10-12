@@ -78,7 +78,7 @@ try {
 
     // If we dont have a ClassNotFoundException exception, raise the
     // problem encountered.
-    if (!err.message.indexOf('java.lang.ClassNotFoundException') === 0) {
+    if (err.message.indexOf('ClassNotFoundException') === 0) {
 
         throw new Error(err);
     }
@@ -113,7 +113,7 @@ try {
 
     // If we dont have a ClassNotFoundException exception, raise the
     // problem encountered.
-    if (!err.message.indexOf('java.lang.ClassNotFoundException') === 0) {
+    if (err.message.indexOf('ClassNotFoundException') === 0) {
 
         throw new Error(err);
     }
