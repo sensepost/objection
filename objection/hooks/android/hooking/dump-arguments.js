@@ -44,6 +44,6 @@ for (var i = 0; i < overload_count; i++) {
         }
 
         // continue with the original method
-        eval('this.{{ target_method }}.apply(this, arguments)');
+        return eval('this.{{ target_method }}.apply(this, arguments)');
     }
 }
