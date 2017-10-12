@@ -351,7 +351,7 @@ def _ls_ios(path: str) -> None:
     if data['writable']:
         permissions['writable'] = 'Yes'
 
-    click.secho('\nReadable: {0}  Writable: {0}'.format(permissions['readable'], permissions['writable']), bold=True)
+    click.secho('\nReadable: {0}  Writable: {1}'.format(permissions['readable'], permissions['writable']), bold=True)
 
 
 def _ls_android(path: str) -> None:
@@ -434,7 +434,7 @@ def _ls_android(path: str) -> None:
     if data['writable']:
         permissions['writable'] = 'Yes'
 
-    click.secho('\nReadable: {0}  Writable: {0}'.format(permissions['readable'], permissions['writable']), bold=True)
+    click.secho('\nReadable: {0}  Writable: {1}'.format(permissions['readable'], permissions['writable']), bold=True)
 
 
 def download(args: list) -> None:
