@@ -5,9 +5,9 @@ import click
 import delegator
 from pkg_resources import parse_version
 
+from ..utils.patchers.android import AndroidGadget, AndroidPatcher
 from ..utils.patchers.github import Github
 from ..utils.patchers.ios import IosGadget, IosPatcher
-from ..utils.patchers.android import AndroidGadget, AndroidPatcher
 
 
 def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, binary_name: str,

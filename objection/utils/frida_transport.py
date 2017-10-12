@@ -285,7 +285,8 @@ class FridaRunner(object):
             try:
                 device = frida.get_device("tcp@%s:%d" % (state_connection.host, state_connection.port))
             except frida.TimedOutError as e:
-                device = frida.get_device_manager().add_remote_device("%s:%d" % (state_connection.host, state_connection.port))
+                device = frida.get_device_manager().add_remote_device(
+                    "%s:%d" % (state_connection.host, state_connection.port))
 
             return device.attach(state_connection.gadget_name)
 
