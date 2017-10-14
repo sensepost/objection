@@ -34,31 +34,51 @@ def get_device_info() -> tuple:
     if response.device_type == 'ios':
         device_state.device_type = 'ios'
 
-        hook = ios_hook('device-information')
-        runner.run(hook=hook)
-        response = runner.get_last_message()
-
-        # we have some device information for iOS, return it!
-        if response.is_successful():
-            return pretty_concat(response.applicationName, 30, left=True), \
-                   response.systemName, response.model, response.systemVersion
-
-        raise Exception('Failed to get device information')
+        return _get_ios_device_information()
 
     # android device information
     if runner.get_last_message().device_type == 'android':
         device_state.device_type = 'android'
 
-        hook = android_hook('device-information')
-        runner.run(hook=hook)
-        response = runner.get_last_message()
+        return _get_android_device_information()
 
-        # we have some device information for iOS, return it!
-        if response.is_successful():
-            return pretty_concat(response.application_name, 30, left=True), \
-                   response.device, response.brand, response.version
 
-        raise Exception('Failed to get device information')
+def _get_ios_device_information() -> tuple:
+    """
+        Return information for the currently connected iOS device.
+
+        :return:
+    """
+
+    runner = FridaRunner(hook=ios_hook('device-information'))
+    runner.run()
+    response = runner.get_last_message()
+
+    # we have some device information for iOS, return it!
+    if response.is_successful():
+        return pretty_concat(response.applicationName, 30, left=True), \
+               response.systemName, response.model, response.systemVersion
+
+    raise Exception('Failed to get device information')
+
+
+def _get_android_device_information() -> tuple:
+    """
+        Return information for the currently connected Android device.
+
+        :return:
+    """
+
+    runner = FridaRunner(hook=android_hook('device-information'))
+    runner.run()
+    response = runner.get_last_message()
+
+    # we have some device information for iOS, return it!
+    if response.is_successful():
+        return pretty_concat(response.application_name, 30, left=True), \
+               response.device, response.brand, response.version
+
+    raise Exception('Failed to get device information')
 
 
 def get_environment(args: list = None) -> None:
