@@ -508,7 +508,7 @@ def _download_ios(path: str, destination: str) -> None:
     response = runner.get_last_message()
 
     if not response.is_successful() or not response.is_file:
-        click.secho('Unable to download file')
+        click.secho('Unable to download file. Not a file.')
         return
 
     # run the download hook and get the file from
