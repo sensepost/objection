@@ -24,7 +24,10 @@ var response = {
     status: 'failure',
     error_reason: 'Not a file or could not read attributes',
     type: 'is-type-file',
-    data: false
+    data: {
+        path: '{{ path }}',
+        is_file: false
+    }
 };
 
 // if we were able to get attributes for the path, try and
@@ -37,7 +40,7 @@ if (attributes) {
 
         response.status = 'success';
         response.error_reason = NaN;
-        response.data = true
+        response.data.is_file = true
     }
 }
 

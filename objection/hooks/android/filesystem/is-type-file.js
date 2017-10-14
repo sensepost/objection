@@ -8,7 +8,10 @@ var response = {
     status: 'success',
     error_reason: NaN,
     type: 'is-type-file',
-    data: Boolean(file.isFile())
+    data: {
+        path: '{{ path }}',
+        is_file: Boolean(file.isFile())
+    }
 };
 
 send(response);

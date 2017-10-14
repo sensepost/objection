@@ -507,7 +507,7 @@ def _download_ios(path: str, destination: str) -> None:
     # get the response message
     response = runner.get_last_message()
 
-    if not response.is_successful():
+    if not response.is_successful() or not response.is_file:
         click.secho('Unable to download file')
         return
 
@@ -573,7 +573,7 @@ def _download_android(path: str, destination: str) -> None:
     # get the response message
     response = runner.get_last_message()
 
-    if not response.is_successful():
+    if not response.is_successful() or not response.is_file:
         click.secho('Unable to download file. Not a file.')
         return
 
