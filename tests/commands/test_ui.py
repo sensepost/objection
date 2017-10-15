@@ -54,7 +54,7 @@ class TestUI(unittest.TestCase):
         self.assertTrue(output, 'Failed to screenshot with error: test\n')
 
     @mock.patch('objection.commands.ui.FridaRunner')
-    @mock.patch('objection.commands.ui.open')
+    @mock.patch('objection.commands.ui.open', create=True)
     def test_ios_screenshot(self, mock_open, mock_runner):
         mock_response = mock.Mock()
         mock_response.is_successful.return_value = True
@@ -107,7 +107,7 @@ class TestUI(unittest.TestCase):
         self.assertEqual(output, 'Usage: android ui screenshot <local png destination>\n')
 
     @mock.patch('objection.commands.ui.FridaRunner')
-    @mock.patch('objection.commands.ui.open')
+    @mock.patch('objection.commands.ui.open', create=True)
     def test_android_screenshot_fails_with_empty_data(self, mock_open, mock_runner):
         mock_api = mock.Mock()
         mock_api.screenshot.return_value = None
@@ -121,7 +121,7 @@ class TestUI(unittest.TestCase):
         self.assertFalse(mock_open.called)
 
     @mock.patch('objection.commands.ui.FridaRunner')
-    @mock.patch('objection.commands.ui.open')
+    @mock.patch('objection.commands.ui.open', create=True)
     def test_android_screenshot(self, mock_open, mock_runner):
         mock_api = mock.Mock()
         mock_api.screenshot.return_value = b'\x00'

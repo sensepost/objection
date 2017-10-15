@@ -32,7 +32,7 @@ class TestMemory(unittest.TestCase):
         self.assertEqual(output, 'Usage: memory dump all <local destination>\n')
 
     @mock.patch('objection.commands.memory.FridaRunner')
-    @mock.patch('objection.commands.memory.open')
+    @mock.patch('objection.commands.memory.open', create=True)
     def test_dump_all(self, mock_open, mock_runner):
         mock_session = mock.Mock()
         mock_session.enumerate_ranges.return_value = [MockRange()]
@@ -59,7 +59,7 @@ Memory dumped to file: /foo
                                  '<base_address> <size_to_dump> <local_destination>\n')
 
     @mock.patch('objection.commands.memory.FridaRunner')
-    @mock.patch('objection.commands.memory.open')
+    @mock.patch('objection.commands.memory.open', create=True)
     def test_dump_from_base(self, mock_open, mock_runner):
         mock_session = mock.Mock()
         mock_session.read_bytes.return_value = b'\x00'

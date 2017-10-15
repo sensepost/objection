@@ -38,7 +38,7 @@ Copying final ipa from /foo/ipa to current directory...
     @mock.patch('objection.commands.mobile_packages.shutil')
     @mock.patch('objection.commands.mobile_packages.os')
     @mock.patch('objection.commands.mobile_packages.delegator')
-    @mock.patch('objection.commands.mobile_packages.input')
+    @mock.patch('objection.commands.mobile_packages.input', create=True)
     def test_patching_android_apk(self, mock_input, mock_delegator, mock_os, mock_shutil, mock_androidpatcher,
                                   mock_androidgadget, mock_github):
         mock_github.return_value.get_latest_version.return_value = '1.0'

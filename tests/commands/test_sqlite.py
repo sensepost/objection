@@ -44,7 +44,7 @@ class TestSqlite(unittest.TestCase):
     @mock.patch('objection.commands.sqlite.os')
     @mock.patch('objection.commands.sqlite.pwd')
     @mock.patch('objection.commands.sqlite.download')
-    @mock.patch('objection.commands.sqlite.open')
+    @mock.patch('objection.commands.sqlite.open', create=True)
     @mock.patch('objection.commands.sqlite.binascii')
     def test_connect_with_valid_file(self, mock_binascii, mock_open, mock_download, mock_pwd, mock_os,
                                      mock_sqlite_state):
@@ -69,7 +69,7 @@ Connected to SQLite database at: /foo/bar.sqlite
     @mock.patch('objection.commands.sqlite.os')
     @mock.patch('objection.commands.sqlite.pwd')
     @mock.patch('objection.commands.sqlite.download')
-    @mock.patch('objection.commands.sqlite.open')
+    @mock.patch('objection.commands.sqlite.open', create=True)
     @mock.patch('objection.commands.sqlite.binascii')
     def test_connect_with_invalid_file(self, mock_binascii, mock_open, mock_download, mock_pwd, mock_os,
                                        mock_sqlite_state):

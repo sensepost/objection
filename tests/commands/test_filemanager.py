@@ -418,7 +418,7 @@ Readable: Yes  Writable: Yes
         self.assertTrue(mock_download_android.called)
 
     @mock.patch('objection.commands.filemanager.FridaRunner')
-    @mock.patch('objection.commands.filemanager.open')
+    @mock.patch('objection.commands.filemanager.open', create=True)
     def test_downloads_file_with_ios_helper(self, mock_open, mock_runner):
         mock_response = mock.Mock()
         mock_response.is_successful.return_value = True
@@ -440,7 +440,7 @@ Readable: Yes  Writable: Yes
         self.assertEqual(output, 'Downloading /foo to /bar\n')
 
     @mock.patch('objection.commands.filemanager.FridaRunner')
-    @mock.patch('objection.commands.filemanager.open')
+    @mock.patch('objection.commands.filemanager.open', create=True)
     def test_downloads_file_but_fails_on_unreadable_with_ios_helper(self, mock_open, mock_runner):
         mock_response = mock.Mock()
         mock_response.is_successful.return_value = True
@@ -475,7 +475,7 @@ Readable: Yes  Writable: Yes
         self.assertEqual(output, 'Downloading /foo to /bar\nUnable to download file. Not a file.\n')
 
     @mock.patch('objection.commands.filemanager.FridaRunner')
-    @mock.patch('objection.commands.filemanager.open')
+    @mock.patch('objection.commands.filemanager.open', create=True)
     def test_downloads_file_with_android_helper(self, mock_open, mock_runner):
         mock_response = mock.Mock()
         mock_response.is_successful.return_value = True
@@ -497,7 +497,7 @@ Readable: Yes  Writable: Yes
         self.assertEqual(output, 'Downloading /foo to /bar\n')
 
     @mock.patch('objection.commands.filemanager.FridaRunner')
-    @mock.patch('objection.commands.filemanager.open')
+    @mock.patch('objection.commands.filemanager.open', create=True)
     def test_downloads_file_but_fails_on_unreadable_with_android_helper(self, mock_open, mock_runner):
         mock_response = mock.Mock()
         mock_response.is_successful.return_value = True
@@ -514,7 +514,7 @@ Readable: Yes  Writable: Yes
         self.assertEqual(output, 'Downloading /foo to /bar\nUnable to download file. File is not readable\n')
 
     @mock.patch('objection.commands.filemanager.FridaRunner')
-    @mock.patch('objection.commands.filemanager.open')
+    @mock.patch('objection.commands.filemanager.open', create=True)
     def test_downloads_file_but_fails_on_file_type_with_android_helper(self, mock_open, mock_runner):
         mock_response = mock.Mock()
         mock_response.is_successful.return_value = True

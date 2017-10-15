@@ -69,7 +69,7 @@ Debugger Attached     True
 
     @mock.patch('objection.commands.frida_commands.FridaRunner')
     @mock.patch('objection.commands.frida_commands.os')
-    @mock.patch('objection.commands.frida_commands.open')
+    @mock.patch('objection.commands.frida_commands.open', create=True)
     def test_loads_script_from_home_directory_and_starts_job(self, mock_open, mock_os, mock_runner):
         mock_os.path.isfile.return_value = True
         mock_os.path.expanduser.return_value = '/home/foo'
@@ -80,7 +80,7 @@ Debugger Attached     True
 
     @mock.patch('objection.commands.frida_commands.FridaRunner')
     @mock.patch('objection.commands.frida_commands.os')
-    @mock.patch('objection.commands.frida_commands.open')
+    @mock.patch('objection.commands.frida_commands.open', create=True)
     def test_loads_script_with_custom_name_and_starts_job(self, mock_open, mock_os, mock_runner):
         mock_os.path.isfile.return_value = True
 

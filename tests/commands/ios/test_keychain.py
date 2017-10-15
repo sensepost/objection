@@ -91,7 +91,7 @@ a        b          c          d          e
         self.assertEqual(output, expected_output)
 
     @mock.patch('objection.commands.ios.keychain.FridaRunner')
-    @mock.patch('objection.commands.ios.keychain.open')
+    @mock.patch('objection.commands.ios.keychain.open', create=True)
     def test_dump_to_json(self, mock_open, mock_runner):
         mock_response = mock.Mock()
         mock_response.is_successful.return_value = True
