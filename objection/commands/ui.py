@@ -125,9 +125,7 @@ def android_screenshot(args: list = None) -> None:
     destination = args[0] if args[0].endswith('.png') else args[0] + '.png'
 
     hook = android_hook('screenshot/take')
-
     runner = FridaRunner(hook=hook)
-
     api = runner.rpc_exports()
 
     # download the file
@@ -137,7 +135,7 @@ def android_screenshot(args: list = None) -> None:
     runner.unload_script()
 
     if not data:
-        click.secho('Failed to take screenshot')
+        click.secho('Failed to take screenshot.')
         return
 
     image = bytearray(map(lambda x: x % 256, data))
@@ -169,7 +167,7 @@ def android_flag_secure(args: list = None) -> None:
     response = runner.get_last_message()
 
     if not response.is_successful():
-        click.secho('Failed to set FLAG_SECURE'.format(response.error_message), fg='red')
+        click.secho('Failed to set FLAG_SECURE: {0}'.format(response.error_message), fg='red')
         return
 
     click.secho('Successfuly set FLAG_SECURE' if response.data else 'Successfully removed FLAG_SECURE')
