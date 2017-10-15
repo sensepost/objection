@@ -288,7 +288,7 @@ send(response);"""
 
         self.assertEqual(last_message.data, self.successful_message['payload']['data'])
 
-    def test_sets_hook_with(self):
+    def test_sets_hook_with_data(self):
         self.runner.set_hook_with_data('{{ test }}', test='testing123')
 
         self.assertEqual(self.runner.hook, 'testing123')
