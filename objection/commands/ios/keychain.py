@@ -48,20 +48,15 @@ def dump(args: list = None) -> None:
         return
 
     if _should_output_json(args):
-
         destination = args[1]
 
-        if destination:
-            click.secho('Writing full keychain as json to {0}...'.format(destination), dim=True)
+        click.secho('Writing full keychain as json to {0}...'.format(destination), dim=True)
 
-            with open(destination, 'w') as f:
-                f.write(json.dumps(response.data, indent=2))
+        with open(destination, 'w') as f:
+            f.write(json.dumps(response.data, indent=2))
 
-            click.secho('Dumped full keychain to: {0}'.format(destination), fg='green')
-            return
-
-        # simply output the json to the screen.
-        click.secho(json.dumps(response.data), indent=2)
+        click.secho('Dumped full keychain to: {0}'.format(destination), fg='green')
+        return
 
     # refer to hooks/ios/keychain/dump.js for a key,value reference
 
