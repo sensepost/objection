@@ -53,7 +53,10 @@ def cli(network: bool, host: str, port: int, gadget: str) -> None:
               help='Print compiled hooks as they are run to the screen and logfile.')
 @click.option('--quiet', '-q', required=False, default=False, is_flag=True,
               help='Do not display the objection logo on startup.')
-def explore(startup_command: str, startup_script: str, hook_debug: bool, quiet: bool) -> None:
+@click.option('--file-commands', '-c', required=False, type=click.File('r'),
+              help=('A file containing objection commands, seperated by a ' 'newline, that will be '
+                    'executed before showing the prompt.'))
+def explore(startup_command: str, startup_script: str, hook_debug: bool, quiet: bool, file_commands) -> None:
     """
         Start the objection exploration REPL.
     """
@@ -78,8 +81,8 @@ def explore(startup_command: str, startup_script: str, hook_debug: bool, quiet: 
 
     try:
 
-        # poll the device for information and populate the
-        # repls prompt.
+        # poll the device for information. this method also sets
+        # the device type internally in state.device
         device_info = get_device_info()
         r.set_prompt_tokens(device_info)
 
@@ -91,7 +94,24 @@ def explore(startup_command: str, startup_script: str, hook_debug: bool, quiet: 
 
         return
 
-    # run the REPL
+    # process commands from a resource file
+    if file_commands:
+        click.secho('Running commands from file...', bold=True)
+        for command in file_commands.readlines():
+
+            # clean up newlines
+            command = command.strip()
+
+            # do nothing for empty lines
+            if command == '':
+                continue
+
+            # run the command using the instantiated repl
+            click.secho('Running: \'{0}\':\n'.format(command), dim=True)
+            r.run_command(command)
+
+    # run the REPL and wait for more commands
+    r.set_prompt_tokens(device_info)
     r.start_repl(quiet=quiet)
 
 
