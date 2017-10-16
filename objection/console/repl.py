@@ -16,6 +16,7 @@ from .commands import COMMANDS
 from .completer import CommandCompleter
 from ..__init__ import __version__
 from ..commands.device import get_device_info
+from ..state.app import app_state
 from ..state.connection import state_connection
 from ..utils.helpers import get_tokens
 
@@ -196,6 +197,8 @@ class Repl(object):
 
         # run the method for the command itself!
         exec_method(arguments)
+
+        app_state.add_command_to_history(command=document)
 
     def _find_command_exec_method(self, tokens: list) -> tuple:
         """

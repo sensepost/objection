@@ -1,3 +1,4 @@
+from ..commands import command_history
 from ..commands import device
 from ..commands import filemanager
 from ..commands import frida_commands
@@ -54,6 +55,24 @@ COMMANDS = {
         'meta': 'Change the current working directory',
         'dynamic': filemanager.list_folders_in_current_fm_directory,
         'exec': filemanager.cd
+    },
+
+    'commands': {
+        'meta': 'Work with commands run in the current session',
+        'commands': {
+            'history': {
+                'meta': 'List all unique commands that have run for this session',
+                'exec': command_history.history,
+            },
+            'save': {
+                'meta': 'Save all unique commands that have run in this session to a file',
+                'exec': command_history.save
+            },
+            'clear': {
+                'meta': 'Clear the current sessions command history',
+                'exec': command_history.clear
+            }
+        }
     },
 
     'ls': {
