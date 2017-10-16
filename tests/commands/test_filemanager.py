@@ -396,10 +396,10 @@ Readable: Yes  Writable: Yes
         self.assertEqual(output, 'Failed to get directory listing with error: Test\n')
 
     def test_download_platform_proxy_validates_arguments(self):
-        with capture(download, ['foo']) as o:
+        with capture(download, []) as o:
             output = o
 
-        self.assertEqual(output, 'Usage: file download <remote location> <local destination>\n')
+        self.assertEqual(output, 'Usage: file download <remote location> (optional: <local destination>)\n')
 
     @mock.patch('objection.commands.filemanager._download_ios')
     def test_download_platform_proxy_calls_ios_method(self, mock_download_ios):
@@ -532,10 +532,10 @@ Readable: Yes  Writable: Yes
         self.assertEqual(output, 'Downloading /foo to /bar\nUnable to download file. Not a file.\n')
 
     def test_file_upload_method_proxy_validates_arguments(self):
-        with capture(upload, ['/foo']) as o:
+        with capture(upload, []) as o:
             output = o
 
-        self.assertEqual(output, 'Usage: file upload <local source> <remote destination>\n')
+        self.assertEqual(output, 'Usage: file upload <local source> (optional: <remote destination>)\n')
 
     @mock.patch('objection.commands.filemanager._upload_ios')
     def test_file_upload_method_proxy_calls_ios_helper_method(self, mock_upload_ios):

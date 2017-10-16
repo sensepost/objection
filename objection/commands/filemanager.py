@@ -449,18 +449,21 @@ def download(args: list) -> None:
         :return:
     """
 
-    if len(args) < 2:
-        click.secho('Usage: file download <remote location> <local destination>', bold=True)
+    if len(args) < 1:
+        click.secho('Usage: file download <remote location> (optional: <local destination>)', bold=True)
         return
 
-    path = args[0]
-    destination = args[1]
+    # determine the source and destination file names.
+    # if we didnt get a specification of where to dump the file,
+    # assume the same name should be used locally.
+    source = args[0]
+    destination = args[1] if len(args) > 1 else os.path.basename(source)
 
     if device_state.device_type == 'ios':
-        _download_ios(path, destination)
+        _download_ios(source, destination)
 
     if device_state.device_type == 'android':
-        _download_android(path, destination)
+        _download_android(source, destination)
 
 
 def _download_ios(path: str, destination: str) -> None:
@@ -608,18 +611,18 @@ def upload(args: list) -> None:
         :return:
     """
 
-    if len(args) < 2:
-        click.secho('Usage: file upload <local source> <remote destination>', bold=True)
+    if len(args) < 1:
+        click.secho('Usage: file upload <local source> (optional: <remote destination>)', bold=True)
         return
 
-    path = args[0]
-    destination = args[1]
+    source = args[0]
+    destination = args[1] if len(args) > 1 else os.path.join(pwd(), os.path.basename(source))
 
     if device_state.device_type == 'ios':
-        _upload_ios(path, destination)
+        _upload_ios(source, destination)
 
     if device_state.device_type == 'android':
-        _upload_android(path, destination)
+        _upload_android(source, destination)
 
 
 def _upload_ios(path: str, destination: str) -> None:
