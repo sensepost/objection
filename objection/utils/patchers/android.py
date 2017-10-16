@@ -390,6 +390,41 @@ class AndroidPatcher(BasePlatformPatcher):
         xml.write(os.path.join(self.apk_temp_directory, 'AndroidManifest.xml'),
                   encoding='utf-8', xml_declaration=True)
 
+    def flip_debug_flag_to_true(self):
+        """
+            Set the android:debuggable flag to true in the
+            AndroidManifest.
+
+            :return:
+        """
+
+        xml = self._get_android_manifest()
+        root = xml.getroot()
+
+        click.secho('Setting debug flag to true', fg='green')
+
+        application_tag = root.findall('application')
+
+        # ensure that we got the application tag
+        if len(application_tag) <= 0:
+            message = 'Could not find the application tag in the AndroidManifest.xml'
+            click.secho(message, fg='red', bold=True)
+            raise Exception(message)
+
+        application_tag = application_tag[0]
+
+        if '{http://schemas.android.com/apk/res/android}debuggable' in application_tag.attrib \
+                and application_tag.attrib['{http://schemas.android.com/apk/res/android}debuggable'] == 'true':
+            click.secho('Application already has the android:debuggable flag set to True')
+            return
+
+        # set the debuggable flag
+        application_tag.attrib['android:debuggable'] = 'true'
+
+        click.secho('Writing new Android manifest...', dim=True)
+        xml.write(os.path.join(self.apk_temp_directory, 'AndroidManifest.xml'),
+                  encoding='utf-8', xml_declaration=True)
+
     def inject_load_library(self):
         """
             Injects a loadLibrary call into the launchable

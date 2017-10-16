@@ -48,6 +48,7 @@ class TestsCommandLineInteractions(unittest.TestCase):
             '--architecture', 'x86',
             '--pause',
             '--skip-cleanup',
+            '--enable-debug',
         ])
 
         self.assertIsNone(result.exception)

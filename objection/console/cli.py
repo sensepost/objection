@@ -184,7 +184,9 @@ def patchipa(source: str, codesign_signature: str, provision_file: str, binary_n
               show_default=True)
 @click.option('--skip-cleanup', '-k', is_flag=True,
               help='Do not clean temporary files once finished.', show_default=True)
-def patchapk(source: str, architecture: str, pause: bool, skip_cleanup: bool) -> None:
+@click.option('--enable-debug', '-d', is_flag=True,
+              help='Set the android:debuggable flag to true in the application manifiest.', show_default=True)
+def patchapk(source: str, architecture: str, pause: bool, skip_cleanup: bool, enable_debug: bool) -> None:
     """
         Patch an APK with the frida-gadget.so.
     """
