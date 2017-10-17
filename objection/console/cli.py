@@ -84,12 +84,10 @@ def explore(startup_command: str, startup_script: str, hook_debug: bool, quiet: 
         # poll the device for information. this method also sets
         # the device type internally in state.device
         device_info = get_device_info()
-        r.set_prompt_tokens(device_info)
 
-    except (frida.TimedOutError, frida.ServerNotRunningError) as e:
-        click.secho('Error: {0}'.format(e), fg='red')
+    except (frida.TimedOutError, frida.ServerNotRunningError,
+            frida.ProcessNotFoundError, frida.NotSupportedError) as e:
 
-    except (frida.ProcessNotFoundError, frida.NotSupportedError) as e:
         click.secho('Error: {0}'.format(e), fg='red')
 
         return
