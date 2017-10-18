@@ -278,10 +278,6 @@ COMMANDS = {
                             }
                         }
                     },
-                    'dump_args': {
-                        'meta': 'Dumps Android Java class methods',
-                        'exec': android_hooking.dump_android_method_args
-                    },
                     'set': {
                         'meta': 'Set various values',
                         'commands': {

@@ -1,9 +1,10 @@
 import unittest
 from unittest import mock
 
-from objection.commands.android.hooking import _string_is_true, _should_include_backtrace, show_android_classes, \
-    show_android_class_methods, watch_class_method, dump_android_method_args, show_registered_broadcast_receivers, \
-    show_registered_services, show_registered_activities, set_method_return_value, search_class
+from objection.commands.android.hooking import _string_is_true, _should_dump_backtrace, _should_dump_args, \
+    _should_dump_return_value, show_android_classes, show_android_class_methods, watch_class_method, \
+    show_registered_broadcast_receivers, show_registered_services, show_registered_activities, \
+    set_method_return_value, search_class
 from ...helpers import capture
 
 
@@ -18,13 +19,43 @@ class TestHooking(unittest.TestCase):
 
         self.assertFalse(result)
 
-    def test_arguement_includes_backtrace_flag(self):
-        result = _should_include_backtrace([
+    def test_argument_includes_backtrace_flag(self):
+        result = _should_dump_backtrace([
             '--test',
-            '--include-backtrace'
+            '--dump-backtrace'
         ])
 
         self.assertTrue(result)
+
+    def test_argument_dump_args_returns_true(self):
+        result = _should_dump_args([
+            '--foo',
+            '--dump-args'
+        ])
+
+        self.assertTrue(result)
+
+    def test_argument_dump_args_returns_false(self):
+        result = _should_dump_args([
+            '--foo',
+        ])
+
+        self.assertFalse(result)
+
+    def test_argument_dump_return_returns_true(self):
+        result = _should_dump_return_value([
+            '--foo',
+            '--dump-return'
+        ])
+
+        self.assertTrue(result)
+
+    def test_argument_dump_return_returns_false(self):
+        result = _should_dump_return_value([
+            '--foo',
+        ])
+
+        self.assertFalse(result)
 
     @mock.patch('objection.commands.android.hooking.FridaRunner')
     def test_show_android_classes_handles_hook_error(self, mock_runner):
@@ -109,24 +140,14 @@ Found 3 method(s)
         with capture(watch_class_method, ['com.foo.bar']) as o:
             output = o
 
-        self.assertEqual(output, 'Usage: android hooking watch class_method '
-                                 '<class> <method> (eg: com.example.test dologin) (optional: --include-backtrace)\n')
+        self.assertEqual(output, 'Usage: android hooking watch class_method <class> '
+                                 '<method> (eg: com.example.test dologin) (optional: '
+                                 '--dump-args) (optional: --dump-backtrace) (optional'
+                                 ': --dump-return)\n')
 
     @mock.patch('objection.commands.android.hooking.FridaRunner')
     def test_watch_class_method(self, mock_runner):
         watch_class_method(['com.foo.bar', 'isValid'])
-
-        self.assertTrue(mock_runner.return_value.run_as_job.called)
-
-    def test_dump_method_args_validates_arguements(self):
-        with capture(dump_android_method_args, []) as o:
-            output = o
-
-        self.assertEqual(output, 'Usage: android hooking dump_args <class> <method>\n')
-
-    @mock.patch('objection.commands.android.hooking.FridaRunner')
-    def test_dump_android_method_args(self, mock_runner):
-        dump_android_method_args(['com.foo.bar', 'isValid'])
 
         self.assertTrue(mock_runner.return_value.run_as_job.called)
 

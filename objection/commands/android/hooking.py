@@ -15,15 +15,16 @@ def _string_is_true(s: str) -> bool:
     return s.lower() in ('true', 'yes')
 
 
-def _should_include_backtrace(args: list) -> bool:
+def _should_dump_backtrace(args: list) -> bool:
     """
-        Check if --include-backtrace is part of the arguments.
+        Check if --dump-backtrace is part of the arguments.
 
         :param args:
         :return:
     """
 
-    return '--include-backtrace' in args
+    return '--dump-backtrace' in args
+
 
 def _should_dump_args(args: list) -> bool:
     """
@@ -34,6 +35,17 @@ def _should_dump_args(args: list) -> bool:
     """
 
     return '--dump-args' in args
+
+
+def _should_dump_return_value(args: list) -> bool:
+    """
+        Check if --dump-return is part of the arguments.
+
+        :param args:
+        :return:
+    """
+
+    return '--dump-return' in args
 
 
 def show_android_classes(args: list = None) -> None:
@@ -95,51 +107,36 @@ def show_android_class_methods(args: list = None) -> None:
 def watch_class_method(args: list) -> None:
     """
         Watches for invocations of an Android Java class method.
-        All overloads are watched.
+        All overloads for the same method are also watched.
+
+        Optionally, this method will dump the watched methods arguments,
+        backtrace as well as return value.
 
         :param args:
         :return:
     """
 
     if len(args) < 2:
-        click.secho(('Usage: android hooking watch class_method <class> <method>'
-                     ' (eg: com.example.test dologin) (optional: --include-backtrace)'), bold=True)
+        click.secho(('Usage: android hooking watch class_method <class> <method> '
+                     '(eg: com.example.test dologin) '
+                     '(optional: --dump-args) '
+                     '(optional: --dump-backtrace) '
+                     '(optional: --dump-return)'), bold=True)
         return
 
     target_class = args[0]
     target_method = args[1]
 
     runner = FridaRunner()
+
     runner.set_hook_with_data(android_hook('hooking/watch-method'),
-                              target_class=target_class, target_method=target_method,
-                              include_backtrace=_should_include_backtrace(args),
-                              dump_args=_should_dump_args(args))
+                              target_class=target_class,
+                              target_method=target_method,
+                              dump_args=_should_dump_args(args),
+                              dump_return=_should_dump_return_value(args),
+                              dump_backtrace=_should_dump_backtrace(args))
 
     runner.run_as_job(name='watch-java-method')
-
-
-def dump_android_method_args(args: list) -> None:
-    """
-        Starts an objection job that hooks into a class method and
-        dumps the argument values as the method is invoked.
-
-        :param args:
-        :return:
-    """
-
-    if len(args) < 2:
-        click.secho('Usage: android hooking dump_args <class> <method>', bold=True)
-        return
-
-    target_class = args[0]
-    target_method = args[1]
-
-    # prepare a runner for the arg dump hook
-    runner = FridaRunner()
-    runner.set_hook_with_data(android_hook('hooking/dump-arguments'),
-                              target_class=target_class, target_method=target_method)
-
-    runner.run_as_job(name='dump-arguments')
 
 
 def show_registered_broadcast_receivers(args: list = None) -> None:
