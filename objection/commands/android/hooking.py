@@ -25,6 +25,16 @@ def _should_include_backtrace(args: list) -> bool:
 
     return '--include-backtrace' in args
 
+def _should_dump_args(args: list) -> bool:
+    """
+        Check if --dump-args is part of the arguments.
+
+        :param args:
+        :return:
+    """
+
+    return '--dump-args' in args
+
 
 def show_android_classes(args: list = None) -> None:
     """
@@ -102,7 +112,8 @@ def watch_class_method(args: list) -> None:
     runner = FridaRunner()
     runner.set_hook_with_data(android_hook('hooking/watch-method'),
                               target_class=target_class, target_method=target_method,
-                              include_backtrace=_should_include_backtrace(args))
+                              include_backtrace=_should_include_backtrace(args),
+                              dump_args=_should_dump_args(args))
 
     runner.run_as_job(name='watch-java-method')
 
