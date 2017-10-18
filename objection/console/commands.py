@@ -46,6 +46,7 @@ COMMANDS = {
 
     'import': {
         'meta': 'Import fridascript from a full path',
+        'flags': ['--no-exception-handler'],
         'exec': frida_commands.load_script
     },
 
@@ -154,11 +155,13 @@ COMMANDS = {
 
             'search': {
                 'meta': 'Search for pattern in the applications memory',
+                'flags': ['--string'],
                 'exec': memory.find_pattern
             },
 
             'write': {
                 'meta': 'Write raw bytes to a memory address. Use with caution!',
+                'flags': ['--string'],
                 'exec': memory.write
             }
         },
@@ -274,6 +277,7 @@ COMMANDS = {
                         'commands': {
                             'class_method': {
                                 'meta': 'Watches for invocations of a specific class method',
+                                'flags': ['--dump-args', '--dump-backtrace', '--dump-return'],
                                 'exec': android_hooking.watch_class_method
                             }
                         }
@@ -380,6 +384,7 @@ COMMANDS = {
                 'commands': {
                     'dump': {
                         'meta': 'Dump the keychain for the current app\'s entitlement group',
+                        'flags': ['--json'],
                         'exec': keychain.dump
                     },
                     'clear': {
@@ -450,6 +455,7 @@ COMMANDS = {
                             },
                             'class_methods': {
                                 'meta': 'List the methods in a class',
+                                'flags': ['--include-parents'],
                                 'exec': ios_hooking.show_ios_class_methods
                             }
                         }
@@ -468,10 +474,12 @@ COMMANDS = {
                         'commands': {
                             'class': {
                                 'meta': 'Hook all methods in a class and report on invocations',
+                                'flags': ['--include-parents'],
                                 'exec': ios_hooking.watch_class
                             },
                             'method': {
                                 'meta': 'Hook a specific method and report on invocations',
+                                'flags': ['--include-backtrace'],
                                 'exec': ios_hooking.watch_class_method
                             }
                         }

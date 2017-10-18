@@ -37,8 +37,15 @@ class CommandCompleter(Completer):
         """
 
         # extract tokens from the document similar to
-        # how a shell invocation would have been done
-        tokens = get_tokens(document.text)
+        # how a shell invocation would have been done.
+        # we will also cleanup flags that come in the form
+        #  of --flag so that multiples can be suggested.
+        tokens = [token for token in get_tokens(document.text) if not token.startswith('--')]
+
+        # extract the flags in the received tokens. This list
+        # will be used to remove suggested flags from those
+        # already present in the command.
+        flags = [flag for flag in get_tokens(document.text) if flag.startswith('--')]
 
         # start with the current suggestions dictionary being
         # all commands
@@ -63,6 +70,12 @@ class CommandCompleter(Completer):
                 # environment, so, call the method defined
                 elif 'dynamic' in current_suggestions[candidate]:
                     current_suggestions = current_suggestions[candidate]['dynamic']()
+
+                # make --flags in the 'flags' key tab completable
+                elif 'flags' in current_suggestions[candidate]:
+                    current_suggestions = {
+                        flag: '' for flag in current_suggestions[candidate]['flags'] if flag not in flags
+                    }
 
                 # in this case, there are probably no sub commands, so return
                 # an empty dictionary
@@ -102,17 +115,18 @@ class CommandCompleter(Completer):
         if not document.text.startswith('!'):
             commands.update(self.find_completions(document))
 
-        # if there are commands, show them
-        if len(commands) > 0:
+        # if there are no commands return
+        if len(commands) <= 0:
+            return
 
-            # sort alphabetically
-            commands = collections.OrderedDict(sorted(list(commands.items()), key=lambda t: t[0]))
+        # sort alphabetically
+        commands = collections.OrderedDict(sorted(list(commands.items()), key=lambda t: t[0]))
 
-            # loop the commands that we have determined to be useful
-            # based on the current text input and populate a 'meta' field
-            # if one exists.
-            for cmd, extra in commands.items():
-                meta = extra['meta'] if type(extra) is dict and 'meta' in extra else None
+        # loop the commands that we have determined to be useful
+        # based on the current text input and populate a 'meta' field
+        # if one exists.
+        for cmd, extra in commands.items():
+            meta = extra['meta'] if type(extra) is dict and 'meta' in extra else None
 
-                # finally, yield the generator for completions
-                yield Completion(cmd, -(len(word_before_cursor)), display_meta=meta)
+            # finally, yield the generator for completions
+            yield Completion(cmd, -(len(word_before_cursor)), display_meta=meta)
