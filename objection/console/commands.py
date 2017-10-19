@@ -460,15 +460,6 @@ COMMANDS = {
                             }
                         }
                     },
-                    'dump': {
-                        'meta': 'Dumps various bits of information',
-                        'commands': {
-                            'method_args': {
-                                'meta': 'Attempt to dump arguments for a given method',
-                                'exec': ios_hooking.dump_ios_method_args
-                            }
-                        }
-                    },
                     'watch': {
                         'meta': 'Watch invocations of classes and methods',
                         'commands': {
@@ -479,7 +470,7 @@ COMMANDS = {
                             },
                             'method': {
                                 'meta': 'Hook a specific method and report on invocations',
-                                'flags': ['--include-backtrace'],
+                                'flags': ['--dump-args', '--dump-backtrace', '--dump-return'],
                                 'exec': ios_hooking.watch_class_method
                             }
                         }

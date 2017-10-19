@@ -1,6 +1,7 @@
 Command: ios hooking watch method
 
-Usage: ios hooking method "<full class & selector> (optional: --include-backtrace)"
+Usage: ios hooking method "<full class & selector>" (optional: --dump-backtrace)
+       (optional: --dump-args) (optional: --dump-return)
 
 Hooks into a specified Objective-C method and reports on invocations.
 A full class and method is expected, including whether its an instance
@@ -10,5 +11,5 @@ lead to the methods invocation will also be dumped.
 
 Examples:
    ios hooking watch method "+[KeychainDataManager update:forKey:]
-   ios hooking watch method "-[PinnedNSURLSessionStarwarsApi
    ios hooking watch method "-[PinnedNSURLSessionStarwarsApi getJsonResponseFrom:onSuccess:onFailure:]" --include-backtrace
+   ios hooking watch method "+[KeychainDataManager update:forKey:] --dump-args --dump-return

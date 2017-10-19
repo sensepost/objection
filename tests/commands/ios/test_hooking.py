@@ -2,8 +2,8 @@ import unittest
 from unittest import mock
 
 from objection.commands.ios.hooking import _should_ignore_native_classes, _should_include_parent_methods, \
-    _class_is_prefixed_with_native, _string_is_true, _should_include_backtrace, _get_ios_classes, show_ios_classes, \
-    show_ios_class_methods, dump_ios_method_args, watch_class, watch_class_method, set_method_return_value, \
+    _class_is_prefixed_with_native, _string_is_true, _get_ios_classes, show_ios_classes, \
+    show_ios_class_methods, watch_class, watch_class_method, set_method_return_value, \
     search_class, search_method
 from ...helpers import capture
 
@@ -56,21 +56,6 @@ class TestHooking(unittest.TestCase):
 
     def test_string_is_true_returns_false(self):
         result = _string_is_true('foo')
-
-        self.assertFalse(result)
-
-    def test_should_include_backtrace_arguments_returns_true(self):
-        result = _should_include_backtrace([
-            '--false',
-            '--include-backtrace'
-        ])
-
-        self.assertTrue(result)
-
-    def test_should_include_backtrace_arguments_returns_false(self):
-        result = _should_include_backtrace([
-            '--false',
-        ])
 
         self.assertFalse(result)
 
@@ -174,30 +159,6 @@ Foo
 
         self.assertEqual(output, 'foo\nbar\n')
 
-    # ---
-
-    def test_dump_ios_method_args_validates_arguments(self):
-        with capture(dump_ios_method_args, []) as o:
-            output = o
-
-        self.assertEqual(output, 'Usage: ios hooking dump method_args <+/-> <class_name> <method_name>\n')
-
-    def test_dump_ios_method_args_validates_arguments_class_instance_field(self):
-        with capture(dump_ios_method_args, ['*', 'TEKeychainManager', 'getDataFor:']) as o:
-            output = o
-
-        self.assertEqual(output, 'Specify a class method (+) or instance method (-) '
-                                 'with either a "+" or a "-"\nUsage: ios hooking dump '
-                                 'method_args <+/-> <class_name> <method_name>\n')
-
-    @mock.patch('objection.commands.ios.hooking.FridaRunner')
-    def test_dump_ios_method_arguements(self, mock_runner):
-        with capture(dump_ios_method_args, ['-', 'TEKeychainManager', 'getDataFor:']) as o:
-            output = o
-
-        self.assertEqual(output, 'Full method: -[TEKeychainManager getDataFor:] (1 arguments)\n')
-        self.assertTrue(mock_runner.return_value.run_as_job.called)
-
     def test_watch_class_validates_arguments(self):
         with capture(watch_class, []) as o:
             output = o
@@ -214,8 +175,9 @@ Foo
         with capture(watch_class_method, []) as o:
             output = o
 
-        self.assertEqual(output, 'Usage: ios hooking watch method <selector> (eg: '
-                                 '-[ClassName methodName:]) (optional: --include-backtrace)\n')
+        self.assertEqual(output, 'Usage: ios hooking watch method <selector> '
+                                 '(eg: -[ClassName methodName:]) (optional: --dump-backtrace) '
+                                 '(optional: --dump-args) (optional: --dump-return)\n')
 
     @mock.patch('objection.commands.ios.hooking.FridaRunner')
     def test_watch_class_method(self, mock_runner):

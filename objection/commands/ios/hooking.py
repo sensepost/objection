@@ -104,15 +104,37 @@ def _string_is_true(s: str) -> bool:
     return s.lower() in ('true', 'yes')
 
 
-def _should_include_backtrace(args: list) -> bool:
+def _should_dump_backtrace(args: list) -> bool:
     """
-        Check if --include-backtrace is part of the arguments.
+        Check if --dump-backtrace is part of the arguments.
 
         :param args:
         :return:
     """
 
-    return '--include-backtrace' in args
+    return '--dump-backtrace' in args
+
+
+def _should_dump_args(args: list) -> bool:
+    """
+        Check if --dump-args is part of the arguments.
+
+        :param args:
+        :return:
+    """
+
+    return '--dump-args' in args
+
+
+def _should_dump_return_value(args: list) -> bool:
+    """
+        Check if --dump-return is part of the arguments.
+
+        :param args:
+        :return:
+    """
+
+    return '--dump-return' in args
 
 
 def _get_ios_classes() -> list:
@@ -193,45 +215,6 @@ def show_ios_class_methods(args: list) -> None:
         click.secho(method)
 
 
-def dump_ios_method_args(args: list) -> None:
-    """
-        Starts an objection job that hooks into a class method and
-        dumps the argument values as the method is invoked.
-
-        :param args:
-        :return:
-    """
-
-    # small helper method to reduce copy/paste code for the usage info
-    def usage():
-        click.secho('Usage: ios hooking dump method_args <+/-> <class_name> <method_name>', bold=True)
-
-    if len(args) < 3:
-        usage()
-        return
-
-    class_instance = args[0]
-    class_name = args[1]
-    method_name = args[2]
-
-    if class_instance not in ['-', '+']:
-        click.secho('Specify a class method (+) or instance method (-) with either a "+" or a "-"', fg='red')
-        usage()
-        return
-
-    full_method = '{0}[{1} {2}]'.format(class_instance, class_name, method_name)
-    argument_count = full_method.count(':')
-    click.secho('Full method: {0} ({1} arguments)'.format(full_method, argument_count))
-
-    # prepare a runner for the arg dump hook
-    runner = FridaRunner()
-    runner.set_hook_with_data(
-        ios_hook('hooking/dump-arguments'),
-        method=full_method, argument_count=argument_count)
-
-    runner.run_as_job(name='dump-arguments')
-
-
 def watch_class(args: list) -> None:
     """
         Starts an objection job that hooks into all of the methods
@@ -265,16 +248,21 @@ def watch_class_method(args: list) -> None:
     """
 
     if len(args) <= 0:
-        click.secho(('Usage: ios hooking watch method <selector>'
-                     ' (eg: -[ClassName methodName:]) (optional: --include-backtrace)'), bold=True)
+        click.secho(('Usage: ios hooking watch method <selector> (eg: -[ClassName methodName:]) '
+                     '(optional: --dump-backtrace) '
+                     '(optional: --dump-args) '
+                     '(optional: --dump-return)'), bold=True)
         return
 
     selector = args[0]
+    argument_count = selector.count(':')
 
     runner = FridaRunner()
-    runner.set_hook_with_data(
-        ios_hook('hooking/watch-method'), selector=selector,
-        include_backtrace=_should_include_backtrace(args))
+    runner.set_hook_with_data(ios_hook('hooking/watch-method'), selector=selector,
+                              argument_count=argument_count,
+                              dump_backtrace=_should_dump_backtrace(args),
+                              dump_args=_should_dump_args(args),
+                              dump_return=_should_dump_return_value(args))
 
     runner.run_as_job(name='watch-method')
 
