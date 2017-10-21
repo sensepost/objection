@@ -1,6 +1,7 @@
 import click
 
 from objection.utils.frida_transport import FridaRunner
+from objection.utils.helpers import clean_argument_flags
 from objection.utils.templates import ios_hook
 
 # a thumbsucked list of prefixes used in Objective-C runtime
@@ -192,7 +193,7 @@ def show_ios_class_methods(args: list) -> None:
         :return:
     """
 
-    if len(args) <= 0:
+    if len(clean_argument_flags(args)) <= 0:
         click.secho('Usage: ios hooking list class_methods <class name> (--include-parents)', bold=True)
         return
 
@@ -224,7 +225,7 @@ def watch_class(args: list) -> None:
         :return:
     """
 
-    if len(args) <= 0:
+    if len(clean_argument_flags(args)) <= 0:
         click.secho('Usage: ios hooking watch class <class_name> (--include-parents)', bold=True)
         return
 
@@ -247,7 +248,7 @@ def watch_class_method(args: list) -> None:
         :return:
     """
 
-    if len(args) <= 0:
+    if len(clean_argument_flags(args)) <= 0:
         click.secho(('Usage: ios hooking watch method <selector> (eg: -[ClassName methodName:]) '
                      '(optional: --dump-backtrace) '
                      '(optional: --dump-args) '
@@ -276,7 +277,7 @@ def set_method_return_value(args: list) -> None:
         :return:
     """
 
-    if len(args) < 2:
+    if len(clean_argument_flags(args)) < 2:
         click.secho('Usage: ios hooking set_method_return "<selector>" (eg: "-[ClassName methodName:]") <true/false>',
                     bold=True)
         return
@@ -300,7 +301,7 @@ def search_class(args: list) -> None:
         :return:
     """
 
-    if len(args) < 1:
+    if len(clean_argument_flags(args)) < 1:
         click.secho('Usage: ios hooking search classes <name>', bold=True)
         return
 
@@ -336,7 +337,7 @@ def search_method(args: list) -> None:
         :return:
     """
 
-    if len(args) < 1:
+    if len(clean_argument_flags(args)) < 1:
         click.secho('Usage: ios hooking search methods <name>', bold=True)
         return
 

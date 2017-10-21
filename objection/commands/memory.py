@@ -2,6 +2,7 @@ import click
 from tabulate import tabulate
 
 from ..utils.frida_transport import FridaRunner
+from ..utils.helpers import clean_argument_flags
 from ..utils.helpers import sizeof_fmt, pretty_concat
 from ..utils.templates import generic_hook
 
@@ -33,7 +34,7 @@ def dump_all(args: list) -> None:
         :return:
     """
 
-    if len(args) <= 0:
+    if len(clean_argument_flags(args)) <= 0:
         click.secho('Usage: memory dump all <local destination>', bold=True)
         return
 
@@ -74,7 +75,7 @@ def dump_from_base(args: list) -> None:
         :return:
     """
 
-    if len(args) < 3:
+    if len(clean_argument_flags(args)) < 3:
         click.secho('Usage: memory dump from_base <base_address> <size_to_dump> <local_destination>', bold=True)
         return
 
@@ -136,7 +137,7 @@ def dump_exports(args: list) -> None:
         :return:
     """
 
-    if len(args) <= 0:
+    if len(clean_argument_flags(args)) <= 0:
         click.secho('Usage: memory list exports <module name>', bold=True)
         return
 
@@ -168,7 +169,7 @@ def find_pattern(args: list) -> None:
         :return:
     """
 
-    if len(args) <= 0:
+    if len(clean_argument_flags(args)) <= 0:
         click.secho('Usage: memory search "<pattern eg: 41 41 41 ?? 41>" (--string)', bold=True)
         return
 
@@ -211,7 +212,7 @@ def write(args: list) -> None:
         :return:
     """
 
-    if len(args) < 2:
+    if len(clean_argument_flags(args)) < 2:
         click.secho('Usage: memory write "<address>" "<pattern eg: 41 41 41 41>" (--string)', bold=True)
         return
 

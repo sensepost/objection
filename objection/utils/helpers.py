@@ -95,3 +95,17 @@ def normalize_gadget_name(gadget_name: str):
         pass
 
     return gadget_name
+
+
+def clean_argument_flags(args: list) -> list:
+    """
+        Returns a list of arguments with flags removed.
+
+        Items are considered flags when they are prefixed
+        with two dashes.
+
+        :param args:
+        :return:
+    """
+
+    return [x for x in args if not x.startswith('--')]

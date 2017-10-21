@@ -4,6 +4,7 @@ import click
 from tabulate import tabulate
 
 from ..utils.frida_transport import FridaRunner
+from ..utils.helpers import clean_argument_flags
 from ..utils.templates import generic_hook, template_env
 
 
@@ -55,7 +56,7 @@ def load_script(args: list) -> None:
         :return:
     """
 
-    if len(args) <= 0:
+    if len(clean_argument_flags(args)) <= 0:
         click.secho('Usage: import <local path to frida-script> (optional name) (optional: --no-exception-handler)',
                     bold=True)
         return

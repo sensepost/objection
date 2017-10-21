@@ -1,6 +1,7 @@
 import click
 
 from objection.utils.frida_transport import FridaRunner
+from objection.utils.helpers import clean_argument_flags
 from objection.utils.templates import android_hook
 
 
@@ -81,7 +82,7 @@ def show_android_class_methods(args: list = None) -> None:
         :return:
     """
 
-    if len(args) <= 0:
+    if len(clean_argument_flags(args)) <= 0:
         click.secho('Usage: android hooking list class_methods <class name>', bold=True)
         return
 
@@ -116,7 +117,7 @@ def watch_class_method(args: list) -> None:
         :return:
     """
 
-    if len(args) < 2:
+    if len(clean_argument_flags(args)) < 2:
         click.secho(('Usage: android hooking watch class_method <class> <method> '
                      '(eg: com.example.test dologin) '
                      '(optional: --dump-args) '
@@ -231,7 +232,7 @@ def set_method_return_value(args: list = None) -> None:
         :return:
     """
 
-    if len(args) < 2:
+    if len(clean_argument_flags(args)) < 2:
         click.secho(('Usage: android hooking set return_value '
                      '"<fully qualified class>" (eg: "com.example.test") '
                      '"<method (with overload if needed)>" (eg: see help for details) '
@@ -259,7 +260,7 @@ def search_class(args: list) -> None:
         :return:
     """
 
-    if len(args) < 1:
+    if len(clean_argument_flags(args)) < 1:
         click.secho('Usage: android hooking search classes <name>', bold=True)
         return
 

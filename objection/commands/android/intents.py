@@ -1,6 +1,7 @@
 import click
 
 from objection.utils.frida_transport import FridaRunner
+from objection.utils.helpers import clean_argument_flags
 from objection.utils.templates import android_hook
 
 
@@ -12,7 +13,7 @@ def launch_activity(args: list) -> None:
         :return:
     """
 
-    if len(args) < 1:
+    if len(clean_argument_flags(args)) < 1:
         click.secho('Usage: android intent launch_activity <activity_class>', bold=True)
         return
 
@@ -34,7 +35,7 @@ def launch_service(args: list) -> None:
         :return:
     """
 
-    if len(args) < 1:
+    if len(clean_argument_flags(args)) < 1:
         click.secho('Usage: android intent launch_service <service_class>', bold=True)
         return
 

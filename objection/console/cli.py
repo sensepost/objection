@@ -71,9 +71,7 @@ def explore(startup_command: str, startup_script: str, hook_debug: bool, quiet: 
     # the call to get_device_info().
     if startup_command:
         for command in startup_command:
-            click.secho(
-                'Running a startup command... {}'.format(command),
-                dim=True)
+            click.secho('Running a startup command... {0}'.format(command), dim=True)
             r.run_command(command)
 
     # if we have a startup script to run, use the 'import' command
