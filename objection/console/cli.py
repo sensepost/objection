@@ -45,7 +45,7 @@ def cli(network: bool, host: str, port: int, gadget: str) -> None:
 
 
 @cli.command()
-@click.option('--startup-command', '-s', required=False,
+@click.option('--startup-command', '-s', required=False, multiple=True,
               help='A command to run before the repl polls the device for information.')
 @click.option('--startup-script', '-S', required=False,
               help='A script to import and run before the repl polls the device for information.')
@@ -70,8 +70,11 @@ def explore(startup_command: str, startup_script: str, hook_debug: bool, quiet: 
     # if we have a command to run, do that first before
     # the call to get_device_info().
     if startup_command:
-        click.secho('Running a startup command...', dim=True)
-        r.run_command(startup_command)
+        for command in startup_command:
+            click.secho(
+                'Running a startup command... {}'.format(command),
+                dim=True)
+            r.run_command(command)
 
     # if we have a startup script to run, use the 'import' command
     # and give it the users path.
