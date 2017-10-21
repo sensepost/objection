@@ -1,5 +1,6 @@
 import unittest
 
+from objection.utils.helpers import clean_argument_flags
 from objection.utils.helpers import get_tokens
 from objection.utils.helpers import normalize_gadget_name
 from objection.utils.helpers import pretty_concat
@@ -49,6 +50,10 @@ class TestHelpers(unittest.TestCase):
         self.assertEqual(result, 400)
 
     def test_normalizes_gadget_name_when_string_name_is_given(self):
-        resilt = normalize_gadget_name('gadget')
+        result = normalize_gadget_name('gadget')
 
-        self.assertEqual(resilt, 'gadget')
+        self.assertEqual(result, 'gadget')
+
+    def test_cleans_argument_lists_with_flags(self):
+        result = clean_argument_flags(['foo', '--bar'])
+        self.assertEqual(result, ['foo'])
