@@ -14,6 +14,7 @@ class MockJob:
         self.id = '3c3c65c7-67d2-4617-8fba-b96b6d2130d7'
         self.started = '2017-10-14 09:21:01'
         self.name = 'test'
+        self.args = ['--foo', 'bar']
 
     def end(self):
         pass
@@ -38,9 +39,9 @@ class TestJobs(unittest.TestCase):
         with capture(show, []) as o:
             output = o
 
-        expected_outut = """UUID                                  Name    Started
-------------------------------------  ------  -------------------
-3c3c65c7-67d2-4617-8fba-b96b6d2130d7  test    2017-10-14 09:21:01
+        expected_outut = """UUID                                  Name    Started              Arguments
+------------------------------------  ------  -------------------  -----------
+3c3c65c7-67d2-4617-8fba-b96b6d2130d7  test    2017-10-14 09:21:01  --foo bar
 """
 
         self.assertEqual(output, expected_outut)

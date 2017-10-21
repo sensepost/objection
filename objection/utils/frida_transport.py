@@ -102,17 +102,16 @@ class FridaJobRunner(object):
         are represented by an instance of this class
     """
 
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, args: list) -> None:
         """
             Init a new FridaJobRunner with a given name
-
-            :param name:
         """
 
         self.id = uuid.uuid4()
         self.started = strftime('%Y-%m-%d %H:%M:%S')
         self.name = name
         self.has_had_error = False
+        self.args = args
 
         self.hook = None
         self.session = None
@@ -284,7 +283,7 @@ class FridaRunner(object):
         if state_connection.get_comms_type() == state_connection.TYPE_REMOTE:
             try:
                 device = frida.get_device("tcp@%s:%d" % (state_connection.host, state_connection.port))
-            except frida.TimedOutError as e:
+            except frida.TimedOutError:
                 device = frida.get_device_manager().add_remote_device(
                     "%s:%d" % (state_connection.host, state_connection.port))
 
@@ -350,7 +349,7 @@ class FridaRunner(object):
         script.load()
         script.unload()
 
-    def run_as_job(self, name: str, hook: str = None) -> None:
+    def run_as_job(self, name: str, hook: str = None, args: list = None) -> None:
         """
             Run a hook as a background job, identified by a name.
 
@@ -359,6 +358,7 @@ class FridaRunner(object):
 
             :param name:
             :param hook:
+            :param args:
             :return:
         """
 
@@ -368,7 +368,7 @@ class FridaRunner(object):
         if not hook:
             raise Exception('Like, we need a hook to run y0')
 
-        job = FridaJobRunner(name=name)
+        job = FridaJobRunner(name=name, args=args)
 
         click.secho('Job: {0} - Starting'.format(job.id), dim=True)
 

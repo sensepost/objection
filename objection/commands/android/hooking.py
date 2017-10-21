@@ -137,7 +137,7 @@ def watch_class_method(args: list) -> None:
                               dump_return=_should_dump_return_value(args),
                               dump_backtrace=_should_dump_backtrace(args))
 
-    runner.run_as_job(name='watch-java-method')
+    runner.run_as_job(name='watch-java-method', args=args)
 
 
 def show_registered_broadcast_receivers(args: list = None) -> None:
@@ -248,7 +248,7 @@ def set_method_return_value(args: list = None) -> None:
     runner.set_hook_with_data(
         android_hook('hooking/set-return'), class_name=class_name, method_name=method_name, retval=retval)
 
-    runner.run_as_job(name='set-return-value')
+    runner.run_as_job(name='set-return-value', args=args)
 
 
 def search_class(args: list) -> None:

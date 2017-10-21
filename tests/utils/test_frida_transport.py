@@ -89,7 +89,7 @@ class TestRunnerMessage(unittest.TestCase):
 
 class TestFridaJobRunner(unittest.TestCase):
     def setUp(self):
-        self.runner = FridaJobRunner(name='testing')
+        self.runner = FridaJobRunner(name='testing', args=None)
 
         # set status values for some determined by
         # uuid & time
@@ -128,7 +128,7 @@ class TestFridaJobRunner(unittest.TestCase):
     def test_inits_job_runner(self, choice):
         choice.return_value = 'green'
 
-        runner = FridaJobRunner('test')
+        runner = FridaJobRunner('test', ['foo'])
 
         self.assertEqual(runner.name, 'test')
         self.assertEqual(type(runner.id), uuid.UUID)
@@ -136,6 +136,7 @@ class TestFridaJobRunner(unittest.TestCase):
         self.assertIsNone(runner.hook)
         self.assertIsNone(runner.session)
         self.assertIsNone(runner.script)
+        self.assertEqual(runner.args, ['foo'])
         self.assertEqual(runner.success_color, 'green')
 
     def test_receive_successful_message_from_hook(self):

@@ -17,9 +17,11 @@ def show(args: list = None) -> None:
 
     jobs = []
     for job in job_manager_state.jobs:
-        jobs.append([job.id, job.name, job.started])
+        jobs.append([
+            job.id, job.name, job.started, ' '.join(job.args) if job.args else 'n/a'
+        ])
 
-    click.secho(tabulate(jobs, headers=['UUID', 'Name', 'Started']))
+    click.secho(tabulate(jobs, headers=['UUID', 'Name', 'Started', 'Arguments']))
 
 
 def kill(args: list) -> None:

@@ -93,4 +93,4 @@ def load_script(args: list) -> None:
         hook = err_handler.render(content=hook)
 
     runner = FridaRunner(hook=hook)
-    runner.run_as_job(name=name)
+    runner.run_as_job(name=name, args=args)

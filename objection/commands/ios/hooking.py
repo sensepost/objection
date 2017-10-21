@@ -236,7 +236,7 @@ def watch_class(args: list) -> None:
         ios_hook('hooking/watch-class-methods'),
         class_name=class_name, include_parents=_should_include_parent_methods(args))
 
-    runner.run_as_job(name='watch-class-methods')
+    runner.run_as_job(name='watch-class-methods', args=args)
 
 
 def watch_class_method(args: list) -> None:
@@ -265,7 +265,7 @@ def watch_class_method(args: list) -> None:
                               dump_args=_should_dump_args(args),
                               dump_return=_should_dump_return_value(args))
 
-    runner.run_as_job(name='watch-method')
+    runner.run_as_job(name='watch-method', args=args)
 
 
 def set_method_return_value(args: list) -> None:
@@ -289,7 +289,7 @@ def set_method_return_value(args: list) -> None:
     runner.set_hook_with_data(
         ios_hook('hooking/set-return'), selector=selector, retval=_string_is_true(retval))
 
-    runner.run_as_job(name='set-return-value')
+    runner.run_as_job(name='set-return-value', args=args)
 
 
 def search_class(args: list) -> None:
