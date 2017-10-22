@@ -355,6 +355,7 @@ COMMANDS = {
                 'commands': {
                     'disable': {
                         'meta': 'Attempt to disable SSL pinning in various Java libraries/classes',
+                        'flags': ['--quiet'],
                         'exec': android_pinning.android_disable
                     }
                 }

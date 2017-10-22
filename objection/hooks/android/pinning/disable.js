@@ -5,6 +5,18 @@
 
 var X509TrustManager = Java.use('javax.net.ssl.X509TrustManager');
 var SSLContext = Java.use('javax.net.ssl.SSLContext');
+var quiet_output = ('{{ quiet }}'.toLowerCase() == 'true')
+
+// Helper method to honor the quiet flag.
+function quiet_send(data) {
+
+    if (quiet_output) {
+
+        return;
+    }
+
+    send(data)
+}
 
 // Implement a new TrustManager
 // ref: https://gist.github.com/oleavr/3ca67a173ff7d207c6b8c3b0ca65a9d8
@@ -39,7 +51,7 @@ var SSLContext_init = SSLContext.init.overload(
 // Override the init method, specifying our new TrustManager
 SSLContext_init.implementation = function (keyManager, trustManager, secureRandom) {
 
-    send({
+    quiet_send({
         status: 'success',
         error_reason: NaN,
         type: 'android-ssl-pinning-bypass',
@@ -66,7 +78,7 @@ try {
 
     CertificatePinner.check.overload('java.lang.String', 'java.util.List').implementation = function () {
 
-        send({
+        quiet_send({
             status: 'success',
             error_reason: NaN,
             type: 'android-ssl-pinning-bypass',
@@ -101,7 +113,7 @@ try {
 
     PinningTrustManager.checkServerTrusted.implementation = function () {
 
-        send({
+        quiet_send({
             status: 'success',
             error_reason: NaN,
             type: 'android-ssl-pinning-bypass',
