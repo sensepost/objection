@@ -513,6 +513,7 @@ COMMANDS = {
                 'commands': {
                     'disable': {
                         'meta': 'Attempt to disable SSL pinning in various iOS libraries/classes',
+                        'flags': ['--ignore-ios10-tls-helper', '--quiet'],
                         'exec': ios_pinning.ios_disable
                     }
                 }

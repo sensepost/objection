@@ -38,6 +38,19 @@
 // Some base handles
 var resolver = new ApiResolver('objc');
 var NSURLCredential = ObjC.classes.NSURLCredential;
+var ignore_ios10_tls_helper = ('{{ ignore_ios10_tls_helper }}'.toLowerCase() == 'true')
+var quiet_output = ('{{ quiet }}'.toLowerCase() == 'true')
+
+// Helper method to honor the quiet flag.
+function quiet_send(data) {
+
+    if (quiet_output) {
+
+        return;
+    }
+
+    send(data)
+}
 
 // Process the Frameworks and Classes First
 
@@ -48,9 +61,98 @@ if (ObjC.classes.AFHTTPSessionManager && ObjC.classes.AFSecurityPolicy) {
         status: 'success',
         error_reason: NaN,
         type: 'ios-ssl-pinning-bypass',
-        data: 'Found AFNetworking 3.0 library'
+        data: 'Found AFNetworking library'
     });
 
+    // -[AFSecurityPolicy setSSLPinningMode:]
+    var AFSecurityPolicy_setSSLPinningMode = {};
+    resolver.enumerateMatches('-[AFSecurityPolicy setSSLPinningMode:]', {
+        onMatch: function (match) {
+            AFSecurityPolicy_setSSLPinningMode.name = match.name;
+            AFSecurityPolicy_setSSLPinningMode.address = match.address;
+        },
+        onComplete: function () { }
+    });
+
+    if (AFSecurityPolicy_setSSLPinningMode.address) {
+
+        send({
+            status: 'success',
+            error_reason: NaN,
+            type: 'ios-ssl-pinning-bypass',
+            data: 'Found +[AFSecurityPolicy setSSLPinningMode:]'
+        });
+
+        Interceptor.attach(AFSecurityPolicy_setSSLPinningMode.address, {
+            onEnter: function (args) {
+
+                // typedef NS_ENUM(NSUInteger, AFSSLPinningMode) {
+                //     AFSSLPinningModeNone,
+                //     AFSSLPinningModePublicKey,
+                //     AFSSLPinningModeCertificate,
+                // };
+
+                if (args[2] != 0x0) {
+
+                    quiet_send({
+                        status: 'success',
+                        error_reason: NaN,
+                        type: 'ios-ssl-pinning-bypass',
+                        data: '[AFNetworking] setting AFSSLPinningModeNone for setSSLPinningMode: ' +
+                        ' (was: ' + args[2] + ')'
+                    });
+
+                    args[2] = 0x0;
+                }
+            }
+        });
+    }
+
+    // -[AFSecurityPolicy setAllowInvalidCertificates:]
+    var AFSecurityPolicy_setAllowInvalidCertificates = {};
+    resolver.enumerateMatches('-[AFSecurityPolicy setAllowInvalidCertificates:]', {
+        onMatch: function (match) {
+            AFSecurityPolicy_setAllowInvalidCertificates.name = match.name;
+            AFSecurityPolicy_setAllowInvalidCertificates.address = match.address;
+        },
+        onComplete: function () { }
+    });
+
+    if (AFSecurityPolicy_setAllowInvalidCertificates.address) {
+
+        send({
+            status: 'success',
+            error_reason: NaN,
+            type: 'ios-ssl-pinning-bypass',
+            data: 'Found +[AFSecurityPolicy setAllowInvalidCertificates:]'
+        });
+
+        Interceptor.attach(AFSecurityPolicy_setAllowInvalidCertificates.address, {
+            onEnter: function (args) {
+
+                // typedef NS_ENUM(NSUInteger, AFSSLPinningMode) {
+                //     AFSSLPinningModeNone,
+                //     AFSSLPinningModePublicKey,
+                //     AFSSLPinningModeCertificate,
+                // };
+
+                if (args[2] != 0x1) {
+
+                    quiet_send({
+                        status: 'success',
+                        error_reason: NaN,
+                        type: 'ios-ssl-pinning-bypass',
+                        data: '[AFNetworking] setting AFSSLPinningModeNone for setAllowInvalidCertificates:' +
+                        ' (was: ' + args[2] + ')'
+                    });
+
+                    args[2] = 0x1;
+                }
+            }
+        });
+    }
+
+    // +[AFSecurityPolicy policyWithPinningMode:]
     var AFSecurityPolicy_policyWithPinningMode = {};
     resolver.enumerateMatches('+[AFSecurityPolicy policyWithPinningMode:]', {
         onMatch: function (match) {
@@ -78,21 +180,23 @@ if (ObjC.classes.AFHTTPSessionManager && ObjC.classes.AFSecurityPolicy) {
                 //     AFSSLPinningModeCertificate,
                 // };
 
-                if (args[2] != '0x0') {
+                if (args[2] != 0x0) {
 
-                    send({
+                    quiet_send({
                         status: 'success',
                         error_reason: NaN,
                         type: 'ios-ssl-pinning-bypass',
-                        data: '[AFNetworking 3.0] setting AFSSLPinningModeNone for policyWithPinningMode:'
+                        data: '[AFNetworking] setting AFSSLPinningModeNone for policyWithPinningMode:' +
+                        ' (was: ' + args[2] + ')'
                     });
 
-                    args[2] = '0x0';
+                    args[2] = 0x0;
                 }
             }
         });
     }
 
+    // +[AFSecurityPolicy policyWithPinningMode:withPinnedCertificates:]
     var AFSecurityPolicy_policyWithPinningModewithPinnedCertificates = {};
     resolver.enumerateMatches('+[AFSecurityPolicy policyWithPinningMode:withPinnedCertificates:]', {
         onMatch: function (match) {
@@ -120,16 +224,17 @@ if (ObjC.classes.AFHTTPSessionManager && ObjC.classes.AFSecurityPolicy) {
                 //     AFSSLPinningModeCertificate,
                 // };
 
-                if (args[2] != '0x0') {
+                if (args[2] != 0x0) {
 
-                    send({
+                    quiet_send({
                         status: 'success',
                         error_reason: NaN,
                         type: 'ios-ssl-pinning-bypass',
-                        data: '[AFNetworking 3.0] setting AFSSLPinningModeNone for policyWithPinningMode:withPinnedCertificates:'
+                        data: '[AFNetworking] setting AFSSLPinningModeNone for policyWithPinningMode:withPinnedCertificates:' +
+                        ' (was: ' + args[2] + ')'
                     });
 
-                    args[2] = '0x0';
+                    args[2] = 0x0;
                 }
             }
         });
@@ -164,7 +269,7 @@ if (search.length > 0) {
                 var selector = ObjC.selectorAsString(args[1]);
                 var challenge = new ObjC.Object(args[3]);
 
-                send({
+                quiet_send({
                     status: 'success',
                     error_reason: NaN,
                     type: 'ios-ssl-pinning-bypass',
@@ -241,15 +346,7 @@ if (search.length > 0) {
 
 // Process the lower level methods, just like SSL-Killswitch2
 //  https://github.com/nabla-c0d3/ssl-kill-switch2/blob/master/SSLKillSwitch/SSLKillSwitch.m
-
-send({
-    status: 'success',
-    error_reason: NaN,
-    type: 'ios-ssl-pinning-bypass',
-    data: 'Hooking lower level methods: SSLSetSessionOption, SSLCreateContext, ' +
-    'SSLHandshake and tls_helper_create_peer_trust'
-});
-
+//
 // iOS9 and below
 
 // Some constants
@@ -259,20 +356,27 @@ var noErr = 0;
 var errSecSuccess = 0;
 
 // SSLSetSessionOption
+send({
+    status: 'success',
+    error_reason: NaN,
+    type: 'ios-ssl-pinning-bypass',
+    data: 'Hooking lower level method: SSLSetSessionOption'
+});
+
 var SSLSetSessionOption = new NativeFunction(
     Module.findExportByName('Security', 'SSLSetSessionOption'),
     'int', ['pointer', 'int', 'bool']);
 
 Interceptor.replace(SSLSetSessionOption, new NativeCallback(function (context, option, value) {
 
-    send({
+    quiet_send({
         status: 'success',
         error_reason: NaN,
         type: 'ios-ssl-pinning-bypass',
         data: '[SSLSetSessionOption] Called'
     });
 
-    if (option === kSSLSessionOptionBreakOnServerAuth) {
+    if (option == kSSLSessionOptionBreakOnServerAuth) {
 
         return noErr;
     }
@@ -281,13 +385,20 @@ Interceptor.replace(SSLSetSessionOption, new NativeCallback(function (context, o
 }, 'int', ['pointer', 'int', 'bool']));
 
 // SSLCreateContext
+send({
+    status: 'success',
+    error_reason: NaN,
+    type: 'ios-ssl-pinning-bypass',
+    data: 'Hooking lower level method: SSLCreateContext'
+});
+
 var SSLCreateContext = new NativeFunction(
     Module.findExportByName('Security', 'SSLCreateContext'),
     'pointer', ['pointer', 'int', 'int']);
 
 Interceptor.replace(SSLCreateContext, new NativeCallback(function (alloc, protocolSide, connectionType) {
 
-    send({
+    quiet_send({
         status: 'success',
         error_reason: NaN,
         type: 'ios-ssl-pinning-bypass',
@@ -302,29 +413,65 @@ Interceptor.replace(SSLCreateContext, new NativeCallback(function (alloc, protoc
 }, 'pointer', ['pointer', 'int', 'int']));
 
 // SSLHandshake
+send({
+    status: 'success',
+    error_reason: NaN,
+    type: 'ios-ssl-pinning-bypass',
+    data: 'Hooking lower level method: SSLHandshake'
+});
+
 var SSLHandshake = new NativeFunction(
     Module.findExportByName('Security', 'SSLHandshake'),
     'int', ['pointer']);
 
 Interceptor.replace(SSLHandshake, new NativeCallback(function (context) {
 
-    send({
-        status: 'success',
-        error_reason: NaN,
-        type: 'ios-ssl-pinning-bypass',
-        data: '[SSLHandshake] Called'
-    });
-
     var result = SSLHandshake(context);
 
-    if (result === errSSLServerAuthCompared) {
+    if (result == errSSLServerAuthCompared) {
+
+        quiet_send({
+            status: 'success',
+            error_reason: NaN,
+            type: 'ios-ssl-pinning-bypass',
+            data: '[SSLHandshake] Calling SSLHandshake() again, skipping cert validation.'
+        });
 
         return SSLHandshake(context);
+
     } else {
 
         return result;
     }
 }, 'int', ['pointer']));
+
+// SecTrustEvaluate
+// Refs:
+//  https://github.com/vtky/Swizzler2/blob/159a5eaf64bc56d92f823b028fd1c11b71324e90/SSLKillSwitch.js#L92
+send({
+    status: 'success',
+    error_reason: NaN,
+    type: 'ios-ssl-pinning-bypass',
+    data: 'Hooking lower level method: SecTrustEvaluate'
+});
+
+var SecTrustEvaluate = new NativeFunction(
+    Module.findExportByName('Security', 'SecTrustEvaluate'),
+    'int', ['pointer', 'pointer']
+);
+
+Interceptor.replace(SecTrustEvaluate, new NativeCallback(function (trust, result) {
+
+    quiet_send({
+        status: 'success',
+        error_reason: NaN,
+        type: 'ios-ssl-pinning-bypass',
+        data: '[SecTrustEvaluate] Called SecTrustEvaluate()'
+    });
+
+    return errSecSuccess;
+
+}, 'int', ['pointer', 'pointer']));
 
 // iOS 10
 
@@ -334,20 +481,32 @@ var tls_helper_create_peer_trust_export = Module.findExportByName('libcoretls_cf
 
 // In the case of devices older than iOS 10, this export
 // would not have been found.
-if (tls_helper_create_peer_trust_export) {
+if (tls_helper_create_peer_trust_export && !ignore_ios10_tls_helper) {
+
+    // TODO: This method broke SSL connections as per: https://github.com/sensepost/objection/issues/35
+    // Figure out why!
+    //  ref: https://opensource.apple.com/source/coreTLS/coreTLS-121.31.1/coretls_cfhelpers/tls_helpers.c
+
+    send({
+        status: 'success',
+        error_reason: NaN,
+        type: 'ios-ssl-pinning-bypass',
+        data: 'Hooking lower level method: tls_helper_create_peer_trust'
+    });
 
     var tls_helper_create_peer_trust = new NativeFunction(tls_helper_create_peer_trust_export,
         'int', ['void', 'bool', 'pointer']);
 
     Interceptor.replace(tls_helper_create_peer_trust, new NativeCallback(function (hdsk, server, SecTrustRef) {
 
-        send({
+        quiet_send({
             status: 'success',
             error_reason: NaN,
             type: 'ios-ssl-pinning-bypass',
             data: '[tls_helper_create_peer_trust] Called'
         });
 
-        return errSecSuccess;
+        return noErr;
+
     }, 'int', ['void', 'bool', 'pointer']));
 }
