@@ -646,6 +646,8 @@ class AndroidPatcher(BasePlatformPatcher):
             'SHA1withRSA',
             '-digestalg',
             'SHA1',
+            '-tsa',
+            'http://timestamp.digicert.com',
             '-storepass',
             'basil-joule-bug',
             '-keystore',
