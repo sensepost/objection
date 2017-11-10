@@ -148,6 +148,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
 
     patcher.build_new_apk()
     patcher.sign_apk()
+    patcher.zipalign_apk()
 
     # woohoo, get the APK!
     click.secho('Copying final apk from {0} to current directory...'.format(patcher.get_patched_apk_path()))

@@ -190,6 +190,9 @@ class AndroidPatcher(BasePlatformPatcher):
         },
         'apktool': {
             'installation': 'apt install apktool (Kali Linux)'
+        },
+        'zipalign': {
+            'installation': 'apt install zipalign'
         }
     }
 
@@ -199,6 +202,7 @@ class AndroidPatcher(BasePlatformPatcher):
         self.apk_source = None
         self.apk_temp_directory = tempfile.mkdtemp(suffix='.apktemp')
         self.apk_temp_frida_patched = self.apk_temp_directory + '.objection.apk'
+        self.apk_temp_frida_patched_aligned = self.apk_temp_directory + '.aligned.objection.apk'
         self.aapt = None
         self.skip_cleanup = skip_cleanup
 
@@ -318,12 +322,12 @@ class AndroidPatcher(BasePlatformPatcher):
 
     def get_patched_apk_path(self) -> str:
         """
-            Returns the path of the patched APK.
+            Returns the path of the patched, aligned APK.
 
             :return:
         """
 
-        return self.apk_temp_frida_patched
+        return self.apk_temp_frida_patched_aligned
 
     def get_temp_working_directory(self) -> str:
         """
@@ -343,16 +347,14 @@ class AndroidPatcher(BasePlatformPatcher):
 
         click.secho('Unpacking {0}'.format(self.apk_source), dim=True)
 
-        o = delegator.run(list2cmdline(
-            [
-                self.required_commands['apktool']['location'],
-                'decode',
-                '-f',
-                '-o',
-                self.apk_temp_directory,
-                self.apk_source
-            ]
-        ), timeout=self.command_run_timeout)
+        o = delegator.run(list2cmdline([
+            self.required_commands['apktool']['location'],
+            'decode',
+            '-f',
+            '-o',
+            self.apk_temp_directory,
+            self.apk_source
+        ]), timeout=self.command_run_timeout)
 
         if len(o.err) > 0:
             click.secho('An error may have occured while extracting the APK.', fg='red')
@@ -586,15 +588,13 @@ class AndroidPatcher(BasePlatformPatcher):
         """
 
         click.secho('Rebuilding the APK with the frida-gadget loaded...', fg='green', dim=True)
-        o = delegator.run(list2cmdline(
-            [
-                self.required_commands['apktool']['location'],
-                'build',
-                self.apk_temp_directory,
-                '-o',
-                self.apk_temp_frida_patched
-            ]
-        ), timeout=self.command_run_timeout)
+        o = delegator.run(list2cmdline([
+            self.required_commands['apktool']['location'],
+            'build',
+            self.apk_temp_directory,
+            '-o',
+            self.apk_temp_frida_patched
+        ]), timeout=self.command_run_timeout)
 
         if len(o.err) > 0:
             click.secho(('Rebuilding the APK may have failed. Read the following '
@@ -602,6 +602,30 @@ class AndroidPatcher(BasePlatformPatcher):
             click.secho(o.err, fg='red')
 
         click.secho('Built new APK with injected loadLibrary and frida-gadget', fg='green')
+
+    def zipalign_apk(self):
+        """
+            Performs the zipalign command on an APK.
+
+            :return:
+        """
+
+        click.secho('Performing zipalign', dim=True)
+
+        o = delegator.run(list2cmdline([
+            self.required_commands['zipalign']['location'],
+            '-p',
+            '4',
+            self.apk_temp_frida_patched,
+            self.apk_temp_frida_patched_aligned
+        ]))
+
+        if len(o.err) > 0:
+            click.secho(('Zipaligning the APK may have failed. Read the following '
+                         'output to determine if zipalign actually had an error: \n'), fg='red')
+            click.secho(o.err, fg='red')
+
+        click.secho('Zipaling completed', fg='green')
 
     def sign_apk(self):
         """
@@ -627,8 +651,8 @@ class AndroidPatcher(BasePlatformPatcher):
             '-keystore',
             self.keystore,
             self.apk_temp_frida_patched,
-            'objection'])
-        )
+            'objection'
+        ]))
 
         if len(o.out) > 0:
             click.secho(o.out, dim=True)
@@ -656,6 +680,7 @@ class AndroidPatcher(BasePlatformPatcher):
 
             shutil.rmtree(self.apk_temp_directory, ignore_errors=True)
             os.remove(self.apk_temp_frida_patched)
+            os.remove(self.apk_temp_frida_patched_aligned)
 
         except Exception as err:
             click.secho('Failed to cleanup with error: {0}'.format(err), fg='red')
