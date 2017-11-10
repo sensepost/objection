@@ -445,34 +445,6 @@ Interceptor.replace(SSLHandshake, new NativeCallback(function (context) {
     }
 }, 'int', ['pointer']));
 
-// SecTrustEvaluate
-// Refs:
-//  https://github.com/vtky/Swizzler2/blob/159a5eaf64bc56d92f823b028fd1c11b71324e90/SSLKillSwitch.js#L92
-send({
-    status: 'success',
-    error_reason: NaN,
-    type: 'ios-ssl-pinning-bypass',
-    data: 'Hooking lower level method: SecTrustEvaluate'
-});
-
-var SecTrustEvaluate = new NativeFunction(
-    Module.findExportByName('Security', 'SecTrustEvaluate'),
-    'int', ['pointer', 'pointer']
-);
-
-Interceptor.replace(SecTrustEvaluate, new NativeCallback(function (trust, result) {
-
-    quiet_send({
-        status: 'success',
-        error_reason: NaN,
-        type: 'ios-ssl-pinning-bypass',
-        data: '[SecTrustEvaluate] Called SecTrustEvaluate()'
-    });
-
-    return errSecSuccess;
-
-}, 'int', ['pointer', 'pointer']));
-
 // iOS 10
 
 // tls_helper_create_peer_trust
