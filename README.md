@@ -1,13 +1,11 @@
 <h1 align="center">
   <br>
   <a href="https://github.com/sensepost/objection">
-    <img src="https://raw.githubusercontent.com/sensepost/objection/master/images/objection.png" alt="objection"></a>
-  <br>
-  objection
+    <img src="images/objection.png" alt="objection"></a>
   <br>
 </h1>
 
-<h4 align="center">Runtime Mobile Exploration, powered by <a href="https://www.frida.re/" target="_blank">Frida</a>.</h4>
+<h4 align="center">objection - Runtime Mobile Exploration</h4>
 
 <p align="center">
   <a href="https://pypi.python.org/pypi/objection"><img src="https://badge.fury.io/py/objection.svg" alt="PyPI version" height="18"></a>
