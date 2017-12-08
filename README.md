@@ -10,6 +10,7 @@
 <p align="center">
   <a href="https://pypi.python.org/pypi/objection"><img src="https://badge.fury.io/py/objection.svg" alt="PyPI version" height="18"></a>
   <a href="https://travis-ci.org/sensepost/objection"><img src="https://travis-ci.org/sensepost/objection.svg?branch=master" alt="Build Status" height="18"></a>
+  <a href="http://www.toolswatch.org/2017/09/black-hat-arsenal-europe-2017-lineup/"><img src="https://rawgit.com/toolswatch/badges/master/arsenal/2017.svg" alt="Build Status" height="18"></a>
 </p>
 
 <br>
