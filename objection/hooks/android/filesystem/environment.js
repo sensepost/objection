@@ -8,7 +8,7 @@ var data = {
     filesDirectory: context.getFilesDir().getAbsolutePath().toString(),
     cacheDirectory: context.getCacheDir().getAbsolutePath().toString(),
     externalCacheDirectory: context.getExternalCacheDir().getAbsolutePath().toString(),
-    codeCacheDirectory: context.getCodeCacheDir().getAbsolutePath().toString(),
+    codeCacheDirectory: 'getCodeCacheDir' in context ? context.getCodeCacheDir().getAbsolutePath().toString() : 'n/a',
     obbDir: context.getObbDir().getAbsolutePath().toString(),
     packageCodePath: context.getPackageCodePath().toString()
 };
