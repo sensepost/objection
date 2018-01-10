@@ -275,6 +275,11 @@ COMMANDS = {
                     'watch': {
                         'meta': 'Watch for Android Java invocations',
                         'commands': {
+                            'class': {
+                                'meta': 'Watches for invocations of all methods in a class',
+                                'flags': ['--dump-args', '--dump-backtrace', '--dump-return'],
+                                'exec': android_hooking.watch_class,
+                            },
                             'class_method': {
                                 'meta': 'Watches for invocations of a specific class method',
                                 'flags': ['--dump-args', '--dump-backtrace', '--dump-return'],

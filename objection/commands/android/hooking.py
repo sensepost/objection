@@ -105,6 +105,35 @@ def show_android_class_methods(args: list = None) -> None:
     click.secho('\nFound {0} method(s)'.format(len(response.data)), bold=True)
 
 
+def watch_class(args: list) -> None:
+    """
+        Watches for invocations of all methods in an Android
+        Java class. All overloads for methods found are also watched.
+
+        :param args:
+        :return:
+    """
+
+    if len(clean_argument_flags(args)) < 1:
+        click.secho('Usage: android hooking watch class <class> '
+                    '(eg: com.example.test) '
+                    '(optional: --dump-args) '
+                    '(optional: --dump-backtrace) '
+                    '(optional: --dump-return)', bold=True)
+        return
+
+    target_class = args[0]
+
+    runner = FridaRunner()
+    runner.set_hook_with_data(android_hook('hooking/watch-class-methods'),
+                              target_class=target_class,
+                              dump_args=_should_dump_args(args),
+                              dump_return=_should_dump_return_value(args),
+                              dump_backtrace=_should_dump_backtrace(args))
+
+    runner.run_as_job(name='watch-java-class', args=args)
+
+
 def watch_class_method(args: list) -> None:
     """
         Watches for invocations of an Android Java class method.
