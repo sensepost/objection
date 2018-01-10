@@ -423,6 +423,7 @@ COMMANDS = {
                 'commands': {
                     'get': {
                         'meta': 'Get the current apps shared cookies',
+                        'flags': ['--json'],
                         'exec': cookies.get
                     }
                 }

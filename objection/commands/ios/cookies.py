@@ -1,3 +1,5 @@
+import json
+
 import click
 from tabulate import tabulate
 
@@ -5,7 +7,18 @@ from objection.utils.frida_transport import FridaRunner
 from objection.utils.templates import ios_hook
 
 
-def get(args: list = None) -> None:
+def _should_dump_json(args: list) -> bool:
+    """
+        Check if --json is part of the arguments.
+
+        :param args:
+        :return:
+    """
+
+    return '--json' in args
+
+
+def get(args: list) -> None:
     """
         Gets cookies using the iOS NSHTTPCookieStorage sharedHTTPCookieStorage
         and prints them to the screen.
@@ -28,6 +41,10 @@ def get(args: list = None) -> None:
 
     if not response.data:
         click.secho('No cookies found')
+        return
+
+    if _should_dump_json(args):
+        print(json.dumps(response.data, indent=4))
         return
 
     data = []
