@@ -66,7 +66,7 @@ def ios_screenshot(args: list = None) -> None:
 
     image = response.get_extra_data()
 
-    with open(destination, 'w') as f:
+    with open(destination, 'wb') as f:
         f.write(image)
 
     click.secho('Screenshot saved to: {0}'.format(destination), fg='green')
