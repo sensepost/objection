@@ -63,6 +63,10 @@ def explore(startup_command: str, startup_script: str, hook_debug: bool, quiet: 
 
     # specify if hooks should be debugged
     app_state.debug_hooks = hook_debug
+    try:
+        pid = state_connection.get_pid()
+    except:
+        state_connection.spawn()    
 
     # start the main REPL
     r = Repl()
@@ -79,6 +83,8 @@ def explore(startup_command: str, startup_script: str, hook_debug: bool, quiet: 
     if startup_script:
         click.secho('Importing and running a startup script...', dim=True)
         r.run_command('import {0}'.format(startup_script))
+    
+    state_connection.resume()
 
     try:
 

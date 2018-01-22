@@ -277,17 +277,7 @@ class FridaRunner(object):
             Attempt to get a Frida session.
         """
 
-        if state_connection.get_comms_type() == state_connection.TYPE_USB:
-            return frida.get_usb_device(5).attach(state_connection.gadget_name)
-
-        if state_connection.get_comms_type() == state_connection.TYPE_REMOTE:
-            try:
-                device = frida.get_device("tcp@%s:%d" % (state_connection.host, state_connection.port))
-            except frida.TimedOutError:
-                device = frida.get_device_manager().add_remote_device(
-                    "%s:%d" % (state_connection.host, state_connection.port))
-
-            return device.attach(state_connection.gadget_name)
+        return state_connection.get_device().attach(state_connection.gadget_name)
 
     def set_hook_with_data(self, hook: str, **kwargs) -> None:
         """

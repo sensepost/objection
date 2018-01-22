@@ -1,3 +1,5 @@
+import frida
+
 class StateConnection(object):
     """ A class controlling the connection state of a device. """
 
@@ -15,8 +17,9 @@ class StateConnection(object):
         self.host = '127.0.0.1'
         self.port = 27042
         self._type = self.TYPE_USB
-
+   
         self.gadget_name = 'Gadget'
+        self.spawning = False
 
     def use_usb(self) -> None:
         """
@@ -68,5 +71,50 @@ class StateConnection(object):
     def __repr__(self) -> str:
         return '<State Usb:{0}, Network:{1}, Host:{2}, Port:{3}'.format(self.usb, self.network, self.host, self.port)
 
+
+    def get_device(self):
+        """
+            Attempt to get a handle to the device.
+        """
+       
+        if self.get_comms_type() == self.TYPE_USB:
+            return frida.get_usb_device(5)
+
+        if self.get_comms_type() == self.TYPE_REMOTE:
+            try:
+                return frida.get_device("tcp@%s:%d" % (self.host, self.port))
+            except frida.TimedOutError:
+                return frida.get_device_manager().add_remote_device(
+                    "%s:%d" % (self.host, self.port))
+
+    def spawn(self):
+        '''
+            Spawn the application with specified package name or bundle identifier.
+        '''
+        pid = self.get_device().spawn((self.gadget_name,)) 
+        process_name = next((process.name for process in self.get_device().enumerate_processes() if process.pid == pid), None)
+
+        # Update the package identifier to match the process name
+        self.gadget_name = process_name
+        self.spawning = True
+
+    def resume(self):
+        '''
+            Resume recently spawned process.
+        '''
+        if not self.spawning:
+            return 
+
+        pid = None 
+        try:           
+            self.get_device().resume(self.get_pid())                               
+        except:
+            raise Exception("Failed to resume. Process not found.")
+
+    def get_pid(self):
+        '''
+            Return the PID of the Gadget.
+        '''
+        return self.get_device().get_process(self.gadget_name).pid 
 
 state_connection = StateConnection()
