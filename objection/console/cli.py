@@ -177,6 +177,8 @@ def device_type():
 
 @cli.command()
 @click.option('--source', '-s', help='The source IPA to patch', required=True)
+@click.option('--gadget-version', '-V', help=('The gadget version to use. If not '
+                                              'specified, the latest version will be used.'), default=None)
 @click.option('--codesign-signature', '-c',
               help='Codesigning Identity to use. Get it with: `security find-identity -p codesigning -v`',
               required=True)
@@ -184,7 +186,8 @@ def device_type():
 @click.option('--binary-name', '-b', help='Name of the Mach-O binary in the IPA (used to patch with Frida)')
 @click.option('--skip-cleanup', '-k', is_flag=True,
               help='Do not clean temporary files once finished.', show_default=True)
-def patchipa(source: str, codesign_signature: str, provision_file: str, binary_name: str, skip_cleanup: bool) -> None:
+def patchipa(source: str, gadget_version: str, codesign_signature: str, provision_file: str, binary_name: str,
+             skip_cleanup: bool) -> None:
     """
         Patch an IPA with the FridaGadget dylib.
     """
@@ -199,13 +202,16 @@ def patchipa(source: str, codesign_signature: str, provision_file: str, binary_n
                                             '`adb shell getprop ro.product.cpu.abi`. If it '
                                             'is not specified, this command will try and '
                                             'determine it automatically.'), required=False)
+@click.option('--gadget-version', '-V', help=('The gadget version to use. If not '
+                                              'specified, the latest version will be used.'), default=None)
 @click.option('--pause', '-p', is_flag=True, help='Pause the patcher before rebuilding the APK.',
               show_default=True)
 @click.option('--skip-cleanup', '-k', is_flag=True,
               help='Do not clean temporary files once finished.', show_default=True)
 @click.option('--enable-debug', '-d', is_flag=True,
               help='Set the android:debuggable flag to true in the application manifiest.', show_default=True)
-def patchapk(source: str, architecture: str, pause: bool, skip_cleanup: bool, enable_debug: bool) -> None:
+def patchapk(source: str, architecture: str, gadget_version: str, pause: bool, skip_cleanup: bool,
+             enable_debug: bool) -> None:
     """
         Patch an APK with the frida-gadget.so.
     """

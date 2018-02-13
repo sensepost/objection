@@ -110,6 +110,7 @@ class AndroidGadget(BasePlatformGadget):
         """
 
         download_url = self._get_download_url()
+        click.secho('Downloading from: {0}'.format(download_url), dim=True)
 
         # stream the download using requests
         library = requests.get(download_url, stream=True)
@@ -126,7 +127,7 @@ class AndroidGadget(BasePlatformGadget):
 
     def _get_download_url(self) -> str:
         """
-            Determines the download URL to use for the iOS
+            Determines the download URL to use for the Android
             gadget.
 
             :return:

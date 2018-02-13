@@ -12,7 +12,7 @@ class TestMobilePackages(unittest.TestCase):
     @mock.patch('objection.commands.mobile_packages.shutil')
     @mock.patch('objection.commands.mobile_packages.os')
     def test_patching_ios_ipa(self, mock_os, mock_shutil, mock_iospatcher, mock_iosgadget, mock_github):
-        mock_github.return_value.get_latest_version.return_value = '1.0'
+        mock_github.return_value.set_latest_version.return_value = '1.0'
         mock_iosgadget.return_value.get_local_version.return_value = '0.9'
 
         mock_iospatcher.return_value.are_requirements_met.return_value = True
@@ -21,8 +21,9 @@ class TestMobilePackages(unittest.TestCase):
         with capture(patch_ios_ipa, 'test.ipa', '00-11', '/foo', '', False) as o:
             output = o
 
-        expected_output = """Github FridaGadget is v1.0, local is v0.9. Updating...
-Using Gadget version: 1.0
+        expected_output = """Using latest Github gadget version: 1.0
+Remote FridaGadget version is v1.0, local is v0.9. Downloading...
+Patcher will be using Gadget version: 1.0
 Copying final ipa from /foo/ipa to current directory...
 """
 
@@ -41,7 +42,7 @@ Copying final ipa from /foo/ipa to current directory...
     @mock.patch('objection.commands.mobile_packages.input', create=True)
     def test_patching_android_apk(self, mock_input, mock_delegator, mock_os, mock_shutil, mock_androidpatcher,
                                   mock_androidgadget, mock_github):
-        mock_github.return_value.get_latest_version.return_value = '1.0'
+        mock_github.return_value.set_latest_version.return_value = '1.0'
         mock_androidgadget.return_value.get_local_version.return_value = '0.9'
 
         mock_androidpatcher.return_value.are_requirements_met.return_value = True
@@ -59,8 +60,9 @@ Copying final ipa from /foo/ipa to current directory...
 
         expected_output = """No architecture specified. Determining it using `adb`...
 Detected target device architecture as: x86
-Github FridaGadget is v1.0, local is v0.9. Updating...
-Using Gadget version: 1.0
+Using latest Github gadget version: 1.0
+Remote FridaGadget version is v1.0, local is v0.9. Downloading...
+Patcher will be using Gadget version: 1.0
 Patching paused. The next step is to rebuild the APK. If you require any manual fixes, the current temp directory is:
 /foo/apk
 Copying final apk from /foo/bar/apk to current directory...

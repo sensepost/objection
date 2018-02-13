@@ -4,12 +4,19 @@ import requests
 class Github(object):
     """ Interact with Github """
 
-    GITHUB_RELEASE = 'https://api.github.com/repos/frida/frida/releases/latest'
+    GITHUB_LATEST_RELEASE = 'https://api.github.com/repos/frida/frida/releases/latest'
+    GITHUB_TAGGED_RELEASE = 'https://api.github.com/repos/frida/frida/releases/tags/{tag}'
 
-    def __init__(self):
+    # the 'context' of this Github instance
+    gadget_version = None
+
+    def __init__(self, gadget_version: str = None):
         """
             Init a new instance of Github
         """
+
+        if gadget_version:
+            self.gadget_version = gadget_version
 
         self.request_cache = {}
 
@@ -34,7 +41,7 @@ class Github(object):
         # and return it
         return results
 
-    def get_latest_version(self) -> str:
+    def set_latest_version(self) -> str:
         """
             Call Github and get the tag_name of the latest
             release.
@@ -42,13 +49,21 @@ class Github(object):
             :return:
         """
 
-        return self._call(self.GITHUB_RELEASE)['tag_name']
+        self.gadget_version = self._call(self.GITHUB_LATEST_RELEASE)['tag_name']
+
+        return self.gadget_version
 
     def get_assets(self) -> dict:
         """
-            Gets the assets for the latest release.
+            Gets the assets for the currently selected gadget_version.
 
             :return:
         """
 
-        return self._call(self.GITHUB_RELEASE)['assets']
+        assets = self._call(self.GITHUB_TAGGED_RELEASE.format(tag=self.gadget_version))
+
+        if 'assets' not in assets:
+            raise Exception(('Unable to determine assets for gadget version \'{0}\'. '
+                             'Are you sure this version is available on Github?').format(self.gadget_version))
+
+        return assets['assets']

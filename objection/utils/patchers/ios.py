@@ -63,6 +63,7 @@ class IosGadget(BasePlatformGadget):
         """
 
         download_url = self._get_download_url()
+        click.secho('Downloading from: {0}'.format(download_url), dim=True)
 
         # stream the download using requests
         dylib = requests.get(download_url, stream=True)

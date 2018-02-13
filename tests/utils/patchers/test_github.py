@@ -71,9 +71,20 @@ class TestGithub(unittest.TestCase):
 
         mock_requests.get.return_value = mock_response
 
-        result = self.github.get_latest_version()
+        result = self.github.set_latest_version()
 
         self.assertEqual(result, self.mock_response['tag_name'])
+
+    @mock.patch('objection.utils.patchers.github.requests')
+    def test_makes_call_and_fails_to_get_assets(self, mock_requests):
+        mock_response = mock.Mock()
+        mock_response.status_code = 404
+        mock_response.json.return_value = {}
+
+        mock_requests.get.return_value = mock_response
+
+        with self.assertRaises(Exception) as _:
+            self.github.get_assets()
 
     @mock.patch('objection.utils.patchers.github.requests')
     def test_makes_call_and_gets_assets(self, mock_requests):
