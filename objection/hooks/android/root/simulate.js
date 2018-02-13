@@ -23,7 +23,7 @@ String.contains.implementation = function (check) {
     }
 
     // call the original method
-    this.contains.apply(this, arguments);
+    return this.contains.apply(this, arguments);
 };
 
 // file existence checks.
@@ -46,5 +46,5 @@ File.exists.implementation = function () {
     }
 
     // call the original method
-    this.contains.apply(this, arguments);
+    return this.exists.apply(this, arguments);
 };
