@@ -7,7 +7,7 @@ from ..commands.device import get_device_info
 from ..commands.mobile_packages import patch_ios_ipa, patch_android_apk
 from ..state.app import app_state
 from ..state.connection import state_connection
-from ..utils.helpers import normalize_gadget_name
+from ..utils.helpers import normalize_gadget_name, print_frida_connection_help
 
 
 # Start the Click command group
@@ -89,7 +89,8 @@ def explore(startup_command: str, startup_script: str, hook_debug: bool, quiet: 
     except (frida.TimedOutError, frida.ServerNotRunningError,
             frida.ProcessNotFoundError, frida.NotSupportedError) as e:
 
-        click.secho('Error: {0}'.format(e), fg='red')
+        click.secho('Could not connect with error: {0}'.format(str(e)), fg='red')
+        print_frida_connection_help()
 
         return
 
@@ -168,8 +169,8 @@ def device_type():
     except frida.ProcessNotFoundError as e:
 
         click.secho('Could not connect with error: {0}'.format(str(e)), fg='red')
-        click.secho('If you are running a rooted/jailbroken device, specify a process with '
-                    'the --gadget flag. Eg: objection --gadget "Calendar" device_type', fg='red')
+        print_frida_connection_help()
+
         return
 
     if state_connection.get_comms_type() == state_connection.TYPE_USB:

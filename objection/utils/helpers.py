@@ -1,5 +1,7 @@
 import shlex
 
+import click
+
 from ..state.jobs import job_manager_state
 
 
@@ -109,3 +111,20 @@ def clean_argument_flags(args: list) -> list:
     """
 
     return [x for x in args if not x.startswith('--')]
+
+
+def print_frida_connection_help() -> None:
+    """
+        Prints help information about connecting to devices and
+        processess.
+
+        :return:
+    """
+
+    click.secho('If you are using a rooted/jailbroken device, specify a process with '
+                'the --gadget flag. Eg: objection --gadget "Calendar" device_type', fg='red')
+    click.secho('If you are using a non rooted/jailbroken device, ensure that your patched application '
+                'is running and in the foreground.', fg='red')
+    click.secho('')
+    click.secho('For more information, please refer to the objection wiki at: '
+                'https://github.com/sensepost/objection/wiki', fg='green')
