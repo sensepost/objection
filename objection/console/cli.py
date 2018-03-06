@@ -161,7 +161,16 @@ def device_type():
         Get information about an attached device.
     """
 
-    device_name, system_name, model, system_version = get_device_info()
+    try:
+
+        device_name, system_name, model, system_version = get_device_info()
+
+    except frida.ProcessNotFoundError as e:
+
+        click.secho('Could not connect with error: {0}'.format(str(e)), fg='red')
+        click.secho('If you are running a rooted/jailbroken device, specify a process with '
+                    'the --gadget flag. Eg: objection --gadget "Calendar" device_type', fg='red')
+        return
 
     if state_connection.get_comms_type() == state_connection.TYPE_USB:
         click.secho('Connection: USB')
