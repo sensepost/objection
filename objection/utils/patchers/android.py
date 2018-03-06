@@ -658,11 +658,9 @@ class AndroidPatcher(BasePlatformPatcher):
             'objection'
         ]))
 
-        if len(o.out) > 0:
-            click.secho(o.out, dim=True)
-
-        if len(o.err) > 0:
+        if len(o.err) > 0 or 'jar signed' not in o.out:
             click.secho('Signing the new APK may have failed.', fg='red')
+            click.secho(o.out, fg='yellow')
             click.secho(o.err, fg='red')
 
         click.secho('Signed the new APK', fg='green')
