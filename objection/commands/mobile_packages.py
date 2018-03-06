@@ -76,7 +76,7 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
 
 
 def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup: bool = True,
-                      enable_debug: bool = True, gadget_version: str = None) -> None:
+                      enable_debug: bool = True, gadget_version: str = None, decode_resources: bool = False) -> None:
     """
         Patches an Android APK by extracting, patching SMALI, repackaging
         and signing a new APK.

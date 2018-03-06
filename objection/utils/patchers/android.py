@@ -245,14 +245,12 @@ class AndroidPatcher(BasePlatformPatcher):
         """
 
         if not self.aapt:
-            o = delegator.run(list2cmdline(
-                [
-                    self.required_commands['aapt']['location'],
-                    'dump',
-                    'badging',
-                    self.apk_source
-                ]
-            ), timeout=self.command_run_timeout)
+            o = delegator.run(list2cmdline([
+                self.required_commands['aapt']['location'],
+                'dump',
+                'badging',
+                self.apk_source
+            ]), timeout=self.command_run_timeout)
 
             if len(o.err) > 0:
                 click.secho('An error may have occured while running aapt.', fg='red')
@@ -339,9 +337,11 @@ class AndroidPatcher(BasePlatformPatcher):
 
         return self.apk_temp_directory
 
-    def unpack_apk(self):
+    def unpack_apk(self, decode_resources: bool = False):
         """
             Unpack an APK with apktool.
+
+            :type decode_resources: bool
 
             :return:
         """
@@ -352,6 +352,7 @@ class AndroidPatcher(BasePlatformPatcher):
             self.required_commands['apktool']['location'],
             'decode',
             '-f',
+            '-r' if not decode_resources else '',
             '-o',
             self.apk_temp_directory,
             self.apk_source

@@ -47,6 +47,7 @@ class TestsCommandLineInteractions(unittest.TestCase):
             '--source', 'foo.apk',
             '--architecture', 'x86',
             '--pause',
+            '--decode-resources',
             '--skip-cleanup',
             '--enable-debug',
         ])
