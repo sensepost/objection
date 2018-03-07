@@ -7,7 +7,7 @@ from ..commands.device import get_device_info
 from ..commands.mobile_packages import patch_ios_ipa, patch_android_apk
 from ..state.app import app_state
 from ..state.connection import state_connection
-from ..utils.helpers import normalize_gadget_name, print_frida_connection_help
+from ..utils.helpers import normalize_gadget_name, print_frida_connection_help, warn_about_older_operating_systems
 
 
 # Start the Click command group
@@ -109,6 +109,8 @@ def explore(startup_command: str, startup_script: str, hook_debug: bool, quiet: 
             # run the command using the instantiated repl
             click.secho('Running: \'{0}\':\n'.format(command), dim=True)
             r.run_command(command)
+
+    warn_about_older_operating_systems()
 
     # run the REPL and wait for more commands
     r.set_prompt_tokens(device_info)

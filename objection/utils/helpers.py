@@ -1,7 +1,9 @@
 import shlex
 
 import click
+from pkg_resources import parse_version
 
+from ..state.device import device_state
 from ..state.jobs import job_manager_state
 
 
@@ -128,3 +130,31 @@ def print_frida_connection_help() -> None:
     click.secho('')
     click.secho('For more information, please refer to the objection wiki at: '
                 'https://github.com/sensepost/objection/wiki', fg='green')
+
+
+def warn_about_older_operating_systems() -> None:
+    """
+        Prints a warning to the console about the reccomended Android and
+        iOS versions to use with objection.
+
+        :return:
+    """
+
+    android_supported = '5'
+    ios_supported = '9'
+
+    # android & ios version warnings
+    if device_state.device_type == 'android' and (
+            parse_version(device_state.os_version) < parse_version(android_supported)):
+        click.secho('Warning: You appear to be running Android {0} which may result in '
+                    'some hooks failing.\nIt is recommended to use at least an Android '
+                    'version {1} device with objection.'.format(device_state.os_version, android_supported),
+                    fg='yellow')
+
+    # android & ios version warnings
+    if device_state.device_type == 'ios' and (
+            parse_version(device_state.os_version) < parse_version(ios_supported)):
+        click.secho('Warning: You appear to be running iOS {0} which may result in '
+                    'some hooks failing.\nIt is recommended to use at least an iOS '
+                    'version {1} device with objection.'.format(device_state.os_version, ios_supported),
+                    fg='yellow')

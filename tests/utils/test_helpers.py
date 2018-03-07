@@ -4,7 +4,10 @@ from objection.utils.helpers import clean_argument_flags
 from objection.utils.helpers import get_tokens
 from objection.utils.helpers import normalize_gadget_name
 from objection.utils.helpers import pretty_concat
+from objection.utils.helpers import print_frida_connection_help
 from objection.utils.helpers import sizeof_fmt
+from objection.utils.helpers import warn_about_older_operating_systems
+from ..helpers import capture
 
 
 class TestHelpers(unittest.TestCase):
@@ -57,3 +60,25 @@ class TestHelpers(unittest.TestCase):
     def test_cleans_argument_lists_with_flags(self):
         result = clean_argument_flags(['foo', '--bar'])
         self.assertEqual(result, ['foo'])
+
+    def test_prints_frida_connection_help(self):
+        with capture(print_frida_connection_help) as o:
+            output = o
+
+        expected_output = """If you are using a rooted/jailbroken device, specify a process with the --gadget flag. Eg: objection --gadget "Calendar" device_type
+If you are using a non rooted/jailbroken device, ensure that your patched application is running and in the foreground.
+
+For more information, please refer to the objection wiki at: https://github.com/sensepost/objection/wiki
+"""
+
+        self.assertEqual(output, expected_output)
+
+    def test_warns_about_operating_system_versions(self):
+        with capture(warn_about_older_operating_systems) as o:
+            output = o
+
+        expected_output = """Warning: You appear to be running iOS 1 which may result in some hooks failing.
+It is recommended to use at least an iOS version 9 device with objection.
+"""
+
+        self.assertEqual(output, expected_output)

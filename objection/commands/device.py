@@ -54,6 +54,9 @@ def _get_ios_device_information() -> tuple:
     runner.run()
     response = runner.get_last_message()
 
+    # update the internal device_state
+    device_state.os_version = response.systemVersion
+
     # we have some device information for iOS, return it!
     if response.is_successful():
         return pretty_concat(response.applicationName, 30, left=True), \
@@ -73,7 +76,10 @@ def _get_android_device_information() -> tuple:
     runner.run()
     response = runner.get_last_message()
 
-    # we have some device information for iOS, return it!
+    # update the internal device_state
+    device_state.os_version = response.version
+
+    # we have some device information for Android, return it!
     if response.is_successful():
         return pretty_concat(response.application_name, 30, left=True), \
                response.device, response.brand, response.version
