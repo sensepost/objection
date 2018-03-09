@@ -12,8 +12,8 @@ var methods = target_class.class.getDeclaredMethods().map(function (method) {
 
     // eg: public void com.example.fooBar(int,int)
     var full_method_signature = method.toGenericString();
-    if (full_method_signature.indexOf('throws') !== -1) {
-        full_method_signature = full_method_signature.substring(0, full_method_signature.indexOf('throws') - 1);
+    if (full_method_signature.indexOf(' throws ') !== -1) {
+        full_method_signature = full_method_signature.substring(0, full_method_signature.indexOf(' throws '));
     }
 
     // remove the scope and return type
@@ -113,4 +113,3 @@ for (var m = 0; m < methods.length; m++) {
         }
     }
 }
-
