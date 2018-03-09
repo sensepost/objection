@@ -12,9 +12,12 @@ var methods = target_class.class.getDeclaredMethods().map(function (method) {
 
     // eg: public void com.example.fooBar(int,int)
     var full_method_signature = method.toGenericString();
+	if (full_method_signature.indexOf('throws') !== -1) {
+		full_method_signature = full_method_signature.substring(0, full_method_signature.indexOf('throws') - 1);
+	}
 
     // remove the scope and return type
-    var method_only_delimiter_location = full_method_signature.lastIndexOf(' ');
+	var method_only_delimiter_location = full_method_signature.lastIndexOf(' ');
     var class_and_method_name = full_method_signature.slice(method_only_delimiter_location)
 
     // remove the classname
@@ -34,7 +37,7 @@ send({
     status: 'success',
     error_reason: NaN,
     type: 'watch-class',
-    data: 'Found class with ' + methods.length + ' methods (excl: overloads)',
+    data: 'Found class with ' + methods.length + ' methods (excl: overloads), methods = ' + methods.toString(),
 });
 
 for (var m = 0; m < methods.length; m++) {
