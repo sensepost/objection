@@ -12,6 +12,8 @@ var methods = target_class.class.getDeclaredMethods().map(function (method) {
 
     // eg: public void com.example.fooBar(int,int)
     var full_method_signature = method.toGenericString();
+
+    // strip any 'throws' the method may have
     if (full_method_signature.indexOf(' throws ') !== -1) {
         full_method_signature = full_method_signature.substring(0, full_method_signature.indexOf(' throws '));
     }
