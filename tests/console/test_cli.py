@@ -48,6 +48,7 @@ class TestsCommandLineInteractions(unittest.TestCase):
             '--architecture', 'x86',
             '--pause',
             '--decode-resources',
+            '--network-security-config',
             '--skip-cleanup',
             '--enable-debug',
         ])

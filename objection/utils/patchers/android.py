@@ -207,8 +207,9 @@ class AndroidPatcher(BasePlatformPatcher):
         self.aapt = None
         self.skip_cleanup = skip_cleanup
 
-        self.keystore = os.path.join(os.path.abspath(os.path.dirname(__file__)),
-                                     '../assets', 'objection.jks')
+        self.keystore = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../assets', 'objection.jks')
+        self.netsec_config = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../assets',
+                                          'network_security_config.xml')
 
     def set_apk_source(self, source: str):
         """
@@ -424,6 +425,58 @@ class AndroidPatcher(BasePlatformPatcher):
 
         # set the debuggable flag
         application_tag.attrib['android:debuggable'] = 'true'
+
+        click.secho('Writing new Android manifest...', dim=True)
+        xml.write(os.path.join(self.apk_temp_directory, 'AndroidManifest.xml'),
+                  encoding='utf-8', xml_declaration=True)
+
+    def add_network_security_config(self):
+        """
+            Add a network_security_config.xml to the AndroidManifest.xml for
+            Android 7+.
+
+            Refs:
+                https://serializethoughts.com/2016/09/10/905/
+                https://warroom.securestate.com/android-7-intercepting-app-traffic/
+                https://www.nowsecure.com/blog/2017/06/15/certificate-pinning-for-android-and-ios-mobile-man-in-the-middle-attack-prevention/
+                https://android-developers.googleblog.com/2016/07/changes-to-trusted-certificate.html
+
+            return:
+        """
+
+        xml = self._get_android_manifest()
+        root = xml.getroot()
+        application_tag = root.findall('application')
+
+        # ensure that we got the application tag
+        if len(application_tag) <= 0:
+            message = 'Could not find the application tag in the AndroidManifest.xml'
+            click.secho(message, fg='red', bold=True)
+            raise Exception(message)
+
+        application_tag = application_tag[0]
+
+        click.secho('Checking for an existing networkSecurityConfig tag', dim=True)
+
+        if '{http://schemas.android.com/apk/res/android}networkSecurityConfig' in application_tag.attrib:
+            if not click.prompt('An existing network security config was found. Do you want to replace it?',
+                                type=bool, default=True):
+                return
+
+        # copy our network security configuration to res/xml/network_security_config.xml
+        sec_config_path = os.path.join(self.apk_temp_directory, 'res', 'xml')
+
+        # check if the config path exists
+        if not os.path.exists(sec_config_path):
+            click.secho('Creating XML res path: {0}'.format(sec_config_path), dim=True)
+            os.makedirs(sec_config_path)
+
+        click.secho('Copying network_security_config.xml...', fg='green', dim=True)
+        shutil.copyfile(self.netsec_config, os.path.join(sec_config_path, 'network_security_config.xml'))
+
+        # set the networkSecurityConfig xml location
+        # this is in res/xml/network_security_config.xml
+        application_tag.attrib['android:networkSecurityConfig'] = '@xml/network_security_config'
 
         click.secho('Writing new Android manifest...', dim=True)
         xml.write(os.path.join(self.apk_temp_directory, 'AndroidManifest.xml'),

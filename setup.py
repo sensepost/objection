@@ -1,8 +1,7 @@
 import os
 
-from setuptools import setup
-
 from objection.__init__ import __version__
+from setuptools import setup
 
 
 def _package_files(directory: str, suffix: str) -> list:
@@ -49,7 +48,8 @@ setup(
     package_data={
         '': _package_files(os.path.join(here, 'objection/hooks'), '.js') +
             _package_files(os.path.join(here, 'objection/console/helpfiles'), '.txt') +
-            _package_files(os.path.join(here, 'objection/utils/assets'), '.jks'),
+            _package_files(os.path.join(here, 'objection/utils/assets'), '.jks') +
+            _package_files(os.path.join(here, 'objection/utils/assets'), '.xml'),
     },
 
     python_requires='>=3.4',
