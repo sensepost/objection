@@ -175,6 +175,8 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
     patcher.zipalign_apk()
 
     # woohoo, get the APK!
-    click.secho('Copying final apk from {0} to current directory...'.format(patcher.get_patched_apk_path()))
-    destination = ''.join(source.split('.')[:-1]) + '.objection.apk'
+    destination = source.replace('.apk', '.objection.apk')
+
+    click.secho(
+        'Copying final apk from {0} to {1} in current directory...'.format(patcher.get_patched_apk_path(), destination))
     shutil.copyfile(patcher.get_patched_apk_path(), os.path.join(os.path.abspath('.'), destination))
