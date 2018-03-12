@@ -131,6 +131,55 @@ try {
     }
 }
 
+// Android 7+ TrustManagerImpl
+// The work in the following NCC blogpost was a great help for this hook!
+// hattip @AdriVillaB :)
+// https://www.nccgroup.trust/uk/about-us/newsroom-and-events/blogs/2017/november/bypassing-androids-network-security-configuration/
+try {
+
+    var TrustManagerImpl = Java.use('com.android.org.conscrypt.TrustManagerImpl');
+
+    send({
+        status: 'success',
+        error_reason: NaN,
+        type: 'android-ssl-pinning-bypass',
+        data: 'TrustManagerImpl'
+    });
+
+    // https://github.com/google/conscrypt/blob/c88f9f55a523f128f0e4dace76a34724bfa1e88c/platform/src/main/java/org/conscrypt/TrustManagerImpl.java#L650
+    TrustManagerImpl.verifyChain.implementation = function (untrustedChain, trustAnchorChain, host, clientAuth, ocspData, tlsSctData) {
+
+        quiet_send({
+            status: 'success',
+            error_reason: NaN,
+            type: 'android-ssl-pinning-bypass',
+            data: '(Android 7+) TrustManagerImpl verifyChain() called. Not throwing an exception.'
+        })
+
+        // Skip all the logic and just return the chain again :P
+        return untrustedChain;
+    }
+
+    PinningTrustManager.checkServerTrusted.implementation = function () {
+
+        quiet_send({
+            status: 'success',
+            error_reason: NaN,
+            type: 'android-ssl-pinning-bypass',
+            data: 'Appcelerator checkServerTrusted() called. Not throwing an exception.'
+        });
+    }
+
+} catch (err) {
+
+    // If we dont have a ClassNotFoundException exception, raise the
+    // problem encountered.
+    if (err.message.indexOf('ClassNotFoundException') === 0) {
+
+        throw new Error(err);
+    }
+}
+
 // -- Sample Java
 //
 // "Generic" TrustManager Example

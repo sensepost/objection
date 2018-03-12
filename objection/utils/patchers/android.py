@@ -440,6 +440,7 @@ class AndroidPatcher(BasePlatformPatcher):
                 https://warroom.securestate.com/android-7-intercepting-app-traffic/
                 https://www.nowsecure.com/blog/2017/06/15/certificate-pinning-for-android-and-ios-mobile-man-in-the-middle-attack-prevention/
                 https://android-developers.googleblog.com/2016/07/changes-to-trusted-certificate.html
+                https://www.nccgroup.trust/uk/about-us/newsroom-and-events/blogs/2017/november/bypassing-androids-network-security-configuration/
 
             return:
         """
