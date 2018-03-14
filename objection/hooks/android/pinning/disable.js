@@ -160,16 +160,6 @@ try {
         return untrustedChain;
     }
 
-    PinningTrustManager.checkServerTrusted.implementation = function () {
-
-        quiet_send({
-            status: 'success',
-            error_reason: NaN,
-            type: 'android-ssl-pinning-bypass',
-            data: 'Appcelerator checkServerTrusted() called. Not throwing an exception.'
-        });
-    }
-
 } catch (err) {
 
     // If we dont have a ClassNotFoundException exception, raise the
