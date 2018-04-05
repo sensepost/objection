@@ -1,6 +1,6 @@
 Command: android hooking watch class
 
-Usage: android hooking watch class_method <class>
+Usage: android hooking watch class <class>
        (optional: --dump-args) (optional: --dump-backtrace)
        (optional: --dump-return)
 
