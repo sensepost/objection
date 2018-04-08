@@ -338,11 +338,11 @@ class AndroidPatcher(BasePlatformPatcher):
 
         return self.apk_temp_directory
 
-    def unpack_apk(self, decode_resources: bool = False):
+    def unpack_apk(self, skip_resources: bool = False):
         """
             Unpack an APK with apktool.
 
-            :type decode_resources: bool
+            :type skip_resources: bool
 
             :return:
         """
@@ -353,7 +353,7 @@ class AndroidPatcher(BasePlatformPatcher):
             self.required_commands['apktool']['location'],
             'decode',
             '-f',
-            '-r' if not decode_resources else '',
+            '-r' if skip_resources else '',
             '-o',
             self.apk_temp_directory,
             self.apk_source
@@ -441,6 +441,7 @@ class AndroidPatcher(BasePlatformPatcher):
                 https://www.nowsecure.com/blog/2017/06/15/certificate-pinning-for-android-and-ios-mobile-man-in-the-middle-attack-prevention/
                 https://android-developers.googleblog.com/2016/07/changes-to-trusted-certificate.html
                 https://www.nccgroup.trust/uk/about-us/newsroom-and-events/blogs/2017/november/bypassing-androids-network-security-configuration/
+                https://sensepost.com/blog/2018/tip-toeing-past-android-7s-network-security-configuration/
 
             return:
         """

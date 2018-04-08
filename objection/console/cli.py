@@ -225,16 +225,16 @@ def patchipa(source: str, gadget_version: str, codesign_signature: str, provisio
 @click.option('--network-security-config', '-N', is_flag=True, default=False,
               help='Include a network_security_config.xml file allowing for user added CA\'s to be trusted on '
                    'Android 7 and up. This option requires the --decode-resources flag as well.')
-@click.option('--decode-resources', '-D', is_flag=True, default=False,
-              help='Also decode resources as part of the apktool processing.', show_default=True)
+@click.option('--skip-resources', '-D', is_flag=True, default=False,
+              help='Skip resource decoding as part of the apktool processing.', show_default=False)
 def patchapk(source: str, architecture: str, gadget_version: str, pause: bool, skip_cleanup: bool,
-             enable_debug: bool, decode_resources: bool, network_security_config: bool) -> None:
+             enable_debug: bool, skip_resources: bool, network_security_config: bool) -> None:
     """
         Patch an APK with the frida-gadget.so.
     """
 
     # ensure we have the decode-resources flag if we have the network-security-config flag.
-    if network_security_config and not decode_resources:
+    if network_security_config and skip_resources:
         click.secho('The --network-security-config flag requires the --decode-resources flag as well.', fg='red')
         return
 

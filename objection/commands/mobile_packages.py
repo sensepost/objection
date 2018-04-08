@@ -76,7 +76,7 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
 
 
 def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup: bool = True,
-                      enable_debug: bool = True, gadget_version: str = None, decode_resources: bool = False,
+                      enable_debug: bool = True, gadget_version: str = None, skip_resources: bool = False,
                       network_security_config: bool = False) -> None:
     """
         Patches an Android APK by extracting, patching SMALI, repackaging
@@ -88,7 +88,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
         :param skip_cleanup:
         :param enable_debug:
         :param gadget_version:
-        :param decode_resources:
+        :param skip_resources:
         :param network_security_config:
         :return:
     """
@@ -149,7 +149,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
 
     # work on patching the APK
     patcher.set_apk_source(source=source)
-    patcher.unpack_apk(decode_resources=decode_resources)
+    patcher.unpack_apk(skip_resources=skip_resources)
     patcher.inject_internet_permission()
 
     if enable_debug:
