@@ -224,7 +224,7 @@ def patchipa(source: str, gadget_version: str, codesign_signature: str, provisio
               help='Set the android:debuggable flag to true in the application manifiest.', show_default=True)
 @click.option('--network-security-config', '-N', is_flag=True, default=False,
               help='Include a network_security_config.xml file allowing for user added CA\'s to be trusted on '
-                   'Android 7 and up. This option requires the --decode-resources flag as well.')
+                   'Android 7 and up. This option can not be used with the --skip-resources flag.')
 @click.option('--skip-resources', '-D', is_flag=True, default=False,
               help='Skip resource decoding as part of the apktool processing.', show_default=False)
 def patchapk(source: str, architecture: str, gadget_version: str, pause: bool, skip_cleanup: bool,
