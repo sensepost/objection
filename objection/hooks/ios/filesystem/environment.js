@@ -60,6 +60,33 @@ function getPathForNSLocation(NSSomeLocationDirectory) {
     }
 }
 
+/**
+By given a path, for example '/var/mobile/Containers/Shared/AppGroup/' which the first sub folders represent app's UUID
+this function will iterate those sub folders, parse the hidden metadata.plist and will return the path+UUID
+which the metadata file contains the app identifier.
+
+will return 'not-found @ ' + @path if not found
+
+*/
+function extractUUIDfromPath(path) {
+    var result = 'not-found @ ' + path; // default, TBD
+    var bundleIdentifier = mb.objectForInfoDictionaryKey_('CFBundleIdentifier').toString();
+    // metadata plist file which contains app identifier
+    var plist_metadata = '/.com.apple.mobile_container_manager.metadata.plist';
+    var folders = fm.contentsOfDirectoryAtPath_error_(path, NULL);
+    for (var i = 0, l = folders.count(); i < l; i++) {
+        var uuid = folders.objectAtIndex_(i); // current folder
+        var metadata = path + uuid + plist_metadata;
+        var dict = ObjC.classes.NSMutableDictionary.alloc().initWithContentsOfFile_(metadata);
+        // comparing the key from plist against the context app indentifier
+        if (dict.objectForKey_('MCMMetadataIdentifier').toString().indexOf(bundleIdentifier) != -1) {
+            result = path + uuid;
+            break; // no need to continue iterating when found
+        }
+    }
+    return result;
+}
+
 var data = {
 
     // most interesting directories
@@ -77,6 +104,7 @@ var data = {
     AutosavedInformationDirectory: getPathForNSLocation(NSAutosavedInformationDirectory),
     DesktopDirectory: getPathForNSLocation(NSDesktopDirectory),
     ApplicationSupportDirectory: getPathForNSLocation(NSApplicationSupportDirectory),
+    MobileContainersSharedAppGroup: extractUUIDfromPath('/var/mobile/Containers/Shared/AppGroup/').toString(),
 
     // data from the NSBundle
     ReceiptPath: mb.appStoreReceiptURL().path().toString(),
