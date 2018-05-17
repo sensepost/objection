@@ -1,5 +1,5 @@
 frida
-prompt_toolkit
+prompt_toolkit>=1.0.15,<2.0.0
 click
 jinja2
 tabulate
