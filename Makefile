@@ -1,6 +1,6 @@
 DIST_DIR := dist
 
-default: clean sdist
+default: clean test sdist
 
 clean:
 	$(RM) $(DIST_DIR)/*
@@ -13,3 +13,6 @@ testupload:
 
 upload:
 	twine upload dist/*
+
+test:
+	python -m unittest
