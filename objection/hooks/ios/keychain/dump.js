@@ -49,6 +49,7 @@ var kSecReturnAttributes = 'r_Attributes',
     kSecAttrAccessibleAfterFirstUnlock = 'ck',
     kSecAttrAccessibleAlways = 'dk',
     kSecAttrAccessibleWhenUnlockedThisDeviceOnly = 'aku',
+    kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly = 'akpu',
     kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly = 'cku',
     kSecAttrAccessibleAlwaysThisDeviceOnly = 'dku';
 
@@ -90,6 +91,7 @@ var kSecConstantReverse = {
     'ck': 'kSecAttrAccessibleAfterFirstUnlock',
     'dk': 'kSecAttrAccessibleAlways',
     'aku': 'kSecAttrAccessibleWhenUnlockedThisDeviceOnly',
+    'akpu': 'kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly',
     'cku': 'kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly',
     'dku': 'kSecAttrAccessibleAlwaysThisDeviceOnly'
 };
