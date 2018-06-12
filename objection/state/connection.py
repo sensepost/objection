@@ -15,6 +15,7 @@ class StateConnection(object):
         self.host = '127.0.0.1'
         self.port = 27042
         self._type = self.TYPE_USB
+        self.device_serial = None
 
         self.gadget_name = 'Gadget'
 
