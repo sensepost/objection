@@ -16,11 +16,10 @@ from ..utils.helpers import normalize_gadget_name, print_frida_connection_help, 
               show_default=True)
 @click.option('--host', '-h', default='127.0.0.1', show_default=True)
 @click.option('--port', '-p', required=False, default=27042, show_default=True)
-@click.option('--device_serial', '-D', required=False, default=None)
 @click.option('--gadget', '-g', required=False, default='Gadget',
-              help='Name of the Frida Gadget/Process to connect to.',
-              show_default=True)
-def cli(network: bool, host: str, port: int, gadget: str, device_serial: str) -> None:
+              help='Name of the Frida Gadget/Process to connect to.', show_default=True)
+@click.option('--serial', '-S', required=False, default=None, help='A device serial to connect to.')
+def cli(network: bool, host: str, port: int, gadget: str, serial: str) -> None:
     """
         \b
              _     _         _   _
@@ -42,8 +41,8 @@ def cli(network: bool, host: str, port: int, gadget: str, device_serial: str) ->
         state_connection.host = host
         state_connection.port = port
 
-    if device_serial:
-        state_connection.device_serial = device_serial
+    if serial:
+        state_connection.device_serial = serial
 
     state_connection.gadget_name = normalize_gadget_name(gadget_name=gadget)
 

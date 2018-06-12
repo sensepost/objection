@@ -124,9 +124,12 @@ def print_frida_connection_help() -> None:
     """
 
     click.secho('If you are using a rooted/jailbroken device, specify a process with '
-                'the --gadget flag. Eg: objection --gadget "Calendar" device_type', fg='red')
+                'the --gadget flag. Eg: objection --gadget "Calendar" explore', fg='red')
     click.secho('If you are using a non rooted/jailbroken device, ensure that your patched application '
                 'is running and in the foreground.', fg='red')
+    click.secho('')
+    click.secho('If you have multiple devices, specify the target device with --serial. A list '
+                'of attached device serials can be found with the frida-ls-devices command.', fg='yellow')
     click.secho('')
     click.secho('For more information, please refer to the objection wiki at: '
                 'https://github.com/sensepost/objection/wiki', fg='green')
