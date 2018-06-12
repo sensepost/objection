@@ -65,8 +65,10 @@ class TestHelpers(unittest.TestCase):
         with capture(print_frida_connection_help) as o:
             output = o
 
-        expected_output = """If you are using a rooted/jailbroken device, specify a process with the --gadget flag. Eg: objection --gadget "Calendar" device_type
+        expected_output = """If you are using a rooted/jailbroken device, specify a process with the --gadget flag. Eg: objection --gadget "Calendar" explore
 If you are using a non rooted/jailbroken device, ensure that your patched application is running and in the foreground.
+
+If you have multiple devices, specify the target device with --serial. A list of attached device serials can be found with the frida-ls-devices command.
 
 For more information, please refer to the objection wiki at: https://github.com/sensepost/objection/wiki
 """
