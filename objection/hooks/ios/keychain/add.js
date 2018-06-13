@@ -9,11 +9,7 @@ var SecItemAdd = new NativeFunction(
 // constants
 var NSUTF8StringEncoding = 4;
 var kSecClass = 'class',
-    kSecClassKey = 'keys',
-    kSecClassIdentity = 'idnt',
-    kSecClassCertificate = 'cert',
     kSecClassGenericPassword = 'genp',
-    kSecClassInternetPassword = 'inet',
     kSecAttrService = 'svce',
     kSecValueData = 'v_Data';
 
@@ -24,18 +20,14 @@ rpc.exports = {
         data_value = NSString.stringWithString_(data).dataUsingEncoding_(NSUTF8StringEncoding);
         data_key = NSString.stringWithString_(key).dataUsingEncoding_(NSUTF8StringEncoding);
 
-        // console.log(new ObjC.Object(data_key).$className);
-
         var item_dictionary = NSMutableDictionary.alloc().init();
 
         item_dictionary.setObject_forKey_(kSecClassGenericPassword, kSecClass);
         item_dictionary.setObject_forKey_(data_key, kSecAttrService);
         item_dictionary.setObject_forKey_(data_value, kSecValueData);
 
-        var results_pointer = Memory.alloc(Process.pointerSize);
-
         // Add the keychain entry
-        var result = SecItemAdd(item_dictionary, results_pointer);
+        var result = SecItemAdd(item_dictionary, NULL);
 
         if (result != 0x00)
             return false;
