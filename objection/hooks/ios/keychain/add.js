@@ -37,14 +37,10 @@ rpc.exports = {
         // Add the keychain entry
         var result = SecItemAdd(item_dictionary, results_pointer);
 
-        if (result != 0x00) {
-
+        if (result != 0x00)
             return false;
 
-        } else {
-
-            return true;
-        }
+        return true;
     }
 }
 
