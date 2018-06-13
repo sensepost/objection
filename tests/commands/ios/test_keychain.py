@@ -1,7 +1,8 @@
 import unittest
 from unittest import mock
 
-from objection.commands.ios.keychain import _should_output_json, dump, clear
+from objection.commands.ios.keychain import _should_output_json, dump, clear, add, \
+    _has_minimum_flags_to_add_item, _get_flag_value
 from ...helpers import capture
 
 
@@ -26,6 +27,21 @@ class TestKeychain(unittest.TestCase):
             output = o
 
         self.assertEqual(output, 'Usage: ios keychain dump (--json <local destination>)\n')
+
+    def test_has_minimum_flags_to_add_item_returns_true(self):
+        result = _has_minimum_flags_to_add_item(['--key', 'test_key', '--data', 'test_data'])
+
+        self.assertTrue(result)
+
+    def test_has_minumum_flags_to_add_item_returns_false(self):
+        result = _has_minimum_flags_to_add_item(['--key', 'test_key'])
+
+        self.assertFalse(result)
+
+    def test_get_flag_value_gets_value_of_flag(self):
+        result = _get_flag_value(['--key', 'test_value'], '--key')
+
+        self.assertEqual(result, 'test_value')
 
     @mock.patch('objection.commands.ios.keychain.FridaRunner')
     def test_dump_to_screen_handles_hook_errors(self, mock_runner):
@@ -140,3 +156,35 @@ Dumped full keychain to: foo.json
             output = o
 
         self.assertEqual(output, 'Clearing the keychain...\nKeychain cleared\n')
+
+    def test_adds_item_validates_arguments(self):
+        with capture(add, ['--key', 'test_key']) as o:
+            output = o
+
+        self.assertEqual(output, 'Usage: ios keychain add --key <key name> --data <entry data>\n')
+
+    @mock.patch('objection.commands.ios.keychain.FridaRunner')
+    def test_adds_item_successfully(self, mock_runner):
+        mock_api = mock.Mock()
+        mock_api.add.return_value = True
+
+        mock_runner.return_value.rpc_exports.return_value = mock_api
+
+        with capture(add, ['--key', 'test_key', '--data', 'test_data']) as o:
+            output = o
+
+        self.assertEqual(output, 'Adding a new entry to the iOS keychain...\nKey:       test_key\n'
+                                 'Value:     test_data\nSuccessfully added the keychain item\n')
+
+    @mock.patch('objection.commands.ios.keychain.FridaRunner')
+    def test_adds_item_with_failure(self, mock_runner):
+        mock_api = mock.Mock()
+        mock_api.add.return_value = False
+
+        mock_runner.return_value.rpc_exports.return_value = mock_api
+
+        with capture(add, ['--key', 'test_key', '--data', 'test_data']) as o:
+            output = o
+
+        self.assertEqual(output, 'Adding a new entry to the iOS keychain...\nKey:       test_key\n'
+                                 'Value:     test_data\nFailed to add the keychain item\n')
