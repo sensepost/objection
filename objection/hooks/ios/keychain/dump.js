@@ -51,7 +51,8 @@ var kSecReturnAttributes = 'r_Attributes',
     kSecAttrAccessibleWhenUnlockedThisDeviceOnly = 'aku',
     kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly = 'akpu',
     kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly = 'cku',
-    kSecAttrAccessibleAlwaysThisDeviceOnly = 'dku';
+    kSecAttrAccessibleAlwaysThisDeviceOnly = 'dku',
+    kSecValueData = 'v_Data';
 
 // dict for reverse constants lookups
 var kSecConstantReverse = {
@@ -93,7 +94,8 @@ var kSecConstantReverse = {
     'aku': 'kSecAttrAccessibleWhenUnlockedThisDeviceOnly',
     'akpu': 'kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly',
     'cku': 'kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly',
-    'dku': 'kSecAttrAccessibleAlwaysThisDeviceOnly'
+    'dku': 'kSecAttrAccessibleAlwaysThisDeviceOnly',
+    'v_Data': 'kSecValueData',
 };
 
 // the base query dictionary to use for the keychain lookups
@@ -350,7 +352,7 @@ for (var item_class_index in item_classes) {
                 'service': odas(search_result.objectForKey_(kSecAttrService)),
                 'account': odas(search_result.objectForKey_(kSecAttrAccount)),
                 'label': odas(search_result.objectForKey_(kSecAttrLabel)),
-                'data': odas(search_result.objectForKey_('v_Data'))
+                'data': odas(search_result.objectForKey_(kSecValueData)),
             };
 
             keychain_items.push(keychain_entry);
