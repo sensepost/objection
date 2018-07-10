@@ -12,11 +12,11 @@ for (var class_name in ObjC.classes) {
         // if we should include parent class methods, do that.
         if ('{{ include_parents }}' == 'True') {
 
-            var class_methods = eval('ObjC.classes.{{ classname }}.$methods');
+            var class_methods = ObjC.classes[class_name].$methods;
 
         } else {
 
-            var class_methods = eval('ObjC.classes.{{ classname }}.$ownMethods');
+            var class_methods = ObjC.classes[class_name].$ownMethods;
 
         }
 

@@ -17,11 +17,11 @@ for (var class_name in ObjC.classes) {
         // if we should include parent classes, do that.
         if ('{{ include_parents }}' == 'True') {
 
-            var methods = eval('ObjC.classes.{{ class_name }}.$methods');
+            var methods = ObjC.classes[class_name].$methods;
 
         } else {
 
-            var methods = eval('ObjC.classes.{{ class_name }}.$ownMethods');
+            var methods = ObjC.classes[class_name].$ownMethods;
 
         }
 
@@ -30,8 +30,7 @@ for (var class_name in ObjC.classes) {
 
             // the current method
             var method = methods[i];
-
-            var selector = eval('ObjC.classes.{{ class_name }}["' + method + '"]');
+            var selector = ObjC.classes[class_name][method];
 
             try {
                 // attach an interceptor
