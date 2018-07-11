@@ -1,7 +1,6 @@
 // Dumps contents of NSURLCredentialStorage for all protection spaces
 
 var NSURLCredentialStorage = ObjC.classes.NSURLCredentialStorage;
-var NSEnumerator = ObjC.classes.NSEnumerator;
 
 rpc.exports = {
     dump: function () {

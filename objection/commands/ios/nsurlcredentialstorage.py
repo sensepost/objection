@@ -7,7 +7,7 @@ from objection.utils.templates import ios_hook
 
 def dump(args: list = None) -> None:
     """
-        Dumps credentials stored in NSURLCredentalsStorage
+        Dumps credentials stored in NSURLCredentialStorage
 
         :param args:
         :return:
