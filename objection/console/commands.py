@@ -21,6 +21,7 @@ from ..commands.ios import nsuserdefaults
 from ..commands.ios import pasteboard
 from ..commands.ios import pinning as ios_pinning
 from ..commands.ios import plist
+from ..commands.ios import nsurlcredentialstorage
 from ..utils.helpers import list_current_jobs
 
 # commands are defined with their name being the key, then optionally
@@ -420,6 +421,15 @@ COMMANDS = {
                     'get': {
                         'meta': 'Get all of the entries',
                         'exec': nsuserdefaults.get
+                    }
+                }
+            },
+            'nsurlcredentialstorage': {
+                'meta': 'Work with the shared NSURLCredentialStorage',
+                'commands': {
+                    'dump': {
+                        'meta': 'Dump all of the credentials in the shared NSURLCredentialStorage',
+                        'exec': nsurlcredentialstorage.dump
                     }
                 }
             },
