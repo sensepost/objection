@@ -1,3 +1,5 @@
+import os
+
 import click
 from tabulate import tabulate
 
@@ -40,6 +42,12 @@ def dump_all(args: list) -> None:
 
     # the destination file to write the dump to
     destination = args[0]
+
+    # Check for file override
+    if os.path.exists(destination):
+        click.secho('Destination file {dest} already exists'.format(dest=destination), fg='yellow', bold=True)
+        if not click.confirm('Continue append?'):
+            return
 
     # access type used when enumerating ranges
     access = 'rw-'
@@ -96,8 +104,14 @@ def dump_from_base(args: list) -> None:
     # grab the (size) bytes starting at the (base_address)
     dump = session.read_bytes(int(base_address, 16), int(memory_size))
 
+    # Check for file override
+    if os.path.exists(destination):
+        click.secho('Destination file {dest} already exists'.format(dest=destination), fg='yellow', bold=True)
+        if not click.confirm('Override?'):
+            return
+
     # append the results to the destination file
-    with open(destination, 'ab') as f:
+    with open(destination, 'wb') as f:
         f.write(dump)
 
     click.secho('Memory dumped to file: {0}'.format(destination), fg='green')
