@@ -34,11 +34,14 @@ class TestMemory(unittest.TestCase):
     @mock.patch('objection.commands.memory.FridaRunner')
     @mock.patch('objection.commands.memory.open', create=True)
     def test_dump_all(self, mock_open, mock_runner):
-        mock_session = mock.Mock()
-        mock_session.enumerate_ranges.return_value = [MockRange()]
-        mock_session.read_bytes.return_value = b'\x00'
+        # mock_session = mock.Mock()
+        # mock_session.enumerate_ranges.return_value = [MockRange()]
+        # mock_session.read_bytes.return_value = b'\x00'
 
-        mock_runner.return_value.get_session.return_value = mock_session
+        mock_runner.return_value.rpc_exports.return_value.enumerate_ranges.return_value = [
+            {'size': 100, 'base': '0x7fff90800000'}
+        ]
+        mock_runner.return_value.rpc_exports.return_value.read_bytes.return_value = b'\x00'
 
         with capture(dump_all, ['/foo']) as o:
             output = o
@@ -61,10 +64,7 @@ Memory dumped to file: /foo
     @mock.patch('objection.commands.memory.FridaRunner')
     @mock.patch('objection.commands.memory.open', create=True)
     def test_dump_from_base(self, mock_open, mock_runner):
-        mock_session = mock.Mock()
-        mock_session.read_bytes.return_value = b'\x00'
-
-        mock_runner.return_value.get_session.return_value = mock_session
+        mock_runner.return_value.rpc_exports.return_value.read_bytes.return_value = b'\x00'
 
         with capture(dump_from_base, ['0x00008000', '200', '/foo']) as o:
             output = o

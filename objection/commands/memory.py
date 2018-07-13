@@ -52,25 +52,30 @@ def dump_all(args: list) -> None:
     # access type used when enumerating ranges
     access = 'rw-'
 
-    runner = FridaRunner()
-    session = runner.get_session()
-    ranges = session.enumerate_ranges(access)
+    hook = generic_hook('memory/dump')
+    runner = FridaRunner(hook=hook)
+    api = runner.rpc_exports()
 
-    total_size = sum([x.size for x in ranges])
+    ranges = api.enumerate_ranges(access)
+
+    total_size = sum([x['size'] for x in ranges])
     click.secho('Will dump {0} {1} images, totalling {2}'.format(
         len(ranges), access, sizeof_fmt(total_size)), fg='green', dim=True)
 
     with click.progressbar(ranges, label='Preparing to dump images') as bar:
 
         for image in bar:
-            bar.label = 'Dumping {0} from base: {1}'.format(sizeof_fmt(image.size), hex(image.base_address))
+            bar.label = 'Dumping {0} from base: {1}'.format(sizeof_fmt(image['size']), hex(int(image['base'], 16)))
 
             # grab the (size) bytes starting at the (base_address)
-            dump = session.read_bytes(image.base_address, image.size)
+            dump = api.read_bytes(int(image['base'], 16), image['size'])
 
             # append the results to the destination file
             with open(destination, 'ab') as f:
                 f.write(dump)
+
+    # Cleanup the script
+    runner.unload_script()
 
     click.secho('Memory dumped to file: {0}'.format(destination), fg='green')
 
@@ -95,14 +100,15 @@ def dump_from_base(args: list) -> None:
     click.secho('Dumping {0} from {1} to {2}'.format(sizeof_fmt(int(memory_size)), base_address, destination),
                 fg='green', dim=True)
 
-    # access type used when enumerating ranges
-    # access = 'rw-'
-
-    runner = FridaRunner()
-    session = runner.get_session()
+    hook = generic_hook('memory/dump')
+    runner = FridaRunner(hook=hook)
+    api = runner.rpc_exports()
 
     # grab the (size) bytes starting at the (base_address)
-    dump = session.read_bytes(int(base_address, 16), int(memory_size))
+    dump = api.read_bytes(int(base_address, 16), int(memory_size))
+
+    # Cleanup the script
+    runner.unload_script()
 
     # Check for file override
     if os.path.exists(destination):
