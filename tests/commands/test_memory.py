@@ -34,10 +34,6 @@ class TestMemory(unittest.TestCase):
     @mock.patch('objection.commands.memory.FridaRunner')
     @mock.patch('objection.commands.memory.open', create=True)
     def test_dump_all(self, mock_open, mock_runner):
-        # mock_session = mock.Mock()
-        # mock_session.enumerate_ranges.return_value = [MockRange()]
-        # mock_session.read_bytes.return_value = b'\x00'
-
         mock_runner.return_value.rpc_exports.return_value.enumerate_ranges.return_value = [
             {'size': 100, 'base': '0x7fff90800000'}
         ]
