@@ -1,5 +1,6 @@
 import logging
 import os
+import traceback
 
 import click
 import delegator
@@ -391,6 +392,7 @@ class Repl(object):
                     click.secho(('\n\nAn exception occurred while processing the command. If this '
                                  'looks like a code related error, please file a bug report!'), fg='red')
                     click.secho('Error: {0}'.format(e), fg='red', bold=True)
+                    click.secho(traceback.format_exc(), dim=True)
 
             except (KeyboardInterrupt, EOFError):
                 click.secho('Exiting...', dim=True)
