@@ -42,10 +42,9 @@ send({
     data: 'Found class with ' + methods.length + ' methods (excl: overloads)',
 });
 
-for (var m = 0; m < methods.length; m++) {
+methods.map(function (method) {
 
-    var target_method = methods[m];
-    var overload_count = target_class[target_method].overloads.length;
+    var overload_count = target_class[method].overloads.length;
 
     // Hook all of the overloads found for this class.method
     // TODO: Make this a function that can be used in both this class
@@ -57,13 +56,13 @@ for (var m = 0; m < methods.length; m++) {
             status: 'success',
             error_reason: NaN,
             type: 'watch-class',
-            data: 'Hooking overload: ' + (i + 1) + ' for ' + target_method
+            data: 'Hooking overload: ' + (i + 1) + ' for ' + method
         });
 
         // Hook the overload.
-        target_class[target_method].overloads[i].implementation = function () {
+        target_class[method].overloads[i].implementation = function () {
 
-            var message = 'Called ' + target_class + '.' + target_method + ' (args: ' + arguments.length + ')';
+            var message = 'Called ' + target_class + '.' + method + ' (args: ' + arguments.length + ')';
 
             // if we should include a backtrace to here, do that.
             if (dump_backtrace) {
@@ -92,13 +91,13 @@ for (var m = 0; m < methods.length; m++) {
                         status: 'success',
                         error_reason: NaN,
                         type: 'watch-class',
-                        data: target_method + ' - Arg ' + h + ': ' + (arguments[h] || '(none)').toString()
+                        data: method + ' - Arg ' + h + ': ' + (arguments[h] || '(none)').toString()
                     });
                 }
             }
 
             // continue with the original method and capture the return value
-            var return_value = this[target_method].apply(this, arguments);
+            var return_value = this[method].apply(this, arguments);
 
             if (dump_return) {
 
@@ -106,7 +105,7 @@ for (var m = 0; m < methods.length; m++) {
                     status: 'success',
                     error_reason: NaN,
                     type: 'watch-class',
-                    data: target_method + ' - Returned : ' + (return_value || '(none)').toString()
+                    data: method + ' - Returned : ' + (return_value || '(none)').toString()
                 });
             }
 
@@ -114,4 +113,4 @@ for (var m = 0; m < methods.length; m++) {
             return return_value;
         }
     }
-}
+});
