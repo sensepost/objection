@@ -1,7 +1,8 @@
 import os
 
+from setuptools import setup, find_packages
+
 from objection.__init__ import __version__
-from setuptools import setup
 
 
 def _package_files(directory: str, suffix: str) -> list:
@@ -44,26 +45,18 @@ setup(
     keywords=['mobile', 'instrumentation', 'pentest', 'frida', 'hook'],
     version=__version__,
 
-    # include the hooks!
+    # include other files
     package_data={
         '': _package_files(os.path.join(here, 'objection/hooks'), '.js') +
             _package_files(os.path.join(here, 'objection/console/helpfiles'), '.txt') +
             _package_files(os.path.join(here, 'objection/utils/assets'), '.jks') +
-            _package_files(os.path.join(here, 'objection/utils/assets'), '.xml'),
+            _package_files(os.path.join(here, 'objection/utils/assets'), '.xml') +
+            [os.path.join(here, 'objection/agent/agent.js')],  # Frida agent
     },
-
-    python_requires='>=3.4',
-    packages=[
-        'objection',
-        'objection.commands',
-        'objection.commands.android',
-        'objection.commands.ios',
-        'objection.console',
-        'objection.state',
-        'objection.utils',
-        'objection.utils.patchers',
-    ],
+    package_dir={'': 'objection'},
+    packages=find_packages('objection'),
     install_requires=requirements,
+    python_requires='>=3.4',
     classifiers=[
         'Operating System :: OS Independent',
         'Natural Language :: English',

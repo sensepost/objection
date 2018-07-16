@@ -1,0 +1,37 @@
+{
+  "name": "objection",
+  "version": "1.0.0",
+  "description": "Runtime Mobile Exploration",
+  "private": true,
+  "main": "src/index.ts",
+  "scripts": {
+    "prepare": "npm run build",
+    "build": "frida-compile src/index.ts -o agent.js -c",
+    "watch": "frida-compile src/index.ts -o agent.js -w -c"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sensepost/objection.git"
+  },
+  "keywords": [
+    "frida",
+    "runtime",
+    "mobile",
+    "security",
+    "objection"
+  ],
+  "author": "Leon Jacobs",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/sensepost/objection/issues"
+  },
+  "homepage": "https://github.com/sensepost/objection#readme",
+  "dependencies": {
+    "frida-java": "^1.4.10",
+    "frida-objc": "^2.0.6"
+  },
+  "devDependencies": {
+    "frida-compile": "^5.3.7",
+    "frida-gum-types": "^1.2.3"
+  }
+}

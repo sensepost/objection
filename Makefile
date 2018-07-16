@@ -1,9 +1,12 @@
 DIST_DIR := dist
 
-default: clean test sdist
+default: clean test agent sdist
 
 clean:
 	$(RM) $(DIST_DIR)/*
+
+agent:
+	cd objection/agent && npm run build
 
 sdist:
 	python setup.py sdist

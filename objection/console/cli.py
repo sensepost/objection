@@ -9,6 +9,10 @@ from ..state.app import app_state
 from ..state.connection import state_connection
 from ..utils.helpers import normalize_gadget_name, print_frida_connection_help, warn_about_older_operating_systems
 
+from ..utils.frida_transport import Agent
+
+from pprint import pprint
+
 
 # Start the Click command group
 @click.group()
@@ -117,6 +121,23 @@ def explore(startup_command: str, startup_script: str, hook_debug: bool, quiet: 
 
     # run the REPL and wait for more commands
     r.set_prompt_tokens(device_info)
+    r.start_repl(quiet=quiet)
+
+
+@cli.command()
+@click.option('--quiet', '-q', required=False, default=False, is_flag=True,
+              help='Do not display the objection logo on startup.')
+def start(quiet: bool) -> None:
+
+    agent = Agent()
+    agent.inject()
+
+    api = agent.exports()
+
+    pprint(api.keychain_dump())
+    # pprint(api.keychain_empty())
+
+    r = Repl()
     r.start_repl(quiet=quiet)
 
 

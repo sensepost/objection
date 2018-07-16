@@ -1,4 +1,5 @@
 import json
+import os
 import random
 import uuid
 from time import strftime
@@ -423,3 +424,114 @@ class FridaRunner(object):
 
         if self.script:
             self.script.unload()
+
+
+class Agent(object):
+    """
+        Class to manage the lifecycle of the compiled Frida agent.
+    """
+
+    def __init__(self):
+        """
+            Initialises a new Agent instance to run the Frida agent.
+        """
+
+        # Compiled frida agent path
+        self.agent_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../agent', 'agent.js')
+
+        self.session = None
+        self.script = None
+
+    def _on_message(self, message: dict, data):
+        """
+            The callback to run when a message is received from the agent.
+
+            :param message:
+            :param data:
+            :return:
+        """
+
+        try:
+
+            # log the hook response if needed
+            if app_state.should_debug_hooks():
+                click.secho('- [response] ' + '-' * 18, dim=True)
+                click.secho(json.dumps(message, indent=2, sort_keys=True), dim=True)
+                click.secho('- [./response] ' + '-' * 16, dim=True)
+
+            # process the response
+            if message and 'payload' in message:
+
+                self.messages.append(RunnerMessage(message['payload'], data))
+
+                # check if the last message was an error
+                msg = self.get_last_message()
+                if not msg.is_successful():
+                    click.secho('[hook failure] {0}'.format(msg.error_reason), fg='red')
+
+        except Exception as e:
+            click.secho('Failed to process an incoming message from hook: {0}'.format(e), fg='red', bold=True)
+            raise e
+
+    @staticmethod
+    def get_session() -> frida.core.Session:
+        """
+            Attempt to get a Frida session.
+        """
+
+        if state_connection.get_comms_type() == state_connection.TYPE_USB:
+            if state_connection.device_serial:
+                device = frida.get_device(state_connection.device_serial)
+            else:
+                device = frida.get_usb_device(5)
+            return device.attach(state_connection.gadget_name)
+
+        if state_connection.get_comms_type() == state_connection.TYPE_REMOTE:
+            try:
+                device = frida.get_device("tcp@%s:%d" % (state_connection.host, state_connection.port))
+            except frida.TimedOutError:
+                device = frida.get_device_manager().add_remote_device(
+                    "%s:%d" % (state_connection.host, state_connection.port))
+
+            return device.attach(state_connection.gadget_name)
+
+    def _get_agent_source(self) -> str:
+        """
+            Loads the frida-compiled agent from disk.
+
+            :return:
+        """
+
+        if not os.path.exists(self.agent_path):
+            raise Exception('Unable to locate Frida agent sources at: {location}'.format(
+                location=self.agent_path))
+
+        with open(self.agent_path, 'r') as f:
+            agent = ''.join(f.readlines())
+
+        return agent
+
+    def inject(self) -> None:
+        """
+            Injects the Objection Frida Agent
+
+            :return:
+        """
+
+        self.session = self.get_session()
+        self.script = self.session.create_script(self._get_agent_source())
+        self.script.on('message', self._on_message)
+        self.script.load()
+
+    def exports(self) -> frida.core.ScriptExports:
+        """
+            Get the exports of the agent.
+
+            :return:
+        """
+
+        return self.script.exports
+
+    def unload(self) -> None:
+
+        self.script.unload()
