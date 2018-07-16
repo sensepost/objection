@@ -7,7 +7,8 @@
   "scripts": {
     "prepare": "npm run build",
     "build": "frida-compile src/index.ts -o ../objection/agent.js -c",
-    "watch": "frida-compile src/index.ts -o ../objection/agent.js -w -c"
+    "watch": "frida-compile src/index.ts -o ../objection/agent.js -w -c",
+    "lint": "tslint -c tslint.json 'src/**/*.ts'"
   },
   "repository": {
     "type": "git",
@@ -32,6 +33,7 @@
   },
   "devDependencies": {
     "frida-compile": "^5.3.7",
-    "frida-gum-types": "^1.2.3"
+    "frida-gum-types": "^1.2.3",
+    "tslint": "^5.11.0"
   }
 }

@@ -1,6 +1,9 @@
-import { IosKeychain } from "./ios/keychain"
+import { IosKeychain } from "./ios/keychain";
+
+const keychain = new IosKeychain();
 
 rpc.exports = {
-    keychainDump: () => (new IosKeychain).list(),
-    keychainEmpty: () => (new IosKeychain).empty(),
-}
+    keychainAdd: () => keychain.add.bind(keychain),
+    keychainDump: () => keychain.list.bind(keychain),
+    keychainEmpty: () => keychain.empty.bind(keychain),
+};

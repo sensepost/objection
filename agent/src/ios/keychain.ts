@@ -1,112 +1,134 @@
 // dumps all of the keychain items available to the current
 // application.
-import { data_to_string } from "../lib/ios/helpers"
-import { kSec } from "../lib/ios/constants"
-import { KeychainItem } from "../lib/ios/interfaces"
+import { kSec } from "../lib/ios/constants";
+import { data_to_string } from "../lib/ios/helpers";
+import { IKeychainItem } from "../lib/ios/interfaces";
 import {
-    SecItemCopyMatching,
-    SecAccessControlGetConstraints,
-    SecItemDelete,
     kCFBooleanTrue,
     NSDictionary,
-} from "../lib/ios/libios"
+    NSMutableDictionary,
+    NSString,
+    SecAccessControlGetConstraints,
+    SecItemAdd,
+    SecItemCopyMatching,
+    SecItemDelete,
+} from "../lib/ios/libios";
 
 const { NSMutableDictionary, NSString } = ObjC.classes;
+const NSUTF8StringEncoding = 4;
 
 // keychain item times to query for
-const item_classes = [
+const itemClasses = [
     kSec.kSecClassKey,
     kSec.kSecClassIdentity,
     kSec.kSecClassCertificate,
     kSec.kSecClassGenericPassword,
-    kSec.kSecClassInternetPassword
+    kSec.kSecClassInternetPassword,
 ];
 
 // class to interface with the iOS Keychain.
 export class IosKeychain {
 
-    empty() {
+    // clean out the keychain
+    public empty() {
 
         // the base query dictionary to use for the keychain lookups
-        const search_dictionary = NSMutableDictionary.alloc().init();
+        const searchDictionary = NSMutableDictionary.alloc().init();
 
-        item_classes.forEach(item_class => {
+        itemClasses.forEach((clazz) => {
 
-            // set the class-type we are querying for now
-            search_dictionary.setObject_forKey_(item_class, kSec.kSecClass);
-
-            // delete the classes items.
-            SecItemDelete(search_dictionary);
+            // set the class-type we are querying for now & delete
+            searchDictionary.setObject_forKey_(clazz, kSec.kSecClass);
+            SecItemDelete(searchDictionary);
         });
     }
 
     // dump the contents of the iOS keychain, returning the
     // results as an array representation.
-    list(): Array<KeychainItem> {
+    public list(): IKeychainItem[] {
 
         // the base query dictionary to use for the keychain lookups
-        const search_dictionary = NSMutableDictionary.alloc().init();
-        search_dictionary.setObject_forKey_(kCFBooleanTrue, kSec.kSecReturnAttributes);
-        search_dictionary.setObject_forKey_(kCFBooleanTrue, kSec.kSecReturnData);
-        search_dictionary.setObject_forKey_(kCFBooleanTrue, kSec.kSecReturnRef);
-        search_dictionary.setObject_forKey_(kSec.kSecMatchLimitAll, kSec.kSecMatchLimit);
+        const searchDictionary = NSMutableDictionary.alloc().init();
+        searchDictionary.setObject_forKey_(kCFBooleanTrue, kSec.kSecReturnAttributes);
+        searchDictionary.setObject_forKey_(kCFBooleanTrue, kSec.kSecReturnData);
+        searchDictionary.setObject_forKey_(kCFBooleanTrue, kSec.kSecReturnRef);
+        searchDictionary.setObject_forKey_(kSec.kSecMatchLimitAll, kSec.kSecMatchLimit);
 
-        let key_chain_items: Array<KeychainItem> = [].concat.apply([], item_classes.map(item_class => {
+        const kcItems: IKeychainItem[] = [].concat.apply([], itemClasses.map((clazz) => {
 
-            let item_class_items: Array<KeychainItem> = [];
+            const clazzItems: IKeychainItem[] = [];
 
-            search_dictionary.setObject_forKey_(item_class, kSec.kSecClass);
+            searchDictionary.setObject_forKey_(clazz, kSec.kSecClass);
 
             // prepare a pointer for the results and call SecItemCopyMatching
-            let results_pointer: NativePointer = Memory.alloc(Process.pointerSize);
-            let copy_results: NativePointer = SecItemCopyMatching(search_dictionary, results_pointer);
+            const resultsPointer: NativePointer = Memory.alloc(Process.pointerSize);
+            const copyResults: NativePointer = SecItemCopyMatching(searchDictionary, resultsPointer);
 
             // without results (aka non-zero OSStatus) we just move along.
-            if (!copy_results.isNull()) { return; }
+            if (!copyResults.isNull()) { return; }
 
             // read the resultant dict of the lookup from memory
-            let search_results: NSDictionary = new ObjC.Object(Memory.readPointer(results_pointer));
+            const searchResults: NSDictionary = new ObjC.Object(Memory.readPointer(resultsPointer));
 
             // if the results in the dict is empty (which is not something I expect),
             // fail fast too.
-            if (search_results.length <= 0) { return; }
+            if (searchResults.length <= 0) { return; }
 
             // read each key chain entry for the current item_class and populate
             // the item_class items we will return
-            for (let i: number = 0; i < search_results.count(); i++) {
+            for (let i: number = 0; i < searchResults.count(); i++) {
 
-                let data: NSDictionary = search_results.objectAtIndex_(i);
+                const data: NSDictionary = searchResults.objectAtIndex_(i);
 
-                item_class_items.push({
-                    item_class: item_class,
-                    create_date: data_to_string(data.objectForKey_(kSec.kSecAttrCreationDate)),
-                    modification_date: data_to_string(data.objectForKey_(kSec.kSecAttrModificationDate)),
-                    description: data_to_string(data.objectForKey_(kSec.kSecAttrDescription)),
-                    comment: data_to_string(data.objectForKey_(kSec.kSecAttrComment)),
-                    creator: data_to_string(data.objectForKey_(kSec.kSecAttrCreator)),
-                    type: data_to_string(data.objectForKey_(kSec.kSecAttrType)),
-                    script_code: data_to_string(data.objectForKey_(kSec.kSecAttrScriptCode)),
-                    alias: data_to_string(data.objectForKey_(kSec.kSecAttrAlias)),
-                    invisible: data_to_string(data.objectForKey_(kSec.kSecAttrIsInvisible)),
-                    negative: data_to_string(data.objectForKey_(kSec.kSecAttrIsNegative)),
-                    custom_icon: data_to_string(data.objectForKey_(kSec.kSecAttrHasCustomIcon)),
-                    protected: data_to_string(data.objectForKey_(kSec.kSecProtectedDataItemAttr)),
-                    access_control: (data.containsKey_(kSec.kSecAttrAccessControl)) ? this.decode_acl(data) : '',
+                clazzItems.push({
+                    access_control: (data.containsKey_(kSec.kSecAttrAccessControl)) ? this.decode_acl(data) : "",
                     accessible_attribute: kSec[data.objectForKey_(kSec.kSecAttrAccessible)],
+                    account: data_to_string(data.objectForKey_(kSec.kSecAttrAccount)),
+                    alias: data_to_string(data.objectForKey_(kSec.kSecAttrAlias)),
+                    comment: data_to_string(data.objectForKey_(kSec.kSecAttrComment)),
+                    create_date: data_to_string(data.objectForKey_(kSec.kSecAttrCreationDate)),
+                    creator: data_to_string(data.objectForKey_(kSec.kSecAttrCreator)),
+                    custom_icon: data_to_string(data.objectForKey_(kSec.kSecAttrHasCustomIcon)),
+                    data: data_to_string(data.objectForKey_(kSec.kSecValueData)),
+                    description: data_to_string(data.objectForKey_(kSec.kSecAttrDescription)),
                     entitlement_group: data_to_string(data.objectForKey_(kSec.kSecAttrAccessGroup)),
                     generic: data_to_string(data.objectForKey_(kSec.kSecAttrGeneric)),
-                    service: data_to_string(data.objectForKey_(kSec.kSecAttrService)),
-                    account: data_to_string(data.objectForKey_(kSec.kSecAttrAccount)),
+                    invisible: data_to_string(data.objectForKey_(kSec.kSecAttrIsInvisible)),
+                    item_class: clazz,
                     label: data_to_string(data.objectForKey_(kSec.kSecAttrLabel)),
-                    data: data_to_string(data.objectForKey_(kSec.kSecValueData)),
+                    modification_date: data_to_string(data.objectForKey_(kSec.kSecAttrModificationDate)),
+                    negative: data_to_string(data.objectForKey_(kSec.kSecAttrIsNegative)),
+                    protected: data_to_string(data.objectForKey_(kSec.kSecProtectedDataItemAttr)),
+                    script_code: data_to_string(data.objectForKey_(kSec.kSecAttrScriptCode)),
+                    service: data_to_string(data.objectForKey_(kSec.kSecAttrService)),
+                    type: data_to_string(data.objectForKey_(kSec.kSecAttrType)),
                 });
             }
 
-            return item_class_items;
+            return clazzItems;
 
-        }).filter(n => n != undefined));
+        }).filter((n) => n !== undefined));
 
-        return key_chain_items;
+        return kcItems;
+    }
+
+    // add a string entry to the keychain
+    public add(key: string, data: string) {
+
+        // Convert the key and data to NSData
+        const dataString: NSString = NSString.stringWithString_(data).dataUsingEncoding_(NSUTF8StringEncoding);
+        const dataKey: NSString = NSString.stringWithString_(key).dataUsingEncoding_(NSUTF8StringEncoding);
+
+        const itemDict: NSMutableDictionary = NSMutableDictionary.alloc().init();
+
+        itemDict.setObject_forKey_(kSec.kSecClassGenericPassword, kSec.kSecClass);
+        itemDict.setObject_forKey_(dataKey, kSec.kSecAttrService);
+        itemDict.setObject_forKey_(dataString, kSec.kSecValueData);
+
+        // Add the keychain entry
+        const result: any = SecItemAdd(itemDict, NULL);
+
+        // if (result != 0x00) return false;
     }
 
     // decode the access control attributes on a keychain
@@ -115,55 +137,57 @@ export class IosKeychain {
     // SecAccessControlGetConstraints.
     private decode_acl(entry: NSDictionary): string {
 
-        const access_controls = new ObjC.Object(
+        const acl = new ObjC.Object(
             SecAccessControlGetConstraints(entry.objectForKey_(kSec.kSecAttrAccessControl)));
 
         // Ensure we were able to get the SecAccessControlRef
-        if (access_controls.handle.isNull()) { return ''; }
+        if (acl.handle.isNull()) { return ""; }
 
-        let flags: Array<string> = [];
-        let access_control_enumerator: NSDictionary = access_controls.keyEnumerator();
-        let access_control_item_key: any;
+        const flags: string[] = [];
+        const aclEnum: NSDictionary = acl.keyEnumerator();
+        let aclItemkey: any;
 
-        while ((access_control_item_key = access_control_enumerator.nextObject()) !== null) {
+        // tslint:disable-next-line:no-conditional-assignment
+        while ((aclItemkey = aclEnum.nextObject()) !== null) {
 
-            let access_control_item: NSDictionary = access_controls.objectForKey_(access_control_item_key);
+            const aclItem: NSDictionary = acl.objectForKey_(aclItemkey);
 
-            switch (data_to_string(access_control_item_key)) {
+            switch (data_to_string(aclItemkey)) {
 
                 // Defaults?
-                case 'dacl':
+                case "dacl":
                     break;
 
-                case 'osgn':
-                    flags.push('kSecAttrKeyClassPrivate');
+                case "osgn":
+                    flags.push("kSecAttrKeyClassPrivate");
 
-                case 'od':
-                    let constraints: NSDictionary = access_control_item;
-                    let constraint_enumerator = constraints.keyEnumerator();
-                    let constraint_item_key;
+                case "od":
+                    const constraints: NSDictionary = aclItem;
+                    const constraintEnum = constraints.keyEnumerator();
+                    let constraintItemKey;
 
-                    while ((constraint_item_key = constraint_enumerator.nextObject()) !== null) {
+                    // tslint:disable-next-line:no-conditional-assignment
+                    while ((constraintItemKey = constraintEnum.nextObject()) !== null) {
 
-                        switch (data_to_string(constraint_item_key)) {
-                            case 'cpo':
-                                flags.push('kSecAccessControlUserPresence');
+                        switch (data_to_string(constraintItemKey)) {
+                            case "cpo":
+                                flags.push("kSecAccessControlUserPresence");
                                 break;
 
-                            case 'cup':
-                                flags.push('kSecAccessControlDevicePasscode');
+                            case "cup":
+                                flags.push("kSecAccessControlDevicePasscode");
                                 break;
 
-                            case 'pkofn':
-                                constraints.objectForKey_('pkofn') == 1 ?
-                                    flags.push('Or') :
-                                    flags.push('And');
+                            case "pkofn":
+                                constraints.objectForKey_("pkofn") === 1 ?
+                                    flags.push("Or") :
+                                    flags.push("And");
                                 break;
 
-                            case 'cbio':
-                                constraints.objectForKey_('cbio').count() == 1 ?
-                                    flags.push('kSecAccessControlBiometryAny') :
-                                    flags.push('kSecAccessControlBiometryCurrentSet');
+                            case "cbio":
+                                constraints.objectForKey_("cbio").count() === 1 ?
+                                    flags.push("kSecAccessControlBiometryAny") :
+                                    flags.push("kSecAccessControlBiometryCurrentSet");
                                 break;
 
                             default:
@@ -173,8 +197,8 @@ export class IosKeychain {
 
                     break;
 
-                case 'prp':
-                    flags.push('kSecAccessControlApplicationPassword');
+                case "prp":
+                    flags.push("kSecAccessControlApplicationPassword");
                     break;
 
                 default:
@@ -182,7 +206,7 @@ export class IosKeychain {
             }
         }
 
-        return '';
+        return "";
     }
 }
 
@@ -219,7 +243,8 @@ export class IosKeychain {
 //     // loopy-loop the results
 //     for (NSDictionary *entry in (__bridge NSDictionary *)result) {
 
-//         NSString *stringRes = [[NSString alloc] initWithData:[entry objectForKey:@"v_Data"] encoding:NSUTF8StringEncoding];
+//         NSString *stringRes = [[NSString alloc] initWithData:[entry objectForKey:@"v_Data"]
+//                                                     encoding:NSUTF8StringEncoding];
 //         NSLog(@"%@", stringRes);
 
 //     }
@@ -229,10 +254,9 @@ export class IosKeychain {
 //     }
 // }
 
-// To reference some of the constants, the had to be echoed to 
+// To reference some of the constants, the had to be echoed to
 // get their values.
 
 // NSLog(@"Constants Dump");
 // NSLog(@"kSecAttrService: %@", kSecAttrService);
 // NSLog(@"End Constants Dump");
-
