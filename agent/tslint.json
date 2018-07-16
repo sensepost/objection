@@ -6,6 +6,5 @@
     "jsRules": {},
     "rules": {},
     "rulesDirectory": [],
-    "alwaysShowStatus": true,
-    "autoFixOnSave": true
+    "alwaysShowStatus": true
 }

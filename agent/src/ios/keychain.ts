@@ -113,7 +113,7 @@ export class IosKeychain {
     }
 
     // add a string entry to the keychain
-    public add(key: string, data: string) {
+    public add(key: string, data: string): boolean {
 
         // Convert the key and data to NSData
         const dataString: NSString = NSString.stringWithString_(data).dataUsingEncoding_(NSUTF8StringEncoding);
@@ -128,7 +128,9 @@ export class IosKeychain {
         // Add the keychain entry
         const result: any = SecItemAdd(itemDict, NULL);
 
-        // if (result != 0x00) return false;
+        if (result !== 0x00) { return false; }
+
+        return true;
     }
 
     // decode the access control attributes on a keychain
