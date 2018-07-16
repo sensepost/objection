@@ -1,12 +1,12 @@
 DIST_DIR := dist
 
-default: clean test agent sdist
+default: clean test frida-agent sdist
 
 clean:
 	$(RM) $(DIST_DIR)/*
 
-agent:
-	cd objection/agent && npm run build
+frida-agent:
+	cd agent && npm run build
 
 sdist:
 	python setup.py sdist

@@ -6,8 +6,8 @@
   "main": "src/index.ts",
   "scripts": {
     "prepare": "npm run build",
-    "build": "frida-compile src/index.ts -o agent.js -c",
-    "watch": "frida-compile src/index.ts -o agent.js -w -c"
+    "build": "frida-compile src/index.ts -o ../objection/agent.js -c",
+    "watch": "frida-compile src/index.ts -o ../objection/agent.js -w -c"
   },
   "repository": {
     "type": "git",

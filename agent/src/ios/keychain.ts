@@ -122,7 +122,7 @@ export class IosKeychain {
         if (access_controls.handle.isNull()) { return ''; }
 
         let flags: Array<string> = [];
-        var access_control_enumerator: NSDictionary = access_controls.keyEnumerator();
+        let access_control_enumerator: NSDictionary = access_controls.keyEnumerator();
         let access_control_item_key: any;
 
         while ((access_control_item_key = access_control_enumerator.nextObject()) !== null) {

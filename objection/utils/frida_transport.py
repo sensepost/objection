@@ -437,7 +437,7 @@ class Agent(object):
         """
 
         # Compiled frida agent path
-        self.agent_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../agent', 'agent.js')
+        self.agent_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../', 'agent.js')
 
         self.session = None
         self.script = None

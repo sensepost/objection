@@ -51,7 +51,7 @@ setup(
             _package_files(os.path.join(here, 'objection/console/helpfiles'), '.txt') +
             _package_files(os.path.join(here, 'objection/utils/assets'), '.jks') +
             _package_files(os.path.join(here, 'objection/utils/assets'), '.xml') +
-            [os.path.join(here, 'objection/agent/agent.js')],  # Frida agent
+            [os.path.join(here, 'objection/agent.js')],  # Frida agent
     },
     package_dir={'': 'objection'},
     packages=find_packages('objection'),
