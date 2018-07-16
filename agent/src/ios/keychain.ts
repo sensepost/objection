@@ -12,7 +12,7 @@ import {
     SecItemAdd,
     SecItemCopyMatching,
     SecItemDelete,
-} from "../lib/ios/libios";
+ } from "../lib/ios/libios";
 
 const { NSMutableDictionary, NSString } = ObjC.classes;
 const NSUTF8StringEncoding = 4;
@@ -32,7 +32,6 @@ export class IosKeychain {
     // clean out the keychain
     public empty() {
 
-        // the base query dictionary to use for the keychain lookups
         const searchDictionary = NSMutableDictionary.alloc().init();
 
         itemClasses.forEach((clazz) => {
@@ -60,12 +59,12 @@ export class IosKeychain {
 
             searchDictionary.setObject_forKey_(clazz, kSec.kSecClass);
 
-            // prepare a pointer for the results and call SecItemCopyMatching
+            // prepare a pointer for the results and call SecItemCopyMatching to get them
             const resultsPointer: NativePointer = Memory.alloc(Process.pointerSize);
-            const copyResults: NativePointer = SecItemCopyMatching(searchDictionary, resultsPointer);
+            const copyResult: NativePointer = SecItemCopyMatching(searchDictionary, resultsPointer);
 
             // without results (aka non-zero OSStatus) we just move along.
-            if (!copyResults.isNull()) { return; }
+            if (!copyResult.isNull()) { return; }
 
             // read the resultant dict of the lookup from memory
             const searchResults: NSDictionary = new ObjC.Object(Memory.readPointer(resultsPointer));

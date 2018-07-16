@@ -134,8 +134,11 @@ def start(quiet: bool) -> None:
 
     api = agent.exports()
 
-    pprint(api.keychain_dump())
-    # pprint(api.keychain_empty())
+    print('Agent version: {v}'.format(v=api.version()))
+
+    pprint(api.keychain_add('foo', 'bar'))
+    pprint(api.keychain_list())
+    pprint(api.keychain_empty())
 
     r = Repl()
     r.start_repl(quiet=quiet)

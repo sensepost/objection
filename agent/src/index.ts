@@ -1,9 +1,15 @@
 import { IosKeychain } from "./ios/keychain";
+import { version } from "./version";
 
-const keychain = new IosKeychain();
+const keychain: IosKeychain = new IosKeychain();
 
 rpc.exports = {
-    keychainAdd: () => keychain.add.bind(keychain),
-    keychainDump: () => keychain.list.bind(keychain),
-    keychainEmpty: () => keychain.empty.bind(keychain),
+
+    // keychain
+    keychainAdd: (key: string, data: string) => keychain.add(key, data),
+    keychainEmpty: () => keychain.empty(),
+    keychainList: () => keychain.list(),
+
+    // meta
+    version: () => version,
 };
