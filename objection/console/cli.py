@@ -1,3 +1,5 @@
+from pprint import pprint
+
 import click
 import frida
 
@@ -7,11 +9,8 @@ from ..commands.device import get_device_info
 from ..commands.mobile_packages import patch_ios_ipa, patch_android_apk
 from ..state.app import app_state
 from ..state.connection import state_connection
-from ..utils.helpers import normalize_gadget_name, print_frida_connection_help, warn_about_older_operating_systems
-
 from ..utils.frida_transport import Agent
-
-from pprint import pprint
+from ..utils.helpers import normalize_gadget_name, print_frida_connection_help, warn_about_older_operating_systems
 
 
 # Start the Click command group
@@ -23,7 +22,9 @@ from pprint import pprint
 @click.option('--gadget', '-g', required=False, default='Gadget',
               help='Name of the Frida Gadget/Process to connect to.', show_default=True)
 @click.option('--serial', '-S', required=False, default=None, help='A device serial to connect to.')
-def cli(network: bool, host: str, port: int, gadget: str, serial: str) -> None:
+@click.option('--debug', '-d', required=False, default=False, is_flag=True,
+              help='Enabled debug mode whith verbose output.')
+def cli(network: bool, host: str, port: int, gadget: str, serial: str, debug: bool) -> None:
     """
         \b
              _     _         _   _
@@ -38,6 +39,9 @@ def cli(network: bool, host: str, port: int, gadget: str, serial: str) -> None:
         By default, communications will happen over USB, unless the --network
         option is provided.
     """
+
+    if debug:
+        app_state.debug = debug
 
     # disable the usb comms if network is chosen.
     if network:
@@ -128,17 +132,16 @@ def explore(startup_command: str, startup_script: str, hook_debug: bool, quiet: 
 @click.option('--quiet', '-q', required=False, default=False, is_flag=True,
               help='Do not display the objection logo on startup.')
 def start(quiet: bool) -> None:
+    """
+        Start a new session.
+    """
 
     agent = Agent()
-    agent.inject()
+    state_connection.api = agent.inject().exports()
 
-    api = agent.exports()
-
-    print('Agent version: {v}'.format(v=api.version()))
-
-    pprint(api.keychain_add('foo', 'bar'))
-    pprint(api.keychain_list())
-    pprint(api.keychain_empty())
+    # pprint(state_connection.get_api().keychain_add('foos', 'bar'))
+    pprint(state_connection.get_api().keychain_list())
+    # pprint(api.keychain_empty())
 
     r = Repl()
     r.start_repl(quiet=quiet)

@@ -3,8 +3,22 @@ import shlex
 import click
 from pkg_resources import parse_version
 
+from ..state.app import app_state
 from ..state.device import device_state
 from ..state.jobs import job_manager_state
+
+
+def debug_print(message: str) -> None:
+    """
+        Prints a message if the application is running with
+        debugging enabled.
+
+        :param message:
+        :return:
+    """
+
+    if app_state.should_debug():
+        click.secho('[debug] {message}'.format(message=message), dim=True)
 
 
 def list_current_jobs() -> dict:

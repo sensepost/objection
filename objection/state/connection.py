@@ -18,6 +18,7 @@ class StateConnection(object):
         self.device_serial = None
 
         self.gadget_name = 'Gadget'
+        self.api = None
 
     def use_usb(self) -> None:
         """
@@ -61,10 +62,23 @@ class StateConnection(object):
 
         if t == self.TYPE_USB:
             return 'usb'
+
         if t == self.TYPE_REMOTE:
             return 'net'
 
         return ''
+
+    def get_api(self):
+        """
+            Return a Frida RPC API session
+
+            :return:
+        """
+
+        if not self.api:
+            raise Exception('No API session available')
+
+        return self.api
 
     def __repr__(self) -> str:
         return '<State Usb:{0}, Network:{1}, Host:{2}, Port:{3}'.format(self.usb, self.network, self.host, self.port)
