@@ -682,7 +682,7 @@ class AndroidPatcher(BasePlatformPatcher):
                          'output to determine if zipalign actually had an error: \n'), fg='red')
             click.secho(o.err, fg='red')
 
-        click.secho('Zipaling completed', fg='green')
+        click.secho('Zipalign completed', fg='green')
 
     def sign_apk(self):
         """
