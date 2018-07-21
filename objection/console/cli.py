@@ -141,7 +141,7 @@ def start(quiet: bool) -> None:
 
     # pprint(state_connection.get_api().keychain_add('foos', 'bar'))
     pprint(state_connection.get_api().keychain_list())
-    # pprint(api.keychain_empty())
+    # pprint(state_connection.get_api().keychain_empty())
 
     r = Repl()
     r.start_repl(quiet=quiet)

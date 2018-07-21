@@ -1,11 +1,15 @@
 {
-    "compilerOptions": {
-        "lib": [
-            "es5",
-            "es2015.promise"
-        ],
-        "typeRoots": [
-            "node_modules/frida-gum-types"
-        ]
-    }
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "lib": [
+      "es5",
+      "es2015.promise",
+      "es2015.proxy"
+    ],
+    "typeRoots": [
+      "node_modules/frida-gum-types"
+    ]
+  }
 }

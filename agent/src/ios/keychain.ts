@@ -4,15 +4,11 @@ import { kSec } from "../lib/ios/constants";
 import { data_to_string } from "../lib/ios/helpers";
 import { IKeychainItem } from "../lib/ios/interfaces";
 import {
-    kCFBooleanTrue,
+    libObjc,
     NSDictionary,
     NSMutableDictionary,
     NSString,
-    SecAccessControlGetConstraints,
-    SecItemAdd,
-    SecItemCopyMatching,
-    SecItemDelete,
- } from "../lib/ios/libios";
+ } from "../lib/ios/libobjc";
 
 const { NSMutableDictionary, NSString } = ObjC.classes;
 const NSUTF8StringEncoding = 4;
@@ -38,13 +34,15 @@ export class IosKeychain {
 
             // set the class-type we are querying for now & delete
             searchDictionary.setObject_forKey_(clazz, kSec.kSecClass);
-            SecItemDelete(searchDictionary);
+            libObjc.SecItemDelete(searchDictionary);
         });
     }
 
     // dump the contents of the iOS keychain, returning the
     // results as an array representation.
     public list(): IKeychainItem[] {
+
+        const kCFBooleanTrue = ObjC.classes.__NSCFBoolean.numberWithBool_(true);
 
         // the base query dictionary to use for the keychain lookups
         const searchDictionary = NSMutableDictionary.alloc().init();
@@ -61,7 +59,8 @@ export class IosKeychain {
 
             // prepare a pointer for the results and call SecItemCopyMatching to get them
             const resultsPointer: NativePointer = Memory.alloc(Process.pointerSize);
-            const copyResult: NativePointer = SecItemCopyMatching(searchDictionary, resultsPointer);
+            // const copyResult: NativePointer = SecItemCopyMatching(searchDictionary, resultsPointer);
+            const copyResult: NativePointer = libObjc.SecItemCopyMatching(searchDictionary, resultsPointer);
 
             // without results (aka non-zero OSStatus) we just move along.
             if (!copyResult.isNull()) { return; }
@@ -125,7 +124,7 @@ export class IosKeychain {
         itemDict.setObject_forKey_(dataString, kSec.kSecValueData);
 
         // Add the keychain entry
-        const result: any = SecItemAdd(itemDict, NULL);
+        const result: any = libObjc.SecItemAdd(itemDict, NULL);
 
         if (result !== 0x00) { return false; }
 
@@ -139,7 +138,7 @@ export class IosKeychain {
     private decode_acl(entry: NSDictionary): string {
 
         const acl = new ObjC.Object(
-            SecAccessControlGetConstraints(entry.objectForKey_(kSec.kSecAttrAccessControl)));
+            libObjc.SecAccessControlGetConstraints(entry.objectForKey_(kSec.kSecAttrAccessControl)));
 
         // Ensure we were able to get the SecAccessControlRef
         if (acl.handle.isNull()) { return ""; }
