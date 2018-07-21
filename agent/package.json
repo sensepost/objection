@@ -32,8 +32,8 @@
     "frida-objc": "^2.0.6"
   },
   "devDependencies": {
-    "frida-compile": "^5.3.7",
-    "frida-gum-types": "^1.2.3",
+    "frida-compile": "^6.0.0",
+    "frida-gum-types": "^1.2.4",
     "tslint": "^5.11.0"
   }
 }
