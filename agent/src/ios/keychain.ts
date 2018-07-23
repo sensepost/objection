@@ -3,12 +3,12 @@
 import { kSec } from "../lib/ios/constants";
 import { data_to_string } from "../lib/ios/helpers";
 import { IKeychainItem } from "../lib/ios/interfaces";
+import { libObjc } from "../lib/ios/libobjc";
 import {
-    libObjc,
     NSDictionary,
     NSMutableDictionary,
     NSString,
- } from "../lib/ios/libobjc";
+ } from "../lib/ios/types";
 
 const { NSMutableDictionary, NSString } = ObjC.classes;
 const NSUTF8StringEncoding = 4;
@@ -42,6 +42,7 @@ export class IosKeychain {
     // results as an array representation.
     public list(): IKeychainItem[] {
 
+        // http://nshipster.com/bool/
         const kCFBooleanTrue = ObjC.classes.__NSCFBoolean.numberWithBool_(true);
 
         // the base query dictionary to use for the keychain lookups

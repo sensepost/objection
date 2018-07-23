@@ -462,20 +462,20 @@ class Agent(object):
         try:
 
             # log the hook response if needed
-            if app_state.should_debug_hooks():
+            if app_state.should_debug():
                 click.secho('- [response] ' + '-' * 18, dim=True)
                 click.secho(json.dumps(message, indent=2, sort_keys=True), dim=True)
                 click.secho('- [./response] ' + '-' * 16, dim=True)
 
-            # process the response
-            if message and 'payload' in message:
-
-                self.messages.append(RunnerMessage(message['payload'], data))
-
-                # check if the last message was an error
-                msg = self.get_last_message()
-                if not msg.is_successful():
-                    click.secho('[hook failure] {0}'.format(msg.error_reason), fg='red')
+            # # process the response
+            # if message and 'payload' in message:
+            #
+            #     self.messages.append(RunnerMessage(message['payload'], data))
+            #
+            #     # check if the last message was an error
+            #     msg = self.get_last_message()
+            #     if not msg.is_successful():
+            #         click.secho('[hook failure] {0}'.format(msg.error_reason), fg='red')
 
         except Exception as e:
             click.secho('Failed to process an incoming message from hook: {0}'.format(e), fg='red', bold=True)

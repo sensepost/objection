@@ -1,4 +1,4 @@
-const nativeExports = {
+const nativeExports: any = {
     SecAccessControlGetConstraints: {
         argTypes: ["pointer"],
         exportName: "SecAccessControlGetConstraints",
@@ -25,25 +25,19 @@ const nativeExports = {
     },
 };
 
-const api = {
+const api: any = {
     SecAccessControlGetConstraints: null,
     SecItemAdd: null,
     SecItemCopyMatching: null,
     SecItemDelete: null,
 };
 
-export type NSDictionary = any;
-export type NSMutableDictionary = any;
-export type NSString = any;
-
-export type CFDictionaryRef = any;
-export type CFTypeRef = any;
-
 // proxy method resolution
 export const libObjc = new Proxy(api, {
     get: (target, key) => {
 
         if (target[key] === null) {
+
             target[key] = new NativeFunction(Module.findExportByName(
                 nativeExports[key].moduleName, nativeExports[key].exportName),
                 nativeExports[key].retType, nativeExports[key].argTypes);

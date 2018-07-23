@@ -1,4 +1,3 @@
-// a keychain item
 export interface IKeychainItem {
     item_class: string;
     create_date: string;
@@ -21,4 +20,18 @@ export interface IKeychainItem {
     account: string;
     label: string;
     data: string;
+}
+
+export interface IIosFileSystem {
+    files: any;
+    path: string;
+    readable: boolean;
+    writable: boolean;
+}
+
+export interface IIosFilePath {
+    attributes: any;
+    fileName: string;
+    readable: boolean | undefined;
+    writable: boolean | undefined;
 }
