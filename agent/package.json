@@ -28,9 +28,9 @@
   },
   "homepage": "https://github.com/sensepost/objection#readme",
   "dependencies": {
+    "frida-fs": "^1.3.0",
     "frida-java": "^1.4.10",
-    "frida-objc": "^2.0.6",
-    "frida-fs": "^1.2.1"
+    "frida-objc": "^2.0.6"
   },
   "devDependencies": {
     "frida-compile": "^6.0.0",
