@@ -53,8 +53,7 @@ setup(
             _package_files(os.path.join(here, 'objection/utils/assets'), '.xml') +
             [os.path.join(here, 'objection/agent.js')],  # Frida agent
     },
-    package_dir={'': 'objection'},
-    packages=find_packages('objection'),
+    packages=find_packages(),
     install_requires=requirements,
     python_requires='>=3.4',
     classifiers=[
