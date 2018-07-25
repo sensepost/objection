@@ -1,10 +1,11 @@
 import click
 from tabulate import tabulate
 
+from ..state.connection import state_connection
 from ..state.device import device_state
 from ..utils.frida_transport import FridaRunner
 from ..utils.helpers import pretty_concat
-from ..utils.templates import generic_hook, ios_hook, android_hook
+from ..utils.templates import ios_hook, android_hook
 
 
 def get_device_info() -> tuple:
@@ -14,77 +15,24 @@ def get_device_info() -> tuple:
         device based on the result.
     """
 
-    hook = generic_hook('device-type')
-
-    runner = FridaRunner()
-    runner.run(hook=hook)
-
-    # pop the last response off the runner object
-    response = runner.get_last_message()
-
-    if not response.is_successful():
-        msg = 'Failed to determine device type!'
-        click.secho(msg, fg='red')
-        raise Exception(msg)
-
-    # set the frida version from the devicetype response
-    device_state.frida_version = response.frida_version
+    api = state_connection.get_api()
+    environment = api.env_runtime()
 
     # ios device information
-    if response.device_type == 'ios':
+    if environment == 'ios':
         device_state.device_type = 'ios'
+        package_info = api.env_ios()
 
-        return _get_ios_device_information()
+        return pretty_concat(package_info['applicationName'], 30, left=True), \
+               package_info['systemName'], package_info['model'], package_info['systemVersion']
 
     # android device information
-    if runner.get_last_message().device_type == 'android':
+    if environment == 'android':
         device_state.device_type = 'android'
+        package_info = api.env_android()
 
-        return _get_android_device_information()
-
-
-def _get_ios_device_information() -> tuple:
-    """
-        Return information for the currently connected iOS device.
-
-        :return:
-    """
-
-    runner = FridaRunner(hook=ios_hook('device-information'))
-    runner.run()
-    response = runner.get_last_message()
-
-    # update the internal device_state
-    device_state.os_version = response.systemVersion
-
-    # we have some device information for iOS, return it!
-    if response.is_successful():
-        return pretty_concat(response.applicationName, 30, left=True), \
-               response.systemName, response.model, response.systemVersion
-
-    raise Exception('Failed to get device information')
-
-
-def _get_android_device_information() -> tuple:
-    """
-        Return information for the currently connected Android device.
-
-        :return:
-    """
-
-    runner = FridaRunner(hook=android_hook('device-information'))
-    runner.run()
-    response = runner.get_last_message()
-
-    # update the internal device_state
-    device_state.os_version = response.version
-
-    # we have some device information for Android, return it!
-    if response.is_successful():
-        return pretty_concat(response.application_name, 30, left=True), \
-               response.device, response.brand, response.version
-
-    raise Exception('Failed to get device information')
+        return pretty_concat(package_info['application_name'], 30, left=True), \
+               package_info['device'], package_info['brand'], package_info['version']
 
 
 def get_environment(args: list = None) -> None:

@@ -3,7 +3,12 @@ import { IosJailBreak } from "./ios/jailbreak";
 import { IosKeychain } from "./ios/keychain";
 import { nsuserdefaults} from "./ios/nsuserdefaults";
 import { Plist } from "./ios/plist";
+import { Environment } from "./lib/environment";
+import { Jobs } from "./lib/jobs";
 import { version } from "./version";
+
+const jobs: Jobs = new Jobs();
+const environment: Environment = new Environment();
 
 const keychain: IosKeychain = new IosKeychain();
 const iosfilesystem: IosFilesystem = new IosFilesystem();
@@ -11,6 +16,12 @@ const iosjailbreak: IosJailBreak = new IosJailBreak();
 const plist: Plist = new Plist();
 
 rpc.exports = {
+
+    // environment
+    envAndroid: () => environment.android(),
+    envFrida: () => environment.frida(),
+    envIos: () => environment.ios(),
+    envRuntime: () => environment.runtime(),
 
     // ios filesystem
     iosLs: (path: string) => iosfilesystem.ls(path),
