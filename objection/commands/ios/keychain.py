@@ -78,7 +78,7 @@ def dump(args: list = None) -> None:
 
     # Just dump it to the screen
     for entry in keychain:
-        click.secho(tabulate(entry.items(), headers='firstrow', tablefmt='presto'))
+        click.secho(tabulate(sorted(entry.items()), headers='firstrow', tablefmt='presto'))
         click.secho('')
 
     return

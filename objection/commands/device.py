@@ -78,4 +78,4 @@ def _get_android_environment() -> None:
     paths = state_connection.get_api().env_android_paths()
 
     click.secho('')
-    click.secho(tabulate(paths.items(), headers=['Name', 'Path']))
+    click.secho(tabulate(sorted(paths.items()), headers=['Name', 'Path']))
