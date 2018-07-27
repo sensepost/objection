@@ -1,6 +1,6 @@
-import { getApplicationContext } from "./android/libjava";
+import { getApplicationContext, wrapJavaPerform } from "./android/libjava";
 import { DeviceType } from "./constants";
-import { IAndroidPackage, IFridaInfo, IIosPackage } from "./interfaces";
+import { IAndroidPackage, IFridaInfo, IIosBundlePaths, IIosPackage } from "./interfaces";
 import { NSSearchPaths, NSUserDomainMask } from "./ios/constants";
 import { getNSFileManager, getNSMainBundle } from "./ios/helpers";
 import { NSBundle } from "./ios/types";
@@ -50,7 +50,7 @@ export class Environment {
         // NSString *resourcePath = [bundle resourcePath];
     }
 
-    public iosPaths(): any {
+    public iosPaths(): IIosBundlePaths {
 
         const mb: NSBundle = getNSMainBundle();
 
@@ -64,29 +64,46 @@ export class Environment {
 
     public androidPackage(): Promise<IAndroidPackage> {
 
-        return new Promise((resolve, reject) => {
-            Java.perform(() => {
-                try {
-                    // https://developer.android.com/reference/android/os/Build.html
-                    const Build: any = Java.use("android.os.Build");
-                    const result = {
-                        application_name: getApplicationContext().getPackageName(),
-                        board: Build.BOARD.value.toString(),
-                        brand: Build.BRAND.value.toString(),
-                        device: Build.DEVICE.value.toString(),
-                        host: Build.HOST.value.toString(),
-                        id: Build.ID.value.toString(),
-                        model: Build.MODEL.value.toString(),
-                        product: Build.PRODUCT.value.toString(),
-                        user: Build.USER.value.toString(),
-                        version: Java.androidVersion,
-                    };
-                    resolve(result);
-                } catch (e) {
-                    reject(e);
-                }
-            });
+        return wrapJavaPerform(() => {
+
+            // https://developer.android.com/reference/android/os/Build.html
+            const Build: any = Java.use("android.os.Build");
+
+            return {
+                application_name: getApplicationContext().getPackageName(),
+                board: Build.BOARD.value.toString(),
+                brand: Build.BRAND.value.toString(),
+                device: Build.DEVICE.value.toString(),
+                host: Build.HOST.value.toString(),
+                id: Build.ID.value.toString(),
+                model: Build.MODEL.value.toString(),
+                product: Build.PRODUCT.value.toString(),
+                user: Build.USER.value.toString(),
+                version: Java.androidVersion,
+            };
         });
+    }
+
+    public androidPaths(): any {
+
+        return wrapJavaPerform(() => {
+
+            const context = getApplicationContext();
+
+            return {
+                cacheDirectory: context.getCacheDir().getAbsolutePath().toString(),
+                codeCacheDirectory: "getCodeCacheDir" in context ? context.getCodeCacheDir()
+                    .getAbsolutePath().toString() : "n/a",
+                externalCacheDirectory: context.getExternalCacheDir().getAbsolutePath().toString(),
+                filesDirectory: context.getFilesDir().getAbsolutePath().toString(),
+                obbDir: context.getObbDir().getAbsolutePath().toString(),
+                packageCodePath: context.getPackageCodePath().toString(),
+            };
+        });
+
+        // -- Sample Java
+        //
+        // getApplicationContext().getFilesDir().getAbsolutePath()
     }
 
     private getPathForNSLocation(NSPath: NSSearchPaths): string {

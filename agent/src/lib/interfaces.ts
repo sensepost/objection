@@ -29,3 +29,10 @@ export interface IAndroidPackage {
     user: string;
     version: string;
 }
+
+export interface IIosBundlePaths {
+    BundlePath: string;
+    CachesDirectory: string;
+    DocumentDirectory: string;
+    LibraryDirectory: string;
+}

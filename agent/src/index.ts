@@ -19,6 +19,7 @@ rpc.exports = {
 
     // environment
     envAndroid: () => environment.androidPackage(),
+    envAndroidPaths: () => environment.androidPaths(),
     envFrida: () => environment.frida(),
     envIos: () => environment.iosPackage(),
     envIosPaths: () => environment.iosPaths(),

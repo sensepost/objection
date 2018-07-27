@@ -77,6 +77,13 @@ def _get_android_environment() -> None:
         :return:
     """
 
+    paths = state_connection.get_api().env_android_paths()
+
+    click.secho('')
+    click.secho(tabulate(paths.items(), headers=['Name', 'Path']))
+
+    return
+
     hook = android_hook('filesystem/environment')
     runner = FridaRunner(hook=hook)
     runner.run()
