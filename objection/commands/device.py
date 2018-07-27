@@ -3,9 +3,7 @@ from tabulate import tabulate
 
 from ..state.connection import state_connection
 from ..state.device import device_state
-from ..utils.frida_transport import FridaRunner
 from ..utils.helpers import pretty_concat
-from ..utils.templates import android_hook
 
 
 def get_device_info() -> tuple:
@@ -81,23 +79,3 @@ def _get_android_environment() -> None:
 
     click.secho('')
     click.secho(tabulate(paths.items(), headers=['Name', 'Path']))
-
-    return
-
-    hook = android_hook('filesystem/environment')
-    runner = FridaRunner(hook=hook)
-    runner.run()
-    response = runner.get_last_message()
-
-    if not response.is_successful():
-        click.secho('Failed to get environment directories.', fg='red')
-        return
-
-    data = response.data
-
-    directories = []
-    for name, directory in data.items():
-        directories.append([name, directory])
-
-    click.secho('')
-    click.secho(tabulate(directories, headers=['Name', 'Path']))

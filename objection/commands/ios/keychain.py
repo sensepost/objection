@@ -3,6 +3,7 @@ import json
 import click
 from tabulate import tabulate
 
+from objection.state.connection import state_connection
 from objection.utils.frida_transport import FridaRunner
 from objection.utils.templates import ios_hook
 
@@ -61,16 +62,8 @@ def dump(args: list = None) -> None:
     if not _should_output_json(args):
         click.secho('Get all of the attributes by adding `--json keychain.json` to this command', dim=True)
 
-    click.secho('Reading the iOS keychain...', dim=True)
-    hook = ios_hook('keychain/dump')
-    runner = FridaRunner(hook=hook)
-    runner.run()
-
-    response = runner.get_last_message()
-
-    if not response.is_successful():
-        click.secho('Failed to get keychain items with error: {0}'.format(response.error_message), fg='red')
-        return
+    api = state_connection.get_api()
+    keychain = api.keychain_list()
 
     if _should_output_json(args):
         destination = args[1]
@@ -78,24 +71,16 @@ def dump(args: list = None) -> None:
         click.secho('Writing full keychain as json to {0}...'.format(destination), dim=True)
 
         with open(destination, 'w') as f:
-            f.write(json.dumps(response.data, indent=2))
+            f.write(json.dumps(keychain, indent=2))
 
         click.secho('Dumped full keychain to: {0}'.format(destination), fg='green')
         return
 
-    # refer to hooks/ios/keychain/dump.js for a key,value reference
-
-    data = []
-
-    if response.data:
-        for entry in response.data:
-            data.append([entry['item_class'], entry['account'], entry['service'], entry['generic'], entry['data'], ])
-
+    for entry in keychain:
+        click.secho(tabulate(entry.items(), headers='firstrow', tablefmt='presto'))
         click.secho('')
-        click.secho(tabulate(data, headers=['Class', 'Account', 'Service', 'Generic', 'Data']))
 
-    else:
-        click.secho('No keychain data could be found', fg='yellow')
+    return
 
 
 def clear(args: list = None) -> None:

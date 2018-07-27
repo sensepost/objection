@@ -577,7 +577,7 @@ class Agent(object):
             :return:
         """
 
-        debug_print('Injecting objection agent...')
+        debug_print('Injecting agent...')
 
         self.session = self._get_session()
         self.script = self.session.create_script(source=self._get_agent_source())
@@ -590,8 +590,8 @@ class Agent(object):
             debug_print('Resuming PID `{pid}`'.format(pid=self.spawned_pid))
             self.device.resume(self.spawned_pid)
 
-        # click.secho('Objection agent v{version} injected!'.format(version=self.exports().version()), fg='green',
-        #             dim=True)
+        click.secho('Agent v{version} injected!'.format(version=self.exports().version()), fg='green',
+                    dim=True)
 
         return self
 
