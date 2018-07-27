@@ -60,7 +60,7 @@ def dump(args: list = None) -> None:
     click.secho('Note: You may be asked to authenticate using the devices passcode or TouchID')
 
     if not _should_output_json(args):
-        click.secho('Get all of the attributes by adding `--json keychain.json` to this command', dim=True)
+        click.secho('Save the output by adding `--json keychain.json` to this command', dim=True)
 
     api = state_connection.get_api()
     keychain = api.keychain_list()
@@ -68,14 +68,15 @@ def dump(args: list = None) -> None:
     if _should_output_json(args):
         destination = args[1]
 
-        click.secho('Writing full keychain as json to {0}...'.format(destination), dim=True)
+        click.secho('Writing keychain as json to {0}...'.format(destination), dim=True)
 
         with open(destination, 'w') as f:
             f.write(json.dumps(keychain, indent=2))
 
-        click.secho('Dumped full keychain to: {0}'.format(destination), fg='green')
+        click.secho('Dumped keychain to: {0}'.format(destination), fg='green')
         return
 
+    # Just dump it to the screen
     for entry in keychain:
         click.secho(tabulate(entry.items(), headers='firstrow', tablefmt='presto'))
         click.secho('')

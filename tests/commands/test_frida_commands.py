@@ -14,42 +14,24 @@ class TestFridaCommands(unittest.TestCase):
 
         self.assertTrue(result)
 
-    @mock.patch('objection.commands.frida_commands.FridaRunner')
-    def test_gets_frida_environment(self, mock_runner):
-        mock_response = mock.Mock()
-        mock_response.is_successful.return_value = True
-        type(mock_response).frida_version = '10.0.1'
-        type(mock_response).process_arch = 'arm'
-        type(mock_response).process_platform = 'unknown'
-        type(mock_response).process_has_debugger = True
-
-        mock_runner.return_value.get_last_message.return_value = mock_response
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_gets_frida_environment(self, mock_api):
+        mock_api.return_value.env_frida.return_value = {'arch': 'x64', 'debugger': True, 'heap': 6988464,
+                                                        'platform': 'darwin', 'version': '12.0.3'}
 
         with capture(frida_environment, []) as o:
             output = o
 
         expected_output = """--------------------  -------
-Frida Version         10.0.1
-Process Architecture  arm
-Process Platform      unknown
+Frida Version         12.0.3
+Process Architecture  x64
+Process Platform      darwin
 Debugger Attached     True
+Frida Heap Size       6.7 MiB
 --------------------  -------
 """
 
         self.assertEqual(output, expected_output)
-
-    @mock.patch('objection.commands.frida_commands.FridaRunner')
-    def test_gets_frida_environment_and_handles_failed_hook(self, mock_runner):
-        mock_response = mock.Mock()
-        mock_response.is_successful.return_value = False
-        type(mock_response).error_reason = 'test'
-
-        mock_runner.return_value.get_last_message.return_value = mock_response
-
-        with capture(frida_environment, []) as o:
-            output = o
-
-        self.assertEqual(output, 'Failed to get frida environment with error: test\n')
 
     def test_load_script_validates_arguments(self):
         with capture(load_script, []) as o:
