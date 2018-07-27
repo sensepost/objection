@@ -5,7 +5,7 @@ from ..state.connection import state_connection
 from ..state.device import device_state
 from ..utils.frida_transport import FridaRunner
 from ..utils.helpers import pretty_concat
-from ..utils.templates import ios_hook, android_hook
+from ..utils.templates import android_hook
 
 
 def get_device_info() -> tuple:
@@ -64,23 +64,10 @@ def _get_ios_environment() -> None:
         :return:
     """
 
-    hook = ios_hook('filesystem/environment')
-    runner = FridaRunner(hook=hook)
-    runner.run()
-    response = runner.get_last_message()
-
-    if not response.is_successful():
-        click.secho('Failed to get environment directories.', fg='red')
-        return
-
-    data = response.data
-
-    directories = []
-    for name, directory in data.items():
-        directories.append([name, directory])
+    paths = state_connection.get_api().env_ios_paths()
 
     click.secho('')
-    click.secho(tabulate(directories, headers=['Name', 'Path']))
+    click.secho(tabulate(paths.items(), headers=['Name', 'Path']))
 
 
 def _get_android_environment() -> None:

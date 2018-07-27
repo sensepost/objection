@@ -18,9 +18,10 @@ const plist: Plist = new Plist();
 rpc.exports = {
 
     // environment
-    envAndroid: () => environment.android(),
+    envAndroid: () => environment.androidPackage(),
     envFrida: () => environment.frida(),
-    envIos: () => environment.ios(),
+    envIos: () => environment.iosPackage(),
+    envIosPaths: () => environment.iosPaths(),
     envRuntime: () => environment.runtime(),
 
     // ios filesystem

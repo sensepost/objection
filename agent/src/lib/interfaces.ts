@@ -1,6 +1,7 @@
 export interface IFridaInfo {
     arch: string;
     debugger: boolean;
+    heap: number;
     platform: string;
     version: string;
 }

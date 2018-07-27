@@ -43,3 +43,22 @@ export enum kSec {
     kSecAttrAccessibleAlwaysThisDeviceOnly = "dku",
     kSecValueData = "v_Data",
 }
+
+export enum NSSearchPaths {
+    NSApplicationDirectory = 1,
+    NSDemoApplicationDirectory,
+    NSDeveloperApplicationDirectory,
+    NSAdminApplicationDirectory,
+    NSLibraryDirectory,
+    NSDeveloperDirectory,
+    NSUserDirectory,
+    NSDocumentationDirectory,
+    NSDocumentDirectory,
+    NSCoreServiceDirectory,
+    NSAutosavedInformationDirectory,
+    NSDesktopDirectory,
+    NSCachesDirectory,
+    NSApplicationSupportDirectory,
+}
+
+export const NSUserDomainMask = 1;

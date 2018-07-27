@@ -1,15 +1,16 @@
 import fs = require("frida-fs");
+import { getNSFileManager } from "../lib/ios/helpers";
 import { IIosFilePath, IIosFileSystem } from "../lib/ios/interfaces";
 import { NSDictionary, NSFileManager, NSString } from "../lib/ios/types";
 
-const { NSFileManager, NSString} = ObjC.classes;
+const { NSString } = ObjC.classes;
 
 export class IosFilesystem {
 
     get NSFileManager(): any {
 
         if (this.fileManager === undefined) {
-            this.fileManager = NSFileManager.defaultManager();
+            this.fileManager = getNSFileManager();
         }
 
         return this.fileManager;

@@ -3,9 +3,10 @@ import os
 import click
 from tabulate import tabulate
 
+from objection.state.connection import state_connection
 from ..utils.frida_transport import FridaRunner
-from ..utils.helpers import clean_argument_flags
-from ..utils.templates import generic_hook, template_env
+from ..utils.helpers import clean_argument_flags, sizeof_fmt
+from ..utils.templates import template_env
 
 
 def _should_disable_exception_handler(args: list = None) -> bool:
@@ -28,23 +29,15 @@ def frida_environment(args: list = None) -> None:
         :return:
     """
 
-    hook = generic_hook('frida')
+    frida_env = state_connection.get_api().env_frida()
 
-    runner = FridaRunner(hook=hook)
-    runner.run()
-    response = runner.get_last_message()
-
-    if not response.is_successful():
-        click.secho('Failed to get frida environment with error: {}'.format(response.error_reason))
-        return
-
-    data = [
-        ('Frida Version', response.frida_version),
-        ('Process Architecture', response.process_arch),
-        ('Process Platform', response.process_platform),
-        ('Debugger Attached', response.process_has_debugger)
-    ]
-    click.secho(tabulate(data), bold=True)
+    click.secho(tabulate([
+        ('Frida Version', frida_env['version']),
+        ('Process Architecture', frida_env['arch']),
+        ('Process Platform', frida_env['platform']),
+        ('Debugger Attached', frida_env['debugger']),
+        ('Frida Heap Size', sizeof_fmt(frida_env['heap']))
+    ]))
 
 
 def load_script(args: list) -> None:

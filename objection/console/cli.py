@@ -137,16 +137,6 @@ def start(quiet: bool) -> None:
     agent = Agent()
     state_connection.api = agent.inject().exports()
 
-    # pprint(state_connection.get_api().keychain_add('foos', 'bar'))
-    # pprint(state_connection.get_api().keychain_list())
-    # pprint(state_connection.get_api().keychain_empty())
-    # pprint(state_connection.get_api().ios_ls('/Users/leonjza/Documents/git/objection'))
-    # pprint(state_connection.get_api().ios_ls('/Users/leonjza/Documents/git/objection'))
-    # pprint(state_connection.get_api().ios_ls('/Users/leonjza/Documents/git/objection'))
-    # pprint(state_connection.get_api().nsuser_defaults())
-    # pprint(state_connection.get_api().ios_read("/etc/passwd"))
-    # pprint(state_connection.get_api().ios_jailbreak_disable())
-
     r = Repl()
     r.set_prompt_tokens(get_device_info())
     r.start_repl(quiet=quiet)
