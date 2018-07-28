@@ -74,9 +74,9 @@ LibraryDirectory  /var/mobile/Containers/Data/Application/C1D04553/Library
             output = o
 
         expected_output = """
-Name                    Path
-----------------------  ------------------------------------------------------------
-packageCodePath         /data/app/com.sensepost.apewpew-1/base.apk
+Name             Path
+---------------  ------------------------------------------
+packageCodePath  /data/app/com.sensepost.apewpew-1/base.apk
 """
 
         self.assertEqual(output, expected_output)
