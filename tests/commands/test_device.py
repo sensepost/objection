@@ -68,11 +68,6 @@ LibraryDirectory  /var/mobile/Containers/Data/Application/C1D04553/Library
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_prints_android_environment_via_platform_helpers(self, mock_api):
         mock_api.return_value.env_android_paths.return_value = {
-            'cacheDirectory': '/data/user/0/com.sensepost.apewpew/cache',
-            'codeCacheDirectory': '/data/user/0/com.sensepost.apewpew/code_cache',
-            'externalCacheDirectory': '/storage/emulated/0/Android/data/com.sensepost.apewpew/cache',
-            'filesDirectory': '/data/user/0/com.sensepost.apewpew/files',
-            'obbDir': '/storage/emulated/0/Android/obb/com.sensepost.apewpew',
             'packageCodePath': '/data/app/com.sensepost.apewpew-1/base.apk'}
 
         with capture(_get_android_environment) as o:
@@ -81,11 +76,6 @@ LibraryDirectory  /var/mobile/Containers/Data/Application/C1D04553/Library
         expected_output = """
 Name                    Path
 ----------------------  ------------------------------------------------------------
-cacheDirectory          /data/user/0/com.sensepost.apewpew/cache
-codeCacheDirectory      /data/user/0/com.sensepost.apewpew/code_cache
-externalCacheDirectory  /storage/emulated/0/Android/data/com.sensepost.apewpew/cache
-filesDirectory          /data/user/0/com.sensepost.apewpew/files
-obbDir                  /storage/emulated/0/Android/obb/com.sensepost.apewpew
 packageCodePath         /data/app/com.sensepost.apewpew-1/base.apk
 """
 
