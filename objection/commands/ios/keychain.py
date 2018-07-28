@@ -62,6 +62,7 @@ def dump(args: list = None) -> None:
     if not _should_output_json(args):
         click.secho('Save the output by adding `--json keychain.json` to this command', dim=True)
 
+    click.secho('Dumping the iOS keychain...', dim=True)
     api = state_connection.get_api()
     keychain = api.keychain_list()
 
@@ -77,11 +78,17 @@ def dump(args: list = None) -> None:
         return
 
     # Just dump it to the screen
-    for entry in keychain:
-        click.secho(tabulate(sorted(entry.items()), headers='firstrow', tablefmt='presto'))
-        click.secho('')
-
-    return
+    click.secho(tabulate(
+        [[
+            entry['create_date'],
+            entry['accessible_attribute'].replace('kSecAttrAccessible', ''),
+            entry['access_control'],
+            entry['item_class'].replace('kSecClassGeneric', ''),
+            entry['account'],
+            entry['service'],
+            entry['data']
+        ] for entry in keychain], headers=['Created', 'Accessible', 'ACL', 'Type', 'Account', 'Service', 'Data'],
+    ))
 
 
 def clear(args: list = None) -> None:

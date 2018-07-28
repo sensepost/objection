@@ -52,48 +52,29 @@ class TestKeychain(unittest.TestCase):
 
         expected_output = """Note: You may be asked to authenticate using the devices passcode or TouchID
 Save the output by adding `--json keychain.json` to this command
+Dumping the iOS keychain...
+Created    Accessible    ACL    Type    Account    Service    Data
+---------  ------------  -----  ------  ---------  ---------  ------
 """
         self.assertEqual(output, expected_output)
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_dump_to_screen(self, mock_api):
         mock_api.return_value.keychain_list.return_value = [
-            {'access_control': '', 'account': '', 'alias': '', 'comment': '',
-             'create_date': '2018-07-21 18:11:15 +0000', 'creator': '',
-             'custom_icon': '', 'data': 'bar', 'description': '',
-             'entitlement_group': '8AH3PS2AS7.za.sensepost.ipewpew',
-             'generic': '', 'invisible': '', 'item_class': 'genp',
-             'label': '', 'modification_date': '2018-07-21 18:11:15 +0000',
-             'negative': '', 'protected': '', 'script_code': '',
-             'service': 'foos', 'type': ''}]
+            {'account': 'foo', 'create_date': 'now', 'accessible_attribute': 'None',
+             'access_control': 'None', 'item_class': 'kSecClassGeneric', 'service': 'foo',
+             'data': 'bar'}
+        ]
 
         with capture(dump, []) as o:
             output = o
 
         expected_output = """Note: You may be asked to authenticate using the devices passcode or TouchID
 Save the output by adding `--json keychain.json` to this command
- access_control    |
--------------------+---------------------------------
- account           |
- alias             |
- comment           |
- create_date       | 2018-07-21 18:11:15 +0000
- creator           |
- custom_icon       |
- data              | bar
- description       |
- entitlement_group | 8AH3PS2AS7.za.sensepost.ipewpew
- generic           |
- invisible         |
- item_class        | genp
- label             |
- modification_date | 2018-07-21 18:11:15 +0000
- negative          |
- protected         |
- script_code       |
- service           | foos
- type              |
-
+Dumping the iOS keychain...
+Created    Accessible    ACL    Type    Account    Service    Data
+---------  ------------  -----  ------  ---------  ---------  ------
+now        None          None           foo        foo        bar
 """
         self.assertEqual(output, expected_output)
 
@@ -114,6 +95,7 @@ Save the output by adding `--json keychain.json` to this command
             output = o
 
         expected_output = """Note: You may be asked to authenticate using the devices passcode or TouchID
+Dumping the iOS keychain...
 Writing keychain as json to foo.json...
 Dumped keychain to: foo.json
 """

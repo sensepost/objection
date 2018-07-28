@@ -1,14 +1,15 @@
 // dumps all of the keychain items available to the current
 // application.
+import { reverseEnumLookup } from "../lib/helpers";
 import { kSec } from "../lib/ios/constants";
-import { data_to_string } from "../lib/ios/helpers";
+import { dataToString } from "../lib/ios/helpers";
 import { IKeychainItem } from "../lib/ios/interfaces";
 import { libObjc } from "../lib/ios/libobjc";
 import {
     NSDictionary,
     NSMutableDictionary,
     NSString,
- } from "../lib/ios/types";
+} from "../lib/ios/types";
 
 const { NSMutableDictionary, NSString } = ObjC.classes;
 const NSUTF8StringEncoding = 4;
@@ -81,26 +82,28 @@ export class IosKeychain {
 
                 clazzItems.push({
                     access_control: (data.containsKey_(kSec.kSecAttrAccessControl)) ? this.decode_acl(data) : "",
-                    accessible_attribute: kSec[data.objectForKey_(kSec.kSecAttrAccessible)],
-                    account: data_to_string(data.objectForKey_(kSec.kSecAttrAccount)),
-                    alias: data_to_string(data.objectForKey_(kSec.kSecAttrAlias)),
-                    comment: data_to_string(data.objectForKey_(kSec.kSecAttrComment)),
-                    create_date: data_to_string(data.objectForKey_(kSec.kSecAttrCreationDate)),
-                    creator: data_to_string(data.objectForKey_(kSec.kSecAttrCreator)),
-                    custom_icon: data_to_string(data.objectForKey_(kSec.kSecAttrHasCustomIcon)),
-                    data: data_to_string(data.objectForKey_(kSec.kSecValueData)),
-                    description: data_to_string(data.objectForKey_(kSec.kSecAttrDescription)),
-                    entitlement_group: data_to_string(data.objectForKey_(kSec.kSecAttrAccessGroup)),
-                    generic: data_to_string(data.objectForKey_(kSec.kSecAttrGeneric)),
-                    invisible: data_to_string(data.objectForKey_(kSec.kSecAttrIsInvisible)),
-                    item_class: clazz,
-                    label: data_to_string(data.objectForKey_(kSec.kSecAttrLabel)),
-                    modification_date: data_to_string(data.objectForKey_(kSec.kSecAttrModificationDate)),
-                    negative: data_to_string(data.objectForKey_(kSec.kSecAttrIsNegative)),
-                    protected: data_to_string(data.objectForKey_(kSec.kSecProtectedDataItemAttr)),
-                    script_code: data_to_string(data.objectForKey_(kSec.kSecAttrScriptCode)),
-                    service: data_to_string(data.objectForKey_(kSec.kSecAttrService)),
-                    type: data_to_string(data.objectForKey_(kSec.kSecAttrType)),
+                    accessible_attribute: reverseEnumLookup(kSec,
+                        dataToString(data.objectForKey_(kSec.kSecAttrAccessible))),
+                    account: dataToString(data.objectForKey_(kSec.kSecAttrAccount)),
+                    alias: dataToString(data.objectForKey_(kSec.kSecAttrAlias)),
+                    comment: dataToString(data.objectForKey_(kSec.kSecAttrComment)),
+                    create_date: dataToString(data.objectForKey_(kSec.kSecAttrCreationDate)),
+                    creator: dataToString(data.objectForKey_(kSec.kSecAttrCreator)),
+                    custom_icon: dataToString(data.objectForKey_(kSec.kSecAttrHasCustomIcon)),
+                    data: (clazz !== "keys") ? dataToString(data.objectForKey_(kSec.kSecValueData)) :
+                        "(Key data not displayed)",
+                    description: dataToString(data.objectForKey_(kSec.kSecAttrDescription)),
+                    entitlement_group: dataToString(data.objectForKey_(kSec.kSecAttrAccessGroup)),
+                    generic: dataToString(data.objectForKey_(kSec.kSecAttrGeneric)),
+                    invisible: dataToString(data.objectForKey_(kSec.kSecAttrIsInvisible)),
+                    item_class: reverseEnumLookup(kSec, clazz),
+                    label: dataToString(data.objectForKey_(kSec.kSecAttrLabel)),
+                    modification_date: dataToString(data.objectForKey_(kSec.kSecAttrModificationDate)),
+                    negative: dataToString(data.objectForKey_(kSec.kSecAttrIsNegative)),
+                    protected: dataToString(data.objectForKey_(kSec.kSecProtectedDataItemAttr)),
+                    script_code: dataToString(data.objectForKey_(kSec.kSecAttrScriptCode)),
+                    service: dataToString(data.objectForKey_(kSec.kSecAttrService)),
+                    type: dataToString(data.objectForKey_(kSec.kSecAttrType)),
                 });
             }
 
@@ -142,7 +145,7 @@ export class IosKeychain {
             libObjc.SecAccessControlGetConstraints(entry.objectForKey_(kSec.kSecAttrAccessControl)));
 
         // Ensure we were able to get the SecAccessControlRef
-        if (acl.handle.isNull()) { return ""; }
+        if (acl.handle.isNull()) { return "None"; }
 
         const flags: string[] = [];
         const aclEnum: NSDictionary = acl.keyEnumerator();
@@ -153,7 +156,7 @@ export class IosKeychain {
 
             const aclItem: NSDictionary = acl.objectForKey_(aclItemkey);
 
-            switch (data_to_string(aclItemkey)) {
+            switch (dataToString(aclItemkey)) {
 
                 // Defaults?
                 case "dacl":
@@ -170,7 +173,7 @@ export class IosKeychain {
                     // tslint:disable-next-line:no-conditional-assignment
                     while ((constraintItemKey = constraintEnum.nextObject()) !== null) {
 
-                        switch (data_to_string(constraintItemKey)) {
+                        switch (dataToString(constraintItemKey)) {
                             case "cpo":
                                 flags.push("kSecAccessControlUserPresence");
                                 break;
@@ -207,7 +210,7 @@ export class IosKeychain {
             }
         }
 
-        return "";
+        return flags.join(" ");
     }
 }
 

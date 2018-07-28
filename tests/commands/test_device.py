@@ -52,21 +52,15 @@ class TestDevice(unittest.TestCase):
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_prints_ios_environment_via_platform_helpers(self, mock_api):
         mock_api.return_value.env_ios_paths.return_value = {
-            'BundlePath': '/var/containers/Bundle/Application/1A31C3DC/PewPew.app',
-            'CachesDirectory': '/var/mobile/Containers/Data/Application/C1D04553/Library/Caches',
-            'DocumentDirectory': '/var/mobile/Containers/Data/Application/C1D04553/Documents',
             'LibraryDirectory': '/var/mobile/Containers/Data/Application/C1D04553/Library'}
 
         with capture(_get_ios_environment) as o:
             output = o
 
         expected_output = """
-Name               Path
------------------  ---------------------------------------------------------------
-BundlePath         /var/containers/Bundle/Application/1A31C3DC/PewPew.app
-CachesDirectory    /var/mobile/Containers/Data/Application/C1D04553/Library/Caches
-DocumentDirectory  /var/mobile/Containers/Data/Application/C1D04553/Documents
-LibraryDirectory   /var/mobile/Containers/Data/Application/C1D04553/Library
+Name              Path
+----------------  --------------------------------------------------------
+LibraryDirectory  /var/mobile/Containers/Data/Application/C1D04553/Library
 """
 
         self.assertEqual(output, expected_output)
