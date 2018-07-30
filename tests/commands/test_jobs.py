@@ -1,4 +1,5 @@
 import unittest
+from unittest import mock
 
 from objection.commands.jobs import show, kill
 from objection.state.jobs import job_manager_state
@@ -27,21 +28,29 @@ class TestJobs(unittest.TestCase):
     def tearDown(self):
         job_manager_state.jobs = []
 
-    def test_displays_empty_jobs_message(self):
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_displays_empty_jobs_message(self, mock_api):
+        mock_api.return_value.jobs_get.return_value = []
         with capture(show) as o:
             output = o
 
-        self.assertEqual(output, 'No jobs are currently running.\n')
+        expected_output = """Job ID    Invocations    Extra
+--------  -------------  -------
+"""
 
-    def test_displays_list_of_jobs(self):
-        job_manager_state.jobs = [self.mock_job]
+        self.assertEqual(output, expected_output)
+
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_displays_list_of_jobs(self, mock_api):
+        mock_api.return_value.jobs_get.return_value = [
+            {'identifier': 'rdcjq16g8xi', 'invocations': [{}], 'extra': 'ios jailbreak disable'}]
 
         with capture(show, []) as o:
             output = o
 
-        expected_outut = """UUID                                  Name    Started              Arguments
-------------------------------------  ------  -------------------  -----------
-3c3c65c7-67d2-4617-8fba-b96b6d2130d7  test    2017-10-14 09:21:01  --foo bar
+        expected_outut = """Job ID         Invocations  Extra
+-----------  -------------  ---------------------
+rdcjq16g8xi              1  ios jailbreak disable
 """
 
         self.assertEqual(output, expected_outut)
@@ -52,22 +61,14 @@ class TestJobs(unittest.TestCase):
 
         self.assertEqual(output, 'Usage: jobs kill <uuid>\n')
 
-    def test_cant_find_job_by_uuid(self):
-        job_manager_state.jobs = [self.mock_job]
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_cant_find_job_by_uuid(self, mock_api):
+        kill('foo')
 
-        with capture(kill, ['foo']) as o:
-            output = o
+        self.assertTrue(mock_api.return_value.jobs_kill.called)
 
-        self.assertEqual(output, 'No job matched the UUID of: foo\n')
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_kills_job_by_uuid(self, mock_api):
+        kill('foo')
 
-    def test_kills_job_by_uuid(self):
-        job_manager_state.jobs = [self.mock_job]
-
-        with capture(kill, ['3c3c65c7-67d2-4617-8fba-b96b6d2130d7']) as o:
-            output = o
-
-        expected_output = """Job: 3c3c65c7-67d2-4617-8fba-b96b6d2130d7 - Stopping
-Job: 3c3c65c7-67d2-4617-8fba-b96b6d2130d7 - Stopped
-"""
-
-        self.assertEqual(output, expected_output)
+        self.assertTrue(mock_api.return_value.jobs_kill.called)

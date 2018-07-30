@@ -1,3 +1,5 @@
+import { Jobs } from "../lib/jobs";
+
 // Attempts to disable Jailbreak detection.
 // This seems like an odd thing to do on a device that is probably not
 // jailbroken. However, in the case of a device losing a jailbreak due to
@@ -43,80 +45,80 @@ export class IosJailBreak {
 
     // to disable any invocation listeners we keep record
     // of them in an array.
-    private invocations: any[];
+    private invocations: InvocationListener[] = [];
 
-    constructor() {
-        this.invocations = [];
-    }
+    constructor(private jobs: Jobs) { }
 
     public disable(): void {
 
-        this.invocations.push(Interceptor.attach(
-            ObjC.classes.NSFileManager["- fileExistsAtPath:"].implementation, {
-                onEnter(args) {
+        const jobIdentifier: string = this.jobs.identifier;
 
-                    // Use a marker to check onExit if we need to manipulate
-                    // the response.
-                    this.is_common_path = false;
+        this.invocations.push(
+            Interceptor.attach(
+                ObjC.classes.NSFileManager["- fileExistsAtPath:"].implementation, {
+                    onEnter(args) {
 
-                    // Extract the path
-                    this.path = new ObjC.Object(args[2]).toString();
+                        // Use a marker to check onExit if we need to manipulate
+                        // the response.
+                        this.is_common_path = false;
 
-                    // check if the looked up path is in the list of common_paths
-                    if (jailbreakPaths.indexOf(this.path) >= 0) {
+                        // Extract the path
+                        this.path = new ObjC.Object(args[2]).toString();
 
-                        // Mark this path as one that should have its response
-                        // modified if needed.
-                        this.is_common_path = true;
-                    }
-                },
-                onLeave(retval) {
+                        // check if the looked up path is in the list of common_paths
+                        if (jailbreakPaths.indexOf(this.path) >= 0) {
 
-                    // check if the method call matched a common_path or if
-                    // the lookup actually failed. we dont want to mess with
-                    // paths that may not be part of jailbreak detection
-                    // anyways.
-                    if (!this.is_common_path || retval.isNull()) { return; }
+                            // Mark this path as one that should have its response
+                            // modified if needed.
+                            this.is_common_path = true;
+                        }
+                    },
+                    onLeave(retval) {
 
-                    send({
-                        data: `A successful lookup for ${this.path} occurred. Marking it as failed.`,
-                        error_reason: NaN,
-                        status: "success",
-                        type: "jailbreak-bypass",
-                    });
+                        // check if the method call matched a common_path or if
+                        // the lookup actually failed. we dont want to mess with
+                        // paths that may not be part of jailbreak detection
+                        // anyways.
+                        if (!this.is_common_path || retval.isNull()) { return; }
 
-                    // nope.exe
-                    retval.replace(new NativePointer(0x00));
-                },
-        }));
+                        send({
+                            data: `A successful lookup for ${this.path} occurred. Marking it as failed.`,
+                            error_reason: NaN,
+                            status: "success",
+                            type: "jailbreak-bypass",
+                        });
+
+                        // nope.exe
+                        retval.replace(new NativePointer(0x00));
+                    },
+                }),
+        );
 
         // Hook fork() in libSystem.B.dylib and return 0
         // TODO: Hook vfork
-        const libSystemBdylibFork: any = Module.findExportByName("libSystem.B.dylib", "fork");
+        const libSystemBdylibFork: NativePointer = Module.findExportByName("libSystem.B.dylib", "fork");
 
+        // iOS simulator does hot have libSystem.B.dylib
         if (libSystemBdylibFork) {
 
-            Interceptor.attach(libSystemBdylibFork, {
-                onLeave(retval) {
+            this.invocations.push(
+                Interceptor.attach(libSystemBdylibFork, {
+                    onLeave(retval) {
 
-                    send({
-                        data: "Making call to libSystem.B.dylib::fork() return 0x0",
-                        error_reason: NaN,
-                        status: "success",
-                        type: "jailbreak-bypass",
-                    });
+                        send({
+                            data: "Making call to libSystem.B.dylib::fork() return 0x0",
+                            error_reason: NaN,
+                            status: "success",
+                            type: "jailbreak-bypass",
+                        });
 
-                    retval.replace(new NativePointer(0x0));
-                },
-            });
-        } else {
-
-            send({
-                data: NaN,
-                error_reason: "Unable to find libSystem.B.dylib::fork(). Running on simulator?",
-                status: "error",
-                type: "jailbreak-bypass",
-            });
+                        retval.replace(new NativePointer(0x0));
+                    },
+                }),
+            );
         }
+
+        this.jobs.add(jobIdentifier, this.invocations, "ios jailbreak disable");
+        this.invocations = [];
     }
 }

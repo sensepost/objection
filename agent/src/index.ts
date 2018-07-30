@@ -12,7 +12,7 @@ const environment: Environment = new Environment();
 
 const keychain: IosKeychain = new IosKeychain();
 const iosfilesystem: IosFilesystem = new IosFilesystem();
-const iosjailbreak: IosJailBreak = new IosJailBreak();
+const iosjailbreak: IosJailBreak = new IosJailBreak(jobs);
 const plist: Plist = new Plist();
 
 rpc.exports = {
@@ -31,6 +31,10 @@ rpc.exports = {
 
     // jailbreak detection
     iosJailbreakDisable: () => iosjailbreak.disable(),
+
+    // jobs
+    jobsGet: () => jobs.all(),
+    jobsKill: (ident: string) => jobs.kill(ident),
 
     // plist files
     iosPlistRead: (path: string) => plist.read(path),

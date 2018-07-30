@@ -429,7 +429,7 @@ class FridaRunner(object):
 
 
 class Agent(object):
-    """ Class to manage the lifecycle of the compiled Frida agent. """
+    """ Class to manage the lifecycle of the Frida agent. """
 
     def __init__(self):
         """
@@ -437,8 +437,8 @@ class Agent(object):
         """
 
         # Compiled frida agent path
-        self.agent_path = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)),
-                                                       '../', 'agent.js'))
+        self.agent_path = os.path.abspath(
+            os.path.join(os.path.abspath(os.path.dirname(__file__)), '../', 'agent.js'))
         debug_print('Agent path is: {path}'.format(path=self.agent_path))
 
         self.session = None
@@ -590,8 +590,7 @@ class Agent(object):
             debug_print('Resuming PID `{pid}`'.format(pid=self.spawned_pid))
             self.device.resume(self.spawned_pid)
 
-        click.secho('Agent v{version} injected!'.format(version=self.exports().version()), fg='green',
-                    dim=True)
+        click.secho('Agent v{version} injected!'.format(version=self.exports().version()), fg='green', dim=True)
 
         return self
 

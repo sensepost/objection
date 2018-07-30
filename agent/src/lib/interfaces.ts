@@ -36,3 +36,9 @@ export interface IIosBundlePaths {
     DocumentDirectory: string;
     LibraryDirectory: string;
 }
+
+export interface IJob {
+    identifier: string;
+    extra: string;
+    invocations: InvocationListener[];
+}

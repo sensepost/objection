@@ -1,7 +1,7 @@
 import click
 from tabulate import tabulate
 
-from ..state.jobs import job_manager_state
+from objection.state.connection import state_connection
 
 
 def show(args: list = None) -> None:
@@ -11,17 +11,16 @@ def show(args: list = None) -> None:
         :return:
     """
 
-    if len(job_manager_state.jobs) <= 0:
-        click.secho('No jobs are currently running.', bold=True)
-        return
+    api = state_connection.get_api()
+    jobs = api.jobs_get()
 
-    jobs = []
-    for job in job_manager_state.jobs:
-        jobs.append([
-            job.id, job.name, job.started, ' '.join(job.args) if job.args else 'n/a'
-        ])
-
-    click.secho(tabulate(jobs, headers=['UUID', 'Name', 'Started', 'Arguments']))
+    click.secho(tabulate(
+        [[
+            entry['identifier'],
+            len(entry['invocations']),
+            entry['extra'],
+        ] for entry in jobs], headers=['Job ID', 'Invocations', 'Extra'],
+    ))
 
 
 def kill(args: list) -> None:
@@ -38,18 +37,5 @@ def kill(args: list) -> None:
 
     job_uuid = args[0]
 
-    for job in job_manager_state.jobs:
-
-        if str(job.id) == str(job_uuid):
-            # run the end() method for the queued job so that any
-            # cleanup operations that need to be run happen.
-            click.secho('Job: {0} - Stopping'.format(job.id))
-            job.end()
-
-            # remove the job from the global job state manager
-            job_manager_state.remove_job(job)
-            click.secho('Job: {0} - Stopped'.format(job.id), fg='green')
-
-            return
-
-    click.secho('No job matched the UUID of: {0}'.format(job_uuid))
+    api = state_connection.get_api()
+    api.jobs_kill(job_uuid)
