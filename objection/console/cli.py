@@ -7,7 +7,7 @@ from ..commands.device import get_device_info
 from ..commands.mobile_packages import patch_ios_ipa, patch_android_apk
 from ..state.app import app_state
 from ..state.connection import state_connection
-from ..utils.frida_transport import Agent
+from ..utils.agent import Agent
 from ..utils.helpers import normalize_gadget_name, print_frida_connection_help, warn_about_older_operating_systems
 
 
