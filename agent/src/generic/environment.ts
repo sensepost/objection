@@ -1,9 +1,9 @@
-import { getApplicationContext, wrapJavaPerform } from "./android/libjava";
-import { DeviceType } from "./constants";
-import { IAndroidPackage, IFridaInfo, IIosBundlePaths, IIosPackage } from "./interfaces";
-import { NSSearchPaths, NSUserDomainMask } from "./ios/constants";
-import { getNSFileManager, getNSMainBundle } from "./ios/helpers";
-import { NSBundle } from "./ios/types";
+import { getApplicationContext, wrapJavaPerform } from "../android/lib/libjava";
+import { NSSearchPaths, NSUserDomainMask } from "../ios/lib/constants";
+import { getNSFileManager, getNSMainBundle } from "../ios/lib/helpers";
+import { NSBundle } from "../ios/lib/types";
+import { DeviceType } from "../lib/constants";
+import { IAndroidPackage, IFridaInfo, IIosBundlePaths, IIosPackage } from "../lib/interfaces";
 
 export class Environment {
 

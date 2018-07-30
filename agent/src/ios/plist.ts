@@ -1,4 +1,4 @@
-import { NSMutableDictionary } from "../lib/ios/types";
+import { NSMutableDictionary } from "./lib/types";
 
 export class Plist {
 

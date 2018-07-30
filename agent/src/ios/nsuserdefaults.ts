@@ -1,4 +1,4 @@
-import { NSDictionary, NSUserDefaults } from "../lib/ios/types";
+import { NSDictionary, NSUserDefaults } from "./lib/types";
 
 export let nsuserdefaults: NSUserDefaults | any = () => {
 

@@ -1,7 +1,7 @@
 import fs = require("frida-fs");
-import { getNSFileManager } from "../lib/ios/helpers";
-import { IIosFilePath, IIosFileSystem } from "../lib/ios/interfaces";
-import { NSDictionary, NSFileManager, NSString } from "../lib/ios/types";
+import { getNSFileManager } from "./lib/helpers";
+import { IIosFilePath, IIosFileSystem } from "./lib/interfaces";
+import { NSDictionary, NSFileManager, NSString } from "./lib/types";
 
 const { NSString } = ObjC.classes;
 

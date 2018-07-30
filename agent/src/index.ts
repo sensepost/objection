@@ -1,9 +1,9 @@
+import { Environment } from "./generic/environment";
 import { IosFilesystem } from "./ios/filesystem";
 import { IosJailBreak } from "./ios/jailbreak";
 import { IosKeychain } from "./ios/keychain";
 import { nsuserdefaults } from "./ios/nsuserdefaults";
 import { Plist } from "./ios/plist";
-import { Environment } from "./lib/environment";
 import { Jobs } from "./lib/jobs";
 import { version } from "./version";
 

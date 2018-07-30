@@ -1,15 +1,15 @@
 // dumps all of the keychain items available to the current
 // application.
 import { reverseEnumLookup } from "../lib/helpers";
-import { kSec } from "../lib/ios/constants";
-import { dataToString } from "../lib/ios/helpers";
-import { IKeychainItem } from "../lib/ios/interfaces";
-import { libObjc } from "../lib/ios/libobjc";
+import { kSec } from "./lib/constants";
+import { dataToString } from "./lib/helpers";
+import { IKeychainItem } from "./lib/interfaces";
+import { libObjc } from "./lib/libobjc";
 import {
   NSDictionary,
   NSMutableDictionary,
   NSString,
-} from "../lib/ios/types";
+} from "./lib/types";
 
 const { NSMutableDictionary, NSString } = ObjC.classes;
 const NSUTF8StringEncoding = 4;

@@ -8,9 +8,7 @@ export const isNSKeyedArchived = (data: ArrayBuffer): boolean => {
   const magicString: string = String.fromCharCode.apply(null, new Uint8Array(magic));
 
   // 62 70 6c 69 73 74 30 30
-  if (magicString === "bplist00") { return true; }
-
-  return false;
+  return magicString === "bplist00";
 };
 
 export const unArchiveDataAndGetString = (data: ObjC.Object | any): string => {
