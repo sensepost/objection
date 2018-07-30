@@ -135,7 +135,8 @@ def start(quiet: bool) -> None:
     """
 
     agent = Agent()
-    state_connection.api = agent.inject().exports()
+    agent.inject()
+    state_connection.set_agent(agent=agent)
 
     r = Repl()
     r.set_prompt_tokens(get_device_info())
