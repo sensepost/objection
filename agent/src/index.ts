@@ -1,7 +1,7 @@
 import { IosFilesystem } from "./ios/filesystem";
 import { IosJailBreak } from "./ios/jailbreak";
 import { IosKeychain } from "./ios/keychain";
-import { nsuserdefaults} from "./ios/nsuserdefaults";
+import { nsuserdefaults } from "./ios/nsuserdefaults";
 import { Plist } from "./ios/plist";
 import { Environment } from "./lib/environment";
 import { Jobs } from "./lib/jobs";
@@ -17,35 +17,35 @@ const plist: Plist = new Plist();
 
 rpc.exports = {
 
-    // environment
-    envAndroid: () => environment.androidPackage(),
-    envAndroidPaths: () => environment.androidPaths(),
-    envFrida: () => environment.frida(),
-    envIos: () => environment.iosPackage(),
-    envIosPaths: () => environment.iosPaths(),
-    envRuntime: () => environment.runtime(),
+  // environment
+  envAndroid: () => environment.androidPackage(),
+  envAndroidPaths: () => environment.androidPaths(),
+  envFrida: () => environment.frida(),
+  envIos: () => environment.iosPackage(),
+  envIosPaths: () => environment.iosPaths(),
+  envRuntime: () => environment.runtime(),
 
-    // ios filesystem
-    iosLs: (path: string) => iosfilesystem.ls(path),
-    iosRead: (path: string) => iosfilesystem.getFile(path),
+  // ios filesystem
+  iosLs: (path: string) => iosfilesystem.ls(path),
+  iosRead: (path: string) => iosfilesystem.getFile(path),
 
-    // jailbreak detection
-    iosJailbreakDisable: () => iosjailbreak.disable(),
+  // jailbreak detection
+  iosJailbreakDisable: () => iosjailbreak.disable(),
 
-    // jobs
-    jobsGet: () => jobs.all(),
-    jobsKill: (ident: string) => jobs.kill(ident),
+  // jobs
+  jobsGet: () => jobs.all(),
+  jobsKill: (ident: string) => jobs.kill(ident),
 
-    // plist files
-    iosPlistRead: (path: string) => plist.read(path),
+  // plist files
+  iosPlistRead: (path: string) => plist.read(path),
 
-    // keychain
-    keychainAdd: (key: string, data: string) => keychain.add(key, data),
-    keychainEmpty: () => keychain.empty(),
-    keychainList: () => keychain.list(),
+  // keychain
+  keychainAdd: (key: string, data: string) => keychain.add(key, data),
+  keychainEmpty: () => keychain.empty(),
+  keychainList: () => keychain.list(),
 
-    nsuserDefaults: () => nsuserdefaults(),
+  nsuserDefaults: () => nsuserdefaults(),
 
-    // meta
-    version: () => version,
+  // meta
+  version: () => version,
 };
