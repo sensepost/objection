@@ -168,13 +168,9 @@ class TestFileManager(unittest.TestCase):
 
         self.assertEqual(output, 'Current directory: /foo/bar/baz\n')
 
-    @mock.patch('objection.commands.filemanager.FridaRunner')
-    def test_get_ios_pwd_via_helper(self, mock_runner):
-        mock_response = mock.Mock()
-        mock_response.is_successful.return_value = True
-        type(mock_response).cwd = '/foo/bar'
-
-        mock_runner.return_value.get_last_message.return_value = mock_response
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_get_ios_pwd_via_helper(self, mock_api):
+        mock_api.return_value.ios_file_cwd.return_value = '/foo/bar'
 
         self.assertEqual(_pwd_ios(), '/foo/bar')
         self.assertEqual(file_manager_state.cwd, '/foo/bar')
@@ -237,18 +233,17 @@ class TestFileManager(unittest.TestCase):
 
         self.assertTrue(mock_ls_android.called)
 
-    @mock.patch('objection.commands.filemanager.FridaRunner')
-    def test_lists_readable_ios_directory_using_helper_method(self, mock_runner):
-        mock_api = mock.Mock()
-        mock_api.ls.return_value = {
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_lists_readable_ios_directory_using_helper_method(self, mock_api):
+        mock_api.return_value.ios_file_ls.return_value = {
             'path': '/foo/bar',
             'readable': True,
-            'writable': True,
+            'writable': False,
             'files': {
                 'test': {
                     'fileName': 'test',
                     'readable': True,
-                    'writable': True,
+                    'writable': False,
                     'attributes': {
                         'NSFileType': 'A',
                         'NSFilePosixPermissions': 'B',
@@ -264,24 +259,21 @@ class TestFileManager(unittest.TestCase):
             }
         }
 
-        mock_runner.return_value.rpc_exports.return_value = mock_api
-
         with capture(_ls_ios, ['/foo/bar']) as o:
             output = o
 
         expected_outut = """NSFileType    Perms    NSFileProtection    Read    Write    Owner    Group    Size       Creation    Name
 ------------  -------  ------------------  ------  -------  -------  -------  ---------  ----------  ------
-A             B        C                   True    True     D (E)    F (G)    115.4 GiB  H           test
+A             B        C                   True    False    D (E)    F (G)    115.4 GiB  H           test
 
-Readable: Yes  Writable: Yes
+Readable: True  Writable: False
 """
 
         self.assertEqual(output, expected_outut)
 
-    @mock.patch('objection.commands.filemanager.FridaRunner')
-    def test_lists_readable_ios_directory_using_helper_method_no_attributes(self, mock_runner):
-        mock_api = mock.Mock()
-        mock_api.ls.return_value = {
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_lists_readable_ios_directory_using_helper_method_no_attributes(self, mock_api):
+        mock_api.return_value.ios_file_ls.return_value = {
             'path': '/foo/bar',
             'readable': True,
             'writable': True,
@@ -295,8 +287,6 @@ Readable: Yes  Writable: Yes
             }
         }
 
-        mock_runner.return_value.rpc_exports.return_value = mock_api
-
         with capture(_ls_ios, ['/foo/bar']) as o:
             output = o
 
@@ -304,27 +294,24 @@ Readable: Yes  Writable: Yes
 ------------  -------  ------------------  ------  -------  ---------  ---------  ------  ----------  ------
 n/a           n/a      n/a                 True    True     n/a (n/a)  n/a (n/a)  n/a     n/a         test
 
-Readable: Yes  Writable: Yes
+Readable: True  Writable: True
 """
 
         self.assertEqual(output, expected_outut)
 
-    @mock.patch('objection.commands.filemanager.FridaRunner')
-    def test_lists_unreadable_ios_directory_using_helper_method(self, mock_runner):
-        mock_api = mock.Mock()
-        mock_api.ls.return_value = {
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_lists_unreadable_ios_directory_using_helper_method(self, mock_api):
+        mock_api.return_value.ios_file_ls.return_value = {
             'path': '/foo/bar',
             'readable': False,
             'writable': False,
             'files': {}
         }
 
-        mock_runner.return_value.rpc_exports.return_value = mock_api
-
         with capture(_ls_ios, ['/foo/bar']) as o:
             output = o
 
-        self.assertEqual(output, '\nReadable: No  Writable: No\n')
+        self.assertEqual(output, '\nReadable: False  Writable: False\n')
 
     @mock.patch('objection.commands.filemanager.FridaRunner')
     def test_lists_readable_android_directory_using_helper_method(self, mock_runner):
@@ -417,62 +404,45 @@ Readable: Yes  Writable: Yes
 
         self.assertTrue(mock_download_android.called)
 
-    @mock.patch('objection.commands.filemanager.FridaRunner')
+    @mock.patch('objection.state.connection.state_connection.get_api')
     @mock.patch('objection.commands.filemanager.open', create=True)
-    def test_downloads_file_with_ios_helper(self, mock_open, mock_runner):
-        mock_response = mock.Mock()
-        mock_response.is_successful.return_value = True
-        type(mock_response).readable = True
-        type(mock_response).is_file = True
-
-        mock_api = mock.Mock()
-        mock_api.download.return_value = b'\x00'
-
-        mock_runner.return_value.get_last_message.return_value = mock_response
-        mock_runner.return_value.rpc_exports.return_value = mock_api
+    def test_downloads_file_with_ios_helper(self, mock_open, mock_api):
+        mock_api.return_value.ios_file_readable.return_value = True
+        mock_api.return_value.ios_file_path_is_file.return_value = True
+        mock_api.return_value.ios_file_download.return_value = {'data': b'\x00'}
 
         file_manager_state.cwd = '/foo'
 
         with capture(_download_ios, '/foo', '/bar') as o:
             output = o
+
+        expected_output = """Downloading /foo to /bar
+Streaming file from device...
+Writing bytes to destination...
+Successfully downloaded /foo to /bar
+"""
 
         self.assertTrue(mock_open.called)
-        self.assertEqual(output, 'Downloading /foo to /bar\n')
+        self.assertEqual(output, expected_output)
 
-    @mock.patch('objection.commands.filemanager.FridaRunner')
-    @mock.patch('objection.commands.filemanager.open', create=True)
-    def test_downloads_file_but_fails_on_unreadable_with_ios_helper(self, mock_open, mock_runner):
-        mock_response = mock.Mock()
-        mock_response.is_successful.return_value = True
-        type(mock_response).readable = False
-
-        mock_runner.return_value.get_last_message.return_value = mock_response
-
-        file_manager_state.cwd = '/foo'
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_downloads_file_but_fails_on_unreadable_with_ios_helper(self, mock_api):
+        mock_api.return_value.ios_file_readable.return_value = False
 
         with capture(_download_ios, '/foo', '/bar') as o:
             output = o
 
-        self.assertFalse(mock_open.called)
-        self.assertEqual(output, 'Downloading /foo to /bar\nUnable to download file. File is not readable\n')
+        self.assertEqual(output, 'Downloading /foo to /bar\nUnable to download file. File is not readable.\n')
 
-    @mock.patch('objection.commands.filemanager.FridaRunner')
-    @mock.patch('objection.commands.filemanager.open', create=True)
-    def test_downloads_file_but_fails_on_file_type_with_ios_helper(self, mock_open, mock_runner):
-        mock_response = mock.Mock()
-        mock_response.is_successful.return_value = True
-        type(mock_response).readable = True
-        type(mock_response).is_file = False
-
-        mock_runner.return_value.get_last_message.return_value = mock_response
-
-        file_manager_state.cwd = '/foo'
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_downloads_file_but_fails_on_file_type_with_ios_helper(self, mock_api):
+        mock_api.return_value.ios_file_readable.return_value = True
+        mock_api.return_value.ios_file_path_is_file.return_value = False
 
         with capture(_download_ios, '/foo', '/bar') as o:
             output = o
 
-        self.assertFalse(mock_open.called)
-        self.assertEqual(output, 'Downloading /foo to /bar\nUnable to download file. Not a file.\n')
+        self.assertEqual(output, 'Downloading /foo to /bar\nUnable to download file. Target path is not a file.\n')
 
     @mock.patch('objection.commands.filemanager.FridaRunner')
     @mock.patch('objection.commands.filemanager.open', create=True)

@@ -25,16 +25,22 @@ rpc.exports = {
   envIosPaths: () => environment.iosPaths(),
   envRuntime: () => environment.runtime(),
 
-  // ios filesystem
-  iosLs: (path: string) => iosfilesystem.ls(path),
-  iosRead: (path: string) => iosfilesystem.getFile(path),
-
-  // jailbreak detection
-  iosJailbreakDisable: () => iosjailbreak.disable(),
-
   // jobs
   jobsGet: () => jobs.all(),
   jobsKill: (ident: string) => jobs.kill(ident),
+
+  // ios filesystem
+  iosFileCwd: () => iosfilesystem.pwd(),
+  iosFileDownload: (path: string) => iosfilesystem.readFile(path),
+  iosFileExists: (path: string) => iosfilesystem.exists(path),
+  iosFileLs: (path: string) => iosfilesystem.ls(path),
+  iosFilePathIsFile: (path: string) => iosfilesystem.pathIsFile(path),
+  iosFileReadable: (path: string) => iosfilesystem.readable(path),
+  iosFileUpload: (path: string, data: string) => iosfilesystem.writeFile(path, data),
+  iosFileWritable: (path: string) => iosfilesystem.writable(path),
+
+  // jailbreak detection
+  iosJailbreakDisable: () => iosjailbreak.disable(),
 
   // plist files
   iosPlistRead: (path: string) => plist.read(path),
@@ -44,6 +50,7 @@ rpc.exports = {
   keychainEmpty: () => keychain.empty(),
   keychainList: () => keychain.list(),
 
+  // nsuserdefaults
   nsuserDefaults: () => nsuserdefaults(),
 
   // meta

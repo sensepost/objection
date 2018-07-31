@@ -1,14 +1,17 @@
 import fs = require("frida-fs");
+import { hexStringToBytes } from "../lib/helpers";
 import { getNSFileManager } from "./lib/helpers";
 import { IIosFilePath, IIosFileSystem } from "./lib/interfaces";
 import { NSDictionary, NSFileManager, NSString } from "./lib/types";
 
 const { NSString } = ObjC.classes;
 
+// an iOS filesystem interface.
 export class IosFilesystem {
 
+  // gets an instance of NSFileManager. If noe have not
+  // already been initialized, that is done here.
   get NSFileManager(): any {
-
     if (this.fileManager === undefined) {
       this.fileManager = getNSFileManager();
     }
@@ -20,7 +23,6 @@ export class IosFilesystem {
   private fileManager: NSFileManager;
 
   public ls(path: string): any {
-
     const fm: NSFileManager = this.NSFileManager;
     const p: NSString = NSString.stringWithString_(path);
 
@@ -51,7 +53,7 @@ export class IosFilesystem {
       };
 
       // generate a full path to the file
-      let currentFilePath = [path, "/", file].join();
+      let currentFilePath = [path, "/", file].join("");
       currentFilePath = NSString.stringWithString_(currentFilePath);
 
       // check read / write
@@ -87,8 +89,59 @@ export class IosFilesystem {
     return response;
   }
 
-  public getFile(path: string): any {
+  public exists(path: string): boolean {
+    const fm: NSFileManager = this.NSFileManager;
+    const p = NSString.stringWithString_(path);
 
+    return fm.fileExistsAtPath_(p);
+  }
+
+  public readable(path: string): boolean {
+    const fm: NSFileManager = this.NSFileManager;
+    const p = NSString.stringWithString_(path);
+
+    return fm.isReadableFileAtPath_(p);
+  }
+
+  public writable(path: string): boolean {
+    const fm: NSFileManager = this.NSFileManager;
+    const p = NSString.stringWithString_(path);
+
+    return fm.isWritableFileAtPath_(p);
+  }
+
+  public pathIsFile(path: string): boolean {
+    const fm: NSFileManager = this.NSFileManager;
+    const p = NSString.stringWithString_(path);
+
+    const isDir: NativePointer = Memory.alloc(Process.pointerSize);
+    fm.fileExistsAtPath_isDirectory_(path, isDir);
+
+    // deref the isDir pointer to get the bool
+    // *isDir === 1 means the path is a directory
+    return Memory.readInt(isDir) === 0;
+  }
+
+  // returns a 'pwd' that assumes the current bundle's path
+  // is the directory we are interested in.
+  public pwd(): string {
+
+    const NSBundle = ObjC.classes.NSBundle;
+    return NSBundle.mainBundle().bundlePath().toString();
+  }
+
+  public readFile(path: string): any[] {
     return fs.readFileSync(path);
+  }
+
+  public writeFile(path: string, data: string): void {
+    const writeStream: any = fs.createWriteStream(path);
+
+    writeStream.on("error", (error) => {
+      throw error;
+    });
+
+    writeStream.write(hexStringToBytes(data));
+    writeStream.end();
   }
 }
