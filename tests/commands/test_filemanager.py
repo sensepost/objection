@@ -313,11 +313,9 @@ Readable: True  Writable: True
 
         self.assertEqual(output, '\nReadable: False  Writable: False\n')
 
-    @mock.patch('objection.commands.filemanager.FridaRunner')
-    def test_lists_readable_android_directory_using_helper_method(self, mock_runner):
-        mock_response = mock.Mock()
-        mock_response.is_successful.return_value = True
-        type(mock_response).data = mock.PropertyMock(return_value={
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_lists_readable_android_directory_using_helper_method(self, mock_api):
+        mock_api.return_value.android_file_ls.return_value = {
             'path': '/foo/bar',
             'readable': True,
             'writable': True,
@@ -335,9 +333,7 @@ Readable: True  Writable: True
                     }
                 }
             }
-        })
-
-        mock_runner.return_value.get_last_message.return_value = mock_response
+        }
 
         with capture(_ls_android, ['/foo/bar']) as o:
             output = o
@@ -346,41 +342,25 @@ Readable: True  Writable: True
 ------  -----------------------  ------  -------  --------  -------  ------
 File    2017-10-05 07:36:41 GMT  True    True     False     249.0 B  test
 
-Readable: Yes  Writable: Yes
+Readable: True  Writable: True
 """
 
         self.assertEqual(output, expected_outut)
 
-    @mock.patch('objection.commands.filemanager.FridaRunner')
-    def test_lists_unreadable_android_directory_using_helper_method(self, mock_runner):
-        mock_response = mock.Mock()
-        mock_response.is_successful.return_value = True
-        type(mock_response).data = mock.PropertyMock(return_value={
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_lists_unreadable_android_directory_using_helper_method(self, mock_api):
+        mock_api.return_value.android_file_ls.return_value = {
+            'path': '/foo/bar',
             'path': '/foo/bar',
             'readable': False,
             'writable': False,
             'files': {}
-        })
-
-        mock_runner.return_value.get_last_message.return_value = mock_response
+        }
 
         with capture(_ls_android, ['/foo/bar']) as o:
             output = o
 
-        self.assertEqual(output, '\nReadable: No  Writable: No\n')
-
-    @mock.patch('objection.commands.filemanager.FridaRunner')
-    def test_lists_android_directory_using_helper_method_and_handles_hook_failure(self, mock_runner):
-        mock_response = mock.Mock()
-        mock_response.is_successful.return_value = False
-        type(mock_response).error_reason = 'Test'
-
-        mock_runner.return_value.get_last_message.return_value = mock_response
-
-        with capture(_ls_android, ['/foo/bar']) as o:
-            output = o
-
-        self.assertEqual(output, 'Failed to get directory listing with error: Test\n')
+        self.assertEqual(output, '\nReadable: False  Writable: False\n')
 
     def test_download_platform_proxy_validates_arguments(self):
         with capture(download, []) as o:

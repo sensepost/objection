@@ -325,21 +325,8 @@ def _ls_android(path: str) -> None:
         :return:
     """
 
-    runner = FridaRunner()
-    runner.set_hook_with_data(
-        android_hook('filesystem/ls'), path=path)
-    runner.run()
-
-    # grab the output lets seeeeee
-    response = runner.get_last_message()
-
-    # ensure the response was successful
-    if not response.is_successful():
-        click.secho('Failed to get directory listing with error: {}'.format(response.error_reason))
-        return
-
-    # get the response data itself
-    data = response.data
+    api = state_connection.get_api()
+    data = api.android_file_ls(path)
 
     def _timestamp_to_str(stamp: str) -> str:
         """
@@ -358,46 +345,27 @@ def _ls_android(path: str) -> None:
 
         return 'n/a'
 
-    # if the directory was readable, dump the filesystem listing
-    # and attributes to screen.
-    if data['readable']:
+    click.secho(tabulate(
+        [[
+            'Directory' if file_data['attributes']['isDirectory'] else 'File',
 
-        table_data = []
-        for file_name, file_data in data['files'].items():
-            attributes = file_data['attributes']
+            _timestamp_to_str(file_data['attributes']['lastModified']),
 
-            table_data.append([
+            # read / write permissions
+            file_data['readable'],
+            file_data['writable'],
+            file_data['attributes']['isHidden'],
 
-                'Directory' if attributes['isDirectory'] else 'File',
+            sizeof_fmt(float(file_data['attributes']['size'])),
 
-                _timestamp_to_str(attributes['lastModified']),
+            file_name,
 
-                # read / write permissions
-                file_data['readable'],
-                file_data['writable'],
-                attributes['isHidden'],
+        ] for file_name, file_data in data['files'].items()], headers=[
+            'Type', 'Last Modified', 'Read', 'Write', 'Hidden', 'Size', 'Name'
+        ],
+    )) if data['readable'] else None
 
-                sizeof_fmt(float(attributes['size'])),
-
-                file_name,
-            ])
-
-        click.secho(tabulate(table_data,
-                             headers=['Type', 'Last Modified', 'Read', 'Write', 'Hidden', 'Size', 'Name']))
-
-    # handle the permissions summary for this directory
-    permissions = {
-        'readable': 'No',
-        'writable': 'No'
-    }
-
-    if data['readable']:
-        permissions['readable'] = 'Yes'
-
-    if data['writable']:
-        permissions['writable'] = 'Yes'
-
-    click.secho('\nReadable: {0}  Writable: {1}'.format(permissions['readable'], permissions['writable']), bold=True)
+    click.secho('\nReadable: {0}  Writable: {1}'.format(data['readable'], data['writable']), bold=True)
 
 
 def download(args: list) -> None:

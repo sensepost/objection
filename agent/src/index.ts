@@ -1,3 +1,4 @@
+import { AndroidFilesystem } from "./android/filesystem";
 import { Environment } from "./generic/environment";
 import { IosFilesystem } from "./ios/filesystem";
 import { IosJailBreak } from "./ios/jailbreak";
@@ -11,6 +12,7 @@ const jobs: Jobs = new Jobs();
 const environment: Environment = new Environment();
 
 const keychain: IosKeychain = new IosKeychain();
+const androidfilesystem: AndroidFilesystem = new AndroidFilesystem();
 const iosfilesystem: IosFilesystem = new IosFilesystem();
 const iosjailbreak: IosJailBreak = new IosJailBreak(jobs);
 const plist: Plist = new Plist();
@@ -28,6 +30,9 @@ rpc.exports = {
   // jobs
   jobsGet: () => jobs.all(),
   jobsKill: (ident: string) => jobs.kill(ident),
+
+  // android filesystem
+  androidFileLs: (path: string) => androidfilesystem.ls(path),
 
   // ios filesystem
   iosFileCwd: () => iosfilesystem.pwd(),

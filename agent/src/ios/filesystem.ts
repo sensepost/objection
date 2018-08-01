@@ -22,7 +22,7 @@ export class IosFilesystem {
   // single resolve property for an NSFileManager
   private fileManager: NSFileManager;
 
-  public ls(path: string): any {
+  public ls(path: string): IIosFileSystem {
     const fm: NSFileManager = this.NSFileManager;
     const p: NSString = NSString.stringWithString_(path);
 
