@@ -12,6 +12,8 @@
   <a href="https://pypi.python.org/pypi/objection"><img src="https://badge.fury.io/py/objection.svg" alt="PyPI version" height="18"></a>
   <a href="https://travis-ci.org/sensepost/objection"><img src="https://travis-ci.org/sensepost/objection.svg?branch=master" alt="Build Status" height="18"></a>
   <a href="http://www.toolswatch.org/2017/09/black-hat-arsenal-europe-2017-lineup/"><img src="https://rawgit.com/toolswatch/badges/master/arsenal/europe/2017.svg" alt="Arsenal 2017" height="18"></a>
+  <a href="https://lgtm.com/projects/g/sensepost/objection/context:python"><img src="https://img.shields.io/lgtm/grade/python/g/sensepost/objection.svg?logo=lgtm&logoWidth=18" alt="Code Quality: Python" height="18"></a>
+  <a href="https://lgtm.com/projects/g/sensepost/objection/alerts"><img src="https://img.shields.io/lgtm/alerts/g/sensepost/objection.svg?logo=lgtm&logoWidth=18" alt="Total Alerts" height="18"></a>
 </p>
 
 <br>
