@@ -8,12 +8,12 @@ var response = {
     error_reason: NaN,
     type: 'device-info',
     data: {
-        applicationName: String(NSBundle.mainBundle().objectForInfoDictionaryKey_('CFBundleIdentifier')),
-        deviceName: String(UIDevice.currentDevice().name()),
-        systemName: String(UIDevice.currentDevice().systemName()),
-        model: String(UIDevice.currentDevice().model()),
-        systemVersion: String(UIDevice.currentDevice().systemVersion()),
-        identifierForVendor: String(UIDevice.currentDevice().identifierForVendor())
+        applicationName: NSBundle.mainBundle().objectForInfoDictionaryKey_('CFBundleIdentifier').toString(),
+        deviceName: UIDevice.currentDevice().name().toString(),
+        systemName: UIDevice.currentDevice().systemName().toString(),
+        model: UIDevice.currentDevice().model().toString(),
+        systemVersion: UIDevice.currentDevice().systemVersion().toString(),
+        identifierForVendor: UIDevice.currentDevice().identifierForVendor().toString()
     }
 };
 
