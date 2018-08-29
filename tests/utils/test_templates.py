@@ -71,7 +71,7 @@ var response = {
     error_reason: NaN,
     type: 'current-working-directory',
     data: {
-        cwd: String(BundleURL)
+        cwd: BundleURL.toString()
     }
 };
 
@@ -123,7 +123,7 @@ var response = {
     error_reason: NaN,
     type: 'current-working-directory',
     data: {
-        cwd: String(BundleURL)
+        cwd: BundleURL.toString()
     }
 };
 
