@@ -5,17 +5,29 @@ import { NSBundle } from "../ios/lib/types";
 import { DeviceType } from "../lib/constants";
 import { IAndroidPackage, IFridaInfo, IIosBundlePaths, IIosPackage } from "../lib/interfaces";
 
-export class Environment {
+export namespace environment {
 
-  public runtime(): string {
+  // small helper function to lookup ios bundle paths
+  const getPathForNSLocation = (NSPath: NSSearchPaths): string => {
+
+    const p = getNSFileManager().URLsForDirectory_inDomains_(NSPath, NSUserDomainMask).lastObject();
+
+    if (p) {
+      return p.path().toString();
+    }
+
+    return "";
+  };
+
+  export const runtime = (): string => {
 
     if (ObjC.available) { return DeviceType.IOS; }
     if (Java.available) { return DeviceType.ANDROID; }
 
     return DeviceType.UNKNOWN;
-  }
+  };
 
-  public frida(): IFridaInfo {
+  export const frida = (): IFridaInfo => {
 
     return {
       arch: Process.arch,
@@ -24,9 +36,18 @@ export class Environment {
       platform: Process.platform,
       version: Frida.version,
     };
-  }
+  };
 
-  public iosPackage(): IIosPackage {
+  export const iosPackage = (): IIosPackage => {
+
+    // -- Sample Objective-C
+    //
+    // NSFileManager *fm = [NSFileManager defaultManager];
+    // NSString *pictures = [[fm URLsForDirectory:NSPicturesDirectory inDomains:NSUserDomainMask] lastObject].path;
+    // NSBundle *bundle = [NSBundle mainBundle];
+    // NSString *bundlePath = [bundle bundlePath];
+    // NSString *receipt = [bundle appStoreReceiptURL].path;
+    // NSString *resourcePath = [bundle resourcePath];
 
     const { UIDevice } = ObjC.classes;
     const mb: NSBundle = getNSMainBundle();
@@ -39,30 +60,21 @@ export class Environment {
       systemName: UIDevice.currentDevice().systemName().toString(),
       systemVersion: UIDevice.currentDevice().systemVersion().toString(),
     };
+  };
 
-    // -- Sample Objective-C
-    //
-    // NSFileManager *fm = [NSFileManager defaultManager];
-    // NSString *pictures = [[fm URLsForDirectory:NSPicturesDirectory inDomains:NSUserDomainMask] lastObject].path;
-    // NSBundle *bundle = [NSBundle mainBundle];
-    // NSString *bundlePath = [bundle bundlePath];
-    // NSString *receipt = [bundle appStoreReceiptURL].path;
-    // NSString *resourcePath = [bundle resourcePath];
-  }
-
-  public iosPaths(): IIosBundlePaths {
+  export const iosPaths = (): IIosBundlePaths => {
 
     const mb: NSBundle = getNSMainBundle();
 
     return {
       BundlePath: mb.bundlePath().toString(),
-      CachesDirectory: this.getPathForNSLocation(NSSearchPaths.NSCachesDirectory),
-      DocumentDirectory: this.getPathForNSLocation(NSSearchPaths.NSDocumentDirectory),
-      LibraryDirectory: this.getPathForNSLocation(NSSearchPaths.NSLibraryDirectory),
+      CachesDirectory: getPathForNSLocation(NSSearchPaths.NSCachesDirectory),
+      DocumentDirectory: getPathForNSLocation(NSSearchPaths.NSDocumentDirectory),
+      LibraryDirectory: getPathForNSLocation(NSSearchPaths.NSLibraryDirectory),
     };
-  }
+  };
 
-  public androidPackage(): Promise<IAndroidPackage> {
+  export const androidPackage = (): Promise<IAndroidPackage> => {
 
     return wrapJavaPerform(() => {
 
@@ -82,9 +94,13 @@ export class Environment {
         version: Java.androidVersion,
       };
     });
-  }
+  };
 
-  public androidPaths(): any {
+  export const androidPaths = (): Promise<any> => {
+
+    // -- Sample Java
+    //
+    // getApplicationContext().getFilesDir().getAbsolutePath()
 
     return wrapJavaPerform(() => {
 
@@ -100,18 +116,5 @@ export class Environment {
         packageCodePath: context.getPackageCodePath().toString(),
       };
     });
-
-    // -- Sample Java
-    //
-    // getApplicationContext().getFilesDir().getAbsolutePath()
-  }
-
-  private getPathForNSLocation(NSPath: NSSearchPaths): string {
-
-    const p = getNSFileManager().URLsForDirectory_inDomains_(NSPath, NSUserDomainMask).lastObject();
-
-    if (p) { return p.path().toString(); }
-
-    return "";
-  }
+  };
 }

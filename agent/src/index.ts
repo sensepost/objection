@@ -1,5 +1,5 @@
 import { AndroidFilesystem } from "./android/filesystem";
-import { Environment } from "./generic/environment";
+import { environment } from "./generic/environment";
 import { IosFilesystem } from "./ios/filesystem";
 import { IosJailBreak } from "./ios/jailbreak";
 import { IosKeychain } from "./ios/keychain";
@@ -9,7 +9,6 @@ import { Jobs } from "./lib/jobs";
 import { version } from "./version";
 
 const jobs: Jobs = new Jobs();
-const environment: Environment = new Environment();
 
 const keychain: IosKeychain = new IosKeychain();
 const androidfilesystem: AndroidFilesystem = new AndroidFilesystem();

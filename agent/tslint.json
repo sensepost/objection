@@ -4,7 +4,9 @@
         "tslint:recommended"
     ],
     "jsRules": {},
-    "rules": {},
+    "rules": {
+        "no-namespace": false
+    },
     "rulesDirectory": [],
     "alwaysShowStatus": true
 }
