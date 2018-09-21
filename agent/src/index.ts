@@ -1,20 +1,14 @@
 import { AndroidFilesystem } from "./android/filesystem";
 import { environment } from "./generic/environment";
-import { IosFilesystem } from "./ios/filesystem";
-import { IosJailBreak } from "./ios/jailbreak";
-import { IosKeychain } from "./ios/keychain";
+import { iosfilesystem } from "./ios/filesystem";
+import { iosjailbreak } from "./ios/jailbreak";
+import { ioskeychain } from "./ios/keychain";
 import { nsuserdefaults } from "./ios/nsuserdefaults";
-import { Plist } from "./ios/plist";
-import { Jobs } from "./lib/jobs";
+import { plist } from "./ios/plist";
+import { jobs } from "./lib/jobs";
 import { version } from "./version";
 
-const jobs: Jobs = new Jobs();
-
-const keychain: IosKeychain = new IosKeychain();
 const androidfilesystem: AndroidFilesystem = new AndroidFilesystem();
-const iosfilesystem: IosFilesystem = new IosFilesystem();
-const iosjailbreak: IosJailBreak = new IosJailBreak(jobs);
-const plist: Plist = new Plist();
 
 rpc.exports = {
 
@@ -50,9 +44,9 @@ rpc.exports = {
   iosPlistRead: (path: string) => plist.read(path),
 
   // keychain
-  keychainAdd: (key: string, data: string) => keychain.add(key, data),
-  keychainEmpty: () => keychain.empty(),
-  keychainList: () => keychain.list(),
+  keychainAdd: (key: string, data: string) => ioskeychain.add(key, data),
+  keychainEmpty: () => ioskeychain.empty(),
+  keychainList: () => ioskeychain.list(),
 
   // nsuserdefaults
   nsuserDefaults: () => nsuserdefaults(),

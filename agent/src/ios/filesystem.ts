@@ -6,24 +6,114 @@ import { NSDictionary, NSFileManager, NSString } from "./lib/types";
 
 const { NSString } = ObjC.classes;
 
-// an iOS filesystem interface.
-export class IosFilesystem {
+export namespace iosfilesystem {
 
-  // gets an instance of NSFileManager. If noe have not
-  // already been initialized, that is done here.
-  get NSFileManager(): any {
-    if (this.fileManager === undefined) {
-      this.fileManager = getNSFileManager();
+  // a resolved nsfilemanager instance
+  let fileManager: NSFileManager;
+
+  const getFileManager = (): NSFileManager => {
+    if (fileManager === undefined) {
+      fileManager = getNSFileManager();
+      return fileManager;
     }
 
-    return this.fileManager;
-  }
+    return fileManager;
+  };
 
-  // single resolve property for an NSFileManager
-  private fileManager: NSFileManager;
+  export const exists = (path: string): boolean  => {
+    // -- Sample Objective-C
+    //
+    // NSFileManager *fm = [NSFileManager defaultManager];
+    // if ([fm fileExistsAtPath:@"/"]) {
+    //     NSLog(@"Yep!");
+    // }
 
-  public ls(path: string): IIosFileSystem {
-    const fm: NSFileManager = this.NSFileManager;
+    const fm: NSFileManager = getFileManager();
+    const p = NSString.stringWithString_(path);
+
+    return fm.fileExistsAtPath_(p);
+  };
+
+  export const readable = (path: string): boolean => {
+    // -- Sample Objective-C
+    //
+    // NSFileManager *fm = [NSFileManager defaultManager];
+    // NSLog(@"%d / readable?", [fm isReadableFileAtPath:@"/"]);
+
+    const fm: NSFileManager = getFileManager();
+    const p = NSString.stringWithString_(path);
+
+    return fm.isReadableFileAtPath_(p);
+  };
+
+  export const writable = (path: string): boolean => {
+    // -- Sample Objective-C
+    //
+    // NSFileManager *fm = [NSFileManager defaultManager];
+    // NSLog(@"%d / readable?", [fm isReadableFileAtPath:@"/"]);
+
+    const fm: NSFileManager = getFileManager();
+    const p = NSString.stringWithString_(path);
+
+    return fm.isWritableFileAtPath_(p);
+  };
+
+  export const pathIsFile = (path: string): boolean => {
+    const fm: NSFileManager = getFileManager();
+    const p = NSString.stringWithString_(path);
+
+    const isDir: NativePointer = Memory.alloc(Process.pointerSize);
+    fm.fileExistsAtPath_isDirectory_(path, isDir);
+
+    // deref the isDir pointer to get the bool
+    // *isDir === 1 means the path is a directory
+    return Memory.readInt(isDir) === 0;
+  };
+
+  // returns a 'pwd' that assumes the current bundle's path
+  // is the directory we are interested in. the handling of
+  // pwd is actually handled in the python world and this
+  // method is only really called as a starting point.
+  export const pwd = (): string => {
+    // -- Sample Objective-C
+    //
+    // NSURL *bundleURL = [[NSBundle mainBundle] bundleURL];
+
+    const NSBundle = ObjC.classes.NSBundle;
+    return NSBundle.mainBundle().bundlePath().toString();
+  };
+
+  // heavy lifting is done in frida-fs here.
+  export const readFile = (path: string): any[] => {
+    return fs.readFileSync(path);
+  };
+
+  // heavy lifting is done in frida-fs here.
+  export const writeFile = (path: string, data: string): void => {
+    const writeStream: any = fs.createWriteStream(path);
+
+    writeStream.on("error", (error) => {
+      throw error;
+    });
+
+    writeStream.write(hexStringToBytes(data));
+    writeStream.end();
+  };
+
+  export const ls = (path: string): IIosFileSystem => {
+    // -- Sample Objective-C
+    //
+    // NSFileManager *fm = [NSFileManager defaultManager];
+    // NSString *bundleURL = [[NSBundle mainBundle] bundlePath];
+    // NSArray *contents = [fm contentsOfDirectoryAtPath:bundleURL error:nil];
+
+    // for (id item in contents) {
+    //     NSString *p = [[NSString alloc] initWithFormat:@"%@/%@",bundleURL, item];
+    //     NSDictionary *attribs = [fm attributesOfItemAtPath:p error:nil];
+    //     NSLog(@"%@ - %@", p, attribs);
+    // }
+
+    const fm: NSFileManager = getFileManager();
     const p: NSString = NSString.stringWithString_(path);
 
     const response: IIosFileSystem = {
@@ -87,61 +177,5 @@ export class IosFilesystem {
     }
 
     return response;
-  }
-
-  public exists(path: string): boolean {
-    const fm: NSFileManager = this.NSFileManager;
-    const p = NSString.stringWithString_(path);
-
-    return fm.fileExistsAtPath_(p);
-  }
-
-  public readable(path: string): boolean {
-    const fm: NSFileManager = this.NSFileManager;
-    const p = NSString.stringWithString_(path);
-
-    return fm.isReadableFileAtPath_(p);
-  }
-
-  public writable(path: string): boolean {
-    const fm: NSFileManager = this.NSFileManager;
-    const p = NSString.stringWithString_(path);
-
-    return fm.isWritableFileAtPath_(p);
-  }
-
-  public pathIsFile(path: string): boolean {
-    const fm: NSFileManager = this.NSFileManager;
-    const p = NSString.stringWithString_(path);
-
-    const isDir: NativePointer = Memory.alloc(Process.pointerSize);
-    fm.fileExistsAtPath_isDirectory_(path, isDir);
-
-    // deref the isDir pointer to get the bool
-    // *isDir === 1 means the path is a directory
-    return Memory.readInt(isDir) === 0;
-  }
-
-  // returns a 'pwd' that assumes the current bundle's path
-  // is the directory we are interested in.
-  public pwd(): string {
-
-    const NSBundle = ObjC.classes.NSBundle;
-    return NSBundle.mainBundle().bundlePath().toString();
-  }
-
-  public readFile(path: string): any[] {
-    return fs.readFileSync(path);
-  }
-
-  public writeFile(path: string, data: string): void {
-    const writeStream: any = fs.createWriteStream(path);
-
-    writeStream.on("error", (error) => {
-      throw error;
-    });
-
-    writeStream.write(hexStringToBytes(data));
-    writeStream.end();
-  }
+  };
 }

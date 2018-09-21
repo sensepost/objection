@@ -2,6 +2,13 @@
 // NSLog(@"kSecAttrService: %@", kSecAttrService);
 export enum kSec {
 
+  // To reference some of the constants, the had to be echoed to
+  // get their values.
+
+  // NSLog(@"Constants Dump");
+  // NSLog(@"kSecAttrService: %@", kSecAttrService);
+  // NSLog(@"End Constants Dump");
+
   kSecReturnAttributes = "r_Attributes",
   kSecReturnData = "r_Data",
   kSecReturnRef = "r_Ref",

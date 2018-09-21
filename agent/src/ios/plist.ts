@@ -1,14 +1,17 @@
 import { NSMutableDictionary } from "./lib/types";
 
-export class Plist {
+export namespace plist {
 
-  public read(path: string): NSMutableDictionary {
+  export const read = (path: string): NSMutableDictionary => {
+    // -- Sample Objective-C
+    //
+    // NSMutableDictionary *result = [[NSMutableDictionary alloc] initWithContentsOfFile:path];
+
     const dictionary: NSMutableDictionary = ObjC.classes.NSMutableDictionary;
-
     return dictionary.alloc().initWithContentsOfFile_(path);
-  }
+  };
 
-  public write(path: string, data: any): void {
+  export const write = (path: string, data: any): void => {
     // TODO
-  }
+  };
 }

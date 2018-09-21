@@ -1,4 +1,4 @@
-import { Jobs } from "../lib/jobs";
+import { jobs } from "../lib/jobs";
 
 // Attempts to disable Jailbreak detection.
 // This seems like an odd thing to do on a device that is probably not
@@ -41,84 +41,83 @@ const jailbreakPaths = [
   "/var/tmp/cydia.log",
 ];
 
-export class IosJailBreak {
+export namespace iosjailbreak {
 
-  // to disable any invocation listeners we keep record
-  // of them in an array.
-  private invocations: InvocationListener[] = [];
+  // toggles replies to fileExistsAtPath: for the paths in jailbreakPaths
+  const fileExistsAtPath = (status: boolean): InvocationListener => {
 
-  constructor(private jobs: Jobs) { }
+    return Interceptor.attach(
+      ObjC.classes.NSFileManager["- fileExistsAtPath:"].implementation, {
+        onEnter(args) {
 
-  public disable(): void {
+          // Use a marker to check onExit if we need to manipulate
+          // the response.
+          this.is_common_path = false;
 
-    const jobIdentifier: string = this.jobs.identifier;
+          // Extract the path
+          this.path = new ObjC.Object(args[2]).toString();
 
-    this.invocations.push(
-      Interceptor.attach(
-        ObjC.classes.NSFileManager["- fileExistsAtPath:"].implementation, {
-          onEnter(args) {
+          // check if the looked up path is in the list of common_paths
+          if (jailbreakPaths.indexOf(this.path) >= 0) {
 
-            // Use a marker to check onExit if we need to manipulate
-            // the response.
-            this.is_common_path = false;
+            // Mark this path as one that should have its response
+            // modified if needed.
+            this.is_common_path = true;
+          }
+        },
+        onLeave(retval) {
 
-            // Extract the path
-            this.path = new ObjC.Object(args[2]).toString();
+          // check if the method call matched a common_path or if
+          // the lookup actually failed. we dont want to mess with
+          // paths that may not be part of jailbreak detection
+          // anyways.
+          if (!this.is_common_path || retval.isNull()) { return; }
 
-            // check if the looked up path is in the list of common_paths
-            if (jailbreakPaths.indexOf(this.path) >= 0) {
+          send({
+            data: `A successful lookup for ${this.path} occurred. Marking it as failed.`,
+            error_reason: NaN,
+            status: "success",
+            type: "jailbreak-bypass",
+          });
 
-              // Mark this path as one that should have its response
-              // modified if needed.
-              this.is_common_path = true;
-            }
-          },
-          onLeave(retval) {
+          // nope.exe
+          retval.replace(new NativePointer(0x00));
+        },
+      });
+  };
 
-            // check if the method call matched a common_path or if
-            // the lookup actually failed. we dont want to mess with
-            // paths that may not be part of jailbreak detection
-            // anyways.
-            if (!this.is_common_path || retval.isNull()) { return; }
-
-            send({
-              data: `A successful lookup for ${this.path} occurred. Marking it as failed.`,
-              error_reason: NaN,
-              status: "success",
-              type: "jailbreak-bypass",
-            });
-
-            // nope.exe
-            retval.replace(new NativePointer(0x00));
-          },
-        }),
-    );
-
+  const libSystemBFork = (status: boolean): InvocationListener | null => {
     // Hook fork() in libSystem.B.dylib and return 0
     // TODO: Hook vfork
     const libSystemBdylibFork: NativePointer = Module.findExportByName("libSystem.B.dylib", "fork");
 
-    // iOS simulator does hot have libSystem.B.dylib
-    if (libSystemBdylibFork) {
-
-      this.invocations.push(
-        Interceptor.attach(libSystemBdylibFork, {
-          onLeave(retval) {
-
-            send({
-              data: "Making call to libSystem.B.dylib::fork() return 0x0",
-              error_reason: NaN,
-              status: "success",
-              type: "jailbreak-bypass",
-            });
-
-            retval.replace(new NativePointer(0x0));
-          },
-        }),
-      );
+    // iOS simulator does not have libSystem.B.dylib
+    if (! libSystemBdylibFork) {
+      return null;
     }
 
-    this.jobs.add(jobIdentifier, this.invocations, "ios jailbreak disable");
-    this.invocations = [];
-  }
+    return Interceptor.attach(libSystemBdylibFork, {
+      onLeave(retval) {
+
+        send({
+          data: "Making call to libSystem.B.dylib::fork() return 0x0",
+          error_reason: NaN,
+          status: "success",
+          type: "jailbreak-bypass",
+        });
+
+        retval.replace(new NativePointer(0x0));
+      },
+    });
+  };
+
+  export const disable = (): void => {
+    fileExistsAtPath(false);
+    libSystemBFork(false);
+  };
+
+  export const enable = (): void => {
+    fileExistsAtPath(true);
+    libSystemBFork(true);
+  };
 }

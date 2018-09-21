@@ -1,24 +1,50 @@
 import { IJob } from "./interfaces";
 
-export class Jobs {
+export namespace jobs {
 
-  private jobs: IJob[] = [];
+  // a record of all of the jobs in the current process
+  let currentJobs: IJob[] = [];
 
-  get identifier(): string {
+  export const identifier = (): string => {
     return Math.random().toString(36).substring(2, 15);
-  }
+  };
 
-  public add(ident: string, invocation: InvocationListener[], desc: string = ""): void {
-    this.jobs.push({ identifier: ident, invocations: invocation, extra: desc });
-  }
+  export const all = (): IJob[] => {
+    return currentJobs;
+  };
 
-  public all(): IJob[] {
-    return this.jobs;
-  }
+  export const add = (jobData: IJob): void => {
+    currentJobs.push(jobData);
+  };
 
-  public kill(ident: string): boolean {
+  // determine of a job already exists based on an identifer
+  export const hasIdent = (ident: string): boolean => {
 
-    this.jobs.forEach((job) => {
+    const m: IJob[] = currentJobs.filter((job) => {
+      if (job.identifier === ident) {
+        return true;
+      }
+    });
+
+    return m.length > 0;
+  };
+
+    // determine of a job already exists based on a type
+  export const hasType = (type: string): boolean => {
+
+    const m: IJob[] = currentJobs.filter((job) => {
+      if (job.type === type) {
+        return true;
+      }
+    });
+
+    return m.length > 0;
+  };
+
+  // kills a job by detatching any invocations and removing
+  // the job by identifier
+  export const kill = (ident: string): boolean => {
+    currentJobs.forEach((job) => {
 
       if (job.identifier === ident) {
 
@@ -28,12 +54,12 @@ export class Jobs {
         });
 
         // remove the job from the current jobs
-        this.jobs = this.jobs.filter((j) => {
+        currentJobs = currentJobs.filter((j) => {
           return j.identifier !== job.identifier;
         });
       }
     });
 
     return true;
-  }
+  };
 }
