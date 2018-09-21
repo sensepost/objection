@@ -27,9 +27,9 @@ export namespace colors {
   export const randc = (): number => colorArray[Math.floor(Math.random() * colorArray.length)];
 
   // return an ansified string
-  export const ansifyString = (color: number, ...msg: string[]): string =>
+  export const ansify = (color: number, ...msg: string[]): string =>
     base.replace(`%d`, color.toString()) + msg.join(``) + reset;
 
   // tslint:disable-next-line:no-console
-  export const log = (color: number, ...msg: string[]): void => console.log(ansifyString(color, ...msg));
+  export const log = (color: number, ...msg: string[]): void => console.log(ansify(color, ...msg));
 }
