@@ -18,8 +18,8 @@ def show(args: list = None) -> None:
         [[
             entry['identifier'],
             len(entry['invocations']),
-            entry['extra'],
-        ] for entry in jobs], headers=['Job ID', 'Invocations', 'Extra'],
+            entry['type'],
+        ] for entry in jobs], headers=['Job ID', 'Invocations', 'Type'],
     ))
 
 

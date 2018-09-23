@@ -1,3 +1,5 @@
+import { colors as c } from "../lib/color";
+import { IJob } from "../lib/interfaces";
 import { jobs } from "../lib/jobs";
 
 // Attempts to disable Jailbreak detection.
@@ -44,7 +46,7 @@ const jailbreakPaths = [
 export namespace iosjailbreak {
 
   // toggles replies to fileExistsAtPath: for the paths in jailbreakPaths
-  const fileExistsAtPath = (status: boolean): InvocationListener => {
+  const fileExistsAtPath = (success: boolean, ident: string): InvocationListener => {
 
     return Interceptor.attach(
       ObjC.classes.NSFileManager["- fileExistsAtPath:"].implementation, {
@@ -67,57 +69,120 @@ export namespace iosjailbreak {
         },
         onLeave(retval) {
 
-          // check if the method call matched a common_path or if
-          // the lookup actually failed. we dont want to mess with
-          // paths that may not be part of jailbreak detection
-          // anyways.
-          if (!this.is_common_path || retval.isNull()) { return; }
+          // stop if we dont care about the path
+          if (!this.is_common_path) {
+            return;
+          }
 
-          send({
-            data: `A successful lookup for ${this.path} occurred. Marking it as failed.`,
-            error_reason: NaN,
-            status: "success",
-            type: "jailbreak-bypass",
-          });
+          // depending on the desired state, we flip retval
+          switch (success) {
+            case(true):
+              // ignore successful lookups
+              if (!retval.isNull()) {
+                return;
+              }
+              send(
+                c.ansify(c.blackBright, `[${ident}] `) +
+                `fileExistsAtPath: check for ` +
+                c.ansify(c.green, this.path) + ` failed with: ` +
+                c.ansify(c.red, retval.toString()) + `, marking it as successful.`,
+              );
 
-          // nope.exe
-          retval.replace(new NativePointer(0x00));
+              retval.replace(new NativePointer(0x01));
+              break;
+
+            case(false):
+              // ignore failed lookups
+              if (retval.isNull()) {
+                return;
+              }
+              send(
+                c.ansify(c.blackBright, `[${ident}] `) +
+                `fileExistsAtPath: check for ` +
+                c.ansify(c.green, this.path) + ` was successful with: ` +
+                c.ansify(c.red, retval.toString()) + `, marking it as failed.`,
+              );
+
+              retval.replace(new NativePointer(0x00));
+              break;
+          }
         },
-      });
+      },
+    );
   };
 
-  const libSystemBFork = (status: boolean): InvocationListener | null => {
+  const libSystemBFork = (success: boolean, ident: string): InvocationListener => {
     // Hook fork() in libSystem.B.dylib and return 0
     // TODO: Hook vfork
     const libSystemBdylibFork: NativePointer = Module.findExportByName("libSystem.B.dylib", "fork");
 
     // iOS simulator does not have libSystem.B.dylib
+    // TODO: Remove as iOS 12 similar may have this now.
     if (! libSystemBdylibFork) {
-      return null;
+      return new InvocationListener();
     }
 
     return Interceptor.attach(libSystemBdylibFork, {
       onLeave(retval) {
 
-        send({
-          data: "Making call to libSystem.B.dylib::fork() return 0x0",
-          error_reason: NaN,
-          status: "success",
-          type: "jailbreak-bypass",
-        });
+        switch (success) {
+          case(true):
+            // already successful forks are ok
+            if (!retval.isNull()) {
+              return;
+            }
+            send(
+              c.ansify(c.blackBright, `[${ident}] `) +
+              `Call to ` +
+              c.ansify(c.green, `libSystem.B.dylib::fork()`) + ` failed with ` +
+              c.ansify(c.red, retval.toString()) + ` marking it as successful.`,
+            );
 
-        retval.replace(new NativePointer(0x0));
+            retval.replace(new NativePointer(0x1));
+            break;
+
+          case(false):
+            // already failed forks are ok
+            if (retval.isNull()) {
+              return;
+            }
+            send(
+              c.ansify(c.blackBright, `[${ident}] `) +
+              `Call to ` +
+              c.ansify(c.green, `libSystem.B.dylib::fork()`) + ` was successful with ` +
+              c.ansify(c.red, retval.toString()) + ` marking it as failed.`,
+            );
+
+            retval.replace(new NativePointer(0x0));
+            break;
+        }
       },
     });
   };
 
   export const disable = (): void => {
-    fileExistsAtPath(false);
-    libSystemBFork(false);
+    const job: IJob = {
+      identifier: jobs.identifier(),
+      invocations: [],
+      type: "ios-jailbreak-disable",
+    };
+
+    job.invocations.push(fileExistsAtPath(false, job.identifier));
+    job.invocations.push(libSystemBFork(false, job.identifier));
+
+    jobs.add(job);
   };
 
   export const enable = (): void => {
-    fileExistsAtPath(true);
-    libSystemBFork(true);
+    const job: IJob = {
+      identifier: jobs.identifier(),
+      invocations: [],
+      type: "ios-jailbreak-enable",
+    };
+
+    job.invocations.push(fileExistsAtPath(true, job.identifier));
+    job.invocations.push(libSystemBFork(true, job.identifier));
+
+    jobs.add(job);
   };
 }

@@ -1,3 +1,4 @@
+import { colors as c } from "./color";
 import { IJob } from "./interfaces";
 
 export namespace jobs {
@@ -5,13 +6,8 @@ export namespace jobs {
   // a record of all of the jobs in the current process
   let currentJobs: IJob[] = [];
 
-  export const identifier = (): string => {
-    return Math.random().toString(36).substring(2, 15);
-  };
-
-  export const all = (): IJob[] => {
-    return currentJobs;
-  };
+  export const identifier = (): string => Math.random().toString(36).substring(2, 15);
+  export const all = (): IJob[] => currentJobs;
 
   export const add = (jobData: IJob): void => {
     currentJobs.push(jobData);

@@ -39,6 +39,6 @@ export interface IIosBundlePaths {
 
 export interface IJob {
   identifier: string;
-  type: string;
   invocations: InvocationListener[];
+  type: string;
 }

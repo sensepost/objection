@@ -31,5 +31,7 @@ export namespace colors {
     base.replace(`%d`, color.toString()) + msg.join(``) + reset;
 
   // tslint:disable-next-line:no-console
-  export const log = (color: number, ...msg: string[]): void => console.log(ansify(color, ...msg));
+  export const clog = (color: number, ...msg: string[]): void => console.log(ansify(color, ...msg));
+  // tslint:disable-next-line:no-console
+  export const log = (...msg: string[]): void => console.log(msg.join(``));
 }
