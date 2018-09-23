@@ -34,8 +34,8 @@ class TestJobs(unittest.TestCase):
         with capture(show) as o:
             output = o
 
-        expected_output = """Job ID    Invocations    Extra
---------  -------------  -------
+        expected_output = """Job ID    Invocations    Type
+--------  -------------  ------
 """
 
         self.assertEqual(output, expected_output)
@@ -43,14 +43,14 @@ class TestJobs(unittest.TestCase):
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_displays_list_of_jobs(self, mock_api):
         mock_api.return_value.jobs_get.return_value = [
-            {'identifier': 'rdcjq16g8xi', 'invocations': [{}], 'extra': 'ios jailbreak disable'}]
+            {'identifier': 'rdcjq16g8xi', 'invocations': [{}], 'type': 'ios-jailbreak-disable'}]
 
         with capture(show, []) as o:
             output = o
 
-        expected_outut = """Job ID         Invocations  Extra
+        expected_outut = """Job ID         Invocations  Type
 -----------  -------------  ---------------------
-rdcjq16g8xi              1  ios jailbreak disable
+rdcjq16g8xi              1  ios-jailbreak-disable
 """
 
         self.assertEqual(output, expected_outut)
