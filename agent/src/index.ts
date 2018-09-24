@@ -1,6 +1,7 @@
 import { AndroidFilesystem } from "./android/filesystem";
 import { environment } from "./generic/environment";
 import { binarycookies } from "./ios/binarycookies";
+import { credentialstorage } from "./ios/credentialstorage";
 import { iosfilesystem } from "./ios/filesystem";
 import { iosjailbreak } from "./ios/jailbreak";
 import { ioskeychain } from "./ios/keychain";
@@ -30,6 +31,9 @@ rpc.exports = {
 
   // ios binary cookies
   iosCookiesGet: () => binarycookies.get(),
+
+  // ios nsurlcredentialstorage
+  iosCredentialStorage: () => credentialstorage.dump(),
 
   // ios filesystem
   iosFileCwd: () => iosfilesystem.pwd(),

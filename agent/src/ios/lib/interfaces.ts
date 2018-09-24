@@ -46,3 +46,12 @@ export interface IIosCookie {
   isSecure: boolean;
   isHTTPOnly: boolean;
 }
+
+export interface ICredential {
+  authMethod: string;
+  host: string;
+  password: string;
+  port: string;
+  protocol: string;
+  user: string;
+}
