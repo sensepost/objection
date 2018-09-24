@@ -6,7 +6,7 @@ export namespace colors {
   export const black = (message: string) => ansify(30, message);
   export const blue = (message: string) => ansify(34, message);
   export const cyan = (message: string) => ansify(36, message);
-  export const green = (message: string) => ansify(92, message);
+  export const green = (message: string) => ansify(32, message);
   export const magenta = (message: string) => ansify(35, message);
   export const red = (message: string) => ansify(31, message);
   export const white = (message: string) => ansify(37, message);

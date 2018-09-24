@@ -1,5 +1,6 @@
 import { AndroidFilesystem } from "./android/filesystem";
 import { environment } from "./generic/environment";
+import { binarycookies } from "./ios/binarycookies";
 import { iosfilesystem } from "./ios/filesystem";
 import { iosjailbreak } from "./ios/jailbreak";
 import { ioskeychain } from "./ios/keychain";
@@ -26,6 +27,9 @@ rpc.exports = {
 
   // android filesystem
   androidFileLs: (path: string) => androidfilesystem.ls(path),
+
+  // ios binary cookies
+  iosCookiesGet: () => binarycookies.get(),
 
   // ios filesystem
   iosFileCwd: () => iosfilesystem.pwd(),

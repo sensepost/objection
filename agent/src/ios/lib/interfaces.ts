@@ -35,3 +35,14 @@ export interface IIosFilePath {
   readable: boolean | undefined;
   writable: boolean | undefined;
 }
+
+export interface IIosCookie {
+  name: string;
+  version: string;
+  value: string;
+  expiresDate: string|undefined;
+  domain: string;
+  path: string;
+  isSecure: boolean;
+  isHTTPOnly: boolean;
+}
