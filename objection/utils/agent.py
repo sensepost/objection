@@ -46,9 +46,9 @@ class Agent(object):
 
             # log the hook response if needed
             if app_state.should_debug():
-                click.secho('- [response] ' + '-' * 18, dim=True)
+                click.secho('- [incoming message] ' + '-' * 18, dim=True)
                 click.secho(json.dumps(message, indent=2, sort_keys=True), dim=True)
-                click.secho('- [./response] ' + '-' * 16, dim=True)
+                click.secho('- [./incoming message] ' + '-' * 16, dim=True)
 
             # process the response
             if message and 'payload' in message:
