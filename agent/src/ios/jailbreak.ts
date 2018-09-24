@@ -82,10 +82,9 @@ export namespace iosjailbreak {
                 return;
               }
               send(
-                c.ansify(c.blackBright, `[${ident}] `) +
-                `fileExistsAtPath: check for ` +
-                c.ansify(c.green, this.path) + ` failed with: ` +
-                c.ansify(c.red, retval.toString()) + `, marking it as successful.`,
+                c.blackBright(`[${ident}] `) + `fileExistsAtPath: check for ` +
+                c.green(this.path) + ` failed with: ` +
+                c.red(retval.toString()) + `, marking it as successful.`,
               );
 
               retval.replace(new NativePointer(0x01));
@@ -97,10 +96,9 @@ export namespace iosjailbreak {
                 return;
               }
               send(
-                c.ansify(c.blackBright, `[${ident}] `) +
-                `fileExistsAtPath: check for ` +
-                c.ansify(c.green, this.path) + ` was successful with: ` +
-                c.ansify(c.red, retval.toString()) + `, marking it as failed.`,
+                c.blackBright(`[${ident}] `) + `fileExistsAtPath: check for ` +
+                c.green(this.path) + ` was successful with: ` +
+                c.red(retval.toString()) + `, marking it as failed.`,
               );
 
               retval.replace(new NativePointer(0x00));
@@ -132,10 +130,9 @@ export namespace iosjailbreak {
               return;
             }
             send(
-              c.ansify(c.blackBright, `[${ident}] `) +
-              `Call to ` +
-              c.ansify(c.green, `libSystem.B.dylib::fork()`) + ` failed with ` +
-              c.ansify(c.red, retval.toString()) + ` marking it as successful.`,
+              c.blackBright(`[${ident}] `) + `Call to ` +
+              c.green(`libSystem.B.dylib::fork()`) + ` failed with ` +
+              c.red(retval.toString()) + ` marking it as successful.`,
             );
 
             retval.replace(new NativePointer(0x1));
@@ -147,10 +144,9 @@ export namespace iosjailbreak {
               return;
             }
             send(
-              c.ansify(c.blackBright, `[${ident}] `) +
-              `Call to ` +
-              c.ansify(c.green, `libSystem.B.dylib::fork()`) + ` was successful with ` +
-              c.ansify(c.red, retval.toString()) + ` marking it as failed.`,
+              c.blackBright(`[${ident}] `) + `Call to ` +
+              c.green(`libSystem.B.dylib::fork()`) + ` was successful with ` +
+              c.red(retval.toString()) + ` marking it as failed.`,
             );
 
             retval.replace(new NativePointer(0x0));

@@ -3,28 +3,21 @@ export namespace colors {
   const base: string = `\x1B[%dm`;
   const reset: string = `\x1b[39m`;
 
-  export const black: number = 30;
-  export const blue: number = 34;
-  export const cyan: number = 36;
-  export const green: number = 92;
-  export const magenta: number = 35;
-  export const red: number = 31;
-  export const white: number = 37;
-  export const yellow: number = 33;
-  export const blackBright: number = 90;
-  export const redBright: number = 91;
-  export const greenBright: number = 92;
-  export const yellowBright: number = 93;
-  export const blueBright: number = 94;
-  export const magentaBright: number = 95;
-  export const cyanBright: number = 96;
-  export const whiteBright: number = 97;
-
-  const colorArray: number[] = [
-    blue, cyan, green, magenta, red, yellow,
-    redBright, greenBright, yellowBright, blueBright, magentaBright, cyanBright,
-  ];
-  export const randc = (): number => colorArray[Math.floor(Math.random() * colorArray.length)];
+  export const black = (message: string) => ansify(30, message);
+  export const blue = (message: string) => ansify(34, message);
+  export const cyan = (message: string) => ansify(36, message);
+  export const green = (message: string) => ansify(92, message);
+  export const magenta = (message: string) => ansify(35, message);
+  export const red = (message: string) => ansify(31, message);
+  export const white = (message: string) => ansify(37, message);
+  export const yellow = (message: string) => ansify(33, message);
+  export const blackBright = (message: string) => ansify(90, message);
+  export const redBright = (message: string) => ansify(91, message);
+  export const greenBright = (message: string) => ansify(92, message);
+  export const yellowBright = (message: string) => ansify(93, message);
+  export const blueBright = (message: string) => ansify(94, message);
+  export const cyanBright = (message: string) => ansify(96, message);
+  export const whiteBright = (message: string) => ansify(97, message);
 
   // return an ansified string
   export const ansify = (color: number, ...msg: string[]): string =>
