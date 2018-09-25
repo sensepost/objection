@@ -35,9 +35,8 @@ def _alert_ios(message: str):
         :return:
     """
 
-    runner = FridaRunner()
-    runner.set_hook_with_data(ios_hook('ui/alert'), message=message)
-    runner.run()
+    api = state_connection.get_api()
+    api.ios_ui_alert(message)
 
 
 def ios_screenshot(args: list = None) -> None:

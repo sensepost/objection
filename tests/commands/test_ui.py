@@ -27,12 +27,11 @@ class TestUI(unittest.TestCase):
 
         self.assertTrue(mock_alert_ios.called_with('foo'))
 
-    @mock.patch('objection.commands.ui.FridaRunner')
-    def test_alert_ios_helper_method(self, mock_runner):
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_alert_ios_helper_method(self, mock_api):
         _alert_ios('foo')
 
-        self.assertTrue(mock_runner.return_value.set_hook_with_data.called)
-        self.assertTrue(mock_runner.return_value.run.called)
+        self.assertTrue(mock_api.return_value.ios_ui_alert.called)
 
     def test_ios_screenshot_validates_arguments(self):
         with capture(ios_screenshot, []) as o:

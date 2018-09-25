@@ -53,6 +53,7 @@ rpc.exports = {
   iosPlistRead: (path: string) => plist.read(path),
 
   // ios user interface
+  iosUiAlert: (message: string) => userinterface.alert(message),
   iosUiScreenshot: () => userinterface.screenshot(),
 
   // keychain
