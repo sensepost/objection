@@ -23,8 +23,8 @@ export namespace colors {
   export const ansify = (color: number, ...msg: string[]): string =>
     base.replace(`%d`, color.toString()) + msg.join(``) + reset;
 
-  // tslint:disable-next-line:no-console
-  export const clog = (color: number, ...msg: string[]): void => console.log(ansify(color, ...msg));
-  // tslint:disable-next-line:no-console
-  export const log = (...msg: string[]): void => console.log(msg.join(``));
+  // tslint:disable-next-line:no-eval
+  export const clog = (color: number, ...msg: string[]): void => eval("console").log(ansify(color, ...msg));
+  // tslint:disable-next-line:no-eval
+  export const log = (...msg: string[]): void => eval("console").log(msg.join(``));
 }
