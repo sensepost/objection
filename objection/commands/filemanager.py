@@ -542,7 +542,7 @@ def _upload_ios(path: str, destination: str) -> None:
     click.secho('Uploading {0} to {1}'.format(path, destination), fg='green', dim=True)
 
     # if we cant read the file, just stop
-    if not api.ios_file_writable(destination):
+    if not api.ios_file_writable(os.path.dirname(destination)):
         click.secho('Unable to upload file. Destination is not writable.', fg='red')
         return
 
