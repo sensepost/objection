@@ -55,6 +55,7 @@ rpc.exports = {
   // ios user interface
   iosUiAlert: (message: string) => userinterface.alert(message),
   iosUiScreenshot: () => userinterface.screenshot(),
+  iosUiWindowDump: () => userinterface.dump(),
 
   // keychain
   keychainAdd: (key: string, data: string) => ioskeychain.add(key, data),

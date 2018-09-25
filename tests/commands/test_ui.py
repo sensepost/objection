@@ -50,26 +50,9 @@ class TestUI(unittest.TestCase):
         self.assertTrue(output, 'Screenshot saved to: foo.png\n')
         self.assertTrue(mock_open.called)
 
-    @mock.patch('objection.commands.ui.FridaRunner')
-    def test_dump_ios_ui_handles_failed_hook(self, mock_runner):
-        mock_response = mock.Mock()
-        mock_response.is_successful.return_value = False
-        type(mock_response).error_message = 'test'
-
-        mock_runner.return_value.get_last_message.return_value = mock_response
-
-        with capture(dump_ios_ui, []) as o:
-            output = o
-
-        self.assertTrue(output, 'Failed to dump UI with error: test\n')
-
-    @mock.patch('objection.commands.ui.FridaRunner')
-    def test_dump_ios_ui(self, mock_runner):
-        mock_response = mock.Mock()
-        mock_response.is_successful.return_value = True
-        type(mock_response).data = 'test_ui'
-
-        mock_runner.return_value.get_last_message.return_value = mock_response
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_dump_ios_ui(self, mock_api):
+        mock_api.return_value.ios_ui_window_dump.return_value = 'test_ui'
 
         with capture(dump_ios_ui, []) as o:
             output = o

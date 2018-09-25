@@ -36,4 +36,8 @@ export namespace userinterface {
           .rootViewController().presentViewController_animated_completion_(alertController, true, NULL);
     });
   };
+
+  export const dump = (): string => {
+    return ObjC.classes.UIWindow.keyWindow().recursiveDescription().toString();
+  };
 }

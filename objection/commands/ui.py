@@ -73,18 +73,10 @@ def dump_ios_ui(args: list = None) -> None:
         :return:
     """
 
-    hook = ios_hook('ui/dump')
+    api = state_connection.get_api()
+    ui = api.ios_ui_window_dump()
 
-    runner = FridaRunner(hook=hook)
-    runner.run()
-
-    response = runner.get_last_message()
-
-    if not response.is_successful():
-        click.secho('Failed to dump UI with error: {0}'.format(response.error_message), fg='red')
-        return
-
-    click.secho(response.data)
+    click.secho(ui)
 
 
 def bypass_touchid(args: list = None) -> None:
