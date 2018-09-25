@@ -10,6 +10,8 @@ export namespace jobs {
   export const all = (): IJob[] => currentJobs;
 
   export const add = (jobData: IJob): void => {
+    send(`Registering job ` + c.blueBright(`${jobData.identifier}`) +
+      ` for ` + c.greenBright(`${jobData.type}`));
     currentJobs.push(jobData);
   };
 

@@ -88,10 +88,8 @@ def bypass_touchid(args: list = None) -> None:
         :return:
     """
 
-    hook = ios_hook('ui/touchid')
-
-    runner = FridaRunner(hook=hook)
-    runner.run_as_job(name='touchid-bypass')
+    api = state_connection.get_api()
+    api.ios_ui_biometrics_bypass()
 
 
 def android_screenshot(args: list = None) -> None:

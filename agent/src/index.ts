@@ -54,6 +54,7 @@ rpc.exports = {
 
   // ios user interface
   iosUiAlert: (message: string) => userinterface.alert(message),
+  iosUiBiometricsBypass: () => userinterface.biometricsBypass(),
   iosUiScreenshot: () => userinterface.screenshot(),
   iosUiWindowDump: () => userinterface.dump(),
 

@@ -459,8 +459,8 @@ COMMANDS = {
                         'meta': 'Screenshot the current UIView',
                         'exec': ui.ios_screenshot
                     },
-                    'touchid_bypass': {
-                        'meta': 'Hook the iOS TouchID class and respond with successful fingerprints',
+                    'biometrics_bypass': {
+                        'meta': 'Hook the iOS Biometrics LAContext and respond with successful auth',
                         'exec': ui.bypass_touchid
                     }
                 }

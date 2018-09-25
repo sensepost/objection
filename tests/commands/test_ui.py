@@ -59,11 +59,11 @@ class TestUI(unittest.TestCase):
 
         self.assertTrue(output, 'test_ui\n')
 
-    @mock.patch('objection.commands.ui.FridaRunner')
-    def test_bypass_touchid(self, mock_runner):
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_bypass_touchid(self, mock_api):
         bypass_touchid()
 
-        self.assertTrue(mock_runner.return_value.run_as_job.called)
+        self.assertTrue(mock_api.return_value.ios_ui_biometrics_bypass.called)
 
     def test_android_screenshot_validates_arguments(self):
         with capture(android_screenshot, []) as o:
