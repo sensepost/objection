@@ -1,13 +1,16 @@
 import { NSDictionary, NSUserDefaults } from "./lib/types";
 
-export const nsuserdefaults = (): NSUserDefaults | any => {
-  // -- Sample Objective-C
-  //
-  // NSUserDefaults *d = [[NSUserDefaults alloc] init];
-  // NSLog(@"%@", [d dictionaryRepresentation]);
+export namespace nsuserdefaults {
 
-  const defauts: NSUserDefaults = ObjC.classes.NSUserDefaults;
-  const data: NSDictionary = defauts.alloc().init().dictionaryRepresentation();
+  export const get = (): NSUserDefaults | any => {
+    // -- Sample Objective-C
+    //
+    // NSUserDefaults *d = [[NSUserDefaults alloc] init];
+    // NSLog(@"%@", [d dictionaryRepresentation]);
 
-  return data.toString();
-};
+    const defauts: NSUserDefaults = ObjC.classes.NSUserDefaults;
+    const data: NSDictionary = defauts.alloc().init().dictionaryRepresentation();
+
+    return data.toString();
+  };
+}

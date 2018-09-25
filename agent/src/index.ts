@@ -57,7 +57,7 @@ rpc.exports = {
   keychainList: () => ioskeychain.list(),
 
   // nsuserdefaults
-  nsuserDefaults: () => nsuserdefaults(),
+  nsuserDefaults: () => nsuserdefaults.get(),
 
   // meta
   version: () => version,
