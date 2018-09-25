@@ -40,27 +40,10 @@ class TestUI(unittest.TestCase):
 
         self.assertTrue(output, 'Usage: ios ui screenshot <local png destination>\n')
 
-    @mock.patch('objection.commands.ui.FridaRunner')
-    def test_ios_screenshot_handles_hook_error(self, mock_runner):
-        mock_response = mock.Mock()
-        mock_response.is_successful.return_value = False
-        type(mock_response).error_message = 'test'
-
-        mock_runner.return_value.get_last_message.return_value = mock_response
-
-        with capture(ios_screenshot, ['foo']) as o:
-            output = o
-
-        self.assertTrue(output, 'Failed to screenshot with error: test\n')
-
-    @mock.patch('objection.commands.ui.FridaRunner')
+    @mock.patch('objection.state.connection.state_connection.get_api')
     @mock.patch('objection.commands.ui.open', create=True)
-    def test_ios_screenshot(self, mock_open, mock_runner):
-        mock_response = mock.Mock()
-        mock_response.is_successful.return_value = True
-        mock_response.get_extra_data.return_value = 'image_data'
-
-        mock_runner.return_value.get_last_message.return_value = mock_response
+    def test_ios_screenshot(self, mock_open, mock_api):
+        mock_api.return_value.ios_ui_screenshot.return_value = b'\x00'
 
         with capture(ios_screenshot, ['foo']) as o:
             output = o

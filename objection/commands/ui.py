@@ -1,5 +1,6 @@
 import click
 
+from objection.state.connection import state_connection
 from ..state.device import device_state
 from ..utils.frida_transport import FridaRunner
 from ..utils.templates import ios_hook, android_hook
@@ -51,23 +52,16 @@ def ios_screenshot(args: list = None) -> None:
         click.secho('Usage: ios ui screenshot <local png destination>', bold=True)
         return
 
-    destination = args[0] + '.png'
+    destination = args[0]
 
-    hook = ios_hook('screenshot/take')
+    if not destination.endswith('.png'):
+        destination = destination + '.png'
 
-    runner = FridaRunner(hook=hook)
-    runner.run()
-
-    response = runner.get_last_message()
-
-    if not response.is_successful():
-        click.secho('Failed to screenshot with error: {0}'.format(response.error_message), fg='red')
-        return
-
-    image = response.get_extra_data()
+    api = state_connection.get_api()
+    png = api.ios_ui_screenshot()
 
     with open(destination, 'wb') as f:
-        f.write(image)
+        f.write(png)
 
     click.secho('Screenshot saved to: {0}'.format(destination), fg='green')
 

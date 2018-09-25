@@ -30,7 +30,8 @@
   "dependencies": {
     "frida-fs": "^1.3.0",
     "frida-java": "^1.4.10",
-    "frida-objc": "^2.0.6"
+    "frida-objc": "^2.0.6",
+    "frida-screenshot": "^1.0.2"
   },
   "devDependencies": {
     "frida-compile": "^6.0.0",

@@ -7,6 +7,7 @@ import { iosjailbreak } from "./ios/jailbreak";
 import { ioskeychain } from "./ios/keychain";
 import { nsuserdefaults } from "./ios/nsuserdefaults";
 import { plist } from "./ios/plist";
+import { userinterface } from "./ios/userinterface";
 import { jobs } from "./lib/jobs";
 import { version } from "./version";
 
@@ -50,6 +51,9 @@ rpc.exports = {
 
   // plist files
   iosPlistRead: (path: string) => plist.read(path),
+
+  // ios user interface
+  iosUiScreenshot: () => userinterface.screenshot(),
 
   // keychain
   keychainAdd: (key: string, data: string) => ioskeychain.add(key, data),
