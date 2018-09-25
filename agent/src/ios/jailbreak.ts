@@ -76,7 +76,7 @@ export namespace iosjailbreak {
 
           // depending on the desired state, we flip retval
           switch (success) {
-            case(true):
+            case (true):
               // ignore successful lookups
               if (!retval.isNull()) {
                 return;
@@ -90,7 +90,7 @@ export namespace iosjailbreak {
               retval.replace(new NativePointer(0x01));
               break;
 
-            case(false):
+            case (false):
               // ignore failed lookups
               if (retval.isNull()) {
                 return;
@@ -116,7 +116,7 @@ export namespace iosjailbreak {
 
     // iOS simulator does not have libSystem.B.dylib
     // TODO: Remove as iOS 12 similar may have this now.
-    if (! libSystemBdylibFork) {
+    if (!libSystemBdylibFork) {
       return new InvocationListener();
     }
 
@@ -124,7 +124,7 @@ export namespace iosjailbreak {
       onLeave(retval) {
 
         switch (success) {
-          case(true):
+          case (true):
             // already successful forks are ok
             if (!retval.isNull()) {
               return;
@@ -138,7 +138,7 @@ export namespace iosjailbreak {
             retval.replace(new NativePointer(0x1));
             break;
 
-          case(false):
+          case (false):
             // already failed forks are ok
             if (retval.isNull()) {
               return;

@@ -20,7 +20,7 @@ export namespace iosfilesystem {
     return fileManager;
   };
 
-  export const exists = (path: string): boolean  => {
+  export const exists = (path: string): boolean => {
     // -- Sample Objective-C
     //
     // NSFileManager *fm = [NSFileManager defaultManager];

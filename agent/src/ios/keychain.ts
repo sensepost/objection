@@ -25,188 +25,188 @@ const itemClasses = [
 
 export namespace ioskeychain {
 
-    // clean out the keychain
-    export const empty = (): void => {
-      const searchDictionary = NSMutableDictionary.alloc().init();
-      itemClasses.forEach((clazz) => {
+  // clean out the keychain
+  export const empty = (): void => {
+    const searchDictionary = NSMutableDictionary.alloc().init();
+    itemClasses.forEach((clazz) => {
 
-        // set the class-type we are querying for now & delete
-        searchDictionary.setObject_forKey_(clazz, kSec.kSecClass);
-        libObjc.SecItemDelete(searchDictionary);
-      });
-    };
+      // set the class-type we are querying for now & delete
+      searchDictionary.setObject_forKey_(clazz, kSec.kSecClass);
+      libObjc.SecItemDelete(searchDictionary);
+    });
+  };
 
-    // dump the contents of the iOS keychain, returning the
-    // results as an array representation.
-    export const list = (): IKeychainItem[] => {
-      // http://nshipster.com/bool/
-      const kCFBooleanTrue = ObjC.classes.__NSCFBoolean.numberWithBool_(true);
+  // dump the contents of the iOS keychain, returning the
+  // results as an array representation.
+  export const list = (): IKeychainItem[] => {
+    // http://nshipster.com/bool/
+    const kCFBooleanTrue = ObjC.classes.__NSCFBoolean.numberWithBool_(true);
 
-      // the base query dictionary to use for the keychain lookups
-      const searchDictionary = NSMutableDictionary.alloc().init();
-      searchDictionary.setObject_forKey_(kCFBooleanTrue, kSec.kSecReturnAttributes);
-      searchDictionary.setObject_forKey_(kCFBooleanTrue, kSec.kSecReturnData);
-      searchDictionary.setObject_forKey_(kCFBooleanTrue, kSec.kSecReturnRef);
-      searchDictionary.setObject_forKey_(kSec.kSecMatchLimitAll, kSec.kSecMatchLimit);
+    // the base query dictionary to use for the keychain lookups
+    const searchDictionary = NSMutableDictionary.alloc().init();
+    searchDictionary.setObject_forKey_(kCFBooleanTrue, kSec.kSecReturnAttributes);
+    searchDictionary.setObject_forKey_(kCFBooleanTrue, kSec.kSecReturnData);
+    searchDictionary.setObject_forKey_(kCFBooleanTrue, kSec.kSecReturnRef);
+    searchDictionary.setObject_forKey_(kSec.kSecMatchLimitAll, kSec.kSecMatchLimit);
 
-      const kcItems: IKeychainItem[] = [].concat.apply([], itemClasses.map((clazz) => {
+    const kcItems: IKeychainItem[] = [].concat.apply([], itemClasses.map((clazz) => {
 
-        const clazzItems: IKeychainItem[] = [];
+      const clazzItems: IKeychainItem[] = [];
 
-        searchDictionary.setObject_forKey_(clazz, kSec.kSecClass);
+      searchDictionary.setObject_forKey_(clazz, kSec.kSecClass);
 
-        // prepare a pointer for the results and call SecItemCopyMatching to get them
-        const resultsPointer: NativePointer = Memory.alloc(Process.pointerSize);
-        // const copyResult: NativePointer = SecItemCopyMatching(searchDictionary, resultsPointer);
-        const copyResult: NativePointer = libObjc.SecItemCopyMatching(searchDictionary, resultsPointer);
+      // prepare a pointer for the results and call SecItemCopyMatching to get them
+      const resultsPointer: NativePointer = Memory.alloc(Process.pointerSize);
+      // const copyResult: NativePointer = SecItemCopyMatching(searchDictionary, resultsPointer);
+      const copyResult: NativePointer = libObjc.SecItemCopyMatching(searchDictionary, resultsPointer);
 
-        // without results (aka non-zero OSStatus) we just move along.
-        if (!copyResult.isNull()) { return; }
+      // without results (aka non-zero OSStatus) we just move along.
+      if (!copyResult.isNull()) { return; }
 
-        // read the resultant dict of the lookup from memory
-        const searchResults: NSDictionary = new ObjC.Object(Memory.readPointer(resultsPointer));
+      // read the resultant dict of the lookup from memory
+      const searchResults: NSDictionary = new ObjC.Object(Memory.readPointer(resultsPointer));
 
-        // if the results in the dict is empty (which is not something I expect),
-        // fail fast too.
-        if (searchResults.length <= 0) { return; }
+      // if the results in the dict is empty (which is not something I expect),
+      // fail fast too.
+      if (searchResults.length <= 0) { return; }
 
-        // read each key chain entry for the current item_class and populate
-        // the item_class items we will return
-        for (let i: number = 0; i < searchResults.count(); i++) {
+      // read each key chain entry for the current item_class and populate
+      // the item_class items we will return
+      for (let i: number = 0; i < searchResults.count(); i++) {
 
-          const data: NSDictionary = searchResults.objectAtIndex_(i);
+        const data: NSDictionary = searchResults.objectAtIndex_(i);
 
-          clazzItems.push({
-            access_control: (data.containsKey_(kSec.kSecAttrAccessControl)) ? decodeAcl(data) : "",
-            accessible_attribute: reverseEnumLookup(kSec,
-              dataToString(data.objectForKey_(kSec.kSecAttrAccessible))),
-            account: dataToString(data.objectForKey_(kSec.kSecAttrAccount)),
-            alias: dataToString(data.objectForKey_(kSec.kSecAttrAlias)),
-            comment: dataToString(data.objectForKey_(kSec.kSecAttrComment)),
-            create_date: dataToString(data.objectForKey_(kSec.kSecAttrCreationDate)),
-            creator: dataToString(data.objectForKey_(kSec.kSecAttrCreator)),
-            custom_icon: dataToString(data.objectForKey_(kSec.kSecAttrHasCustomIcon)),
-            data: (clazz !== "keys") ? dataToString(data.objectForKey_(kSec.kSecValueData)) :
-              "(Key data not displayed)",
-            description: dataToString(data.objectForKey_(kSec.kSecAttrDescription)),
-            entitlement_group: dataToString(data.objectForKey_(kSec.kSecAttrAccessGroup)),
-            generic: dataToString(data.objectForKey_(kSec.kSecAttrGeneric)),
-            invisible: dataToString(data.objectForKey_(kSec.kSecAttrIsInvisible)),
-            item_class: reverseEnumLookup(kSec, clazz),
-            label: dataToString(data.objectForKey_(kSec.kSecAttrLabel)),
-            modification_date: dataToString(data.objectForKey_(kSec.kSecAttrModificationDate)),
-            negative: dataToString(data.objectForKey_(kSec.kSecAttrIsNegative)),
-            protected: dataToString(data.objectForKey_(kSec.kSecProtectedDataItemAttr)),
-            script_code: dataToString(data.objectForKey_(kSec.kSecAttrScriptCode)),
-            service: dataToString(data.objectForKey_(kSec.kSecAttrService)),
-            type: dataToString(data.objectForKey_(kSec.kSecAttrType)),
-          });
-        }
-
-        return clazzItems;
-
-      }).filter((n) => n !== undefined));
-
-      return kcItems;
-    };
-
-    // add a string entry to the keychain
-    export const add = (key: string, data: string): boolean => {
-
-      // Convert the key and data to NSData
-      const dataString: NSString = NSString.stringWithString_(data).dataUsingEncoding_(NSUTF8StringEncoding);
-      const dataKey: NSString = NSString.stringWithString_(key).dataUsingEncoding_(NSUTF8StringEncoding);
-      const itemDict: NSMutableDictionary = NSMutableDictionary.alloc().init();
-
-      itemDict.setObject_forKey_(kSec.kSecClassGenericPassword, kSec.kSecClass);
-      itemDict.setObject_forKey_(dataKey, kSec.kSecAttrService);
-      itemDict.setObject_forKey_(dataString, kSec.kSecValueData);
-
-      // Add the keychain entry
-      const result: any = libObjc.SecItemAdd(itemDict, NULL);
-      if (result !== 0x00) {
-        return false;
+        clazzItems.push({
+          access_control: (data.containsKey_(kSec.kSecAttrAccessControl)) ? decodeAcl(data) : "",
+          accessible_attribute: reverseEnumLookup(kSec,
+            dataToString(data.objectForKey_(kSec.kSecAttrAccessible))),
+          account: dataToString(data.objectForKey_(kSec.kSecAttrAccount)),
+          alias: dataToString(data.objectForKey_(kSec.kSecAttrAlias)),
+          comment: dataToString(data.objectForKey_(kSec.kSecAttrComment)),
+          create_date: dataToString(data.objectForKey_(kSec.kSecAttrCreationDate)),
+          creator: dataToString(data.objectForKey_(kSec.kSecAttrCreator)),
+          custom_icon: dataToString(data.objectForKey_(kSec.kSecAttrHasCustomIcon)),
+          data: (clazz !== "keys") ? dataToString(data.objectForKey_(kSec.kSecValueData)) :
+            "(Key data not displayed)",
+          description: dataToString(data.objectForKey_(kSec.kSecAttrDescription)),
+          entitlement_group: dataToString(data.objectForKey_(kSec.kSecAttrAccessGroup)),
+          generic: dataToString(data.objectForKey_(kSec.kSecAttrGeneric)),
+          invisible: dataToString(data.objectForKey_(kSec.kSecAttrIsInvisible)),
+          item_class: reverseEnumLookup(kSec, clazz),
+          label: dataToString(data.objectForKey_(kSec.kSecAttrLabel)),
+          modification_date: dataToString(data.objectForKey_(kSec.kSecAttrModificationDate)),
+          negative: dataToString(data.objectForKey_(kSec.kSecAttrIsNegative)),
+          protected: dataToString(data.objectForKey_(kSec.kSecProtectedDataItemAttr)),
+          script_code: dataToString(data.objectForKey_(kSec.kSecAttrScriptCode)),
+          service: dataToString(data.objectForKey_(kSec.kSecAttrService)),
+          type: dataToString(data.objectForKey_(kSec.kSecAttrType)),
+        });
       }
 
-      return true;
-    };
+      return clazzItems;
 
-    // decode the access control attributes on a keychain
-    // entry into a human readable string. Getting an idea of what the
-    // constriants actually are is done using an undocumented method,
-    // SecAccessControlGetConstraints.
-    const decodeAcl = (entry: NSDictionary): string => {
+    }).filter((n) => n !== undefined));
 
-      const acl = new ObjC.Object(
-        libObjc.SecAccessControlGetConstraints(entry.objectForKey_(kSec.kSecAttrAccessControl)));
+    return kcItems;
+  };
 
-      // Ensure we were able to get the SecAccessControlRef
-      if (acl.handle.isNull()) { return "None"; }
+  // add a string entry to the keychain
+  export const add = (key: string, data: string): boolean => {
 
-      const flags: string[] = [];
-      const aclEnum: NSDictionary = acl.keyEnumerator();
-      let aclItemkey: any;
+    // Convert the key and data to NSData
+    const dataString: NSString = NSString.stringWithString_(data).dataUsingEncoding_(NSUTF8StringEncoding);
+    const dataKey: NSString = NSString.stringWithString_(key).dataUsingEncoding_(NSUTF8StringEncoding);
+    const itemDict: NSMutableDictionary = NSMutableDictionary.alloc().init();
 
-      // tslint:disable-next-line:no-conditional-assignment
-      while ((aclItemkey = aclEnum.nextObject()) !== null) {
-        const aclItem: NSDictionary = acl.objectForKey_(aclItemkey);
+    itemDict.setObject_forKey_(kSec.kSecClassGenericPassword, kSec.kSecClass);
+    itemDict.setObject_forKey_(dataKey, kSec.kSecAttrService);
+    itemDict.setObject_forKey_(dataString, kSec.kSecValueData);
 
-        switch (dataToString(aclItemkey)) {
+    // Add the keychain entry
+    const result: any = libObjc.SecItemAdd(itemDict, NULL);
+    if (!result.isNull()) {
+      return false;
+    }
 
-          // Defaults?
-          case "dacl":
-            break;
+    return true;
+  };
 
-          case "osgn":
-            flags.push("kSecAttrKeyClassPrivate");
+  // decode the access control attributes on a keychain
+  // entry into a human readable string. Getting an idea of what the
+  // constriants actually are is done using an undocumented method,
+  // SecAccessControlGetConstraints.
+  const decodeAcl = (entry: NSDictionary): string => {
 
-          case "od":
-            const constraints: NSDictionary = aclItem;
-            const constraintEnum = constraints.keyEnumerator();
-            let constraintItemKey;
+    const acl = new ObjC.Object(
+      libObjc.SecAccessControlGetConstraints(entry.objectForKey_(kSec.kSecAttrAccessControl)));
 
-            // tslint:disable-next-line:no-conditional-assignment
-            while ((constraintItemKey = constraintEnum.nextObject()) !== null) {
+    // Ensure we were able to get the SecAccessControlRef
+    if (acl.handle.isNull()) { return "None"; }
 
-              switch (dataToString(constraintItemKey)) {
-                case "cpo":
-                  flags.push("kSecAccessControlUserPresence");
-                  break;
+    const flags: string[] = [];
+    const aclEnum: NSDictionary = acl.keyEnumerator();
+    let aclItemkey: any;
 
-                case "cup":
-                  flags.push("kSecAccessControlDevicePasscode");
-                  break;
+    // tslint:disable-next-line:no-conditional-assignment
+    while ((aclItemkey = aclEnum.nextObject()) !== null) {
+      const aclItem: NSDictionary = acl.objectForKey_(aclItemkey);
 
-                case "pkofn":
-                  constraints.objectForKey_("pkofn") === 1 ?
-                    flags.push("Or") :
-                    flags.push("And");
-                  break;
+      switch (dataToString(aclItemkey)) {
 
-                case "cbio":
-                  constraints.objectForKey_("cbio").count() === 1 ?
-                    flags.push("kSecAccessControlBiometryAny") :
-                    flags.push("kSecAccessControlBiometryCurrentSet");
-                  break;
+        // Defaults?
+        case "dacl":
+          break;
 
-                default:
-                  break;
-              }
+        case "osgn":
+          flags.push("kSecAttrKeyClassPrivate");
+
+        case "od":
+          const constraints: NSDictionary = aclItem;
+          const constraintEnum = constraints.keyEnumerator();
+          let constraintItemKey;
+
+          // tslint:disable-next-line:no-conditional-assignment
+          while ((constraintItemKey = constraintEnum.nextObject()) !== null) {
+
+            switch (dataToString(constraintItemKey)) {
+              case "cpo":
+                flags.push("kSecAccessControlUserPresence");
+                break;
+
+              case "cup":
+                flags.push("kSecAccessControlDevicePasscode");
+                break;
+
+              case "pkofn":
+                constraints.objectForKey_("pkofn") === 1 ?
+                  flags.push("Or") :
+                  flags.push("And");
+                break;
+
+              case "cbio":
+                constraints.objectForKey_("cbio").count() === 1 ?
+                  flags.push("kSecAccessControlBiometryAny") :
+                  flags.push("kSecAccessControlBiometryCurrentSet");
+                break;
+
+              default:
+                break;
             }
+          }
 
-            break;
+          break;
 
-          case "prp":
-            flags.push("kSecAccessControlApplicationPassword");
-            break;
+        case "prp":
+          flags.push("kSecAccessControlApplicationPassword");
+          break;
 
-          default:
-            break;
-        }
+        default:
+          break;
       }
+    }
 
-      return flags.join(" ");
-    };
+    return flags.join(" ");
+  };
 }
 
 // -- Sample Objective-C

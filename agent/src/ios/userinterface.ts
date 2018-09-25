@@ -124,7 +124,7 @@ export namespace userinterface {
             );
           };
         },
-    });
+      });
 
     // register the job
     job.invocations.push(lacontext);
