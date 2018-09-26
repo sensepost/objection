@@ -6,6 +6,7 @@ import { iosfilesystem } from "./ios/filesystem";
 import { iosjailbreak } from "./ios/jailbreak";
 import { ioskeychain } from "./ios/keychain";
 import { nsuserdefaults } from "./ios/nsuserdefaults";
+import { sslpinning } from "./ios/pinning";
 import { plist } from "./ios/plist";
 import { userinterface } from "./ios/userinterface";
 import { jobs } from "./lib/jobs";
@@ -57,6 +58,9 @@ rpc.exports = {
   iosUiBiometricsBypass: () => userinterface.biometricsBypass(),
   iosUiScreenshot: () => userinterface.screenshot(),
   iosUiWindowDump: () => userinterface.dump(),
+
+  // ios ssl pinning
+  iosPinningDisable: (quiet: boolean) => sslpinning.disable(quiet),
 
   // keychain
   keychainAdd: (key: string, data: string) => ioskeychain.add(key, data),

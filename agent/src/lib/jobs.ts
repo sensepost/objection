@@ -51,6 +51,11 @@ export namespace jobs {
           invocation.detach();
         });
 
+        // revert any replacements
+        job.replacements.forEach((replacement) => {
+          Interceptor.revert(replacement);
+        });
+
         // remove the job from the current jobs
         currentJobs = currentJobs.filter((j) => {
           return j.identifier !== job.identifier;
