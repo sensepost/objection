@@ -62,7 +62,7 @@ def dump_all(args: list) -> None:
     click.secho('Will dump {0} {1} images, totalling {2}'.format(
         len(ranges), access, sizeof_fmt(total_size)), fg='green', dim=True)
 
-    with click.progressbar(ranges, label='Preparing to dump images') as bar:
+    with click.progressbar(ranges) as bar:
 
         for image in bar:
             bar.label = 'Dumping {0} from base: {1}'.format(sizeof_fmt(image['size']), hex(int(image['base'], 16)))
