@@ -1,4 +1,5 @@
 import { colors as c } from "../lib/color";
+import { qsend } from "../lib/helpers";
 import { IJob } from "../lib/interfaces";
 import { jobs } from "../lib/jobs";
 import { libObjc } from "./lib/libobjc";
@@ -64,14 +65,14 @@ export namespace sslpinning {
           //     AFSSLPinningModePublicKey,
           //     AFSSLPinningModeCertificate,
           // };
-          send(
+          qsend(quiet,
             c.blackBright(`[${ident}] `) + `[AFNetworking] Called ` +
             c.green(`-[AFSecurityPolicy setSSLPinningMode:]`) + ` with mode ` +
             c.red(args[2].toString()),
           );
 
           if (!args[2].isNull()) {
-            send(
+            qsend(quiet,
               c.blackBright(`[${ident}] `) + `[AFNetworking] ` +
               c.blueBright(`Altered `) +
               c.green(`-[AFSecurityPolicy setSSLPinningMode:]`) + ` mode to ` +
@@ -88,14 +89,14 @@ export namespace sslpinning {
     const setAllowInvalidCertificates: InvocationListener = Interceptor.attach(
       AFSecurityPolicy["- setAllowInvalidCertificates:"].implementation, {
         onEnter(args) {
-          send(
+          qsend(quiet,
             c.blackBright(`[${ident}] `) + `[AFNetworking] Called ` +
             c.green(`-[AFSecurityPolicy setAllowInvalidCertificates:]`) + ` with allow ` +
             c.red(args[2].toString()),
           );
 
           if (args[2].equals(new NativePointer(0x0))) {
-            send(
+            qsend(quiet,
               c.blackBright(`[${ident}] `) + `[AFNetworking] ` +
               c.blueBright(`Altered `) +
               c.green(`-[AFSecurityPolicy setAllowInvalidCertificates:]`) + ` allow to ` +
@@ -117,14 +118,14 @@ export namespace sslpinning {
           //     AFSSLPinningModePublicKey,
           //     AFSSLPinningModeCertificate,
           // };
-          send(
+          qsend(quiet,
             c.blackBright(`[${ident}] `) + `[AFNetworking] Called ` +
             c.green(`+[AFSecurityPolicy policyWithPinningMode:]`) + ` with mode ` +
             c.red(args[2].toString()),
           );
 
           if (!args[2].isNull()) {
-            send(
+            qsend(quiet,
               c.blackBright(`[${ident}] `) + `[AFNetworking] ` +
               c.blueBright(`Altered `) +
               c.green(`+[AFSecurityPolicy policyWithPinningMode:]`) + ` mode to ` +
@@ -147,14 +148,14 @@ export namespace sslpinning {
           //     AFSSLPinningModePublicKey,
           //     AFSSLPinningModeCertificate,
           // };
-          send(
+          qsend(quiet,
             c.blackBright(`[${ident}] `) + `[AFNetworking] Called ` +
             c.green(`+[AFSecurityPolicy policyWithPinningMode:withPinnedCertificates:]`) + ` with mode ` +
             c.red(args[2].toString()),
           );
 
           if (!args[2].isNull()) {
-            send(
+            qsend(quiet,
               c.blackBright(`[${ident}] `) + `[AFNetworking] ` +
               c.blueBright(`Altered `) +
               c.green(`+[AFSecurityPolicy policyWithPinningMode:withPinnedCertificates:]`) + ` mode to ` +
@@ -202,7 +203,7 @@ export namespace sslpinning {
           const selector = ObjC.selectorAsString(args[1]);
           const challenge = new ObjC.Object(args[3]);
 
-          send(
+          qsend(quiet,
             c.blackBright(`[${ident}] `) + `[AFNetworking] Called ` +
             c.green(`-[${receiver} ${selector}]`) + `, ensuring pinning is passed`,
           );
@@ -264,14 +265,14 @@ export namespace sslpinning {
 
     return Interceptor.attach(ObjC.classes.TSKPinningValidator["- evaluateTrust:forHostname:"].implementation, {
       onLeave(retval) {
-        send(
+        qsend(quiet,
           c.blackBright(`[${ident}] `) + `[TrustKit] Called ` +
           c.green(`-[TSKPinningValidator evaluateTrust:forHostname:]`) + ` with result ` +
           c.red(retval.toString()),
         );
 
         if (!retval.isNull()) {
-          send(
+          qsend(quiet,
             c.blackBright(`[${ident}] `) + `[TrustKit] ` +
             c.blueBright(`Altered `) +
             c.green(`-[TSKPinningValidator evaluateTrust:forHostname:]`) + ` mode to ` +
@@ -295,7 +296,7 @@ export namespace sslpinning {
       // https://github.com/nabla-c0d3/ssl-kill-switch2/blob/
       //  f7e73a2044340d59f2b96d972afcbc3c2f50ab27/SSLKillSwitch/SSLKillSwitch.m#L70
       if (option === kSSLSessionOptionBreakOnServerAuth) {
-        send(
+        qsend(quiet,
           c.blackBright(`[${ident}] `) + `Called ` +
           c.green(`SSLSetSessionOption()`) +
           `, removing ability to modify kSSLSessionOptionBreakOnServerAuth.`,
@@ -322,7 +323,7 @@ export namespace sslpinning {
       const sslContext = SSLCreateContext(alloc, protocolSide, connectionType);
       SSLSetSessionOption(sslContext, kSSLSessionOptionBreakOnServerAuth, 1);
 
-      send(
+      qsend(quiet,
         c.blackBright(`[${ident}] `) + `Called ` +
         c.green(`SSLCreateContext()`) +
         `, setting kSSLSessionOptionBreakOnServerAuth to disable cert validation.`,
@@ -342,7 +343,7 @@ export namespace sslpinning {
       const result = SSLHandshake(context);
 
       if (result === errSSLServerAuthCompared) {
-        send(
+        qsend(quiet,
           c.blackBright(`[${ident}] `) + `Called ` +
           c.green(`SSLHandshake()`) +
           `, calling again to skip certificate validation.`,
@@ -366,7 +367,7 @@ export namespace sslpinning {
     }
 
     Interceptor.replace(tlsHelper, new NativeCallback((hdsk, server, SecTrustRef) => {
-      send(
+      qsend(quiet,
         c.blackBright(`[${ident}] `) + `Called ` +
         c.green(`tls_helper_create_peer_trust()`) +
         `, returning noErr.`,
@@ -388,7 +389,7 @@ export namespace sslpinning {
 
     return Interceptor.attach(peerTrust, {
       onEnter: () => {
-        send(
+        qsend(quiet,
           c.blackBright(`[${ident}] `) + `Called ` +
           c.green(`nw_tls_create_peer_trust()`) +
           `, ` +
@@ -418,8 +419,10 @@ export namespace sslpinning {
   export const disable = (q: boolean): void => {
 
     if (q) {
+      send(`Quiet mode enabled. Not reporting invocations.`);
       quiet = true;
     }
+
     const job: IJob = {
       identifier: jobs.identifier(),
       invocations: [],

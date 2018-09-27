@@ -27,4 +27,11 @@ export namespace colors {
   export const clog = (color: number, ...msg: string[]): void => eval("console").log(ansify(color, ...msg));
   // tslint:disable-next-line:no-eval
   export const log = (...msg: string[]): void => eval("console").log(msg.join(``));
+
+  // log based on a quiet flag
+  export const qlog = (quiet: boolean, ...msg: string[]): void => {
+    if (quiet === false) {
+      log(...msg);
+    }
+  };
 }

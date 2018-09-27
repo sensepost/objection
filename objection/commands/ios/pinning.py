@@ -23,4 +23,4 @@ def ios_disable(args: list = None) -> None:
     """
 
     api = state_connection.get_api()
-    api.ios_pinning_disable()
+    api.ios_pinning_disable(_should_be_quiet(args))

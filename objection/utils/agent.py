@@ -52,7 +52,8 @@ class Agent(object):
 
             # process the response
             if message and 'payload' in message:
-                click.secho('(agent) ' + message['payload'])
+                if len(message['payload']) > 0:
+                    click.secho('(agent) ' + message['payload'])
 
         except Exception as e:
             click.secho('Failed to process an incoming message from agent: {0}'.format(e), fg='red', bold=True)

@@ -20,3 +20,10 @@ export const hexStringToBytes = (str: string): Uint8Array => {
 
   return new Uint8Array(a);
 };
+
+// only send if quiet is not true
+export const qsend = (quiet: boolean, message: any): void => {
+  if (quiet === false) {
+    send(message);
+   }
+};
