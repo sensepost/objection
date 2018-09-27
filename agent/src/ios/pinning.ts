@@ -187,6 +187,8 @@ export namespace sslpinning {
       return [];
     }
 
+    send(c.blackBright(`[${ident}] `) + `Found NSURLSession based classes. Hooking known pinning methods.`);
+
     // hook all of the methods that matched the selector
     const invocations: InvocationListener[] = search.map((i) => {
       return Interceptor.attach(i.address, {
@@ -248,6 +250,38 @@ export namespace sslpinning {
     });
 
     return invocations;
+  };
+
+  // TrustKit
+  const trustKit = (ident: string): InvocationListener => {
+    // https://github.com/datatheorem/TrustKit/blob/
+    //  71878dce8c761fc226fecc5dbb6e86fbedaee05e/TrustKit/TSKPinningValidator.m#L84
+    if (!ObjC.classes.TSKPinningValidator) {
+      return;
+    }
+
+    send(c.blackBright(`[${ident}] `) + `Found TrustKit. Hooking known pinning methods.`);
+
+    return Interceptor.attach(ObjC.classes.TSKPinningValidator["- evaluateTrust:forHostname:"].implementation, {
+      onLeave(retval) {
+        send(
+          c.blackBright(`[${ident}] `) + `[TrustKit] Called ` +
+          c.green(`-[TSKPinningValidator evaluateTrust:forHostname:]`) + ` with result ` +
+          c.red(retval.toString()),
+        );
+
+        if (!retval.isNull()) {
+          send(
+            c.blackBright(`[${ident}] `) + `[TrustKit] ` +
+            c.blueBright(`Altered `) +
+            c.green(`-[TSKPinningValidator evaluateTrust:forHostname:]`) + ` mode to ` +
+            c.green(`0x0`),
+          );
+
+          retval.replace(new NativePointer(0x0));
+        }
+      },
+    });
   };
 
   const sSLSetSessionOption = (ident: string): NativePointerValue => {
@@ -399,10 +433,10 @@ export namespace sslpinning {
     afNetworking(job.identifier).forEach((i) => {
       job.invocations.push(i);
     });
-
     nsUrlSession(job.identifier).forEach((i) => {
       job.invocations.push(i);
     });
+    job.invocations.push(trustKit(job.identifier));
 
     // Low level hooks.
 
