@@ -241,6 +241,49 @@ if (ObjC.classes.AFHTTPSessionManager && ObjC.classes.AFSecurityPolicy) {
     }
 }
 
+// TrustKit
+
+var search = new ApiResolver('module').enumerateMatchesSync('exports:TrustKit!verifyPublicKeyPin');
+
+var TSKTrustEvaluationSuccess = 0;
+
+if (search.length > 0) {
+
+    send({
+        status: 'success',
+        error_reason: NaN,
+        type: 'ios-ssl-pinning-bypass',
+        data: '[TSKTrustEvaluationResult verifyPublicKeyPin] Found ' + search.length + ' matches for verifyPublicKeyPin'
+    });
+
+    for (var i = 0; i < search.length; i++) {
+        Interceptor.replace(search[i].address, new NativeCallback(function (serverTrust, serverHostname, knownPins, hashCache) {
+            return TSKTrustEvaluationSuccess;
+        }, 'int', ['pointer', 'pointer', 'pointer', 'pointer']));
+    }
+}
+
+// SecTrustEvaluate
+var search = new ApiResolver('module').enumerateMatchesSync('exports:Security!SecTrustEvaluate');
+
+var kSecTrustResultProceed = 1;
+
+if (search.length > 0) {
+
+    send({
+        status: 'success',
+        error_reason: NaN,
+        type: 'ios-ssl-pinning-bypass',
+        data: '[OSStatus SecTrustEvaluate] Found ' + search.length + ' matches for SecTrustEvaluate'
+    });
+
+    for (var i = 0; i < search.length; i++) {
+        Interceptor.replace(search[i].address, new NativeCallback(function (trust, result) {
+			Memory.writeInt(result, kSecTrustResultProceed);
+        }, 'int', ['pointer', 'pointer']));
+    }
+}
+
 // NSURLSession
 var search = resolver.enumerateMatchesSync('-[* URLSession:didReceiveChallenge:completionHandler:]');
 
