@@ -53,6 +53,9 @@ rpc.exports = {
     hooking.getClassMethods(className, includeParents),
   iosHookingGetClasses: () => hooking.getClasses(),
   iosHookingSearchMethods: (partial: string) => hooking.searchMethods(partial),
+  iosHookingSetReturnValue: (selector: string, returnVal: boolean) =>
+    hooking.setMethodReturn(selector, returnVal),
+  iosHookingWatchClass: (clazz: string, parents: boolean) => hooking.watchClass(clazz, parents),
   iosHookingWatchMethod: (selector: string, dargs: boolean, dbt: boolean, dret: boolean) =>
     hooking.watchMethod(selector, dargs, dbt, dret),
 

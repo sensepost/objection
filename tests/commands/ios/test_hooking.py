@@ -86,11 +86,11 @@ Found 2 methods
 
         self.assertEqual(output, 'Usage: ios hooking watch class <class_name> (--include-parents)\n')
 
-    @mock.patch('objection.commands.ios.hooking.FridaRunner')
-    def test_watch_class(self, mock_runner):
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_watch_class(self, mock_api):
         watch_class(['TEKeychainManager'])
 
-        self.assertTrue(mock_runner.return_value.run_as_job.called)
+        self.assertTrue(mock_api.return_value.ios_hooking_watch_class.called)
 
     def test_watch_class_method_validates_arguments(self):
         with capture(watch_class_method, []) as o:
@@ -113,11 +113,11 @@ Found 2 methods
         self.assertEqual(output, 'Usage: ios hooking set_method_return "<selector>" '
                                  '(eg: "-[ClassName methodName:]") <true/false>\n')
 
-    @mock.patch('objection.commands.ios.hooking.FridaRunner')
-    def test_set_method_return_value(self, mock_runner):
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_set_method_return_value(self, mock_api):
         set_method_return_value(['-[TEKeychainManager forData:]', 'true'])
 
-        self.assertTrue(mock_runner.return_value.run_as_job.called)
+        self.assertTrue(mock_api.return_value.ios_hooking_set_return_value.called)
 
     def test_search_class_validates_arguments(self):
         with capture(search_class, []) as o:

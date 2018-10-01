@@ -1,9 +1,7 @@
 import click
 
 from objection.state.connection import state_connection
-from objection.utils.frida_transport import FridaRunner
 from objection.utils.helpers import clean_argument_flags
-from objection.utils.templates import ios_hook
 
 # a thumbsucked list of prefixes used in Objective-C runtime
 # for iOS applications. This is not a science, but a gut feeling.
@@ -210,12 +208,10 @@ def watch_class(args: list) -> None:
 
     class_name = args[0]
 
-    runner = FridaRunner()
-    runner.set_hook_with_data(
-        ios_hook('hooking/watch-class-methods'),
-        class_name=class_name, include_parents=_should_include_parent_methods(args))
+    api = state_connection.get_api()
+    api.ios_hooking_watch_class(class_name)
 
-    runner.run_as_job(name='watch-class-methods', args=args)
+    return
 
 
 def watch_class_method(args: list) -> None:
@@ -260,11 +256,8 @@ def set_method_return_value(args: list) -> None:
     selector = args[0]
     retval = args[1]
 
-    runner = FridaRunner()
-    runner.set_hook_with_data(
-        ios_hook('hooking/set-return'), selector=selector, retval=_string_is_true(retval))
-
-    runner.run_as_job(name='set-return-value', args=args)
+    api = state_connection.get_api()
+    api.ios_hooking_set_return_value(selector, _string_is_true(retval))
 
 
 def search_class(args: list) -> None:
