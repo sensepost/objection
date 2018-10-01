@@ -1,4 +1,5 @@
-import fs = require("frida-fs");
+// import fs = require("frida-fs");
+import * as fs from "fs";
 import { hexStringToBytes } from "../lib/helpers";
 import { getNSFileManager } from "./lib/helpers";
 import { IIosFilePath, IIosFileSystem } from "./lib/interfaces";
@@ -84,7 +85,7 @@ export namespace iosfilesystem {
   };
 
   // heavy lifting is done in frida-fs here.
-  export const readFile = (path: string): any[] => {
+  export const readFile = (path: string): Buffer => {
     return fs.readFileSync(path);
   };
 
@@ -92,7 +93,7 @@ export namespace iosfilesystem {
   export const writeFile = (path: string, data: string): void => {
     const writeStream: any = fs.createWriteStream(path);
 
-    writeStream.on("error", (error) => {
+    writeStream.on("error", (error: Error) => {
       throw error;
     });
 

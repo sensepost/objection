@@ -22,13 +22,13 @@ export namespace hooking {
   };
 
   export const searchMethods = (partial: string): string[] => {
-    const results = []; // the response
+    const results: string[] = []; // the response
 
     Object.keys(ObjC.classes).forEach((clazz: string) => {
       ObjC.classes[clazz].$ownMethods.forEach((method) => {
 
         if (method.toLowerCase().indexOf(partial) !== -1) {
-          results.push(`[${ObjC.classes[clazz].$className} ${method}]`);
+          results.push(`[` + ObjC.classes[clazz].$className + ` ` + method + `]`);
         }
       });
     });
@@ -116,9 +116,10 @@ export namespace hooking {
 
     // Attach to the discovered match
     // TODO: loop correctly when globbing
-    send(`Found selector at ${c.green(matchedMethod.address)} as ${c.green(matchedMethod.name)}`);
+    send(`Found selector at ${c.green(matchedMethod.address.toString())} as ${c.green(matchedMethod.name)}`);
     const watchInvocation: InvocationListener = Interceptor.attach(matchedMethod.address, {
-      onEnter: (args) => {
+      // tslint:disable-next-line:object-literal-shorthand
+      onEnter: function(args) {
         // how many arguments do we have in this selector?
         const argumentCount: number = (selector.match(/:/g) || []).length;
         const receiver = new ObjC.Object(args[0]);
@@ -128,11 +129,14 @@ export namespace hooking {
           `(Kind: ${c.cyan(receiver.$kind)}) (Super: ${c.cyan(receiver.$superClass.$className)})`,
         );
 
-        // // if we should include a backtrace to here, do that.
-        // if (dbt) {
-        //     message = message + "\nBacktrace:\n\t" +
-        //         Thread.backtrace(this.context).map(DebugSymbol.fromAddress).join("\n\t");
-        // }
+        // if we should include a backtrace to here, do that.
+        if (dbt) {
+          send(
+            c.blackBright(`[${job.identifier}] `) +
+            `${c.green(`${selector}`)} Backtrace:\n\t` +
+            Thread.backtrace(this.context, Backtracer.ACCURATE).map(DebugSymbol.fromAddress).join("\n\t"),
+          );
+        }
 
         if (dargs && argumentCount > 0) {
           const methodSplit = ObjC.selectorAsString(args[1]).split(":").filter((val) => val);
@@ -210,7 +214,7 @@ export namespace hooking {
 
     // Attach to the discovered match
     // TODO: loop correctly when globbing
-    send(`Found selector at ${c.green(matchedMethod.address)} as ${c.green(matchedMethod.name)}`);
+    send(`Found selector at ${c.green(matchedMethod.address.toString())} as ${c.green(matchedMethod.name)}`);
     const watchInvocation: InvocationListener = Interceptor.attach(matchedMethod.address, {
       onLeave: (retval) => {
 

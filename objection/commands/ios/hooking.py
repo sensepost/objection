@@ -211,8 +211,6 @@ def watch_class(args: list) -> None:
     api = state_connection.get_api()
     api.ios_hooking_watch_class(class_name)
 
-    return
-
 
 def watch_class_method(args: list) -> None:
     """

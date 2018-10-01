@@ -1,15 +1,22 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "target": "esnext",
     "lib": [
-      "es5",
-      "es2015.promise",
-      "es2015.proxy"
+      "esnext"
     ],
+    "allowJs": true,
+    "noEmit": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
     "typeRoots": [
+      "node_modules/@types",
       "node_modules/frida-gum-types"
+    ],
+    "types": [
+      "node",
+      "frida-gum"
     ]
   }
 }
