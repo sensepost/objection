@@ -1,4 +1,3 @@
-// import fs = require("frida-fs");
 import * as fs from "fs";
 import { hexStringToBytes } from "../lib/helpers";
 import { getNSFileManager } from "./lib/helpers";

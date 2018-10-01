@@ -7,6 +7,7 @@ import { hooking } from "./ios/hooking";
 import { iosjailbreak } from "./ios/jailbreak";
 import { ioskeychain } from "./ios/keychain";
 import { nsuserdefaults } from "./ios/nsuserdefaults";
+import { pasteboard } from "./ios/pasteboard";
 import { sslpinning } from "./ios/pinning";
 import { plist } from "./ios/plist";
 import { userinterface } from "./ios/userinterface";
@@ -73,6 +74,9 @@ rpc.exports = {
 
   // ios ssl pinning
   iosPinningDisable: (quiet: boolean) => sslpinning.disable(quiet),
+
+  // ios pasteboard
+  iosMonitorPasteboard: () => pasteboard.monitor(),
 
   // keychain
   keychainAdd: (key: string, data: string) => ioskeychain.add(key, data),
