@@ -3,6 +3,7 @@ import { environment } from "./generic/environment";
 import { binarycookies } from "./ios/binarycookies";
 import { credentialstorage } from "./ios/credentialstorage";
 import { iosfilesystem } from "./ios/filesystem";
+import { hooking } from "./ios/hooking";
 import { iosjailbreak } from "./ios/jailbreak";
 import { ioskeychain } from "./ios/keychain";
 import { nsuserdefaults } from "./ios/nsuserdefaults";
@@ -46,6 +47,14 @@ rpc.exports = {
   iosFileReadable: (path: string) => iosfilesystem.readable(path),
   iosFileUpload: (path: string, data: string) => iosfilesystem.writeFile(path, data),
   iosFileWritable: (path: string) => iosfilesystem.writable(path),
+
+  // ios hooking
+  iosHookingGetClassMethods: (className: string, includeParents: boolean) =>
+    hooking.getClassMethods(className, includeParents),
+  iosHookingGetClasses: () => hooking.getClasses(),
+  iosHookingSearchMethods: (partial: string) => hooking.searchMethods(partial),
+  iosHookingWatchMethod: (selector: string, dargs: boolean, dbt: boolean, dret: boolean) =>
+    hooking.watchMethod(selector, dargs, dbt, dret),
 
   // jailbreak detection
   iosJailbreakDisable: () => iosjailbreak.disable(),

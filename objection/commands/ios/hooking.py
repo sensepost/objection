@@ -1,5 +1,6 @@
 import click
 
+from objection.state.connection import state_connection
 from objection.utils.frida_transport import FridaRunner
 from objection.utils.helpers import clean_argument_flags
 from objection.utils.templates import ios_hook
@@ -138,27 +139,6 @@ def _should_dump_return_value(args: list) -> bool:
     return '--dump-return' in args
 
 
-def _get_ios_classes() -> list:
-    """
-        Gets a list of all of the classes available in the current
-        Objective-C runtime.
-
-        :return:
-    """
-
-    hook = ios_hook('hooking/list-classes')
-    runner = FridaRunner(hook=hook)
-    runner.run()
-
-    response = runner.get_last_message()
-
-    if not response.is_successful():
-        click.secho('Failed to list classes with error: {0}'.format(response.error_reason), fg='red')
-        return []
-
-    return response.data
-
-
 def show_ios_classes(args: list = None) -> None:
     """
         Prints the classes available in the current Objective-C
@@ -168,9 +148,8 @@ def show_ios_classes(args: list = None) -> None:
         :return:
     """
 
-    classes = _get_ios_classes()
-    if not classes:
-        return
+    api = state_connection.get_api()
+    classes = api.ios_hooking_get_classes()
 
     # loop the class names and check if we should be ignoring it.
     for class_name in sorted(classes):
@@ -183,6 +162,8 @@ def show_ios_classes(args: list = None) -> None:
 
         else:
             click.secho(class_name)
+
+    click.secho('\nFound {0} classes'.format(len(classes)), bold=True)
 
 
 def show_ios_class_methods(args: list) -> None:
@@ -199,21 +180,19 @@ def show_ios_class_methods(args: list) -> None:
 
     classname = args[0]
 
-    runner = FridaRunner()
-    runner.set_hook_with_data(
-        ios_hook('hooking/list-class-methods'), classname=classname,
-        include_parents=_should_include_parent_methods(args))
+    api = state_connection.get_api()
+    methods = api.ios_hooking_get_class_methods(classname, _should_include_parent_methods(args))
 
-    runner.run()
-    response = runner.get_last_message()
+    if len(methods) > 0:
 
-    if not response.is_successful():
-        click.secho('Failed to list classes with error: {0}'.format(response.error_reason), fg='red')
-        return None
+        # dump the methods to screen
+        for method in methods:
+            click.secho(method)
 
-    # dump the methods to screen
-    for method in response.data:
-        click.secho(method)
+        click.secho('\nFound {0} methods'.format(len(methods)), bold=True)
+
+    else:
+        click.secho('No class / methods found')
 
 
 def watch_class(args: list) -> None:
@@ -256,16 +235,12 @@ def watch_class_method(args: list) -> None:
         return
 
     selector = args[0]
-    argument_count = selector.count(':')
 
-    runner = FridaRunner()
-    runner.set_hook_with_data(ios_hook('hooking/watch-method'), selector=selector,
-                              argument_count=argument_count,
-                              dump_backtrace=_should_dump_backtrace(args),
-                              dump_args=_should_dump_args(args),
-                              dump_return=_should_dump_return_value(args))
-
-    runner.run_as_job(name='watch-method', args=args)
+    api = state_connection.get_api()
+    api.ios_hooking_watch_method(selector,
+                                 _should_dump_args(args),
+                                 _should_dump_backtrace(args),
+                                 _should_dump_return_value(args))
 
 
 def set_method_return_value(args: list) -> None:
@@ -307,23 +282,20 @@ def search_class(args: list) -> None:
 
     search = args[0]
 
-    runner = FridaRunner()
-    runner.set_hook_with_data(ios_hook('hooking/search-class'), search=search)
-    runner.run()
+    api = state_connection.get_api()
+    classes = api.ios_hooking_get_classes(search)
+    found_classes = 0
 
-    response = runner.get_last_message()
+    if len(classes) > 0:
 
-    if not response.is_successful():
-        click.secho('Failed to search for classes with error: {0}'.format(response.error_reason), fg='red')
-        return None
+        # filter the classes for the search
+        for classname in classes:
 
-    if response.data:
+            if search.lower() in classname.lower():
+                click.secho(classname)
+                found_classes += 1
 
-        # dump the classes to screen
-        for classname in response.data:
-            click.secho(classname)
-
-        click.secho('\nFound {0} classes'.format(len(response.data)), bold=True)
+        click.secho('\nFound {0} classes'.format(found_classes), bold=True)
 
     else:
         click.secho('No classes found')
@@ -343,23 +315,16 @@ def search_method(args: list) -> None:
 
     search = args[0]
 
-    runner = FridaRunner()
-    runner.set_hook_with_data(ios_hook('hooking/search-method'), search=search)
-    runner.run()
+    api = state_connection.get_api()
+    methods = api.ios_hooking_search_methods(search)
 
-    response = runner.get_last_message()
+    if len(methods) > 0:
 
-    if not response.is_successful():
-        click.secho('Failed to search for methods with error: {0}'.format(response.error_reason), fg='red')
-        return None
-
-    if response.data:
-
-        # dump the methods to screen
-        for method in response.data:
+        # filter the methods for the search
+        for method in methods:
             click.secho(method)
 
-        click.secho('\nFound {0} methods'.format(len(response.data)), bold=True)
+        click.secho('\nFound {0} methods'.format(len(methods)), bold=True)
 
     else:
         click.secho('No methods found')

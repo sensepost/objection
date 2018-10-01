@@ -27,7 +27,7 @@ export namespace jobs {
     return m.length > 0;
   };
 
-    // determine of a job already exists based on a type
+  // determine of a job already exists based on a type
   export const hasType = (type: string): boolean => {
 
     const m: IJob[] = currentJobs.filter((job) => {
@@ -47,14 +47,18 @@ export namespace jobs {
       if (job.identifier === ident) {
 
         // detach any invocations
-        job.invocations.forEach((invocation) => {
-          invocation.detach();
-        });
+        if (job.invocations && job.invocations.length > 0) {
+          job.invocations.forEach((invocation) => {
+            invocation.detach();
+          });
+        }
 
         // revert any replacements
-        job.replacements.forEach((replacement) => {
-          Interceptor.revert(replacement);
-        });
+        if (job.replacements && job.replacements.length > 0) {
+          job.replacements.forEach((replacement) => {
+            Interceptor.revert(replacement);
+          });
+        }
 
         // remove the job from the current jobs
         currentJobs = currentJobs.filter((j) => {
