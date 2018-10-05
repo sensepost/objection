@@ -1,4 +1,4 @@
-import { AndroidFilesystem } from "./android/filesystem";
+import { androidfilesystem } from "./android/filesystem";
 import { environment } from "./generic/environment";
 import { binarycookies } from "./ios/binarycookies";
 import { credentialstorage } from "./ios/credentialstorage";
@@ -13,8 +13,6 @@ import { plist } from "./ios/plist";
 import { userinterface } from "./ios/userinterface";
 import { jobs } from "./lib/jobs";
 import { version } from "./version";
-
-const androidfilesystem: AndroidFilesystem = new AndroidFilesystem();
 
 rpc.exports = {
 
@@ -31,7 +29,14 @@ rpc.exports = {
   jobsKill: (ident: string) => jobs.kill(ident),
 
   // android filesystem
+  androidFileCwd: () => androidfilesystem.pwd(),
+  androidFileDownload: (path: string) => androidfilesystem.readFile(path),
+  androidFileExists: (path: string) => androidfilesystem.exists(path),
   androidFileLs: (path: string) => androidfilesystem.ls(path),
+  androidFilePathIsFile: (path: string) => androidfilesystem.pathIsFile(path),
+  androidFileReadable: (path: string) => androidfilesystem.readable(path),
+  androidFileUpload: (path: string, data: string) => androidfilesystem.writeFile(path, data),
+  androidFileWritable: (path: string) => androidfilesystem.writable(path),
 
   // ios binary cookies
   iosCookiesGet: () => binarycookies.get(),

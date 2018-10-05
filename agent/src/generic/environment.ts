@@ -9,7 +9,6 @@ export namespace environment {
 
   // small helper function to lookup ios bundle paths
   const getPathForNSLocation = (NSPath: NSSearchPaths): string => {
-
     const p = getNSFileManager().URLsForDirectory_inDomains_(NSPath, NSUserDomainMask).lastObject();
 
     if (p) {
@@ -20,7 +19,6 @@ export namespace environment {
   };
 
   export const runtime = (): string => {
-
     if (ObjC.available) { return DeviceType.IOS; }
     if (Java.available) { return DeviceType.ANDROID; }
 
@@ -28,7 +26,6 @@ export namespace environment {
   };
 
   export const frida = (): IFridaInfo => {
-
     return {
       arch: Process.arch,
       debugger: Process.isDebuggerAttached(),
@@ -39,7 +36,6 @@ export namespace environment {
   };
 
   export const iosPackage = (): IIosPackage => {
-
     // -- Sample Objective-C
     //
     // NSFileManager *fm = [NSFileManager defaultManager];
@@ -63,7 +59,6 @@ export namespace environment {
   };
 
   export const iosPaths = (): IIosBundlePaths => {
-
     const mb: NSBundle = getNSMainBundle();
 
     return {
@@ -75,7 +70,6 @@ export namespace environment {
   };
 
   export const androidPackage = (): Promise<IAndroidPackage> => {
-
     return wrapJavaPerform(() => {
 
       // https://developer.android.com/reference/android/os/Build.html
@@ -97,13 +91,10 @@ export namespace environment {
   };
 
   export const androidPaths = (): Promise<any> => {
-
     // -- Sample Java
     //
     // getApplicationContext().getFilesDir().getAbsolutePath()
-
     return wrapJavaPerform(() => {
-
       const context = getApplicationContext();
 
       return {

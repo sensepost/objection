@@ -136,13 +136,8 @@ def _path_exists_android(path: str) -> bool:
         :return:
     """
 
-    runner = FridaRunner()
-
-    # populate the template with the path we want to work with
-    runner.set_hook_with_data(android_hook('filesystem/exists'), path=path)
-    runner.run()
-
-    return runner.get_last_message().exists
+    api = state_connection.get_api()
+    return api.android_file_exists(path)
 
 
 def pwd(args: list = None) -> str:
@@ -204,20 +199,13 @@ def _pwd_android() -> str:
         :return:
     """
 
-    hook = android_hook('filesystem/pwd')
-
-    runner = FridaRunner()
-    runner.run(hook=hook)
-
-    response = runner.get_last_message()
-
-    if not response.is_successful():
-        raise Exception('Failed to get cwd')
+    api = state_connection.get_api()
+    cwd = api.android_file_cwd()
 
     # update the file_manager state's cwd
-    file_manager_state.cwd = response.cwd
+    file_manager_state.cwd = cwd
 
-    return response.cwd
+    return cwd
 
 
 def ls(args: list) -> None:
@@ -447,58 +435,26 @@ def _download_android(path: str, destination: str) -> None:
     if not os.path.isabs(path):
         path = os.path.join(pwd(), path)
 
-    # output about whats about to happen
+    api = state_connection.get_api()
+
     click.secho('Downloading {0} to {1}'.format(path, destination), fg='green', dim=True)
 
-    # start a runner. going to use this a few times
-    # for this method
-    runner = FridaRunner()
-
-    # check that the path is readable
-    runner.set_hook_with_data(android_hook('filesystem/readable'), path=path)
-
-    # run the hook
-    runner.run()
-
-    # get the response message
-    response = runner.get_last_message()
-
-    # if we cant read the file, just stop
-    if not response.is_successful() or not response.readable:
-        click.secho('Unable to download file. File is not readable')
+    if not api.android_file_readable(path):
+        click.secho('Unable to download file. Target path is not readable.', fg='red')
         return
 
-    # check that its a file
-    runner.set_hook_with_data(android_hook('filesystem/is-type-file'), path=path)
-
-    # run the hook
-    runner.run()
-
-    # get the response message
-    response = runner.get_last_message()
-
-    if not response.is_successful() or not response.is_file:
-        click.secho('Unable to download file. Not a file.')
+    if not api.android_file_path_is_file(path):
+        click.secho('Unable to download file. Target path is not a file.', fg='yellow')
         return
 
-    # run the download hook and get the file from
-    # extra_data
-    runner.set_hook_with_data(android_hook('filesystem/download'), path=path)
+    click.secho('Streaming file from device...', dim=True)
+    file_data = api.android_file_download(path)
 
-    # the download method is an rpc export
-    api = runner.rpc_exports()
-
-    # download the file
-    data = api.download()
-
-    # cleanup the runner
-    runner.unload_script()
-
-    file_data = bytearray(data)
-
-    # finally, write the downloaded file to disk
+    click.secho('Writing bytes to destination...', dim=True)
     with open(destination, 'wb') as fh:
-        fh.write(file_data)
+        fh.write(bytearray(file_data['data']))
+
+    click.secho('Successfully downloaded {0} to {1}'.format(path, destination), bold=True)
 
 
 def upload(args: list) -> None:
@@ -564,6 +520,28 @@ def _upload_android(path: str, destination: str) -> None:
         :param destination:
         :return:
     """
+
+    if not os.path.isabs(destination):
+        destination = os.path.join(pwd(), destination)
+
+    api = state_connection.get_api()
+    click.secho('Uploading {0} to {1}'.format(path, destination), fg='green', dim=True)
+
+    # if we cant read the file, just stop
+    if not api.android_file_writable(os.path.dirname(destination)):
+        click.secho('Unable to upload file. Destination is not writable.', fg='red')
+        return
+
+    click.secho('Reading source file...', dim=True)
+    with open(path, 'rb') as f:
+        data = f.read().hex()
+
+    click.secho('Sending file to device for writing...', dim=True)
+    api.android_file_upload(destination, data)
+
+    click.secho('Uploaded: {0}'.format(destination), dim=True)
+
+    return
 
     if not os.path.isabs(destination):
         destination = os.path.join(pwd(), destination)
