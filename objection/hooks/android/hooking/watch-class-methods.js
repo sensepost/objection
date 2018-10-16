@@ -1,13 +1,40 @@
 // Watches a Java class  and reports on method invocations.
 
 var Throwable = Java.use('java.lang.Throwable');
-var target_class = Java.use('{{ target_class }}');
+var target_class = '{{ target_class }}'.toString();
+var target_class_array = [];
 
 var dump_args = ('{{ dump_args }}'.toLowerCase() === 'true');
 var dump_return = ('{{ dump_return }}'.toLowerCase() === 'true');
 var dump_backtrace = ('{{ dump_backtrace }}'.toLowerCase() === 'true');
 
+if (target_class.indexOf("*") > -1){
+    console.log("Searching for class pattern: "+target_class);
+    // enumerate all classes and match against regex
+    Java.enumerateLoadedClasses({
+        onMatch: function(aClass) {
+            if (aClass.match(target_class)) {
+                target_class_array.push(aClass);
+            }
+        },
+        onComplete: function() {}
+    });
+} else {
+    target_class_array.push(target_class);
+}
+
 // Get the methods this class has and filter for unique ones.
+for (var counter = 0; counter < target_class_array.length; counter++){
+    var target_class_name = target_class_array[counter];
+    var target_class = Java.use(target_class_name);
+
+    send({
+        status: 'success',
+        error_reason: NaN,
+        type: 'watch-class',
+        data: 'Found class named ' + target_class_name
+    });
+
 var methods = target_class.class.getDeclaredMethods().map(function (method) {
 
     // eg: public void com.example.fooBar(int,int)
@@ -25,9 +52,8 @@ var methods = target_class.class.getDeclaredMethods().map(function (method) {
     // remove the classname
     var method_name_with_signature = class_and_method_name.replace(' ' + '{{ target_class }}' + '.', '');
     // remove the signature
-    var method_name_only = method_name_with_signature.split('(')[0];
-
-    return method_name_only;
+    var method_name_only = method_name_with_signature.split('(')[0].split('.');
+    return method_name_only[method_name_only.length-1];
 
 }).filter(function (value, index, self) {
 
@@ -44,7 +70,7 @@ send({
 
 methods.map(function (method) {
 
-    var overload_count = target_class[method].overloads.length;
+    var overload_count = target_class[method] ? target_class[method].overloads.length : 0;
 
     // Hook all of the overloads found for this class.method
     // TODO: Make this a function that can be used in both this class
@@ -114,3 +140,5 @@ methods.map(function (method) {
         }
     }
 });
+
+};
