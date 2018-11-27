@@ -117,7 +117,7 @@ class AndroidGadget(BasePlatformGadget):
         library_destination = self.get_frida_library_path(packed=True)
 
         # save the requests stream to file
-        with open(library_destination, 'wb') as f:
+        with open(library_destination, 'wb', encoding="utf8") as f:
             click.secho('Downloading {0} library to {1}...'.format(self.architecture,
                                                                    library_destination), fg='green', dim=True)
 
@@ -554,7 +554,7 @@ class AndroidPatcher(BasePlatformPatcher):
         click.secho('Reading smali from: {0}'.format(activity_path), dim=True)
 
         # apktool d smali will have a commentline line: '# direct methods'
-        with open(activity_path, 'r') as f:
+        with open(activity_path, 'r', encoding="utf8") as f:
             smali_lines = f.readlines()
 
         # search for the line starting with '# direct methods' in it
@@ -614,7 +614,7 @@ class AndroidPatcher(BasePlatformPatcher):
 
         click.secho('Writing patched smali back to: {0}'.format(activity_path), dim=True)
 
-        with open(activity_path, 'w') as f:
+        with open(activity_path, 'w', encoding="utf8") as f:
             f.write(''.join(patched_smali))
 
     def add_gadget_to_apk(self, architecture: str, gadget_source: str):
