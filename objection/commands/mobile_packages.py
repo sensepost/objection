@@ -150,7 +150,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
     # work on patching the APK
     patcher.set_apk_source(source=source)
     patcher.unpack_apk(skip_resources=skip_resources)
-    patcher.inject_internet_permission()
+    patcher.inject_internet_permission(skip_resources=skip_resources)
 
     if enable_debug:
         patcher.flip_debug_flag_to_true()
