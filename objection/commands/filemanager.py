@@ -585,19 +585,14 @@ def _download_android(path: str, destination: str) -> None:
     runner.set_hook_with_data(android_hook('filesystem/download'), path=path)
 
     # the download method is an rpc export
-    api = runner.rpc_exports()
+    runner.run()
 
     # download the file
-    data = api.download()
-
-    # cleanup the runner
-    runner.unload_script()
-
-    file_data = bytearray(data)
+    response = runner.get_last_message()
 
     # finally, write the downloaded file to disk
     with open(destination, 'wb') as fh:
-        fh.write(file_data)
+        fh.write(base64.b64decode(response.data))
 
 
 def upload(args: list) -> None:

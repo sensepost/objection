@@ -482,11 +482,10 @@ Readable: Yes  Writable: Yes
         type(mock_response).readable = True
         type(mock_response).is_file = True
 
-        mock_api = mock.Mock()
-        mock_api.download.return_value = b'\x00'
-
         mock_runner.return_value.get_last_message.return_value = mock_response
-        mock_runner.return_value.rpc_exports.return_value = mock_api
+
+        mock_response.data = 'dGhpcyBpcyBhIHRlc3QK'
+        mock_runner.return_value.get_last_message.return_value = mock_response
 
         file_manager_state.cwd = '/foo'
 
