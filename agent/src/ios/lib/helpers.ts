@@ -5,7 +5,7 @@ import { NSBundle, NSDictionary, NSFileManager } from "./types";
 export const isNSKeyedArchived = (data: ArrayBuffer): boolean => {
 
   const magic: ArrayBuffer = data.slice(0, 8);
-  const magicString: string = String.fromCharCode.apply(null, new Uint8Array(magic));
+  const magicString: string = String.fromCharCode.apply(null, Array.prototype.slice.call(magic));
 
   // 62 70 6c 69 73 74 30 30
   return magicString === "bplist00";
@@ -66,7 +66,7 @@ export const dataToString = (raw: any, o: string = null): string => {
         if (isNSKeyedArchived(dataBytes)) { return unArchiveDataAndGetString(dataObject); }
 
         // Otherwise, just read & convert the bytes read to a string.
-        return String.fromCharCode.apply(null, new Uint8Array(dataBytes));
+        return String.fromCharCode.apply(null, Array.prototype.slice.call(dataBytes));
 
       case "__NSCFNumber":
         return dataObject.integerValue();

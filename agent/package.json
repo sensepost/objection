@@ -28,18 +28,18 @@
   },
   "homepage": "https://github.com/sensepost/objection#readme",
   "dependencies": {
-    "frida-java": "^1",
-    "frida-objc": "^2",
+    "frida-java": "^2",
+    "frida-objc": "^3",
     "frida-screenshot": "^2"
   },
   "devDependencies": {
-    "@babel/core": "^7.1",
-    "@babel/plugin-transform-runtime": "^7.1",
-    "@babel/preset-env": "^7.1",
-    "@babel/runtime-corejs2": "^7.1",
-    "@types/node": "^10.11",
-    "frida-compile": "^8",
-    "frida-gum-types": "^2",
-    "tslint": "^5"
+    "@babel/core": "^7.2.2",
+    "@babel/plugin-transform-runtime": "^7.2.0",
+    "@babel/preset-env": "^7.2.3",
+    "@babel/runtime-corejs2": "^7.2.0",
+    "@types/node": "^10.12.18",
+    "frida-compile": "^8.0.1",
+    "frida-gum-types": "^2.0.6",
+    "tslint": "^5.12.1"
   }
 }
