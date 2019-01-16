@@ -120,7 +120,7 @@ def cd(args: list) -> None:
             return
 
         else:
-            click.secho('Invalid patha: `{0}`'.format(proposed_path), fg='red')
+            click.secho('Invalid path: `{0}`'.format(proposed_path), fg='red')
 
 
 def _path_exists_ios(path: str) -> bool:
