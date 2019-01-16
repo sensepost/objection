@@ -46,19 +46,26 @@ def cd(args: list) -> None:
         return
 
     # moving one directory back
-    if path == "..":
-        split_path = os.path.split(current_dir)
+    if ".." in path:
+        if path == ".." or path == "../":
+            split_path = os.path.split(current_dir)
 
-        # nothing to do if we are already at root
-        if len(split_path) == 1:
+            # nothing to do if we are already at root
+            if len(split_path) == 1:
+                return
+
+            new_path = ''.join(split_path[:-1])
+            click.secho(new_path, fg='green', bold=True)
+
+            file_manager_state.cwd = new_path
+
             return
 
-        new_path = ''.join(split_path[:-1])
-        click.secho(new_path, fg='green', bold=True)
-
-        file_manager_state.cwd = new_path
-
-        return
+        #if path contains ".." as a substring
+        else:
+            click.secho('Invalid path: `{0}`'.format(path), fg='red')
+            click.secho('Path must not contains ".." ', fg='red')
+            return
 
     # if we got an absolute path, check if the path
     # actually exists, and then cd to it if we can
