@@ -4,3 +4,9 @@ export interface IAndroidFilesystem {
     readable: boolean;
     writable: boolean;
 }
+
+export interface IExecutedCommand {
+    command: string;
+    stdOut: string;
+    stdErr: string;
+}

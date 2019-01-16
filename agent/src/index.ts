@@ -1,4 +1,7 @@
+import { clipboard } from "./android/clipboard";
 import { androidfilesystem } from "./android/filesystem";
+import { IExecutedCommand } from "./android/lib/interfaces";
+import { androidshell } from "./android/shell";
 import { environment } from "./generic/environment";
 import { binarycookies } from "./ios/binarycookies";
 import { credentialstorage } from "./ios/credentialstorage";
@@ -28,6 +31,9 @@ rpc.exports = {
   jobsGet: () => jobs.all(),
   jobsKill: (ident: string) => jobs.kill(ident),
 
+  // android clipboard
+  androidMonitorClipboard: () => clipboard.monitor(),
+
   // android filesystem
   androidFileCwd: () => androidfilesystem.pwd(),
   androidFileDownload: (path: string) => androidfilesystem.readFile(path),
@@ -37,6 +43,9 @@ rpc.exports = {
   androidFileReadable: (path: string) => androidfilesystem.readable(path),
   androidFileUpload: (path: string, data: string) => androidfilesystem.writeFile(path, data),
   androidFileWritable: (path: string) => androidfilesystem.writable(path),
+
+  // android command execution
+  androidShellExec: (cmd: string): Promise<IExecutedCommand> => androidshell.execute(cmd),
 
   // ios binary cookies
   iosCookiesGet: () => binarycookies.get(),
