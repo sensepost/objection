@@ -103,22 +103,13 @@ def watch_class(args: list) -> None:
 
     if len(clean_argument_flags(args)) < 1:
         click.secho('Usage: android hooking watch class <class> '
-                    '(eg: com.example.test) '
-                    '(optional: --dump-args) '
-                    '(optional: --dump-backtrace) '
-                    '(optional: --dump-return)', bold=True)
+                    '(eg: com.example.test)', bold=True)
         return
 
     target_class = args[0]
 
-    runner = FridaRunner()
-    runner.set_hook_with_data(android_hook('hooking/watch-class-methods'),
-                              target_class=target_class,
-                              dump_args=_should_dump_args(args),
-                              dump_return=_should_dump_return_value(args),
-                              dump_backtrace=_should_dump_backtrace(args))
-
-    runner.run_as_job(name='watch-java-class', args=args)
+    api = state_connection.get_api()
+    api.android_hooking_watch_class(target_class)
 
 
 def watch_class_method(args: list) -> None:
@@ -150,20 +141,6 @@ def watch_class_method(args: list) -> None:
                                      _should_dump_return_value(args))
 
     return
-
-    target_class = args[0]
-    target_method = args[1]
-
-    runner = FridaRunner()
-
-    runner.set_hook_with_data(android_hook('hooking/watch-method'),
-                              target_class=target_class,
-                              target_method=target_method,
-                              dump_args=_should_dump_args(args),
-                              dump_return=_should_dump_return_value(args),
-                              dump_backtrace=_should_dump_backtrace(args))
-
-    runner.run_as_job(name='watch-java-method', args=args)
 
 
 def show_registered_broadcast_receivers(args: list = None) -> None:

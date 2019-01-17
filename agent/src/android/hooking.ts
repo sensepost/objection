@@ -1,3 +1,4 @@
+import { createCipher } from "crypto";
 import { colors as c } from "../lib/color";
 import { debugDump } from "../lib/helpers";
 import { IJob } from "../lib/interfaces";
@@ -24,6 +25,66 @@ export namespace hooking {
     });
   };
 
+  export const watchClass = (clazz: string): Promise<void> => {
+    return wrapJavaPerform(() => {
+      const clazzInstance: JavaClass = Java.use(clazz);
+
+      const uniqueMethods: string[] = clazzInstance.class.getDeclaredMethods().map((method) => {
+        // perform a cleanup of the method. An example after toGenericString() would be:
+        // public void android.widget.ScrollView.draw(android.graphics.Canvas) throws Exception
+        let m = method.toGenericString();
+
+        // remove any "Throws" the method may have
+        if (m.indexOf(" throws ") !== -1) { m = m.substring(0, m.indexOf(" throws ")); }
+
+        // remove scope and return type declarations (aka: first two words)
+        // remove the class name
+        // remove the signature and return
+        m = m.slice(m.lastIndexOf(" "));
+        m = m.replace(` ${clazz}.`, "");
+
+        return m.split("(")[0];
+
+      }).filter((value, index, self) => {
+        return self.indexOf(value) === index;
+      });
+
+      // start a new job container
+      const job: IJob = {
+        identifier: jobs.identifier(),
+        implementations: [],
+        type: `watch-class for: ${clazz}`,
+      };
+
+      uniqueMethods.forEach((method) => {
+        clazzInstance[method].overloads.forEach((m: any) => {
+
+          // get the argument types for this overload
+          const calleeArgTypes: string[] = m.argumentTypes.map((arg) => arg.className);
+          send(`Hooking ${c.green(clazz)}.${c.greenBright(method)}(${c.red(calleeArgTypes.join(", "))})`);
+
+          // replace the implementation of this method
+          // tslint:disable-next-line:only-arrow-functions
+          m.implementation = function() {
+            send(
+              c.blackBright(`[${job.identifier}] `) +
+              `Called ${c.green(clazz)}.${c.greenBright(m.methodName)}(${c.red(calleeArgTypes.join(", "))})`,
+            );
+
+            // actually run the intended method
+            return m.apply(this, arguments);
+          };
+
+          // record this implementation override for the job
+          job.implementations.push(m);
+        });
+      });
+
+      // record the job
+      jobs.add(job);
+    });
+  };
+
   export const watchMethod = (fqClazz: string, dargs: boolean, dbt: boolean, dret: boolean): Promise<void> => {
     // split the fully qualified class name, assuming the last . denotes the method
     const methodSeperatorIndex: number = fqClazz.lastIndexOf(".");
@@ -33,7 +94,6 @@ export namespace hooking {
     send(`Attemtping to watch class ${c.green(clazz)} and method ${c.green(method)}.`);
 
     return wrapJavaPerform(() => {
-
       const Throwable = Java.use("java.lang.Throwable");
       const targetClass: JavaClass = Java.use(clazz);
 
@@ -91,7 +151,7 @@ export namespace hooking {
           // dump the return value
           if (dret) {
             const retValStr: string = (retVal || "(none)").toString();
-            send( c.blackBright(`[${job.identifier}] `) + `Return Value: ${c.red(retValStr)}`);
+            send(c.blackBright(`[${job.identifier}] `) + `Return Value: ${c.red(retValStr)}`);
           }
 
           // also return the captured return value
