@@ -117,41 +117,20 @@ Found 3 method(s)
 
         self.assertTrue(mock_api.return_value.android_hooking_watch_method.called)
 
-    @mock.patch('objection.commands.android.hooking.FridaRunner')
-    def test_show_registered_broadcast_receivers_handles_hook_errors(self, mock_runner):
-        mock_response = mock.Mock()
-        mock_response.is_successful.return_value = False
-        type(mock_response).error_reason = 'test'
-
-        mock_runner.return_value.get_last_message.return_value = mock_response
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_show_registered_broadcast_receivers_handles_empty_data(self, mock_api):
+        mock_api.return_value.android_hooking_list_broadcast_receivers.return_value = []
 
         with capture(show_registered_broadcast_receivers, []) as o:
             output = o
 
-        self.assertEqual(output, 'Failed to list broadcast receivers with error: test\n')
+        self.assertEqual(output, '\nFound 0 classes\n')
 
-    @mock.patch('objection.commands.android.hooking.FridaRunner')
-    def test_show_registered_broadcast_receivers_handles_empty_data(self, mock_runner):
-        mock_response = mock.Mock()
-        mock_response.is_successful.return_value = True
-        type(mock_response).data = None
-
-        mock_runner.return_value.get_last_message.return_value = mock_response
-
-        with capture(show_registered_broadcast_receivers, []) as o:
-            output = o
-
-        self.assertEqual(output, 'No broadcast receivers were found\n')
-
-    @mock.patch('objection.commands.android.hooking.FridaRunner')
-    def test_show_registered_broadcast_receivers(self, mock_runner):
-        mock_response = mock.Mock()
-        mock_response.is_successful.return_value = True
-        type(mock_response).data = [
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_show_registered_broadcast_receivers(self, mock_api):
+        mock_api.return_value.android_hooking_list_broadcast_receivers.return_value = [
             'foo', 'bar', 'baz'
         ]
-
-        mock_runner.return_value.get_last_message.return_value = mock_response
 
         with capture(show_registered_broadcast_receivers, []) as o:
             output = o

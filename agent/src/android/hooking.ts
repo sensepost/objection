@@ -209,4 +209,34 @@ export namespace hooking {
       return services;
     });
   };
+
+  export const getBroadcastReceivers = (): Promise<string[]> => {
+    return wrapJavaPerform(() => {
+      const ActivityThread = Java.use("android.app.ActivityThread");
+      const ArrayMap = Java.use("android.util.ArrayMap");
+      const PackageManager = Java.use("android.content.pm.PackageManager");
+
+      const GET_RECEIVERS = PackageManager.GET_RECEIVERS.value;
+
+      const currentApplication = ActivityThread.currentApplication();
+      // not using the helper as we need other variables too
+      const context = currentApplication.getApplicationContext();
+
+      let receivers = [];
+
+      currentApplication.mLoadedApk.value.mReceivers.value.values().toArray().map((arrayMap) => {
+        Java.cast(arrayMap, ArrayMap).keySet().toArray().map((receiver) => {
+          receivers.push(receiver.$className);
+        });
+      });
+
+      receivers = receivers.concat(context.getPackageManager()
+        .getPackageInfo(context.getPackageName(), GET_RECEIVERS).receivers.value.map((activityInfo) => {
+          return activityInfo.name.value;
+        }),
+      );
+
+      return receivers;
+    });
+  };
 }
