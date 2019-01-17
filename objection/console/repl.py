@@ -388,11 +388,16 @@ class Repl(object):
                     # find something to run
                     self.run_command(document)
 
+                except frida.core.RPCException as e:
+                    click.secho('A Frida agent exception has occured.', fg='red', bold=True)
+                    click.secho('{0}'.format(e), fg='red')
+                    click.secho('\nPython stack trace: {}'.format(traceback.format_exc()), dim=True)
+
                 except Exception as e:
-                    click.secho(('\n\nAn exception occurred while processing the command. If this '
-                                 'looks like a code related error, please file a bug report!'), fg='red')
-                    click.secho('Error: {0}'.format(e), fg='red', bold=True)
-                    click.secho(traceback.format_exc(), dim=True)
+                    click.secho(('An unexpected internal exception has occurred. If this '
+                                 'looks like a code related error, please file a bug report!'), fg='red', bold=True)
+                    click.secho('{0}'.format(e), fg='red')
+                    click.secho('\nPython stack trace: {}'.format(traceback.format_exc()), dim=True)
 
             except (KeyboardInterrupt, EOFError):
                 click.secho('Exiting...', dim=True)
