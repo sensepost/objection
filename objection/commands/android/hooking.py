@@ -179,24 +179,13 @@ def show_registered_services(args: list = None) -> None:
         :return:
     """
 
-    hook = android_hook('hooking/list-services')
-    runner = FridaRunner(hook=hook)
-    runner.run()
+    api = state_connection.get_api()
+    services = api.android_hooking_list_services()
 
-    response = runner.get_last_message()
-
-    if not response.is_successful():
-        click.secho('Failed to list services with error: {0}'.format(response.error_reason), fg='red')
-        return None
-
-    if not response.data:
-        click.secho('No services were found', fg='yellow')
-        return None
-
-    for class_name in sorted(response.data):
+    for class_name in sorted(services):
         click.secho(class_name)
 
-    click.secho('\nFound {0} classes'.format(len(response.data)), bold=True)
+    click.secho('\nFound {0} classes'.format(len(services)), bold=True)
 
 
 def show_registered_activities(args: list = None) -> None:

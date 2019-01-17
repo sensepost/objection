@@ -179,4 +179,34 @@ export namespace hooking {
       );
     });
   };
+
+  export const getServices = (): Promise<string[]> => {
+    return wrapJavaPerform(() => {
+      const ActivityThread = Java.use("android.app.ActivityThread");
+      const ArrayMap = Java.use("android.util.ArrayMap");
+      const PackageManager = Java.use("android.content.pm.PackageManager");
+
+      const GET_SERVICES = PackageManager.GET_SERVICES.value;
+
+      const currentApplication = ActivityThread.currentApplication();
+      // not using the helper as we need other variables too
+      const context = currentApplication.getApplicationContext();
+
+      let services = [];
+
+      currentApplication.mLoadedApk.value.mServices.value.values().toArray().map((arrayMap) => {
+        Java.cast(arrayMap, ArrayMap).keySet().toArray().map((service) => {
+          services.push(service.$className);
+        });
+      });
+
+      services = services.concat(context.getPackageManager()
+        .getPackageInfo(context.getPackageName(), GET_SERVICES).services.value.map((activityInfo) => {
+          return activityInfo.name.value;
+        }),
+      );
+
+      return services;
+    });
+  };
 }
