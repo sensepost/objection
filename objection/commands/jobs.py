@@ -17,7 +17,11 @@ def show(args: list = None) -> None:
     click.secho(tabulate(
         [[
             entry['identifier'],
-            len(entry['invocations']),
+            sum([
+                len(entry[x]) for x in [
+                    'invocations', 'replacements', 'implementations'
+                ] if x in entry
+            ]),
             entry['type'],
         ] for entry in jobs], headers=['Job ID', 'Hooks', 'Type'],
     ))

@@ -40,6 +40,7 @@ export interface IIosBundlePaths {
 export interface IJob {
   identifier: string;
   invocations?: InvocationListener[];
-  replacements?: any;
+  replacements?: any[];
+  implementations?: any[];
   type: string;
 }

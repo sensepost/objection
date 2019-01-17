@@ -117,6 +117,7 @@ export namespace hooking {
     // Attach to the discovered match
     // TODO: loop correctly when globbing
     send(`Found selector at ${c.green(matchedMethod.address.toString())} as ${c.green(matchedMethod.name)}`);
+
     const watchInvocation: InvocationListener = Interceptor.attach(matchedMethod.address, {
       // tslint:disable-next-line:object-literal-shorthand
       onEnter: function(args) {

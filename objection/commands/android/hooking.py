@@ -1,5 +1,6 @@
 import click
 
+from objection.state.connection import state_connection
 from objection.utils.frida_transport import FridaRunner
 from objection.utils.helpers import clean_argument_flags
 from objection.utils.templates import android_hook
@@ -57,21 +58,14 @@ def show_android_classes(args: list = None) -> None:
         :return:
     """
 
-    hook = android_hook('hooking/list-classes')
-    runner = FridaRunner(hook=hook)
-    runner.run()
-
-    response = runner.get_last_message()
-
-    if not response.is_successful():
-        click.secho('Failed to list classes with error: {0}'.format(response.error_reason), fg='red')
-        return None
+    api = state_connection.get_api()
+    classes = api.android_hooking_get_classes()
 
     # print the enumerated classes
-    for class_name in sorted(response.data):
+    for class_name in sorted(classes):
         click.secho(class_name)
 
-    click.secho('\nFound {0} classes'.format(len(response.data)), bold=True)
+    click.secho('\nFound {0} classes'.format(len(classes)), bold=True)
 
 
 def show_android_class_methods(args: list = None) -> None:
@@ -88,21 +82,14 @@ def show_android_class_methods(args: list = None) -> None:
 
     class_name = args[0]
 
-    runner = FridaRunner()
-    runner.set_hook_with_data(android_hook('hooking/list-class-methods'), class_name=class_name)
-
-    runner.run()
-    response = runner.get_last_message()
-
-    if not response.is_successful():
-        click.secho('Failed to list class methods with error: {0}'.format(response.error_reason), fg='red')
-        return None
+    api = state_connection.get_api()
+    methods = api.android_hooking_get_class_methods(class_name)
 
     # print the enumerated classes
-    for class_name in sorted(response.data):
+    for class_name in sorted(methods):
         click.secho(class_name)
 
-    click.secho('\nFound {0} method(s)'.format(len(response.data)), bold=True)
+    click.secho('\nFound {0} method(s)'.format(len(methods)), bold=True)
 
 
 def watch_class(args: list) -> None:
@@ -146,13 +133,23 @@ def watch_class_method(args: list) -> None:
         :return:
     """
 
-    if len(clean_argument_flags(args)) < 2:
-        click.secho(('Usage: android hooking watch class_method <class> <method> '
-                     '(eg: com.example.test dologin) '
+    if len(clean_argument_flags(args)) < 1:
+        click.secho(('Usage: android hooking watch class_method <fully qualified class method> '
+                     '(eg: com.example.test.dologin) '
                      '(optional: --dump-args) '
                      '(optional: --dump-backtrace) '
                      '(optional: --dump-return)'), bold=True)
         return
+
+    fully_qualified_class = args[0]
+
+    api = state_connection.get_api()
+    api.android_hooking_watch_method(fully_qualified_class,
+                                     _should_dump_args(args),
+                                     _should_dump_backtrace(args),
+                                     _should_dump_return_value(args))
+
+    return
 
     target_class = args[0]
     target_method = args[1]

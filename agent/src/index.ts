@@ -1,12 +1,13 @@
 import { clipboard } from "./android/clipboard";
 import { androidfilesystem } from "./android/filesystem";
+import { hooking as androidhooking } from "./android/hooking";
 import { IExecutedCommand } from "./android/lib/interfaces";
 import { androidshell } from "./android/shell";
 import { environment } from "./generic/environment";
 import { binarycookies } from "./ios/binarycookies";
 import { credentialstorage } from "./ios/credentialstorage";
 import { iosfilesystem } from "./ios/filesystem";
-import { hooking } from "./ios/hooking";
+import { hooking as ioshooking } from "./ios/hooking";
 import { iosjailbreak } from "./ios/jailbreak";
 import { ioskeychain } from "./ios/keychain";
 import { nsuserdefaults } from "./ios/nsuserdefaults";
@@ -34,6 +35,9 @@ rpc.exports = {
   // android clipboard
   androidMonitorClipboard: () => clipboard.monitor(),
 
+  // android command execution
+  androidShellExec: (cmd: string): Promise<IExecutedCommand> => androidshell.execute(cmd),
+
   // android filesystem
   androidFileCwd: () => androidfilesystem.pwd(),
   androidFileDownload: (path: string) => androidfilesystem.readFile(path),
@@ -44,8 +48,11 @@ rpc.exports = {
   androidFileUpload: (path: string, data: string) => androidfilesystem.writeFile(path, data),
   androidFileWritable: (path: string) => androidfilesystem.writable(path),
 
-  // android command execution
-  androidShellExec: (cmd: string): Promise<IExecutedCommand> => androidshell.execute(cmd),
+  // android hooking
+  androidHookingGetClassMethods: (className: string): Promise<string[]> => androidhooking.getClassMethods(className),
+  androidHookingGetClasses: (): Promise<string[]> => androidhooking.getClasses(),
+  androidHookingWatchMethod: (fqClazz: string, dargs: boolean, dbt: boolean, dret: boolean): Promise<void> =>
+    androidhooking.watchMethod(fqClazz, dargs, dbt, dret),
 
   // ios binary cookies
   iosCookiesGet: () => binarycookies.get(),
@@ -65,14 +72,14 @@ rpc.exports = {
 
   // ios hooking
   iosHookingGetClassMethods: (className: string, includeParents: boolean) =>
-    hooking.getClassMethods(className, includeParents),
-  iosHookingGetClasses: () => hooking.getClasses(),
-  iosHookingSearchMethods: (partial: string) => hooking.searchMethods(partial),
+    ioshooking.getClassMethods(className, includeParents),
+  iosHookingGetClasses: () => ioshooking.getClasses(),
+  iosHookingSearchMethods: (partial: string) => ioshooking.searchMethods(partial),
   iosHookingSetReturnValue: (selector: string, returnVal: boolean) =>
-    hooking.setMethodReturn(selector, returnVal),
-  iosHookingWatchClass: (clazz: string, parents: boolean) => hooking.watchClass(clazz, parents),
+    ioshooking.setMethodReturn(selector, returnVal),
+  iosHookingWatchClass: (clazz: string, parents: boolean) => ioshooking.watchClass(clazz, parents),
   iosHookingWatchMethod: (selector: string, dargs: boolean, dbt: boolean, dret: boolean) =>
-    hooking.watchMethod(selector, dargs, dbt, dret),
+    ioshooking.watchMethod(selector, dargs, dbt, dret),
 
   // jailbreak detection
   iosJailbreakDisable: () => iosjailbreak.disable(),

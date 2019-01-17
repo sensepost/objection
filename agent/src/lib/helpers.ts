@@ -33,5 +33,7 @@ export const qsend = (quiet: boolean, message: any): void => {
 
 // a small helper method to use util to dump
 export const debugDump = (o: any, depth: number = 2): void => {
+  c.log(c.blackBright("\n[start debugDump]"));
   c.log(util.inspect(o, true, depth, true));
+  c.log(c.blackBright("[end debugDump]\n"));
 };

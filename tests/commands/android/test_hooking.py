@@ -57,30 +57,13 @@ class TestHooking(unittest.TestCase):
 
         self.assertFalse(result)
 
-    @mock.patch('objection.commands.android.hooking.FridaRunner')
-    def test_show_android_classes_handles_hook_error(self, mock_runner):
-        mock_response = mock.Mock()
-        mock_response.is_successful.return_value = False
-        type(mock_response).error_reason = 'test'
-
-        mock_runner.return_value.get_last_message.return_value = mock_response
-
-        with capture(show_android_classes, []) as o:
-            output = o
-
-        self.assertEqual(output, 'Failed to list classes with error: test\n')
-
-    @mock.patch('objection.commands.android.hooking.FridaRunner')
-    def test_show_android_classes(self, mock_runner):
-        mock_response = mock.Mock()
-        mock_response.is_successful.return_value = True
-        type(mock_response).data = [
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_show_android_classes(self, mock_api):
+        mock_api.return_value.android_hooking_get_classes.return_value = [
             'foo',
             'bar',
             'baz'
         ]
-
-        mock_runner.return_value.get_last_message.return_value = mock_response
 
         with capture(show_android_classes, []) as o:
             output = o
@@ -100,30 +83,13 @@ Found 3 classes
 
         self.assertEqual(output, 'Usage: android hooking list class_methods <class name>\n')
 
-    @mock.patch('objection.commands.android.hooking.FridaRunner')
-    def test_show_android_class_methods_handles_hook_error(self, mock_runner):
-        mock_response = mock.Mock()
-        mock_response.is_successful.return_value = False
-        type(mock_response).error_reason = 'test'
-
-        mock_runner.return_value.get_last_message.return_value = mock_response
-
-        with capture(show_android_class_methods, ['com.foo.bar']) as o:
-            output = o
-
-        self.assertEqual(output, 'Failed to list class methods with error: test\n')
-
-    @mock.patch('objection.commands.android.hooking.FridaRunner')
-    def test_show_android_class_methods(self, mock_runner):
-        mock_response = mock.Mock()
-        mock_response.is_successful.return_value = True
-        type(mock_response).data = [
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_show_android_class_methods(self, mock_api):
+        mock_api.return_value.android_hooking_get_class_methods.return_value = [
             'foo',
             'bar',
             'baz'
         ]
-
-        mock_runner.return_value.get_last_message.return_value = mock_response
 
         with capture(show_android_class_methods, ['com.foo.bar']) as o:
             output = o
@@ -137,19 +103,19 @@ Found 3 method(s)
         self.assertEqual(output, expected_output)
 
     def test_watch_class_method_validates_arguements(self):
-        with capture(watch_class_method, ['com.foo.bar']) as o:
+        with capture(watch_class_method, []) as o:
             output = o
 
-        self.assertEqual(output, 'Usage: android hooking watch class_method <class> '
-                                 '<method> (eg: com.example.test dologin) (optional: '
-                                 '--dump-args) (optional: --dump-backtrace) (optional'
-                                 ': --dump-return)\n')
+        self.assertEqual(output, 'Usage: android hooking watch class_method '
+                                 '<fully qualified class method> (eg: com.example.test.dologin) '
+                                 '(optional: --dump-args) (optional: --dump-backtrace) '
+                                 '(optional: --dump-return)\n')
 
-    @mock.patch('objection.commands.android.hooking.FridaRunner')
-    def test_watch_class_method(self, mock_runner):
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_watch_class_method(self, mock_api):
         watch_class_method(['com.foo.bar', 'isValid'])
 
-        self.assertTrue(mock_runner.return_value.run_as_job.called)
+        self.assertTrue(mock_api.return_value.android_hooking_watch_method.called)
 
     @mock.patch('objection.commands.android.hooking.FridaRunner')
     def test_show_registered_broadcast_receivers_handles_hook_errors(self, mock_runner):

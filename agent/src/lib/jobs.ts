@@ -11,7 +11,7 @@ export namespace jobs {
 
   export const add = (jobData: IJob): void => {
     send(`Registering job ` + c.blueBright(`${jobData.identifier}`) +
-      ` for ` + c.greenBright(`${jobData.type}`));
+      `. Type: ` + c.greenBright(`${jobData.type}`));
     currentJobs.push(jobData);
   };
 
@@ -27,7 +27,7 @@ export namespace jobs {
     return m.length > 0;
   };
 
-  // determine of a job already exists based on a type
+  // determine if a job already exists based on a type
   export const hasType = (type: string): boolean => {
 
     const m: IJob[] = currentJobs.filter((job) => {
@@ -57,6 +57,14 @@ export namespace jobs {
         if (job.replacements && job.replacements.length > 0) {
           job.replacements.forEach((replacement) => {
             Interceptor.revert(replacement);
+          });
+        }
+
+        // remove implementation replacements
+        if (job.implementations && job.implementations.length > 0) {
+          job.implementations.forEach((method) => {
+            // TODO: May be racy if the method is currently used.
+            method.implementation = null;
           });
         }
 
