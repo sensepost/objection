@@ -1,9 +1,7 @@
-import { createCipher } from "crypto";
 import { colors as c } from "../lib/color";
-import { debugDump } from "../lib/helpers";
 import { IJob } from "../lib/interfaces";
 import { jobs } from "../lib/jobs";
-import { wrapJavaPerform } from "./lib/libjava";
+import { getApplicationContext, wrapJavaPerform } from "./lib/libjava";
 import { JavaClass } from "./lib/types";
 
 export namespace hooking {
@@ -164,6 +162,21 @@ export namespace hooking {
 
       // register the job
       jobs.add(job);
+    });
+  };
+
+  export const getActivities = (): Promise<string[]> => {
+    return wrapJavaPerform(() => {
+
+      const PackageManager = Java.use("android.content.pm.PackageManager");
+      const GET_ACTIVITIES = PackageManager.GET_ACTIVITIES.value;
+      const context = getApplicationContext();
+
+      return Array.prototype.concat(context.getPackageManager()
+        .getPackageInfo(context.getPackageName(), GET_ACTIVITIES).activities.value.map((activityInfo) => {
+          return activityInfo.name.value;
+        }),
+      );
     });
   };
 }

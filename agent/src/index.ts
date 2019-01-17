@@ -51,6 +51,7 @@ rpc.exports = {
   // android hooking
   androidHookingGetClassMethods: (className: string): Promise<string[]> => androidhooking.getClassMethods(className),
   androidHookingGetClasses: (): Promise<string[]> => androidhooking.getClasses(),
+  androidHookingListActivities: (): Promise<string[]> => androidhooking.getActivities(),
   androidHookingWatchClass: (clazz: string): Promise<void> => androidhooking.watchClass(clazz),
   androidHookingWatchMethod: (fqClazz: string, dargs: boolean, dbt: boolean, dret: boolean): Promise<void> =>
     androidhooking.watchMethod(fqClazz, dargs, dbt, dret),
