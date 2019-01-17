@@ -1,3 +1,6 @@
+import util from "util";
+import { colors as c } from "./color";
+
 // sure, TS does not support this, but meh.
 // https://www.reddit.com/r/typescript/comments/87i59e/beginner_advice_strongly_typed_function_for/
 export function reverseEnumLookup<T>(enumType: T, value: string): string | undefined {
@@ -26,4 +29,9 @@ export const qsend = (quiet: boolean, message: any): void => {
   if (quiet === false) {
     send(message);
    }
+};
+
+// a small helper method to use util to dump
+export const debugDump = (o: any, depth: number = 2): void => {
+  c.log(util.inspect(o, true, depth, true));
 };
