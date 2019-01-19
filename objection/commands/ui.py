@@ -3,7 +3,7 @@ import click
 from objection.state.connection import state_connection
 from ..state.device import device_state
 from ..utils.frida_transport import FridaRunner
-from ..utils.templates import ios_hook, android_hook
+from ..utils.templates import android_hook
 
 
 def alert(args: list = None) -> None:
@@ -107,19 +107,9 @@ def android_screenshot(args: list = None) -> None:
     # add the .png extention if it does not already exist
     destination = args[0] if args[0].endswith('.png') else args[0] + '.png'
 
-    hook = android_hook('screenshot/take')
-    runner = FridaRunner(hook=hook)
-    api = runner.rpc_exports()
-
     # download the file
-    data = api.screenshot()
-
-    # cleanup the runner
-    runner.unload_script()
-
-    if not data:
-        click.secho('Failed to take screenshot.')
-        return
+    api = state_connection.get_api()
+    data = api.android_ui_screenshot()
 
     image = bytearray(map(lambda x: x % 256, data))
 

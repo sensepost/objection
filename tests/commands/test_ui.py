@@ -71,27 +71,10 @@ class TestUI(unittest.TestCase):
 
         self.assertEqual(output, 'Usage: android ui screenshot <local png destination>\n')
 
-    @mock.patch('objection.commands.ui.FridaRunner')
+    @mock.patch('objection.state.connection.state_connection.get_api')
     @mock.patch('objection.commands.ui.open', create=True)
-    def test_android_screenshot_fails_with_empty_data(self, mock_open, mock_runner):
-        mock_api = mock.Mock()
-        mock_api.screenshot.return_value = None
-
-        mock_runner.return_value.rpc_exports.return_value = mock_api
-
-        with capture(android_screenshot, ['foo']) as o:
-            output = o
-
-        self.assertTrue(output, 'Failed to take screenshot\n')
-        self.assertFalse(mock_open.called)
-
-    @mock.patch('objection.commands.ui.FridaRunner')
-    @mock.patch('objection.commands.ui.open', create=True)
-    def test_android_screenshot(self, mock_open, mock_runner):
-        mock_api = mock.Mock()
-        mock_api.screenshot.return_value = b'\x00'
-
-        mock_runner.return_value.rpc_exports.return_value = mock_api
+    def test_android_screenshot(self, mock_open, mock_api):
+        mock_api.return_value.android_ui_screenshot.return_value = b'\x00'
 
         with capture(android_screenshot, ['foo']) as o:
             output = o

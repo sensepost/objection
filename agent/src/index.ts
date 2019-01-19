@@ -7,6 +7,7 @@ import { IExecutedCommand, IKeyStoreEntry } from "./android/lib/interfaces";
 import { sslpinning as androidsslpinning } from "./android/pinning";
 import { root } from "./android/root";
 import { androidshell } from "./android/shell";
+import { userinterface as androiduserinterface } from "./android/userinterface";
 import { environment } from "./generic/environment";
 import { binarycookies } from "./ios/binarycookies";
 import { credentialstorage } from "./ios/credentialstorage";
@@ -18,7 +19,7 @@ import { nsuserdefaults } from "./ios/nsuserdefaults";
 import { pasteboard } from "./ios/pasteboard";
 import { sslpinning as iossslpinning } from "./ios/pinning";
 import { plist } from "./ios/plist";
-import { userinterface } from "./ios/userinterface";
+import { userinterface as iosuserinterface } from "./ios/userinterface";
 import { jobs } from "./lib/jobs";
 import { version } from "./version";
 
@@ -78,6 +79,9 @@ rpc.exports = {
   androidRootDetectionDisable: () => root.disable(),
   androidRootDetectionEnable: () => root.enable(),
 
+  // android user interface
+  androidUiScreenshot: () => androiduserinterface.screenshot(),
+
   // ios binary cookies
   iosCookiesGet: () => binarycookies.get(),
 
@@ -112,10 +116,10 @@ rpc.exports = {
   iosPlistRead: (path: string) => plist.read(path),
 
   // ios user interface
-  iosUiAlert: (message: string) => userinterface.alert(message),
-  iosUiBiometricsBypass: () => userinterface.biometricsBypass(),
-  iosUiScreenshot: () => userinterface.screenshot(),
-  iosUiWindowDump: () => userinterface.dump(),
+  iosUiAlert: (message: string) => iosuserinterface.alert(message),
+  iosUiBiometricsBypass: () => iosuserinterface.biometricsBypass(),
+  iosUiScreenshot: () => iosuserinterface.screenshot(),
+  iosUiWindowDump: () => iosuserinterface.dump(),
 
   // ios ssl pinning
   iosPinningDisable: (quiet: boolean) => iossslpinning.disable(quiet),
