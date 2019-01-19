@@ -23,20 +23,7 @@ import { userinterface as iosuserinterface } from "./ios/userinterface";
 import { jobs } from "./lib/jobs";
 import { version } from "./version";
 
-rpc.exports = {
-
-  // environment
-  envAndroid: () => environment.androidPackage(),
-  envAndroidPaths: () => environment.androidPaths(),
-  envFrida: () => environment.frida(),
-  envIos: () => environment.iosPackage(),
-  envIosPaths: () => environment.iosPaths(),
-  envRuntime: () => environment.runtime(),
-
-  // jobs
-  jobsGet: () => jobs.all(),
-  jobsKill: (ident: string) => jobs.kill(ident),
-
+const android = {
   // android clipboard
   androidMonitorClipboard: () => clipboard.monitor(),
 
@@ -81,7 +68,9 @@ rpc.exports = {
 
   // android user interface
   androidUiScreenshot: () => androiduserinterface.screenshot(),
+};
 
+const ios = {
   // ios binary cookies
   iosCookiesGet: () => binarycookies.get(),
 
@@ -134,6 +123,24 @@ rpc.exports = {
 
   // ios nsuserdefaults
   nsuserDefaults: () => nsuserdefaults.get(),
+};
+
+rpc.exports = {
+
+  ...android,
+  ...ios,
+
+  // environment
+  envAndroid: () => environment.androidPackage(),
+  envAndroidPaths: () => environment.androidPaths(),
+  envFrida: () => environment.frida(),
+  envIos: () => environment.iosPackage(),
+  envIosPaths: () => environment.iosPaths(),
+  envRuntime: () => environment.runtime(),
+
+  // jobs
+  jobsGet: () => jobs.all(),
+  jobsKill: (ident: string) => jobs.kill(ident),
 
   // meta
   version: () => version,
