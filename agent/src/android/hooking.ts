@@ -6,6 +6,16 @@ import { JavaClass } from "./lib/types";
 
 export namespace hooking {
 
+  const splitClassMethod = (fqClazz: string): string[] => {
+    // split a fully qualified class name, assuming the last period denotes the method
+    const methodSeperatorIndex: number = fqClazz.lastIndexOf(".");
+
+    const clazz: string = fqClazz.substring(0, methodSeperatorIndex);
+    const method: string = fqClazz.substring(methodSeperatorIndex + 1); // Increment by 1 to exclude the leading period
+
+    return [clazz, method];
+  };
+
   export const getClasses = (): Promise<string[]> => {
     return wrapJavaPerform(() => {
       return Java.enumerateLoadedClassesSync();
@@ -84,12 +94,8 @@ export namespace hooking {
   };
 
   export const watchMethod = (fqClazz: string, dargs: boolean, dbt: boolean, dret: boolean): Promise<void> => {
-    // split the fully qualified class name, assuming the last . denotes the method
-    const methodSeperatorIndex: number = fqClazz.lastIndexOf(".");
-    const clazz: string = fqClazz.substring(0, methodSeperatorIndex);
-    const method: string = fqClazz.substring(methodSeperatorIndex + 1); // Increment by 1 to exclude the leading period
-
-    send(`Attemtping to watch class ${c.green(clazz)} and method ${c.green(method)}.`);
+    const [clazz, method] = splitClassMethod(fqClazz);
+    send(`Attempting to watch class ${c.green(clazz)} and method ${c.green(method)}.`);
 
     return wrapJavaPerform(() => {
       const Throwable = Java.use("java.lang.Throwable");
@@ -237,6 +243,48 @@ export namespace hooking {
       );
 
       return receivers;
+    });
+  };
+
+  export const setReturnValue = (fqClazz: string, newRet: boolean): Promise<void> => {
+    const [clazz, method] = splitClassMethod(fqClazz);
+    send(`Attempting to modify return value for class ${c.green(clazz)} and method ${c.green(method)}.`);
+
+    return wrapJavaPerform(() => {
+      const job: IJob = {
+        identifier: jobs.identifier(),
+        implementations: [],
+        type: `set-return for: ${fqClazz}`,
+      };
+
+      const clazzInstance: JavaClass = Java.use(clazz);
+      const methodInstance = clazzInstance[method];
+      // TODO, check that the method in question actually returns a bool
+
+      // get the argument types for this method
+      const calleeArgTypes: string[] = methodInstance.argumentTypes.map((arg) => arg.className);
+      send(`Hooking ${c.green(clazz)}.${c.greenBright(method)}(${c.red(calleeArgTypes.join(", "))})`);
+
+      // tslint:disable-next-line:only-arrow-functions
+      methodInstance.implementation = function() {
+        let retVal = methodInstance.apply(this, arguments);
+
+        // Override retval if needed
+        if (retVal !== newRet) {
+          send(
+            c.blackBright(`[${job.identifier}] `) + `Return value was not ${c.red(newRet.toString())}, ` +
+            `setting to ${c.green(newRet.toString())}.`,
+          );
+          // update the return value
+          retVal = newRet;
+        }
+
+        return retVal;
+      };
+
+      // Register the job
+      job.implementations.push(methodInstance);
+      jobs.add(job);
     });
   };
 }

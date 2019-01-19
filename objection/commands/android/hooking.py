@@ -204,21 +204,16 @@ def set_method_return_value(args: list = None) -> None:
 
     if len(clean_argument_flags(args)) < 2:
         click.secho(('Usage: android hooking set return_value '
-                     '"<fully qualified class>" (eg: "com.example.test") '
-                     '"<method (with overload if needed)>" (eg: see help for details) '
+                     '"<fully qualified class method (with overload if needed)>" (eg: "com.example.test.doLogin") '
                      '<true/false>'),
                     bold=True)
         return
 
-    class_name = args[0]
-    method_name = args[1].replace('\'', '"')  # fun!
-    retval = args[2]
+    class_name = args[0].replace('\'', '"')  # fun!
+    retval = True if _string_is_true(args[1]) else False
 
-    runner = FridaRunner()
-    runner.set_hook_with_data(
-        android_hook('hooking/set-return'), class_name=class_name, method_name=method_name, retval=retval)
-
-    runner.run_as_job(name='set-return-value', args=args)
+    api = state_connection.get_api()
+    api.android_hooking_set_method_return(class_name, retval)
 
 
 def search_class(args: list) -> None:

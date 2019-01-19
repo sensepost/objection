@@ -202,15 +202,15 @@ Found 3 classes
         with capture(set_method_return_value, ['com.foo.bar']) as o:
             output = o
 
-        self.assertEqual(output, 'Usage: android hooking set return_value "<fully qualified class>" '
-                                 '(eg: "com.example.test") "<method (with overload if needed)>" (eg:'
-                                 ' see help for details) <true/false>\n')
+        self.assertEqual(output, 'Usage: android hooking set return_value '
+                                 '"<fully qualified class method (with overload '
+                                 'if needed)>" (eg: "com.example.test.doLogin") <true/false>\n')
 
-    @mock.patch('objection.commands.android.hooking.FridaRunner')
-    def test_set_method_return_value(self, mock_runner):
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_set_method_return_value(self, mock_api):
         set_method_return_value(['com.foo.bar', 'isValid.overload(\'bar\')', 'false'])
 
-        self.assertTrue(mock_runner.return_value.run_as_job.called)
+        self.assertTrue(mock_api.return_value.android_hooking_set_method_return.called)
 
     def test_search_class_validates_arguments(self):
         with capture(search_class, []) as o:
