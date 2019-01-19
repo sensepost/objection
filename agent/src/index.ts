@@ -1,6 +1,7 @@
 import { clipboard } from "./android/clipboard";
 import { androidfilesystem } from "./android/filesystem";
 import { hooking as androidhooking } from "./android/hooking";
+import { intent } from "./android/intent";
 import { IExecutedCommand } from "./android/lib/interfaces";
 import { androidshell } from "./android/shell";
 import { environment } from "./generic/environment";
@@ -58,6 +59,10 @@ rpc.exports = {
   androidHookingWatchClass: (clazz: string): Promise<void> => androidhooking.watchClass(clazz),
   androidHookingWatchMethod: (fqClazz: string, dargs: boolean, dbt: boolean, dret: boolean): Promise<void> =>
     androidhooking.watchMethod(fqClazz, dargs, dbt, dret),
+
+  // android intents
+  androidIntentStartActivity: (activityClass: string): Promise<void> => intent.startActivity(activityClass),
+  androidIntentStartService: (serviceClass: string): Promise<void> => intent.startService(serviceClass),
 
   // ios binary cookies
   iosCookiesGet: () => binarycookies.get(),
