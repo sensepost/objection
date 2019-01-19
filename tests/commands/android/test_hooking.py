@@ -218,42 +218,21 @@ Found 3 classes
 
         self.assertEqual(output, 'Usage: android hooking search classes <name>\n')
 
-    @mock.patch('objection.commands.android.hooking.FridaRunner')
-    def test_search_class_handles_hook_error(self, mock_runner):
-        mock_response = mock.Mock()
-        mock_response.is_successful.return_value = False
-        type(mock_response).error_reason = 'test'
-
-        mock_runner.return_value.get_last_message.return_value = mock_response
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_search_class_handles_empty_data(self, mock_api):
+        mock_api.return_value.android_hooking_get_classes.return_value = []
 
         with capture(search_class, ['com.foo.bar']) as o:
             output = o
 
-        self.assertEqual(output, 'Failed to search for classes with error: test\n')
+        self.assertEqual(output, '\nFound 0 classes\n')
 
-    @mock.patch('objection.commands.android.hooking.FridaRunner')
-    def test_search_class_handles_empty_data(self, mock_runner):
-        mock_response = mock.Mock()
-        mock_response.is_successful.return_value = True
-        type(mock_response).data = None
-
-        mock_runner.return_value.get_last_message.return_value = mock_response
-
-        with capture(search_class, ['com.foo.bar']) as o:
-            output = o
-
-        self.assertEqual(output, 'No classes found\n')
-
-    @mock.patch('objection.commands.android.hooking.FridaRunner')
-    def test_search_class(self, mock_runner):
-        mock_response = mock.Mock()
-        mock_response.is_successful.return_value = True
-        type(mock_response).data = [
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_search_class(self, mock_api):
+        mock_api.return_value.android_hooking_get_classes.return_value = [
             'com.foo.bar',
             'com.foo.bar.baz'
         ]
-
-        mock_runner.return_value.get_last_message.return_value = mock_response
 
         with capture(search_class, ['com.foo.bar']) as o:
             output = o

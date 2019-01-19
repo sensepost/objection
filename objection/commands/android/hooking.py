@@ -1,9 +1,7 @@
 import click
 
 from objection.state.connection import state_connection
-from objection.utils.frida_transport import FridaRunner
 from objection.utils.helpers import clean_argument_flags
-from objection.utils.templates import android_hook
 
 
 def _string_is_true(s: str) -> bool:
@@ -230,24 +228,16 @@ def search_class(args: list) -> None:
         return
 
     search = args[0]
+    found = 0
 
-    runner = FridaRunner()
-    runner.set_hook_with_data(android_hook('hooking/search-class'), search=search)
-    runner.run()
+    api = state_connection.get_api()
+    classes = api.android_hooking_get_classes()
 
-    response = runner.get_last_message()
+    # print the enumerated classes
+    for class_name in sorted(classes):
 
-    if not response.is_successful():
-        click.secho('Failed to search for classes with error: {0}'.format(response.error_reason), fg='red')
-        return None
+        if search.lower() in class_name.lower():
+            click.secho(class_name)
+            found += 1
 
-    if response.data:
-
-        # dump the classes to screen
-        for classname in response.data:
-            click.secho(classname)
-
-        click.secho('\nFound {0} classes'.format(len(response.data)), bold=True)
-
-    else:
-        click.secho('No classes found')
+    click.secho('\nFound {0} classes'.format(found), bold=True)
