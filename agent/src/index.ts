@@ -5,6 +5,7 @@ import { intent } from "./android/intent";
 import { keystore } from "./android/keystore";
 import { IExecutedCommand, IKeyStoreEntry } from "./android/lib/interfaces";
 import { sslpinning as androidsslpinning } from "./android/pinning";
+import { root } from "./android/root";
 import { androidshell } from "./android/shell";
 import { environment } from "./generic/environment";
 import { binarycookies } from "./ios/binarycookies";
@@ -73,6 +74,10 @@ rpc.exports = {
   // android ssl pinning
   androidSslPinningDisable: (quiet: boolean) => androidsslpinning.disable(quiet),
 
+  // android root detection
+  androidRootDetectionDisable: () => root.disable(),
+  androidRootDetectionEnable: () => root.enable(),
+
   // ios binary cookies
   iosCookiesGet: () => binarycookies.get(),
 
@@ -118,12 +123,12 @@ rpc.exports = {
   // ios pasteboard
   iosMonitorPasteboard: () => pasteboard.monitor(),
 
-  // keychain
+  // ios keychain
   keychainAdd: (key: string, data: string) => ioskeychain.add(key, data),
   keychainEmpty: () => ioskeychain.empty(),
   keychainList: () => ioskeychain.list(),
 
-  // nsuserdefaults
+  // ios nsuserdefaults
   nsuserDefaults: () => nsuserdefaults.get(),
 
   // meta
