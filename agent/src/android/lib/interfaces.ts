@@ -10,3 +10,9 @@ export interface IExecutedCommand {
     stdOut: string;
     stdErr: string;
 }
+
+export interface IKeyStoreEntry {
+    alias: string;
+    is_certificate: boolean;
+    is_key: boolean;
+}

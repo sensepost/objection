@@ -1,5 +1,6 @@
 import { colors as c } from "../lib/color";
 import { getApplicationContext, wrapJavaPerform } from "./lib/libjava";
+import { JavaClass } from "./lib/types";
 
 export namespace intent {
 
@@ -20,14 +21,14 @@ export namespace intent {
       const context = getApplicationContext();
 
       // Setup a new Intent
-      const Intent = Java.use("android.content.Intent");
+      const Intent: JavaClass = Java.use("android.content.Intent");
 
       // Get the Activity class's .class
-      const newActivity = Java.use(activityClass).class;
+      const newActivity: string = Java.use(activityClass).class;
       send(`Starting activity ${c.green(activityClass)}...`);
 
       // Init and launch the intent
-      const newIntent = Intent.$new(context, newActivity);
+      const newIntent: JavaClass = Intent.$new(context, newActivity);
       newIntent.setFlags(FLAG_ACTIVITY_NEW_TASK);
 
       context.startActivity(newIntent);
@@ -47,14 +48,14 @@ export namespace intent {
       const context = getApplicationContext();
 
       // Setup a new Intent
-      const Intent = Java.use("android.content.Intent");
+      const Intent: JavaClass = Java.use("android.content.Intent");
 
       // Get the Activity class's .class
-      const newService = Java.use(serviceClass).class;
+      const newService: string = Java.use(serviceClass).class;
       send(`Starting service ${c.green(serviceClass)}...`);
 
       // Init and launch the intent
-      const newIntent = Intent.$new(context, newService);
+      const newIntent: JavaClass = Intent.$new(context, newService);
       newIntent.setFlags(FLAG_ACTIVITY_NEW_TASK);
 
       context.startService(newIntent);

@@ -2,7 +2,8 @@ import { clipboard } from "./android/clipboard";
 import { androidfilesystem } from "./android/filesystem";
 import { hooking as androidhooking } from "./android/hooking";
 import { intent } from "./android/intent";
-import { IExecutedCommand } from "./android/lib/interfaces";
+import { keystore } from "./android/keystore";
+import { IExecutedCommand, IKeyStoreEntry } from "./android/lib/interfaces";
 import { androidshell } from "./android/shell";
 import { environment } from "./generic/environment";
 import { binarycookies } from "./ios/binarycookies";
@@ -63,6 +64,10 @@ rpc.exports = {
   // android intents
   androidIntentStartActivity: (activityClass: string): Promise<void> => intent.startActivity(activityClass),
   androidIntentStartService: (serviceClass: string): Promise<void> => intent.startService(serviceClass),
+
+  // android keystore
+  androidKeystoreClear: () => keystore.clear(),
+  androidKeystoreList: (): Promise<IKeyStoreEntry[]> => keystore.list(),
 
   // ios binary cookies
   iosCookiesGet: () => binarycookies.get(),
