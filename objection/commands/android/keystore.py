@@ -16,7 +16,6 @@ def entries(args: list = None) -> None:
     ks = api.android_keystore_list()
 
     output = [[x['alias'], x['is_key'], x['is_certificate']] for x in ks]
-
     click.secho(tabulate(output, headers=['Alias', 'Key', 'Certificate']))
 
 

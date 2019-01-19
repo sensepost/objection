@@ -1,5 +1,4 @@
-from objection.utils.frida_transport import FridaRunner
-from objection.utils.templates import android_hook
+from objection.state.connection import state_connection
 
 
 def _should_be_quiet(args: list) -> bool:
@@ -23,8 +22,5 @@ def android_disable(args: list = None) -> None:
         :return:
     """
 
-    hook = android_hook('pinning/disable')
-
-    runner = FridaRunner()
-    runner.set_hook_with_data(hook=hook, quiet=_should_be_quiet(args))
-    runner.run_as_job(name='pinning-disable')
+    api = state_connection.get_api()
+    api.android_ssl_pinning_disable(_should_be_quiet(args))

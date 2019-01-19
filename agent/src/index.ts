@@ -4,6 +4,7 @@ import { hooking as androidhooking } from "./android/hooking";
 import { intent } from "./android/intent";
 import { keystore } from "./android/keystore";
 import { IExecutedCommand, IKeyStoreEntry } from "./android/lib/interfaces";
+import { sslpinning as androidsslpinning } from "./android/pinning";
 import { androidshell } from "./android/shell";
 import { environment } from "./generic/environment";
 import { binarycookies } from "./ios/binarycookies";
@@ -14,7 +15,7 @@ import { iosjailbreak } from "./ios/jailbreak";
 import { ioskeychain } from "./ios/keychain";
 import { nsuserdefaults } from "./ios/nsuserdefaults";
 import { pasteboard } from "./ios/pasteboard";
-import { sslpinning } from "./ios/pinning";
+import { sslpinning as iossslpinning } from "./ios/pinning";
 import { plist } from "./ios/plist";
 import { userinterface } from "./ios/userinterface";
 import { jobs } from "./lib/jobs";
@@ -69,6 +70,9 @@ rpc.exports = {
   androidKeystoreClear: () => keystore.clear(),
   androidKeystoreList: (): Promise<IKeyStoreEntry[]> => keystore.list(),
 
+  // android ssl pinning
+  androidSslPinningDisable: (quiet: boolean) => androidsslpinning.disable(quiet),
+
   // ios binary cookies
   iosCookiesGet: () => binarycookies.get(),
 
@@ -109,7 +113,7 @@ rpc.exports = {
   iosUiWindowDump: () => userinterface.dump(),
 
   // ios ssl pinning
-  iosPinningDisable: (quiet: boolean) => sslpinning.disable(quiet),
+  iosPinningDisable: (quiet: boolean) => iossslpinning.disable(quiet),
 
   // ios pasteboard
   iosMonitorPasteboard: () => pasteboard.monitor(),
