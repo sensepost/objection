@@ -94,28 +94,8 @@ class TestUI(unittest.TestCase):
 
         self.assertEqual(output, 'Usage: android ui FLAG_SECURE <true/false>\n')
 
-    @mock.patch('objection.commands.ui.FridaRunner')
-    def test_android_flag_secure(self, mock_runner):
-        mock_response = mock.Mock()
-        mock_response.is_successful.return_value = True
-        type(mock_response).data = 'test'
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_android_flag_secure(self, mock_api):
+        android_flag_secure(['true'])
 
-        mock_runner.return_value.get_last_message.return_value = mock_response
-
-        with capture(android_flag_secure, ['true']) as o:
-            output = o
-
-        self.assertEqual(output, 'Successfuly set FLAG_SECURE\n')
-
-    @mock.patch('objection.commands.ui.FridaRunner')
-    def test_android_flag_secure_handles_hook_error(self, mock_runner):
-        mock_response = mock.Mock()
-        mock_response.is_successful.return_value = False
-        type(mock_response).error_message = 'test'
-
-        mock_runner.return_value.get_last_message.return_value = mock_response
-
-        with capture(android_flag_secure, ['true']) as o:
-            output = o
-
-        self.assertEqual(output, 'Failed to set FLAG_SECURE: test\n')
+        self.assertTrue(mock_api.return_value.android_ui_set_flag_secure.called)

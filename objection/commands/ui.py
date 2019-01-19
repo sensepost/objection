@@ -2,8 +2,6 @@ import click
 
 from objection.state.connection import state_connection
 from ..state.device import device_state
-from ..utils.frida_transport import FridaRunner
-from ..utils.templates import android_hook
 
 
 def alert(args: list = None) -> None:
@@ -132,15 +130,5 @@ def android_flag_secure(args: list = None) -> None:
         click.secho('Usage: android ui FLAG_SECURE <true/false>', bold=True)
         return
 
-    runner = FridaRunner()
-    runner.set_hook_with_data(android_hook('ui/flag-secure'), value=args[0])
-
-    runner.run()
-
-    response = runner.get_last_message()
-
-    if not response.is_successful():
-        click.secho('Failed to set FLAG_SECURE: {0}'.format(response.error_message), fg='red')
-        return
-
-    click.secho('Successfuly set FLAG_SECURE' if response.data else 'Successfully removed FLAG_SECURE')
+    api = state_connection.get_api()
+    api.android_ui_set_flag_secure(args[0])

@@ -1,6 +1,10 @@
+import { colors as c } from "../lib/color";
 import { wrapJavaPerform } from "./lib/libjava";
 
 export namespace userinterface {
+
+  // https://developer.android.com/reference/android/view/WindowManager.LayoutParams.html#FLAG_SECURE
+  const FLAG_SECURE = 0x00002000;
 
   export const screenshot = (): Promise<any> => {
     return wrapJavaPerform(() => {
@@ -17,7 +21,6 @@ export namespace userinterface {
 
       const activityThread = ActivityThread.currentActivityThread();
       const activityRecords = activityThread.mActivities.value.values().toArray();
-
       let currentActivity;
 
       for (const i of activityRecords) {
@@ -41,6 +44,36 @@ export namespace userinterface {
       }
 
       return bytes;
+    });
+  };
+
+  export const setFlagSecure = (v: boolean): Promise<void> => {
+    return wrapJavaPerform(() => {
+      const ActivityThread = Java.use("android.app.ActivityThread");
+      const Activity = Java.use("android.app.Activity");
+      const ActivityClientRecord = Java.use("android.app.ActivityThread$ActivityClientRecord");
+
+      const activityThread = ActivityThread.currentActivityThread();
+      const activityRecords = activityThread.mActivities.value.values().toArray();
+      let currentActivity;
+
+      for (const i of activityRecords) {
+        const activityRecord = Java.cast(i, ActivityClientRecord);
+        if (!activityRecord.paused.value) {
+          currentActivity = Java.cast(Java.cast(activityRecord, ActivityClientRecord).activity.value, Activity);
+          break;
+        }
+      }
+
+      if (currentActivity) {
+        // Somehow the next line prevents Frida from throwing an abort error
+        currentActivity.getWindow();
+        // Set flag and trigger update (Throws abort without first calling getWindow())
+        Java.scheduleOnMainThread(() => {
+          currentActivity.getWindow().setFlags(v ? FLAG_SECURE : 0, FLAG_SECURE);
+          send(`FLAG_SECURE set to ${c.green(v.toString())}`);
+        });
+      }
     });
   };
 }

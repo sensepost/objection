@@ -54,4 +54,5 @@ export const android = {
 
   // android user interface
   androidUiScreenshot: () => userinterface.screenshot(),
+  androidUiSetFlagSecure: (v: boolean): Promise<void> => userinterface.setFlagSecure(v),
 };
