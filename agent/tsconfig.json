@@ -4,6 +4,7 @@
     "lib": [
       "esnext"
     ],
+    "module": "commonjs",
     "allowJs": true,
     "noEmit": true,
     "strict": true,
