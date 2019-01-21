@@ -1,6 +1,4 @@
 from objection.state.connection import state_connection
-from objection.utils.frida_transport import FridaRunner
-from objection.utils.templates import ios_hook
 
 
 def disable(args: list = None) -> None:
@@ -23,7 +21,5 @@ def simulate(args: list = None) -> None:
         :return:
     """
 
-    hook = ios_hook('jailbreak/simulate')
-
-    runner = FridaRunner(hook=hook)
-    runner.run_as_job(name='simulate-jailbroken-environment')
+    api = state_connection.get_api()
+    api.ios_jailbreak_enable()

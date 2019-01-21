@@ -40,7 +40,8 @@ export const ios = {
     hooking.watchMethod(selector, dargs, dbt, dret),
 
   // jailbreak detection
-  iosJailbreakDisable: () => iosjailbreak.disable(),
+  iosJailbreakDisable: (): void => iosjailbreak.disable(),
+  iosJailbreakEnable: (): void => iosjailbreak.enable(),
 
   // plist files
   iosPlistRead: (path: string) => plist.read(path),
