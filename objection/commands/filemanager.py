@@ -1,4 +1,3 @@
-import base64
 import os
 import time
 
@@ -8,9 +7,7 @@ from tabulate import tabulate
 from ..state.connection import state_connection
 from ..state.device import device_state
 from ..state.filemanager import file_manager_state
-from ..utils.frida_transport import FridaRunner
 from ..utils.helpers import sizeof_fmt
-from ..utils.templates import ios_hook, android_hook
 
 # variable used to cache entries from the ls-like
 # commands used in the below helpers. only used
@@ -511,6 +508,10 @@ def _upload_ios(path: str, destination: str) -> None:
 
     click.secho('Uploaded: {0}'.format(destination), dim=True)
 
+    # unset the cache key for this directory so the next short listing
+    # will have updated contents
+    del _ls_cache[os.path.dirname(destination)]
+
 
 def _upload_android(path: str, destination: str) -> None:
     """
@@ -541,52 +542,9 @@ def _upload_android(path: str, destination: str) -> None:
 
     click.secho('Uploaded: {0}'.format(destination), dim=True)
 
-    return
-
-    if not os.path.isabs(destination):
-        destination = os.path.join(pwd(), destination)
-
-    # output about whats about to happen
-    click.secho('Uploading {0} to {1}'.format(path, destination), fg='green', dim=True)
-
-    # start a runner. going to use this a few times
-    # for this method
-    runner = FridaRunner()
-
-    # check that the path is readable
-    runner.set_hook_with_data(
-        android_hook('filesystem/writable'), path=os.path.dirname(destination))
-
-    # run the hook
-    runner.run()
-
-    # get the response message
-    response = runner.get_last_message()
-
-    # if we cant read the file, just stop
-    if not response.is_successful() or not response.writable:
-        click.secho('Unable to upload file. Destination is not writable')
-        return
-
-    # read the local file to upload, and base64 encode it
-    with open(path, 'rb') as f:
-        data = f.read()
-        data = str(base64.b64encode(data), 'utf-8')  # the frida hook wants a raw string
-
-    # prepare the upload hook
-    runner.set_hook_with_data(
-        android_hook('filesystem/upload'), destination=destination, base64_data=data)
-
-    # run the upload hook
-    runner.run()
-
-    response = runner.get_last_message()
-
-    if not response.is_successful():
-        click.secho('Failed to upload {}: {}'.format(path, response.error_reason))
-        return
-
-    click.secho('Uploaded: {0}'.format(destination), dim=True)
+    # unset the cache key for this directory so the next short listing
+    # will have updated contents
+    del _ls_cache[os.path.dirname(destination)]
 
 
 def _get_short_ios_listing() -> list:
@@ -608,18 +566,8 @@ def _get_short_ios_listing() -> list:
     if directory in _ls_cache:
         return _ls_cache[directory]
 
-    # fetch a fresh listing
-    runner = FridaRunner()
-    runner.set_hook_with_data(ios_hook('filesystem/ls'), path=directory)
-
-    # the ls method is an rpc export
-    api = runner.rpc_exports()
-
-    # get the directory listing
-    data = api.ls()
-
-    # cleanup the runner
-    runner.unload_script()
+    api = state_connection.get_api()
+    data = api.ios_file_ls(directory)
 
     # loop the response, marking entries as either being
     # a file or a directory. this response will be stored
@@ -663,23 +611,13 @@ def _get_short_android_listing() -> list:
     if directory in _ls_cache:
         return _ls_cache[directory]
 
-    # fetch a fresh listing
-    runner = FridaRunner()
-    runner.set_hook_with_data(android_hook('filesystem/ls'), path=directory)
-    runner.run()
-
-    response = runner.get_last_message()
-
-    if not response.is_successful():
-        # cache an empty response as an error occurred
-        _ls_cache[directory] = resp
-
-        return resp
+    api = state_connection.get_api()
+    data = api.android_file_ls(directory)
 
     # loop the response, marking entries as either being
     # a file or a directory. this response will be stored
     # in the _ls_cache too.
-    for name, attribs in response.data['files'].items():
+    for name, attribs in data['files'].items():
         attributes = attribs['attributes']
 
         # append a tuple with name, type
