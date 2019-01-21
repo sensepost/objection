@@ -4,8 +4,6 @@ import click
 from tabulate import tabulate
 
 from objection.state.connection import state_connection
-from objection.utils.frida_transport import FridaRunner
-from objection.utils.templates import ios_hook
 
 
 def _should_output_json(args: list) -> bool:
@@ -100,15 +98,9 @@ def clear(args: list = None) -> None:
     """
 
     click.secho('Clearing the keychain...', dim=True)
-    hook = ios_hook('keychain/clear')
-    runner = FridaRunner(hook=hook)
-    runner.run()
 
-    response = runner.get_last_message()
-
-    if not response.is_successful():
-        click.secho('Failed to clear keychain items with error: {0}'.format(response.error_message), fg='red')
-        return
+    api = state_connection.get_api()
+    api.keychain_empty()
 
     click.secho('Keychain cleared', fg='green')
 
@@ -132,12 +124,8 @@ def add(args: list) -> None:
     click.secho('Key:       {0}'.format(key), dim=True)
     click.secho('Value:     {0}'.format(value), dim=True)
 
-    runner = FridaRunner()
-    runner.set_hook_with_data(ios_hook('keychain/add'))
-
-    api = runner.rpc_exports()
-
-    if api.add(key, value):
+    api = state_connection.get_api()
+    if api.keychain_add(key, value):
         click.secho('Successfully added the keychain item', fg='green')
         return
 
