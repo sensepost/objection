@@ -5,6 +5,7 @@ import { hooking } from "../ios/hooking";
 import { iosjailbreak } from "../ios/jailbreak";
 import { ioskeychain } from "../ios/keychain";
 import { IKeychainItem } from "../ios/lib/interfaces";
+import { NSUserDefaults } from "../ios/lib/types";
 import { nsuserdefaults } from "../ios/nsuserdefaults";
 import { pasteboard } from "../ios/pasteboard";
 import { sslpinning } from "../ios/pinning";
@@ -64,5 +65,5 @@ export const ios = {
   keychainList: (): IKeychainItem[] => ioskeychain.list(),
 
   // ios nsuserdefaults
-  nsuserDefaults: () => nsuserdefaults.get(),
+  nsuserDefaultsGet: (): NSUserDefaults | any => nsuserdefaults.get(),
 };
