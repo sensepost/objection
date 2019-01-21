@@ -11,8 +11,8 @@ class TestJailbreak(unittest.TestCase):
 
         self.assertTrue(mock_api.return_value.ios_jailbreak_disable.called)
 
-    @mock.patch('objection.commands.ios.jailbreak.FridaRunner')
-    def test_simulate(self, mock_runner):
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_simulate(self, mock_api):
         simulate([])
 
-        self.assertTrue(mock_runner.return_value.run_as_job.called)
+        self.assertTrue(mock_api.return_value.ios_jailbreak_enable.called)

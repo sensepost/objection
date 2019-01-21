@@ -169,34 +169,12 @@ class TestFileManager(unittest.TestCase):
         self.assertEqual(_pwd_ios(), '/foo/bar')
         self.assertEqual(file_manager_state.cwd, '/foo/bar')
 
-    @mock.patch('objection.commands.filemanager.FridaRunner')
-    def test_get_ios_pwd_via_helper_and_fails(self, mock_runner):
-        mock_response = mock.Mock()
-        mock_response.is_successful.return_value = False
-
-        mock_runner.return_value.get_last_message.return_value = mock_response
-
-        with self.assertRaises(Exception) as _:
-            _pwd_ios()
-        self.assertIsNone(file_manager_state.cwd)
-
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_get_android_pwd_via_helper(self, mock_api):
         mock_api.return_value.android_file_cwd.return_value = '/foo/baz'
 
         self.assertEqual(_pwd_android(), '/foo/baz')
         self.assertEqual(file_manager_state.cwd, '/foo/baz')
-
-    @mock.patch('objection.commands.filemanager.FridaRunner')
-    def test_get_android_pwd_via_helper_and_fails(self, mock_runner):
-        mock_response = mock.Mock()
-        mock_response.is_successful.return_value = False
-
-        mock_runner.return_value.get_last_message.return_value = mock_response
-
-        with self.assertRaises(Exception) as _:
-            _pwd_android()
-        self.assertIsNone(file_manager_state.cwd)
 
     @mock.patch('objection.commands.filemanager.pwd')
     @mock.patch('objection.commands.filemanager._ls_ios')
