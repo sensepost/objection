@@ -102,30 +102,15 @@ Dumped keychain to: foo.json
         self.assertEqual(output, expected_output)
         self.assertTrue(mock_open.called)
 
-    @mock.patch('objection.commands.ios.keychain.FridaRunner')
-    def test_clear_handles_hook_error(self, mock_runner):
-        mock_response = mock.Mock()
-        mock_response.is_successful.return_value = False
-        type(mock_response).error_message = 'test'
-
-        mock_runner.return_value.get_last_message.return_value = mock_response
-
-        with capture(clear, []) as o:
-            output = o
-
-        self.assertEqual(output, 'Clearing the keychain...\nFailed to clear keychain items with error: test\n')
-
-    @mock.patch('objection.commands.ios.keychain.FridaRunner')
-    def test_clear(self, mock_runner):
-        mock_response = mock.Mock()
-        mock_response.is_successful.return_value = True
-
-        mock_runner.return_value.get_last_message.return_value = mock_response
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_clear(self, mock_api):
+        mock_api.return_value.keychain_empty.called
 
         with capture(clear, []) as o:
             output = o
 
         self.assertEqual(output, 'Clearing the keychain...\nKeychain cleared\n')
+        self.assertTrue(mock_api.return_value.keychain_empty.called)
 
     def test_adds_item_validates_arguments(self):
         with capture(add, ['--key', 'test_key']) as o:
@@ -133,12 +118,9 @@ Dumped keychain to: foo.json
 
         self.assertEqual(output, 'Usage: ios keychain add --key <key name> --data <entry data>\n')
 
-    @mock.patch('objection.commands.ios.keychain.FridaRunner')
-    def test_adds_item_successfully(self, mock_runner):
-        mock_api = mock.Mock()
-        mock_api.add.return_value = True
-
-        mock_runner.return_value.rpc_exports.return_value = mock_api
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_adds_item_successfully(self, mock_api):
+        mock_api.return_value.keychain_add.return_value = True
 
         with capture(add, ['--key', 'test_key', '--data', 'test_data']) as o:
             output = o
@@ -146,12 +128,9 @@ Dumped keychain to: foo.json
         self.assertEqual(output, 'Adding a new entry to the iOS keychain...\nKey:       test_key\n'
                                  'Value:     test_data\nSuccessfully added the keychain item\n')
 
-    @mock.patch('objection.commands.ios.keychain.FridaRunner')
-    def test_adds_item_with_failure(self, mock_runner):
-        mock_api = mock.Mock()
-        mock_api.add.return_value = False
-
-        mock_runner.return_value.rpc_exports.return_value = mock_api
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_adds_item_with_failure(self, mock_api):
+        mock_api.return_value.keychain_add.return_value = False
 
         with capture(add, ['--key', 'test_key', '--data', 'test_data']) as o:
             output = o
