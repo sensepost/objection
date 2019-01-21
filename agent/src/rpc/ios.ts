@@ -4,6 +4,7 @@ import { iosfilesystem } from "../ios/filesystem";
 import { hooking } from "../ios/hooking";
 import { iosjailbreak } from "../ios/jailbreak";
 import { ioskeychain } from "../ios/keychain";
+import { IKeychainItem } from "../ios/lib/interfaces";
 import { nsuserdefaults } from "../ios/nsuserdefaults";
 import { pasteboard } from "../ios/pasteboard";
 import { sslpinning } from "../ios/pinning";
@@ -57,9 +58,9 @@ export const ios = {
   iosMonitorPasteboard: () => pasteboard.monitor(),
 
   // ios keychain
-  keychainAdd: (key: string, data: string) => ioskeychain.add(key, data),
-  keychainEmpty: () => ioskeychain.empty(),
-  keychainList: () => ioskeychain.list(),
+  keychainAdd: (key: string, data: string): boolean => ioskeychain.add(key, data),
+  keychainEmpty: (): void => ioskeychain.empty(),
+  keychainList: (): IKeychainItem[] => ioskeychain.list(),
 
   // ios nsuserdefaults
   nsuserDefaults: () => nsuserdefaults.get(),

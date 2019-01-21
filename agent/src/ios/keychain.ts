@@ -39,6 +39,40 @@ export namespace ioskeychain {
   // dump the contents of the iOS keychain, returning the
   // results as an array representation.
   export const list = (): IKeychainItem[] => {
+    // -- Sample Objective-C
+    //
+    // NSMutableDictionary *query = [[NSMutableDictionary alloc] init];
+    // [query setObject:(__bridge id)kCFBooleanTrue forKey:(__bridge id)kSecReturnAttributes];
+    // [query setObject:(__bridge id)kCFBooleanTrue forKey:(__bridge id)kSecReturnData];
+    // [query setObject:(__bridge id)kCFBooleanTrue forKey:(__bridge id)kSecReturnRef];
+    // [query setObject:(__bridge id)kSecMatchLimitAll forKey:(__bridge id)kSecMatchLimit];
+    // NSArray *itemClasses = [NSArray arrayWithObjects:
+    //                         (__bridge id)kSecClassKey,
+    //                         (__bridge id)kSecClassIdentity,
+    //                         (__bridge id)kSecClassCertificate,
+    //                         (__bridge id)kSecClassGenericPassword,
+    //                         (__bridge id)kSecClassInternetPassword,
+    //                         nil];
+    // for (id itemClass in itemClasses) {
+    //     NSLog(@"Querying: %@", itemClass);
+    //     [query setObject:itemClass forKey:(__bridge id)kSecClass];
+    //     CFTypeRef result = NULL;
+    //     OSStatus findStatus = SecItemCopyMatching((__bridge CFDictionaryRef)query, &result);
+    //     if(findStatus != errSecSuccess) {
+    //         NSLog(@"Failed to query keychain for types %@", itemClass);
+    //         continue;
+    //     }
+    //     // loopy-loop the results
+    //     for (NSDictionary *entry in (__bridge NSDictionary *)result) {
+    //         NSString *stringRes = [[NSString alloc] initWithData:[entry objectForKey:@"v_Data"]
+    //                                                     encoding:NSUTF8StringEncoding];
+    //         NSLog(@"%@", stringRes);
+    //     }
+    //     if (result != NULL) {
+    //         CFRelease(result);
+    //     }
+    // }
+
     // http://nshipster.com/bool/
     const kCFBooleanTrue = ObjC.classes.__NSCFBoolean.numberWithBool_(true);
 
@@ -52,7 +86,6 @@ export namespace ioskeychain {
     const kcItems: IKeychainItem[] = [].concat.apply([], itemClasses.map((clazz) => {
 
       const clazzItems: IKeychainItem[] = [];
-
       searchDictionary.setObject_forKey_(clazz, kSec.kSecClass);
 
       // prepare a pointer for the results and call SecItemCopyMatching to get them
@@ -112,7 +145,6 @@ export namespace ioskeychain {
 
   // add a string entry to the keychain
   export const add = (key: string, data: string): boolean => {
-
     // Convert the key and data to NSData
     const dataString: NSString = NSString.stringWithString_(data).dataUsingEncoding_(NSUTF8StringEncoding);
     const dataKey: NSString = NSString.stringWithString_(key).dataUsingEncoding_(NSUTF8StringEncoding);
@@ -136,7 +168,6 @@ export namespace ioskeychain {
   // constriants actually are is done using an undocumented method,
   // SecAccessControlGetConstraints.
   const decodeAcl = (entry: NSDictionary): string => {
-
     const acl = new ObjC.Object(
       libObjc.SecAccessControlGetConstraints(entry.objectForKey_(kSec.kSecAttrAccessControl)));
 
@@ -208,47 +239,3 @@ export namespace ioskeychain {
     return flags.join(" ");
   };
 }
-
-// -- Sample Objective-C
-//
-// NSMutableDictionary *query = [[NSMutableDictionary alloc] init];
-// [query setObject:(__bridge id)kCFBooleanTrue forKey:(__bridge id)kSecReturnAttributes];
-// [query setObject:(__bridge id)kCFBooleanTrue forKey:(__bridge id)kSecReturnData];
-// [query setObject:(__bridge id)kCFBooleanTrue forKey:(__bridge id)kSecReturnRef];
-// [query setObject:(__bridge id)kSecMatchLimitAll forKey:(__bridge id)kSecMatchLimit];
-
-// NSArray *itemClasses = [NSArray arrayWithObjects:
-//                         (__bridge id)kSecClassKey,
-//                         (__bridge id)kSecClassIdentity,
-//                         (__bridge id)kSecClassCertificate,
-//                         (__bridge id)kSecClassGenericPassword,
-//                         (__bridge id)kSecClassInternetPassword,
-//                         nil];
-
-// for (id itemClass in itemClasses) {
-
-//     NSLog(@"Querying: %@", itemClass);
-//     [query setObject:itemClass forKey:(__bridge id)kSecClass];
-
-//     CFTypeRef result = NULL;
-//     OSStatus findStatus = SecItemCopyMatching((__bridge CFDictionaryRef)query, &result);
-
-//     if(findStatus != errSecSuccess) {
-
-//         NSLog(@"Failed to query keychain for types %@", itemClass);
-//         continue;
-//     }
-
-//     // loopy-loop the results
-//     for (NSDictionary *entry in (__bridge NSDictionary *)result) {
-
-//         NSString *stringRes = [[NSString alloc] initWithData:[entry objectForKey:@"v_Data"]
-//                                                     encoding:NSUTF8StringEncoding];
-//         NSLog(@"%@", stringRes);
-
-//     }
-
-//     if (result != NULL) {
-//         CFRelease(result);
-//     }
-// }
