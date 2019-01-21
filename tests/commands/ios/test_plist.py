@@ -12,42 +12,20 @@ class TestPlist(unittest.TestCase):
 
         self.assertEqual(output, 'Usage: ios plist cat <remote_plist>\n')
 
-    @mock.patch('objection.commands.ios.plist.FridaRunner')
-    def test_cat_handles_hook_error(self, mock_runner):
-        mock_response = mock.Mock()
-        mock_response.is_successful.return_value = False
-        type(mock_response).error_reason = 'test'
-
-        mock_runner.return_value.get_last_message.return_value = mock_response
-
-        with capture(cat, ['/foo']) as o:
-            output = o
-
-        self.assertEqual(output, 'Failed to get plist with error: test\n')
-
-    @mock.patch('objection.commands.ios.plist.FridaRunner')
-    def test_cat_with_full_path(self, mock_runner):
-        mock_response = mock.Mock()
-        mock_response.is_successful.return_value = True
-        type(mock_response).data = 'foo'
-
-        mock_runner.return_value.get_last_message.return_value = mock_response
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_cat_with_full_path(self, mock_api):
+        mock_api.return_value.ios_plist_read.return_value = 'foo'
 
         with capture(cat, ['/foo']) as o:
             output = o
 
         self.assertEqual(output, 'foo\n')
 
-    @mock.patch('objection.commands.ios.plist.FridaRunner')
+    @mock.patch('objection.state.connection.state_connection.get_api')
     @mock.patch('objection.commands.ios.plist.filemanager')
-    def test_cat_with_relative(self, mock_file_manager, mock_runner):
+    def test_cat_with_relative(self, mock_file_manager, mock_api):
         mock_file_manager.pwd.return_value = '/baz'
-
-        mock_response = mock.Mock()
-        mock_response.is_successful.return_value = True
-        type(mock_response).data = 'foobar'
-
-        mock_runner.return_value.get_last_message.return_value = mock_response
+        mock_api.return_value.ios_plist_read.return_value = 'foobar'
 
         with capture(cat, ['foo']) as o:
             output = o

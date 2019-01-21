@@ -5,7 +5,7 @@ import { hooking } from "../ios/hooking";
 import { iosjailbreak } from "../ios/jailbreak";
 import { ioskeychain } from "../ios/keychain";
 import { IKeychainItem } from "../ios/lib/interfaces";
-import { NSUserDefaults } from "../ios/lib/types";
+import { NSMutableDictionary, NSUserDefaults } from "../ios/lib/types";
 import { nsuserdefaults } from "../ios/nsuserdefaults";
 import { pasteboard } from "../ios/pasteboard";
 import { sslpinning } from "../ios/pinning";
@@ -45,7 +45,7 @@ export const ios = {
   iosJailbreakEnable: (): void => iosjailbreak.enable(),
 
   // plist files
-  iosPlistRead: (path: string) => plist.read(path),
+  iosPlistRead: (path: string): string => plist.read(path),
 
   // ios user interface
   iosUiAlert: (message: string) => userinterface.alert(message),
