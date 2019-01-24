@@ -133,6 +133,11 @@ def run(hook_debug: bool, command: tuple) -> None:
     # specify if hooks should be debugged
     app_state.debug_hooks = hook_debug
 
+    # Inject the agent
+    agent = Agent()
+    agent.inject()
+    state_connection.set_agent(agent=agent)
+
     try:
 
         click.secho('Determining environment...', dim=True)
