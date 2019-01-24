@@ -31,7 +31,6 @@ def get_device_info() -> tuple:
         # 'identifierForVendor': 'foo',
         # 'model': 'iPhone', 'systemName': 'iOS', 'systemVersion': '12.1'}
         device_state.os_version = package_info['systemVersion']
-        device_state.device_type = package_info['model']
 
         return pretty_concat(package_info['applicationName'], 30, left=True), \
                package_info['systemName'], package_info['model'], package_info['systemVersion']
@@ -46,7 +45,6 @@ def get_device_info() -> tuple:
         # 'host': 'foo.bar', 'id': '1234', 'model': 'foo-bar',
         # 'product': 'foo', 'user': 'root', 'version': '7.1.2'}
         device_state.os_version = package_info['version']
-        device_state.device_type = package_info['brand']
 
         return pretty_concat(package_info['application_name'], 30, left=True), \
                package_info['device'], package_info['brand'], package_info['version']
