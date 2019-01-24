@@ -1,6 +1,6 @@
 Command: android hooking set return_value
 
-Usage: android hooking set return_value "<fully qualified class>" "<method (with overload if needed)>" <true / false>
+Usage: android hooking set return_value "<fully qualified class method (with overload if needed)>" <true / false>
 
 Sets a methods return value to always be true / false. This could be
 a useful module to use in cases where generic SSL pinning or root
@@ -11,7 +11,6 @@ methods that don't return booleans can be hooked, the results may be
 unpredictable.
 
 Examples:
-   android hooking set return_value com.example.test.rootUtils isRooted false
-   android hooking set return_value com.example.test.encryption "hasKey.overload('java.lang.String')" true
-   android hooking set return_value "com.example.test.communication" "setPinningType.overload('java.lang.String', '[B')" false
-
+   android hooking set return_value com.example.test.rootUtils.isRooted false
+   android hooking set return_value com.example.test.encryption.hasKey.overload("java.lang.String") true
+   android hooking set return_value com.example.test.communication.setPinningType.overload("java.lang.String", "[B") false

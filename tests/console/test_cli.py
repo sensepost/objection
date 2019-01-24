@@ -16,21 +16,16 @@ class TestsCommandLineInteractions(unittest.TestCase):
         self.assertEqual(result.exit_code, 0)
         self.assertEqual(result.output, 'objection: ' + __version__ + '\n')
 
+    @mock.patch('objection.utils.agent.Agent.inject')
     @mock.patch('objection.console.cli.get_device_info')
-    def test_device_info(self, get_device_info):
+    def test_device_info(self, mock_inject, get_device_info):
+        mock_inject.return_value = None
         get_device_info.return_value = 'a', 'b', 'c', 'd'
 
         runner = CliRunner()
-        result = runner.invoke(device_type)
+        runner.invoke(device_type)
 
-        expected_output = ('Connection: USB\n'
-                           'Name: a\n'
-                           'System: b\n'
-                           'Model: c\n'
-                           'Version: d\n')
-
-        self.assertIsNone(result.exception)
-        self.assertEqual(result.output, expected_output)
+        self.assertTrue(get_device_info.called)
 
     @mock.patch('objection.console.cli.patch_android_apk')
     def test_patchapk_runs_with_minimal_cli_arguments(self, _):

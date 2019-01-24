@@ -1,5 +1,4 @@
-from objection.utils.frida_transport import FridaRunner
-from objection.utils.templates import android_hook
+from objection.state.connection import state_connection
 
 
 def disable(args: list = None) -> None:
@@ -10,10 +9,8 @@ def disable(args: list = None) -> None:
         :return:
     """
 
-    runner = FridaRunner()
-    runner.set_hook_with_data(android_hook('root/disable'))
-
-    runner.run_as_job(name='root-disable')
+    api = state_connection.get_api()
+    api.android_root_detection_disable()
 
 
 def simulate(args: list = None) -> None:
@@ -24,7 +21,5 @@ def simulate(args: list = None) -> None:
         :return:
     """
 
-    runner = FridaRunner()
-    runner.set_hook_with_data(android_hook('root/simulate'))
-
-    runner.run_as_job(name='root-simulate')
+    api = state_connection.get_api()
+    api.android_root_detection_enable()

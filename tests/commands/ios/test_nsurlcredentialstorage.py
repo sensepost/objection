@@ -6,17 +6,23 @@ from ...helpers import capture
 
 
 class TestNsusercredentialstorage(unittest.TestCase):
-    @mock.patch('objection.commands.ios.nsurlcredentialstorage.FridaRunner')
-    def test_dump(self, mock_runner):
-        mock_runner.return_value.rpc_exports.return_value.dump.return_value = [{"Foo": "Bar"}]
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_dump(self, mock_api):
+        mock_api.return_value.ios_credential_storage.return_value = [{
+            'protocol': 'https',
+            'host': 'foo.bar',
+            'port': '80',
+            'authMethod': 'NSURLAuthenticationMethodDefault',
+            'user': 'foo',
+            'password': 'bar',
+        }]
 
         with capture(dump, []) as o:
             output = o
 
-        expected_output = """\nFoo
------
-Bar
-
-Found 1 credentials\n"""
+        expected_output = """Protocol    Host       Port  Authentication Method    User    Password
+----------  -------  ------  -----------------------  ------  ----------
+https       foo.bar      80  Default                  foo     bar
+"""
 
         self.assertEqual(output, expected_output)

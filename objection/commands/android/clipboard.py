@@ -1,5 +1,4 @@
-from objection.utils.frida_transport import FridaRunner
-from objection.utils.templates import android_hook
+from objection.state.connection import state_connection
 
 
 def monitor(args: list = None) -> None:
@@ -11,7 +10,5 @@ def monitor(args: list = None) -> None:
         :return:
     """
 
-    hook = android_hook('clipboard/monitor')
-
-    runner = FridaRunner(hook=hook)
-    runner.run_as_job(name='clipboard-monitor')
+    api = state_connection.get_api()
+    api.android_monitor_clipboard()

@@ -14,7 +14,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -60,3 +59,6 @@ settings.ini
 python/
 .idea/
 .DS_Store
+
+# Ignore the compiled agent.
+objection/agent.js

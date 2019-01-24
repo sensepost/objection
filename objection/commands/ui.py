@@ -1,8 +1,7 @@
 import click
 
+from objection.state.connection import state_connection
 from ..state.device import device_state
-from ..utils.frida_transport import FridaRunner
-from ..utils.templates import ios_hook, android_hook
 
 
 def alert(args: list = None) -> None:
@@ -34,9 +33,8 @@ def _alert_ios(message: str):
         :return:
     """
 
-    runner = FridaRunner()
-    runner.set_hook_with_data(ios_hook('ui/alert'), message=message)
-    runner.run()
+    api = state_connection.get_api()
+    api.ios_ui_alert(message)
 
 
 def ios_screenshot(args: list = None) -> None:
@@ -51,23 +49,16 @@ def ios_screenshot(args: list = None) -> None:
         click.secho('Usage: ios ui screenshot <local png destination>', bold=True)
         return
 
-    destination = args[0] + '.png'
+    destination = args[0]
 
-    hook = ios_hook('screenshot/take')
+    if not destination.endswith('.png'):
+        destination = destination + '.png'
 
-    runner = FridaRunner(hook=hook)
-    runner.run()
-
-    response = runner.get_last_message()
-
-    if not response.is_successful():
-        click.secho('Failed to screenshot with error: {0}'.format(response.error_message), fg='red')
-        return
-
-    image = response.get_extra_data()
+    api = state_connection.get_api()
+    png = api.ios_ui_screenshot()
 
     with open(destination, 'wb') as f:
-        f.write(image)
+        f.write(png)
 
     click.secho('Screenshot saved to: {0}'.format(destination), fg='green')
 
@@ -80,18 +71,10 @@ def dump_ios_ui(args: list = None) -> None:
         :return:
     """
 
-    hook = ios_hook('ui/dump')
+    api = state_connection.get_api()
+    ui = api.ios_ui_window_dump()
 
-    runner = FridaRunner(hook=hook)
-    runner.run()
-
-    response = runner.get_last_message()
-
-    if not response.is_successful():
-        click.secho('Failed to dump UI with error: {0}'.format(response.error_message), fg='red')
-        return
-
-    click.secho(response.data)
+    click.secho(ui)
 
 
 def bypass_touchid(args: list = None) -> None:
@@ -103,10 +86,8 @@ def bypass_touchid(args: list = None) -> None:
         :return:
     """
 
-    hook = ios_hook('ui/touchid')
-
-    runner = FridaRunner(hook=hook)
-    runner.run_as_job(name='touchid-bypass')
+    api = state_connection.get_api()
+    api.ios_ui_biometrics_bypass()
 
 
 def android_screenshot(args: list = None) -> None:
@@ -124,19 +105,9 @@ def android_screenshot(args: list = None) -> None:
     # add the .png extention if it does not already exist
     destination = args[0] if args[0].endswith('.png') else args[0] + '.png'
 
-    hook = android_hook('screenshot/take')
-    runner = FridaRunner(hook=hook)
-    api = runner.rpc_exports()
-
     # download the file
-    data = api.screenshot()
-
-    # cleanup the runner
-    runner.unload_script()
-
-    if not data:
-        click.secho('Failed to take screenshot.')
-        return
+    api = state_connection.get_api()
+    data = api.android_ui_screenshot()
 
     image = bytearray(map(lambda x: x % 256, data))
 
@@ -159,15 +130,5 @@ def android_flag_secure(args: list = None) -> None:
         click.secho('Usage: android ui FLAG_SECURE <true/false>', bold=True)
         return
 
-    runner = FridaRunner()
-    runner.set_hook_with_data(android_hook('ui/flag-secure'), value=args[0])
-
-    runner.run()
-
-    response = runner.get_last_message()
-
-    if not response.is_successful():
-        click.secho('Failed to set FLAG_SECURE: {0}'.format(response.error_message), fg='red')
-        return
-
-    click.secho('Successfuly set FLAG_SECURE' if response.data else 'Successfully removed FLAG_SECURE')
+    api = state_connection.get_api()
+    api.android_ui_set_flag_secure(args[0])

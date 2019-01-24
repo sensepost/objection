@@ -1,9 +1,12 @@
 DIST_DIR := dist
 
-default: clean test sdist
+default: clean test frida-agent sdist
 
 clean:
 	$(RM) $(DIST_DIR)/*
+
+frida-agent:
+	cd agent && npm run build
 
 sdist:
 	python setup.py sdist

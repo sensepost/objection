@@ -1,15 +1,13 @@
-import base64
 import os
 import time
 
 import click
 from tabulate import tabulate
 
+from ..state.connection import state_connection
 from ..state.device import device_state
 from ..state.filemanager import file_manager_state
-from ..utils.frida_transport import FridaRunner
 from ..utils.helpers import sizeof_fmt
-from ..utils.templates import ios_hook, android_hook
 
 # variable used to cache entries from the ls-like
 # commands used in the below helpers. only used
@@ -123,13 +121,8 @@ def _path_exists_ios(path: str) -> bool:
         :return:
     """
 
-    runner = FridaRunner()
-
-    # populate the template with the path we want to work with
-    runner.set_hook_with_data(ios_hook('filesystem/exists'), path=path)
-    runner.run()
-
-    return runner.get_last_message().exists
+    api = state_connection.get_api()
+    return api.ios_file_exists(path)
 
 
 def _path_exists_android(path: str) -> bool:
@@ -140,13 +133,8 @@ def _path_exists_android(path: str) -> bool:
         :return:
     """
 
-    runner = FridaRunner()
-
-    # populate the template with the path we want to work with
-    runner.set_hook_with_data(android_hook('filesystem/exists'), path=path)
-    runner.run()
-
-    return runner.get_last_message().exists
+    api = state_connection.get_api()
+    return api.android_file_exists(path)
 
 
 def pwd(args: list = None) -> str:
@@ -191,20 +179,13 @@ def _pwd_ios() -> str:
         :return:
     """
 
-    hook = ios_hook('filesystem/pwd')
-
-    runner = FridaRunner()
-    runner.run(hook=hook)
-
-    response = runner.get_last_message()
-
-    if not response.is_successful():
-        raise Exception('Failed to get cwd')
+    api = state_connection.get_api()
+    cwd = api.ios_file_cwd()
 
     # update the file_manager state's cwd
-    file_manager_state.cwd = response.cwd
+    file_manager_state.cwd = cwd
 
-    return response.cwd
+    return cwd
 
 
 def _pwd_android() -> str:
@@ -215,20 +196,13 @@ def _pwd_android() -> str:
         :return:
     """
 
-    hook = android_hook('filesystem/pwd')
-
-    runner = FridaRunner()
-    runner.run(hook=hook)
-
-    response = runner.get_last_message()
-
-    if not response.is_successful():
-        raise Exception('Failed to get cwd')
+    api = state_connection.get_api()
+    cwd = api.android_file_cwd()
 
     # update the file_manager state's cwd
-    file_manager_state.cwd = response.cwd
+    file_manager_state.cwd = cwd
 
-    return response.cwd
+    return cwd
 
 
 def ls(args: list) -> None:
@@ -265,17 +239,8 @@ def _ls_ios(path: str) -> None:
         :return:
     """
 
-    runner = FridaRunner()
-    runner.set_hook_with_data(ios_hook('filesystem/ls'), path=path)
-
-    # the ls method is an rpc export
-    api = runner.rpc_exports()
-
-    # get the directory listing
-    data = api.ls()
-
-    # cleanup the runner
-    runner.unload_script()
+    api = state_connection.get_api()
+    data = api.ios_file_ls(path)
 
     def _get_key_if_exists(attribs, key):
         """
@@ -305,53 +270,36 @@ def _ls_ios(path: str) -> None:
 
     # if the directory was readable, dump the filesystem listing
     # and attributes to screen.
-    if data['readable']:
+    click.secho(tabulate(
+        [[
+            _get_key_if_exists(file_data['attributes'], 'NSFileType').replace('NSFileType', ''),
+            _get_key_if_exists(file_data['attributes'], 'NSFilePosixPermissions'),
+            _get_key_if_exists(file_data['attributes'], 'NSFileProtectionKey').replace('NSFileProtection', ''),
 
-        table_data = []
-        for file_name, file_data in data['files'].items():
-            # extract the attributes
-            attributes = file_data['attributes']
+            # file read / write permissions
+            file_data['readable'],
+            file_data['writable'],
 
-            table_data.append([
-                _get_key_if_exists(attributes, 'NSFileType').replace('NSFileType', ''),
-                _get_key_if_exists(attributes, 'NSFilePosixPermissions'),
+            # owner name and uid
+            _get_key_if_exists(file_data['attributes'], 'NSFileOwnerAccountName') + ' (' +
+            _get_key_if_exists(file_data['attributes'], 'NSFileOwnerAccountID') + ')',
 
-                _get_key_if_exists(attributes, 'NSFileProtectionKey').replace('NSFileProtection', ''),
+            # group name and gid
+            _get_key_if_exists(file_data['attributes'], 'NSFileGroupOwnerAccountName') + ' (' +
+            _get_key_if_exists(file_data['attributes'], 'NSFileGroupOwnerAccountID') + ')',
 
-                # read / write permissions
-                file_data['readable'],
-                file_data['writable'],
+            _humanize_size_if_possible(_get_key_if_exists(file_data['attributes'], 'NSFileSize')),
+            _get_key_if_exists(file_data['attributes'], 'NSFileCreationDate'),
 
-                # owner name and uid
-                _get_key_if_exists(attributes, 'NSFileOwnerAccountName') + ' (' +
-                _get_key_if_exists(attributes, 'NSFileOwnerAccountID') + ')',
+            file_name,
 
-                # group name and gid
-                _get_key_if_exists(attributes, 'NSFileGroupOwnerAccountName') + ' (' +
-                _get_key_if_exists(attributes, 'NSFileGroupOwnerAccountID') + ')',
-
-                _humanize_size_if_possible(_get_key_if_exists(attributes, 'NSFileSize')),
-                _get_key_if_exists(attributes, 'NSFileCreationDate'),
-                file_name,
-            ])
-
-        click.secho(tabulate(table_data,
-                             headers=['NSFileType', 'Perms', 'NSFileProtection', 'Read',
-                                      'Write', 'Owner', 'Group', 'Size', 'Creation', 'Name']))
+        ] for file_name, file_data in data['files'].items()], headers=[
+            'NSFileType', 'Perms', 'NSFileProtection', 'Read', 'Write', 'Owner', 'Group', 'Size', 'Creation', 'Name'
+        ],
+    )) if data['readable'] else None
 
     # handle the permissions summary for this directory
-    permissions = {
-        'readable': 'No',
-        'writable': 'No'
-    }
-
-    if data['readable']:
-        permissions['readable'] = 'Yes'
-
-    if data['writable']:
-        permissions['writable'] = 'Yes'
-
-    click.secho('\nReadable: {0}  Writable: {1}'.format(permissions['readable'], permissions['writable']), bold=True)
+    click.secho('\nReadable: {0}  Writable: {1}'.format(data['readable'], data['writable']), bold=True)
 
 
 def _ls_android(path: str) -> None:
@@ -362,21 +310,8 @@ def _ls_android(path: str) -> None:
         :return:
     """
 
-    runner = FridaRunner()
-    runner.set_hook_with_data(
-        android_hook('filesystem/ls'), path=path)
-    runner.run()
-
-    # grab the output lets seeeeee
-    response = runner.get_last_message()
-
-    # ensure the response was successful
-    if not response.is_successful():
-        click.secho('Failed to get directory listing with error: {}'.format(response.error_reason))
-        return
-
-    # get the response data itself
-    data = response.data
+    api = state_connection.get_api()
+    data = api.android_file_ls(path)
 
     def _timestamp_to_str(stamp: str) -> str:
         """
@@ -395,46 +330,27 @@ def _ls_android(path: str) -> None:
 
         return 'n/a'
 
-    # if the directory was readable, dump the filesystem listing
-    # and attributes to screen.
-    if data['readable']:
+    click.secho(tabulate(
+        [[
+            'Directory' if file_data['attributes']['isDirectory'] else 'File',
 
-        table_data = []
-        for file_name, file_data in data['files'].items():
-            attributes = file_data['attributes']
+            _timestamp_to_str(file_data['attributes']['lastModified']),
 
-            table_data.append([
+            # read / write permissions
+            file_data['readable'],
+            file_data['writable'],
+            file_data['attributes']['isHidden'],
 
-                'Directory' if attributes['isDirectory'] else 'File',
+            sizeof_fmt(float(file_data['attributes']['size'])),
 
-                _timestamp_to_str(attributes['lastModified']),
+            file_name,
 
-                # read / write permissions
-                file_data['readable'],
-                file_data['writable'],
-                attributes['isHidden'],
+        ] for file_name, file_data in data['files'].items()], headers=[
+            'Type', 'Last Modified', 'Read', 'Write', 'Hidden', 'Size', 'Name'
+        ],
+    )) if data['readable'] else None
 
-                sizeof_fmt(float(attributes['size'])),
-
-                file_name,
-            ])
-
-        click.secho(tabulate(table_data,
-                             headers=['Type', 'Last Modified', 'Read', 'Write', 'Hidden', 'Size', 'Name']))
-
-    # handle the permissions summary for this directory
-    permissions = {
-        'readable': 'No',
-        'writable': 'No'
-    }
-
-    if data['readable']:
-        permissions['readable'] = 'Yes'
-
-    if data['writable']:
-        permissions['writable'] = 'Yes'
-
-    click.secho('\nReadable: {0}  Writable: {1}'.format(permissions['readable'], permissions['writable']), bold=True)
+    click.secho('\nReadable: {0}  Writable: {1}'.format(data['readable'], data['writable']), bold=True)
 
 
 def download(args: list) -> None:
@@ -480,56 +396,26 @@ def _download_ios(path: str, destination: str) -> None:
     if not os.path.isabs(path):
         path = os.path.join(pwd(), path)
 
-    # output about whats about to happen
+    api = state_connection.get_api()
+
     click.secho('Downloading {0} to {1}'.format(path, destination), fg='green', dim=True)
 
-    # start a runner. going to use this a few times
-    # for this method
-    runner = FridaRunner()
-
-    # check that the path is readable
-    runner.set_hook_with_data(ios_hook('filesystem/readable'), path=path)
-
-    # run the hook
-    runner.run()
-
-    # get the response message
-    response = runner.get_last_message()
-
-    # if we cant read the file, just stop
-    if not response.is_successful() or not response.readable:
-        click.secho('Unable to download file. File is not readable')
+    if not api.ios_file_readable(path):
+        click.secho('Unable to download file. File is not readable.', fg='red')
         return
 
-    # check that its a file
-    runner.set_hook_with_data(ios_hook('filesystem/is-type-file'), path=path)
-
-    # run the hook
-    runner.run()
-
-    # get the response message
-    response = runner.get_last_message()
-
-    if not response.is_successful() or not response.is_file:
-        click.secho('Unable to download file. Not a file.')
+    if not api.ios_file_path_is_file(path):
+        click.secho('Unable to download file. Target path is not a file.', fg='yellow')
         return
 
-    # run the download hook and get the file from
-    # extra_data
-    runner.set_hook_with_data(ios_hook('filesystem/download'), path=path)
-    runner.run()
+    click.secho('Streaming file from device...', dim=True)
+    file_data = api.ios_file_download(path)
 
-    response = runner.get_last_message()
-
-    if not response.is_successful():
-        click.secho('Failed to download {}: {}'.format(path, response.error_reason))
-        return
-
-    file_data = response.get_extra_data()
-
-    # finally, write the downloaded file to disk
+    click.secho('Writing bytes to destination...', dim=True)
     with open(destination, 'wb') as fh:
-        fh.write(file_data)
+        fh.write(bytearray(file_data['data']))
+
+    click.secho('Successfully downloaded {0} to {1}'.format(path, destination), bold=True)
 
 
 def _download_android(path: str, destination: str) -> None:
@@ -546,58 +432,26 @@ def _download_android(path: str, destination: str) -> None:
     if not os.path.isabs(path):
         path = os.path.join(pwd(), path)
 
-    # output about whats about to happen
+    api = state_connection.get_api()
+
     click.secho('Downloading {0} to {1}'.format(path, destination), fg='green', dim=True)
 
-    # start a runner. going to use this a few times
-    # for this method
-    runner = FridaRunner()
-
-    # check that the path is readable
-    runner.set_hook_with_data(android_hook('filesystem/readable'), path=path)
-
-    # run the hook
-    runner.run()
-
-    # get the response message
-    response = runner.get_last_message()
-
-    # if we cant read the file, just stop
-    if not response.is_successful() or not response.readable:
-        click.secho('Unable to download file. File is not readable')
+    if not api.android_file_readable(path):
+        click.secho('Unable to download file. Target path is not readable.', fg='red')
         return
 
-    # check that its a file
-    runner.set_hook_with_data(android_hook('filesystem/is-type-file'), path=path)
-
-    # run the hook
-    runner.run()
-
-    # get the response message
-    response = runner.get_last_message()
-
-    if not response.is_successful() or not response.is_file:
-        click.secho('Unable to download file. Not a file.')
+    if not api.android_file_path_is_file(path):
+        click.secho('Unable to download file. Target path is not a file.', fg='yellow')
         return
 
-    # run the download hook and get the file from
-    # extra_data
-    runner.set_hook_with_data(android_hook('filesystem/download'), path=path)
+    click.secho('Streaming file from device...', dim=True)
+    file_data = api.android_file_download(path)
 
-    # the download method is an rpc export
-    api = runner.rpc_exports()
-
-    # download the file
-    data = api.download()
-
-    # cleanup the runner
-    runner.unload_script()
-
-    file_data = bytearray(data)
-
-    # finally, write the downloaded file to disk
+    click.secho('Writing bytes to destination...', dim=True)
     with open(destination, 'wb') as fh:
-        fh.write(file_data)
+        fh.write(bytearray(file_data['data']))
+
+    click.secho('Successfully downloaded {0} to {1}'.format(path, destination), bold=True)
 
 
 def upload(args: list) -> None:
@@ -637,47 +491,26 @@ def _upload_ios(path: str, destination: str) -> None:
     if not os.path.isabs(destination):
         destination = os.path.join(pwd(), destination)
 
-    # output about whats about to happen
+    api = state_connection.get_api()
     click.secho('Uploading {0} to {1}'.format(path, destination), fg='green', dim=True)
 
-    # start a runner. going to use this a few times
-    # for this method
-    runner = FridaRunner()
-
-    # check that the path is readable
-    runner.set_hook_with_data(
-        ios_hook('filesystem/writable'), path=os.path.dirname(destination))
-
-    # run the hook
-    runner.run()
-
-    # get the response message
-    response = runner.get_last_message()
-
     # if we cant read the file, just stop
-    if not response.is_successful() or not response.writable:
-        click.secho('Unable to upload file. Destination is not writable')
+    if not api.ios_file_writable(os.path.dirname(destination)):
+        click.secho('Unable to upload file. Destination is not writable.', fg='red')
         return
 
-    # read the local file to upload, and base64 encode it
+    click.secho('Reading source file...', dim=True)
     with open(path, 'rb') as f:
-        data = f.read()
-        data = str(base64.b64encode(data), 'utf-8')  # the frida hook wants a raw string
+        data = f.read().hex()
 
-    # prepare the upload hook
-    runner.set_hook_with_data(
-        ios_hook('filesystem/upload'), destination=destination, base64_data=data)
-
-    # run the upload hook
-    runner.run()
-
-    response = runner.get_last_message()
-
-    if not response.is_successful():
-        click.secho('Failed to upload {}: {}'.format(path, response.error_reason))
-        return
+    click.secho('Sending file to device for writing...', dim=True)
+    api.ios_file_upload(destination, data)
 
     click.secho('Uploaded: {0}'.format(destination), dim=True)
+
+    # unset the cache key for this directory so the next short listing
+    # will have updated contents
+    del _ls_cache[os.path.dirname(destination)]
 
 
 def _upload_android(path: str, destination: str) -> None:
@@ -692,47 +525,26 @@ def _upload_android(path: str, destination: str) -> None:
     if not os.path.isabs(destination):
         destination = os.path.join(pwd(), destination)
 
-    # output about whats about to happen
+    api = state_connection.get_api()
     click.secho('Uploading {0} to {1}'.format(path, destination), fg='green', dim=True)
 
-    # start a runner. going to use this a few times
-    # for this method
-    runner = FridaRunner()
-
-    # check that the path is readable
-    runner.set_hook_with_data(
-        android_hook('filesystem/writable'), path=os.path.dirname(destination))
-
-    # run the hook
-    runner.run()
-
-    # get the response message
-    response = runner.get_last_message()
-
     # if we cant read the file, just stop
-    if not response.is_successful() or not response.writable:
-        click.secho('Unable to upload file. Destination is not writable')
+    if not api.android_file_writable(os.path.dirname(destination)):
+        click.secho('Unable to upload file. Destination is not writable.', fg='red')
         return
 
-    # read the local file to upload, and base64 encode it
+    click.secho('Reading source file...', dim=True)
     with open(path, 'rb') as f:
-        data = f.read()
-        data = str(base64.b64encode(data), 'utf-8')  # the frida hook wants a raw string
+        data = f.read().hex()
 
-    # prepare the upload hook
-    runner.set_hook_with_data(
-        android_hook('filesystem/upload'), destination=destination, base64_data=data)
-
-    # run the upload hook
-    runner.run()
-
-    response = runner.get_last_message()
-
-    if not response.is_successful():
-        click.secho('Failed to upload {}: {}'.format(path, response.error_reason))
-        return
+    click.secho('Sending file to device for writing...', dim=True)
+    api.android_file_upload(destination, data)
 
     click.secho('Uploaded: {0}'.format(destination), dim=True)
+
+    # unset the cache key for this directory so the next short listing
+    # will have updated contents
+    del _ls_cache[os.path.dirname(destination)]
 
 
 def _get_short_ios_listing() -> list:
@@ -754,18 +566,8 @@ def _get_short_ios_listing() -> list:
     if directory in _ls_cache:
         return _ls_cache[directory]
 
-    # fetch a fresh listing
-    runner = FridaRunner()
-    runner.set_hook_with_data(ios_hook('filesystem/ls'), path=directory)
-
-    # the ls method is an rpc export
-    api = runner.rpc_exports()
-
-    # get the directory listing
-    data = api.ls()
-
-    # cleanup the runner
-    runner.unload_script()
+    api = state_connection.get_api()
+    data = api.ios_file_ls(directory)
 
     # loop the response, marking entries as either being
     # a file or a directory. this response will be stored
@@ -809,23 +611,13 @@ def _get_short_android_listing() -> list:
     if directory in _ls_cache:
         return _ls_cache[directory]
 
-    # fetch a fresh listing
-    runner = FridaRunner()
-    runner.set_hook_with_data(android_hook('filesystem/ls'), path=directory)
-    runner.run()
-
-    response = runner.get_last_message()
-
-    if not response.is_successful():
-        # cache an empty response as an error occurred
-        _ls_cache[directory] = resp
-
-        return resp
+    api = state_connection.get_api()
+    data = api.android_file_ls(directory)
 
     # loop the response, marking entries as either being
     # a file or a directory. this response will be stored
     # in the _ls_cache too.
-    for name, attribs in response.data['files'].items():
+    for name, attribs in data['files'].items():
         attributes = attribs['attributes']
 
         # append a tuple with name, type

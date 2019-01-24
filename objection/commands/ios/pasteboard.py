@@ -1,5 +1,4 @@
-from objection.utils.frida_transport import FridaRunner
-from objection.utils.templates import ios_hook
+from objection.state.connection import state_connection
 
 
 def monitor(args: list = None) -> None:
@@ -11,7 +10,5 @@ def monitor(args: list = None) -> None:
         :return:
     """
 
-    hook = ios_hook('pasteboard/monitor')
-
-    runner = FridaRunner(hook=hook)
-    runner.run_as_job(name='pasteboard-monitor')
+    api = state_connection.get_api()
+    api.ios_monitor_pasteboard()

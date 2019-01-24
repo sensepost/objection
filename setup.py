@@ -1,7 +1,8 @@
 import os
 
+from setuptools import setup, find_packages
+
 from objection.__init__ import __version__
-from setuptools import setup
 
 
 def _package_files(directory: str, suffix: str) -> list:
@@ -33,7 +34,7 @@ with open(os.path.join(here, 'requirements.txt'), 'r') as f:
 setup(
     name='objection',
     description='Instrumented Mobile Pentest Framework',
-    license='CC BY-NC-SA 4.0',
+    license='GPL v3',
 
     author='Leon Jacobs',
     author_email='leon@sensepost.com',
@@ -44,26 +45,16 @@ setup(
     keywords=['mobile', 'instrumentation', 'pentest', 'frida', 'hook'],
     version=__version__,
 
-    # include the hooks!
+    # include other files
     package_data={
-        '': _package_files(os.path.join(here, 'objection/hooks'), '.js') +
-            _package_files(os.path.join(here, 'objection/console/helpfiles'), '.txt') +
+        '': _package_files(os.path.join(here, 'objection/console/helpfiles'), '.txt') +
             _package_files(os.path.join(here, 'objection/utils/assets'), '.jks') +
-            _package_files(os.path.join(here, 'objection/utils/assets'), '.xml'),
+            _package_files(os.path.join(here, 'objection/utils/assets'), '.xml') +
+            [os.path.join(here, 'objection/agent.js')],  # Frida agent
     },
-
-    python_requires='>=3.4',
-    packages=[
-        'objection',
-        'objection.commands',
-        'objection.commands.android',
-        'objection.commands.ios',
-        'objection.console',
-        'objection.state',
-        'objection.utils',
-        'objection.utils.patchers',
-    ],
+    packages=find_packages(),
     install_requires=requirements,
+    python_requires='>=3.4',
     classifiers=[
         'Operating System :: OS Independent',
         'Natural Language :: English',
