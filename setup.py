@@ -34,7 +34,7 @@ with open(os.path.join(here, 'requirements.txt'), 'r') as f:
 setup(
     name='objection',
     description='Instrumented Mobile Pentest Framework',
-    license='CC BY-NC-SA 4.0',
+    license='GPL v3',
 
     author='Leon Jacobs',
     author_email='leon@sensepost.com',
