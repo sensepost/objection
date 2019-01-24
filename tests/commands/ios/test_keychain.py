@@ -60,7 +60,7 @@ Created    Accessible    ACL    Type    Account    Service    Data
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_dump_to_screen(self, mock_api):
-        mock_api.return_value.keychain_list.return_value = [
+        mock_api.return_value.ios_keychain_list.return_value = [
             {'account': 'foo', 'create_date': 'now', 'accessible_attribute': 'None',
              'access_control': 'None', 'item_class': 'kSecClassGeneric', 'service': 'foo',
              'data': 'bar'}
@@ -81,7 +81,7 @@ now        None          None           foo        foo        bar
     @mock.patch('objection.state.connection.state_connection.get_api')
     @mock.patch('objection.commands.ios.keychain.open', create=True)
     def test_dump_to_json(self, mock_open, mock_api):
-        mock_api.return_value.keychain_list.return_value = [
+        mock_api.return_value.ios_keychain_list.return_value = [
             {'access_control': '', 'account': '', 'alias': '', 'comment': '',
              'create_date': '2018-07-21 18:11:15 +0000', 'creator': '',
              'custom_icon': '', 'data': 'bar', 'description': '',
@@ -104,13 +104,13 @@ Dumped keychain to: foo.json
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_clear(self, mock_api):
-        mock_api.return_value.keychain_empty.called
+        mock_api.return_value.ios_keychain_empty.called
 
         with capture(clear, []) as o:
             output = o
 
         self.assertEqual(output, 'Clearing the keychain...\nKeychain cleared\n')
-        self.assertTrue(mock_api.return_value.keychain_empty.called)
+        self.assertTrue(mock_api.return_value.ios_keychain_empty.called)
 
     def test_adds_item_validates_arguments(self):
         with capture(add, ['--key', 'test_key']) as o:
@@ -130,7 +130,7 @@ Dumped keychain to: foo.json
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_adds_item_with_failure(self, mock_api):
-        mock_api.return_value.keychain_add.return_value = False
+        mock_api.return_value.ios_keychain_add.return_value = False
 
         with capture(add, ['--key', 'test_key', '--data', 'test_data']) as o:
             output = o
