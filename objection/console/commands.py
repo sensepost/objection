@@ -17,11 +17,11 @@ from ..commands.ios import cookies
 from ..commands.ios import hooking as ios_hooking
 from ..commands.ios import jailbreak
 from ..commands.ios import keychain
+from ..commands.ios import nsurlcredentialstorage
 from ..commands.ios import nsuserdefaults
 from ..commands.ios import pasteboard
 from ..commands.ios import pinning as ios_pinning
 from ..commands.ios import plist
-from ..commands.ios import nsurlcredentialstorage
 from ..utils.helpers import list_current_jobs
 
 # commands are defined with their name being the key, then optionally
@@ -43,12 +43,6 @@ COMMANDS = {
     'reconnect': {
         'meta': 'Reconnect to the current device',
         'exec': None,  # handled in the Repl class itself
-    },
-
-    'import': {
-        'meta': 'Import fridascript from a full path',
-        'flags': ['--no-exception-handler'],
-        'exec': frida_commands.load_script
     },
 
     # file manager commands
@@ -149,7 +143,7 @@ COMMANDS = {
 
                     'exports': {
                         'meta': 'List the exports of a module',
-                        'exec': memory.dump_exports
+                        'exec': memory.list_exports
                     }
                 },
             },
@@ -459,8 +453,8 @@ COMMANDS = {
                         'meta': 'Screenshot the current UIView',
                         'exec': ui.ios_screenshot
                     },
-                    'touchid_bypass': {
-                        'meta': 'Hook the iOS TouchID class and respond with successful fingerprints',
+                    'biometrics_bypass': {
+                        'meta': 'Hook the iOS Biometrics LAContext and respond with successful auth',
                         'exec': ui.bypass_touchid
                     }
                 }
@@ -535,7 +529,7 @@ COMMANDS = {
                 'commands': {
                     'disable': {
                         'meta': 'Attempt to disable SSL pinning in various iOS libraries/classes',
-                        'flags': ['--ignore-ios10-tls-helper', '--quiet'],
+                        'flags': ['--quiet'],
                         'exec': ios_pinning.ios_disable
                     }
                 }

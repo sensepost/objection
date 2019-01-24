@@ -3,8 +3,7 @@ import json
 import click
 from tabulate import tabulate
 
-from objection.utils.frida_transport import FridaRunner
-from objection.utils.templates import ios_hook
+from objection.state.connection import state_connection
 
 
 def _should_dump_json(args: list) -> bool:
@@ -27,30 +26,19 @@ def get(args: list) -> None:
         :return:
     """
 
-    hook = ios_hook('binarycookie/get')
+    api = state_connection.get_api()
+    cookies = api.ios_cookies_get()
 
-    runner = FridaRunner(hook=hook)
-    runner.run()
-
-    response = runner.get_last_message()
-
-    if not response.is_successful():
-        click.secho('Failed to get cookies with error: {0}'.format(
-            response.error_reason), fg='red')
+    if _should_dump_json(args):
+        print(json.dumps(cookies, indent=4))
         return
 
-    if not response.data:
+    if len(cookies) <= 0:
         click.secho('No cookies found')
         return
 
-    if _should_dump_json(args):
-        print(json.dumps(response.data, indent=4))
-        return
-
-    data = []
-
-    for cookie in response.data:
-        data.append([
+    click.secho(tabulate(
+        [[
             cookie['name'],
             cookie['value'],
             cookie['expiresDate'],
@@ -58,6 +46,5 @@ def get(args: list) -> None:
             cookie['path'],
             cookie['isSecure'],
             cookie['isHTTPOnly']
-        ])
-
-    click.secho(tabulate(data, headers=['Name', 'Value', 'Expires', 'Domain', 'Path', 'Secure', 'HTTPOnly']), bold=True)
+        ] for cookie in cookies], headers=['Name', 'Value', 'Expires', 'Domain', 'Path', 'Secure', 'HTTPOnly'],
+    ))

@@ -1,5 +1,4 @@
-from objection.utils.frida_transport import FridaRunner
-from objection.utils.templates import ios_hook
+from objection.state.connection import state_connection
 
 
 def disable(args: list = None) -> None:
@@ -10,10 +9,8 @@ def disable(args: list = None) -> None:
         :return:
     """
 
-    hook = ios_hook('jailbreak/disable')
-
-    runner = FridaRunner(hook=hook)
-    runner.run_as_job(name='disable-jailbreak-detection')
+    api = state_connection.get_api()
+    api.ios_jailbreak_disable()
 
 
 def simulate(args: list = None) -> None:
@@ -24,7 +21,5 @@ def simulate(args: list = None) -> None:
         :return:
     """
 
-    hook = ios_hook('jailbreak/simulate')
-
-    runner = FridaRunner(hook=hook)
-    runner.run_as_job(name='simulate-jailbroken-environment')
+    api = state_connection.get_api()
+    api.ios_jailbreak_enable()

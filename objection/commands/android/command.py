@@ -1,7 +1,6 @@
 import click
 
-from objection.utils.frida_transport import FridaRunner
-from objection.utils.templates import android_hook
+from objection.state.connection import state_connection
 
 
 def execute(args: list) -> None:
@@ -13,21 +12,13 @@ def execute(args: list) -> None:
     """
 
     command = ' '.join(args)
+    click.secho('Running shell command: {0}\n'.format(command), dim=True)
 
-    click.secho('Running command: {0}\n'.format(command), dim=True)
+    api = state_connection.get_api()
+    response = api.android_shell_exec(command)
 
-    runner = FridaRunner()
-    runner.set_hook_with_data(android_hook('command/exec'), command=command)
-    runner.run()
+    if 'stdOut' in response and len(response['stdOut']) > 0:
+        click.secho(response['stdOut'], bold=True)
 
-    response = runner.get_last_message()
-
-    if not response.is_successful():
-        click.secho('Failed to run command with error: {0}'.format(response.error_reason), fg='red')
-        return
-
-    if response.stdout:
-        click.secho(response.stdout, bold=True)
-
-    if response.stderr:
-        click.secho(response.stderr, bold=True, fg='red')
+    if 'stdErr' in response and len(response['stdErr']) > 0:
+        click.secho(response['stdErr'], bold=True, fg='red')

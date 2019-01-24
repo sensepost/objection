@@ -363,7 +363,7 @@ class AndroidPatcher(BasePlatformPatcher):
             click.secho('An error may have occured while extracting the APK.', fg='red')
             click.secho(o.err, fg='red')
 
-    def inject_internet_permission(self):
+    def inject_internet_permission(self, skip_resources: bool = False):
         """
             Checks the status of the source APK to see if it
             has the INTERNET permission. If not, the manifest file
@@ -378,6 +378,11 @@ class AndroidPatcher(BasePlatformPatcher):
         if internet_permission in self._get_appt_output():
             click.secho('App already has android.permission.INTERNET', fg='green')
             return
+
+        # if not, error if --skip-resources was used because the manifest is encoded
+        elif skip_resources is True:
+            click.secho('Cannot patch an APK for Internet permission when --skip-resources is set, remove this and try again.', fg='red')
+            raise Exception('Cannot --skip-resources with no Internet permission')
 
         # if not, we need to inject an element with it
         xml = self._get_android_manifest()

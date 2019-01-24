@@ -7,6 +7,7 @@ from ..commands.device import get_device_info
 from ..commands.mobile_packages import patch_ios_ipa, patch_android_apk
 from ..state.app import app_state
 from ..state.connection import state_connection
+from ..utils.agent import Agent
 from ..utils.helpers import normalize_gadget_name, print_frida_connection_help, warn_about_older_operating_systems
 
 
@@ -19,7 +20,9 @@ from ..utils.helpers import normalize_gadget_name, print_frida_connection_help, 
 @click.option('--gadget', '-g', required=False, default='Gadget',
               help='Name of the Frida Gadget/Process to connect to.', show_default=True)
 @click.option('--serial', '-S', required=False, default=None, help='A device serial to connect to.')
-def cli(network: bool, host: str, port: int, gadget: str, serial: str) -> None:
+@click.option('--debug', '-d', required=False, default=False, is_flag=True,
+              help='Enabled debug mode whith verbose output.')
+def cli(network: bool, host: str, port: int, gadget: str, serial: str, debug: bool) -> None:
     """
         \b
              _     _         _   _
@@ -34,6 +37,9 @@ def cli(network: bool, host: str, port: int, gadget: str, serial: str) -> None:
         By default, communications will happen over USB, unless the --network
         option is provided.
     """
+
+    if debug:
+        app_state.debug = debug
 
     # disable the usb comms if network is chosen.
     if network:
@@ -50,22 +56,19 @@ def cli(network: bool, host: str, port: int, gadget: str, serial: str) -> None:
 @cli.command()
 @click.option('--startup-command', '-s', required=False, multiple=True,
               help='A command to run before the repl polls the device for information.')
-@click.option('--startup-script', '-S', required=False,
-              help='A script to import and run before the repl polls the device for information.')
-@click.option('--hook-debug', '-d', required=False, default=False, is_flag=True,
-              help='Print compiled hooks as they are run to the screen and logfile.')
 @click.option('--quiet', '-q', required=False, default=False, is_flag=True,
               help='Do not display the objection logo on startup.')
 @click.option('--file-commands', '-c', required=False, type=click.File('r'),
               help=('A file containing objection commands, seperated by a ' 'newline, that will be '
                     'executed before showing the prompt.'))
-def explore(startup_command: str, startup_script: str, hook_debug: bool, quiet: bool, file_commands) -> None:
+def explore(startup_command: str, quiet: bool, file_commands) -> None:
     """
         Start the objection exploration REPL.
     """
 
-    # specify if hooks should be debugged
-    app_state.debug_hooks = hook_debug
+    agent = Agent()
+    agent.inject()
+    state_connection.set_agent(agent=agent)
 
     # start the main REPL
     r = Repl()
@@ -76,12 +79,6 @@ def explore(startup_command: str, startup_script: str, hook_debug: bool, quiet: 
         for command in startup_command:
             click.secho('Running a startup command... {0}'.format(command), dim=True)
             r.run_command(command)
-
-    # if we have a startup script to run, use the 'import' command
-    # and give it the users path.
-    if startup_script:
-        click.secho('Importing and running a startup script...', dim=True)
-        r.run_command('import {0}'.format(startup_script))
 
     try:
 
@@ -136,6 +133,11 @@ def run(hook_debug: bool, command: tuple) -> None:
     # specify if hooks should be debugged
     app_state.debug_hooks = hook_debug
 
+    # Inject the agent
+    agent = Agent()
+    agent.inject()
+    state_connection.set_agent(agent=agent)
+
     try:
 
         click.secho('Determining environment...', dim=True)
@@ -168,6 +170,11 @@ def device_type():
     """
 
     try:
+
+        # Inject the agent
+        agent = Agent()
+        agent.inject()
+        state_connection.set_agent(agent=agent)
 
         device_name, system_name, model, system_version = get_device_info()
 
