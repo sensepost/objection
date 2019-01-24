@@ -161,8 +161,6 @@ class Agent(object):
         self.session = self._get_session()
         self.script = self.session.create_script(source=self._get_agent_source())
         self.script.on('message', self._on_message)
-
-        debug_print('Loading script')
         self.script.load()
 
         if not self.resumed:

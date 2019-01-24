@@ -79,7 +79,8 @@ def dump(args: list = None) -> None:
     click.secho(tabulate(
         [[
             entry['create_date'],
-            entry['accessible_attribute'].replace('kSecAttrAccessible', ''),
+            entry['accessible_attribute'].replace('kSecAttrAccessible',
+                                                  '') if 'accessible_attribute' in entry else None,
             entry['access_control'],
             entry['item_class'].replace('kSecClassGeneric', ''),
             entry['account'],
