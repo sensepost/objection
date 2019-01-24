@@ -171,6 +171,11 @@ def device_type():
 
     try:
 
+        # Inject the agent
+        agent = Agent()
+        agent.inject()
+        state_connection.set_agent(agent=agent)
+
         device_name, system_name, model, system_version = get_device_info()
 
     except frida.ProcessNotFoundError as e:
