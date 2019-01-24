@@ -56,22 +56,19 @@ def cli(network: bool, host: str, port: int, gadget: str, serial: str, debug: bo
 @cli.command()
 @click.option('--startup-command', '-s', required=False, multiple=True,
               help='A command to run before the repl polls the device for information.')
-@click.option('--startup-script', '-S', required=False,
-              help='A script to import and run before the repl polls the device for information.')
-@click.option('--hook-debug', '-d', required=False, default=False, is_flag=True,
-              help='Print compiled hooks as they are run to the screen and logfile.')
 @click.option('--quiet', '-q', required=False, default=False, is_flag=True,
               help='Do not display the objection logo on startup.')
 @click.option('--file-commands', '-c', required=False, type=click.File('r'),
               help=('A file containing objection commands, seperated by a ' 'newline, that will be '
                     'executed before showing the prompt.'))
-def explore(startup_command: str, startup_script: str, hook_debug: bool, quiet: bool, file_commands) -> None:
+def explore(startup_command: str, quiet: bool, file_commands) -> None:
     """
         Start the objection exploration REPL.
     """
 
-    # specify if hooks should be debugged
-    app_state.debug_hooks = hook_debug
+    agent = Agent()
+    agent.inject()
+    state_connection.set_agent(agent=agent)
 
     # start the main REPL
     r = Repl()
@@ -82,12 +79,6 @@ def explore(startup_command: str, startup_script: str, hook_debug: bool, quiet: 
         for command in startup_command:
             click.secho('Running a startup command... {0}'.format(command), dim=True)
             r.run_command(command)
-
-    # if we have a startup script to run, use the 'import' command
-    # and give it the users path.
-    if startup_script:
-        click.secho('Importing and running a startup script...', dim=True)
-        r.run_command('import {0}'.format(startup_script))
 
     try:
 
@@ -123,23 +114,6 @@ def explore(startup_command: str, startup_script: str, hook_debug: bool, quiet: 
 
     # run the REPL and wait for more commands
     r.set_prompt_tokens(device_info)
-    r.start_repl(quiet=quiet)
-
-
-@cli.command()
-@click.option('--quiet', '-q', required=False, default=False, is_flag=True,
-              help='Do not display the objection logo on startup.')
-def start(quiet: bool) -> None:
-    """
-        Start a new session.
-    """
-
-    agent = Agent()
-    agent.inject()
-    state_connection.set_agent(agent=agent)
-
-    r = Repl()
-    r.set_prompt_tokens(get_device_info())
     r.start_repl(quiet=quiet)
 
 

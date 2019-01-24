@@ -14,12 +14,24 @@ def get_device_info() -> tuple:
     """
 
     api = state_connection.get_api()
+
+    # set the frida version
+    frida = api.env_frida()
+    device_state.frida_version = frida['version']
+
     environment = api.env_runtime()
 
     # ios device information
     if environment == 'ios':
         device_state.device_type = 'ios'
         package_info = api.env_ios()
+
+        # {'applicationName': 'za.sensepost.ipewpew',
+        # 'deviceName': 'iPhone 7 Plus',
+        # 'identifierForVendor': 'foo',
+        # 'model': 'iPhone', 'systemName': 'iOS', 'systemVersion': '12.1'}
+        device_state.os_version = package_info['systemVersion']
+        device_state.device_type = package_info['model']
 
         return pretty_concat(package_info['applicationName'], 30, left=True), \
                package_info['systemName'], package_info['model'], package_info['systemVersion']
@@ -28,6 +40,13 @@ def get_device_info() -> tuple:
     if environment == 'android':
         device_state.device_type = 'android'
         package_info = api.env_android()
+
+        # {'application_name': 'com.sensepost.apewpew',
+        # 'board': 'universal5422', 'brand': 'samsung', 'device': 'foo',
+        # 'host': 'foo.bar', 'id': '1234', 'model': 'foo-bar',
+        # 'product': 'foo', 'user': 'root', 'version': '7.1.2'}
+        device_state.os_version = package_info['version']
+        device_state.device_type = package_info['brand']
 
         return pretty_concat(package_info['application_name'], 30, left=True), \
                package_info['device'], package_info['brand'], package_info['version']
