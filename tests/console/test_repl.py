@@ -133,9 +133,13 @@ class TestRepl(unittest.TestCase):
 
         self.assertEqual(help_file, expected_output)
 
+    @mock.patch('objection.utils.agent.Agent.inject')
+    @mock.patch('objection.utils.agent.Agent.unload')
     @mock.patch('objection.console.repl.get_device_info')
-    def test_hanldes_reconnects(self, get_device_info):
-        get_device_info.return_value = 'a', 'b', 'c', 'd'
+    def test_hanldes_reconnects(self, get_device_info, mock_unload, mock_inject):
+        mock_inject.return_value = None
+        mock_unload.return_type = None
+        get_device_info.return_value = ('a', 'b', 'c', 'd')
 
         with capture(self.repl.handle_reconnect, 'reconnect') as o:
             output = o
@@ -144,9 +148,14 @@ class TestRepl(unittest.TestCase):
                            'Reconnection successful!\n')
 
         self.assertEqual(output, expected_output)
+        self.assertTrue(get_device_info.called)
+        self.assertTrue(mock_unload.called)
+        self.assertTrue(mock_inject.called)
 
+    @mock.patch('objection.utils.agent.Agent.unload')
     @mock.patch('objection.console.repl.get_device_info')
-    def test_handles_reconnects_and_reports_failures(self, get_device_info):
+    def test_handles_reconnects_and_reports_failures(self, mock_unload, get_device_info):
+        mock_unload.return_type = None
         get_device_info.side_effect = TimedOutError()
 
         with capture(self.repl.handle_reconnect, 'reconnect') as o:

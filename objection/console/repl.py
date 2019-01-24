@@ -13,6 +13,7 @@ from prompt_toolkit.styles import default_style_extensions, style_from_dict
 from pygments.style import Style
 from pygments.token import Token
 
+from objection.utils.agent import Agent
 from .commands import COMMANDS
 from .completer import CommandCompleter
 from ..__init__ import __version__
@@ -313,9 +314,8 @@ class Repl(object):
         """
             Handles a reconnection attempt to a device.
 
-            The reconnection itself is done by simply asking for the
-            device information again, just like how it would have
-            been done when the repl first started up.
+            A reconnection means that the current agent will be unloaded
+            and reloaded again.
 
             :param document:
             :return:
@@ -326,6 +326,12 @@ class Repl(object):
             click.secho('Reconnecting...', dim=True)
 
             try:
+                state_connection.agent.unload()
+
+                agent = Agent()
+                agent.inject()
+                state_connection.agent = agent
+
                 self.set_prompt_tokens(get_device_info())
                 click.secho('Reconnection successful!', fg='green')
 
