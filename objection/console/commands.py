@@ -149,7 +149,7 @@ COMMANDS = {
 
                     'exports': {
                         'meta': 'List the exports of a module',
-                        'exec': memory.dump_exports
+                        'exec': memory.list_exports
                     }
                 },
             },
