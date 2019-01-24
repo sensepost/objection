@@ -6,6 +6,7 @@ import click
 import frida
 from frida.core import ScriptExports
 
+from objection.state.jobs import job_manager_state
 from ..state.app import app_state
 from ..state.connection import state_connection
 from ..utils.helpers import debug_print
@@ -193,8 +194,8 @@ class Agent(object):
             :return:
         """
 
-        # TODO: Ask agent to stop jobs
-
         if self.script:
+            click.secho('Asking jobs to stop...', dim=True)
+            job_manager_state.cleanup()
             click.secho('Unloading objection agent...', dim=True)
             self.unload()
