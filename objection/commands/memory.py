@@ -62,8 +62,14 @@ def dump_all(args: list) -> None:
         for image in bar:
             bar.label = 'Dumping {0} from base: {1}'.format(sizeof_fmt(image['size']), hex(int(image['base'], 16)))
 
-            # grab the (size) bytes starting at the (base_address)
-            dump = api.memory_dump(int(image['base'], 16), image['size'])
+            # catch and exception thrown while dumping.
+            # this could for a few reasons like if the protection
+            # changes or the range is reallocated
+            try:
+                # grab the (size) bytes starting at the (base_address)
+                dump = api.memory_dump(int(image['base'], 16), image['size'])
+            except Exception:
+                continue
 
             # append the results to the destination file
             with open(destination, 'ab') as f:
