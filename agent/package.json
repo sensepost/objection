@@ -1,6 +1,6 @@
 {
   "name": "objection",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "Runtime Mobile Exploration",
   "private": true,
   "main": "src/index.ts",

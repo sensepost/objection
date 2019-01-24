@@ -169,7 +169,12 @@ class Agent(object):
             debug_print('Resuming PID `{pid}`'.format(pid=self.spawned_pid))
             self.device.resume(self.spawned_pid)
 
-        click.secho('Agent v{version} injected!'.format(version=self.exports().version()), fg='green', dim=True)
+        # ping the agent
+        if not self.exports().ping():
+            click.secho('Failed to ping the agent', fg='red')
+            raise Exception('Failed to communicate with agent')
+
+        click.secho('Agent injected and responds ok!', fg='green', dim=True)
 
         return self
 
