@@ -1,6 +1,6 @@
 import { IExecutedCommand } from "./lib/interfaces";
 import { wrapJavaPerform } from "./lib/libjava";
-import { JavaClass } from "./lib/types";
+import { BufferedReader, InputStreamReader, Runtime, StringBuilder } from "./lib/types";
 
 export namespace androidshell {
 
@@ -22,35 +22,35 @@ export namespace androidshell {
     // String output = sb.toString();
     return wrapJavaPerform(() => {
 
-      const Runtime: JavaClass = Java.use("java.lang.Runtime");
-      const InputStreamReader: JavaClass = Java.use("java.io.InputStreamReader");
-      const BufferedReader: JavaClass = Java.use("java.io.BufferedReader");
-      const StringBuilder: JavaClass = Java.use("java.lang.StringBuilder");
+      const runtime: Runtime = Java.use("java.lang.Runtime");
+      const inputStreamReader: InputStreamReader = Java.use("java.io.InputStreamReader");
+      const bufferedReader: BufferedReader = Java.use("java.io.BufferedReader");
+      const stringBuilder: StringBuilder = Java.use("java.lang.StringBuilder");
 
       // Run the command
-      const command = Runtime.getRuntime().exec(cmd);
+      const command = runtime.getRuntime().exec(cmd);
 
       // Read 'stderr'
-      const stdErrInputStreamReader: JavaClass = InputStreamReader.$new(command.getErrorStream());
-      let bufferedReader = BufferedReader.$new(stdErrInputStreamReader);
+      const stdErrInputStreamReader: InputStreamReader = inputStreamReader.$new(command.getErrorStream());
+      let bufferedReaderInstance: BufferedReader = bufferedReader.$new(stdErrInputStreamReader);
 
-      const stdErrStringBuilder = StringBuilder.$new();
+      const stdErrStringBuilder: StringBuilder = stringBuilder.$new();
       let lineBuffer: string;
 
       // tslint:disable-next-line:no-conditional-assignment
-      while ((lineBuffer = bufferedReader.readLine()) != null) {
+      while ((lineBuffer = bufferedReaderInstance.readLine()) != null) {
         stdErrStringBuilder.append(lineBuffer + "\n");
       }
 
       // Read 'stdout'
-      const stdOutInputStreamReader = InputStreamReader.$new(command.getInputStream());
-      bufferedReader = BufferedReader.$new(stdOutInputStreamReader);
+      const stdOutInputStreamReader: InputStreamReader = inputStreamReader.$new(command.getInputStream());
+      bufferedReaderInstance = bufferedReader.$new(stdOutInputStreamReader);
 
-      const stdOutStringBuilder = StringBuilder.$new();
+      const stdOutStringBuilder = stringBuilder.$new();
       lineBuffer = "";
 
       // tslint:disable-next-line:no-conditional-assignment
-      while ((lineBuffer = bufferedReader.readLine()) != null) {
+      while ((lineBuffer = bufferedReaderInstance.readLine()) != null) {
         stdOutStringBuilder.append(lineBuffer + "\n");
       }
 

@@ -2,7 +2,7 @@ import * as fs from "fs";
 import { hexStringToBytes } from "../lib/helpers";
 import { IAndroidFilesystem } from "./lib/interfaces";
 import { getApplicationContext, wrapJavaPerform } from "./lib/libjava";
-import { JavaClass } from "./lib/types";
+import { File, JavaClass } from "./lib/types";
 
 export namespace androidfilesystem {
 
@@ -13,10 +13,10 @@ export namespace androidfilesystem {
     // Boolean e = path.exists();
 
     return wrapJavaPerform(() => {
-      const File: JavaClass = Java.use("java.io.File");
-      const file: JavaClass = File.$new(path);
+      const file: File = Java.use("java.io.File");
+      const currentFile: JavaClass = file.$new(path);
 
-      return file.exists();
+      return currentFile.exists();
     });
   };
 
@@ -27,10 +27,10 @@ export namespace androidfilesystem {
     // d.canRead();
 
     return wrapJavaPerform(() => {
-      const File: JavaClass = Java.use("java.io.File");
-      const file: JavaClass = File.$new(path);
+      const file: File = Java.use("java.io.File");
+      const currentFile: JavaClass = file.$new(path);
 
-      return file.canRead();
+      return currentFile.canRead();
     });
   };
 
@@ -41,10 +41,10 @@ export namespace androidfilesystem {
     // d.canWrite();
 
     return wrapJavaPerform(() => {
-      const File: JavaClass = Java.use("java.io.File");
-      const file: JavaClass = File.$new(path);
+      const file: File = Java.use("java.io.File");
+      const currentFile: JavaClass = file.$new(path);
 
-      return file.canWrite();
+      return currentFile.canWrite();
     });
   };
 
@@ -55,10 +55,10 @@ export namespace androidfilesystem {
     // d.isFile();
 
     return wrapJavaPerform(() => {
-      const File: JavaClass = Java.use("java.io.File");
-      const file: JavaClass = File.$new(path);
+      const file: File = Java.use("java.io.File");
+      const currentFile: JavaClass = file.$new(path);
 
-      return file.isFile();
+      return currentFile.isFile();
     });
   };
 
@@ -105,8 +105,8 @@ export namespace androidfilesystem {
     // }
 
     return wrapJavaPerform(() => {
-      const File: JavaClass = Java.use("java.io.File");
-      const directory: JavaClass = File.$new(p);
+      const file: File = Java.use("java.io.File");
+      const directory: JavaClass = file.$new(p);
 
       const response: IAndroidFilesystem = {
         files: {},
@@ -120,23 +120,22 @@ export namespace androidfilesystem {
       // get a listing of the files in the directory
       const files: any[] = directory.listFiles();
 
-      for (const file of files) {
-        response.files[file.getName()] = {
+      for (const f of files) {
+        response.files[f.getName()] = {
           attributes: {
-            isDirectory: file.isDirectory(),
-            isFile: file.isFile(),
-            isHidden: file.isHidden(),
-            lastModified: file.lastModified(),
-            size: file.length(),
+            isDirectory: f.isDirectory(),
+            isFile: f.isFile(),
+            isHidden: f.isHidden(),
+            lastModified: f.lastModified(),
+            size: f.length(),
           },
-          fileName: file.getName(),
-          readable: file.canRead(),
-          writable: file.canWrite(),
+          fileName: f.getName(),
+          readable: f.canRead(),
+          writable: f.canWrite(),
         };
       }
 
       return response;
-
     });
   };
 }

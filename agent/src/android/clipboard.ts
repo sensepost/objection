@@ -1,6 +1,6 @@
 import { colors as c } from "../lib/color";
 import { getApplicationContext, wrapJavaPerform } from "./lib/libjava";
-import { JavaClass } from "./lib/types";
+import { ClipboardManager } from "./lib/types";
 
 export namespace clipboard {
 
@@ -21,10 +21,10 @@ export namespace clipboard {
 
     return wrapJavaPerform(() => {
 
-      const ClipboardManager: JavaClass = Java.use("android.content.ClipboardManager");
+      const clipboardManager: ClipboardManager = Java.use("android.content.ClipboardManager");
       const context = getApplicationContext();
       const clipboardHandle = context.getApplicationContext().getSystemService(CLIPBOARD_SERVICE);
-      const cp = Java.cast(clipboardHandle, ClipboardManager);
+      const cp = Java.cast(clipboardHandle, clipboardManager);
 
       setInterval(() => {
 

@@ -1,5 +1,8 @@
 import { colors as c } from "../lib/color";
 import { wrapJavaPerform } from "./lib/libjava";
+import {
+   Activity, ActivityClientRecord, ActivityThread, Bitmap, ByteArrayOutputStream, CompressFormat,
+  } from "./lib/types";
 
 export namespace userinterface {
 
@@ -10,24 +13,24 @@ export namespace userinterface {
     return wrapJavaPerform(() => {
       // Take a screenshot by making use of a View's drawing cache:
       //  ref: https://developer.android.com/reference/android/view/View.html#getDrawingCache(boolean)
-      const ActivityThread = Java.use("android.app.ActivityThread");
-      const Activity = Java.use("android.app.Activity");
-      const ActivityClientRecord = Java.use("android.app.ActivityThread$ActivityClientRecord");
-      const Bitmap = Java.use("android.graphics.Bitmap");
-      const ByteArrayOutputStream = Java.use("java.io.ByteArrayOutputStream");
-      const CompressFormat = Java.use("android.graphics.Bitmap$CompressFormat");
+      const activityThread: ActivityThread = Java.use("android.app.ActivityThread");
+      const activity: Activity = Java.use("android.app.Activity");
+      const activityClientRecord: ActivityClientRecord = Java.use("android.app.ActivityThread$ActivityClientRecord");
+      const bitmap: Bitmap = Java.use("android.graphics.Bitmap");
+      const byteArrayOutputStream: ByteArrayOutputStream = Java.use("java.io.ByteArrayOutputStream");
+      const compressFormat: CompressFormat = Java.use("android.graphics.Bitmap$CompressFormat");
 
       let bytes;
 
-      const activityThread = ActivityThread.currentActivityThread();
-      const activityRecords = activityThread.mActivities.value.values().toArray();
+      const currentActivityThread = activityThread.currentActivityThread();
+      const activityRecords = currentActivityThread.mActivities.value.values().toArray();
       let currentActivity;
 
       for (const i of activityRecords) {
-        const activityRecord = Java.cast(activityRecords[i], ActivityClientRecord);
+        const activityRecord = Java.cast(activityRecords[i], activityClientRecord);
 
         if (!activityRecord.paused.value) {
-          currentActivity = Java.cast(Java.cast(activityRecord, ActivityClientRecord).activity.value, Activity);
+          currentActivity = Java.cast(Java.cast(activityRecord, activityClientRecord).activity.value, activity);
           break;
         }
       }
@@ -35,11 +38,11 @@ export namespace userinterface {
       if (currentActivity) {
         const view = currentActivity.getWindow().getDecorView().getRootView();
         view.setDrawingCacheEnabled(true);
-        const bitmap = Bitmap.createBitmap(view.getDrawingCache());
+        const bitmapInstance = bitmap.createBitmap(view.getDrawingCache());
         view.setDrawingCacheEnabled(false);
 
-        const outputStream = ByteArrayOutputStream.$new();
-        bitmap.compress(CompressFormat.PNG.value, 100, outputStream);
+        const outputStream: ByteArrayOutputStream = byteArrayOutputStream.$new();
+        bitmapInstance.compress(compressFormat.PNG.value, 100, outputStream);
         bytes = outputStream.buf.value;
       }
 
@@ -49,18 +52,18 @@ export namespace userinterface {
 
   export const setFlagSecure = (v: boolean): Promise<void> => {
     return wrapJavaPerform(() => {
-      const ActivityThread = Java.use("android.app.ActivityThread");
-      const Activity = Java.use("android.app.Activity");
-      const ActivityClientRecord = Java.use("android.app.ActivityThread$ActivityClientRecord");
+      const activityThread: ActivityThread = Java.use("android.app.ActivityThread");
+      const activity: Activity = Java.use("android.app.Activity");
+      const activityClientRecord: ActivityClientRecord = Java.use("android.app.ActivityThread$ActivityClientRecord");
 
-      const activityThread = ActivityThread.currentActivityThread();
-      const activityRecords = activityThread.mActivities.value.values().toArray();
+      const currentActivityThread = activityThread.currentActivityThread();
+      const activityRecords = currentActivityThread.mActivities.value.values().toArray();
       let currentActivity;
 
       for (const i of activityRecords) {
-        const activityRecord = Java.cast(i, ActivityClientRecord);
+        const activityRecord = Java.cast(i, activityClientRecord);
         if (!activityRecord.paused.value) {
-          currentActivity = Java.cast(Java.cast(activityRecord, ActivityClientRecord).activity.value, Activity);
+          currentActivity = Java.cast(Java.cast(activityRecord, activityClientRecord).activity.value, activity);
           break;
         }
       }

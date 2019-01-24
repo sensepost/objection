@@ -3,7 +3,9 @@ import { qsend } from "../lib/helpers";
 import { IJob } from "../lib/interfaces";
 import { jobs } from "../lib/jobs";
 import { wrapJavaPerform } from "./lib/libjava";
-import { JavaClass } from "./lib/types";
+import {
+  ArrayList, CertificatePinner, PinningTrustManager, SSLContext, TrustManagerImpl, X509TrustManager,
+} from "./lib/types";
 
 export namespace sslpinning {
   // a simple flag to control if we should be quiet or not
@@ -26,13 +28,13 @@ export namespace sslpinning {
     // SSLContext sslcontect = SSLContext.getInstance("TLS");
     // sslcontect.init(null, trustAllCerts, null);
     return wrapJavaPerform(() => {
-      const X509TrustManager: JavaClass = Java.use("javax.net.ssl.X509TrustManager");
-      const SSLContext: JavaClass = Java.use("javax.net.ssl.SSLContext");
+      const x509TrustManager: X509TrustManager = Java.use("javax.net.ssl.X509TrustManager");
+      const sSLContext: SSLContext = Java.use("javax.net.ssl.SSLContext");
 
       // Implement a new TrustManager
       // ref: https://gist.github.com/oleavr/3ca67a173ff7d207c6b8c3b0ca65a9d8
-      const TrustManager: JavaClass = Java.registerClass({
-        implements: [X509TrustManager],
+      const TrustManager: X509TrustManager = Java.registerClass({
+        implements: [x509TrustManager],
         methods: {
           // tslint:disable-next-line:no-empty
           checkClientTrusted(chain, authType) { },
@@ -46,11 +48,11 @@ export namespace sslpinning {
       });
 
       // Prepare the TrustManagers array to pass to SSLContext.init()
-      const TrustManagers: JavaClass[] = [TrustManager.$new()];
+      const TrustManagers: X509TrustManager[] = [TrustManager.$new()];
       send(c.blackBright("Custom TrustManager ready, overriding SSLContext.init()"));
 
       // Get a handle on the init() on the SSLContext class
-      const SSLContextInit = SSLContext.init.overload(
+      const SSLContextInit = sSLContext.init.overload(
         "[Ljavax.net.ssl.KeyManager;", "[Ljavax.net.ssl.TrustManager;", "java.security.SecureRandom");
 
       // Override the init method, specifying our new TrustManager
@@ -71,7 +73,7 @@ export namespace sslpinning {
   const okHttp3CertificatePinnerCheck = (ident: string): any | undefined => {
     // -- Sample Java
     //
-    // Used to test this bypass.
+    // Example used to test this bypass.
     //
     // String hostname = "swapi.co";
     // CertificatePinner certificatePinner = new CertificatePinner.Builder()
@@ -86,10 +88,10 @@ export namespace sslpinning {
     // Response response = client.newCall(request).execute();
     return wrapJavaPerform(() => {
       try {
-        const CertificatePinner = Java.use("okhttp3.CertificatePinner");
+        const certificatePinner: CertificatePinner = Java.use("okhttp3.CertificatePinner");
         send(c.blackBright(`Found okhttp3.CertificatePinner, overriding CertificatePinner.check()`));
 
-        const CertificatePinnerCheck = CertificatePinner.check.overload("java.lang.String", "java.util.List");
+        const CertificatePinnerCheck = certificatePinner.check.overload("java.lang.String", "java.util.List");
 
         // tslint:disable-next-line:only-arrow-functions
         CertificatePinnerCheck.implementation = function() {
@@ -113,13 +115,13 @@ export namespace sslpinning {
   const appceleratorTitaniumPinningTrustManager = (ident: string): any | undefined => {
     return wrapJavaPerform(() => {
       try {
-        const PinningTrustManager = Java.use("appcelerator.https.PinningTrustManager");
+        const pinningTrustManager: PinningTrustManager = Java.use("appcelerator.https.PinningTrustManager");
         send(
           c.blackBright(`Found appcelerator.https.PinningTrustManager, ` +
             `overriding PinningTrustManager.checkServerTrusted()`),
         );
 
-        const PinningTrustManagerCheckServerTrusted = PinningTrustManager.checkServerTrusted;
+        const PinningTrustManagerCheckServerTrusted = pinningTrustManager.checkServerTrusted;
 
         // tslint:disable-next-line:only-arrow-functions
         PinningTrustManagerCheckServerTrusted.implementation = function() {
@@ -150,7 +152,7 @@ export namespace sslpinning {
   const trustManagerImplVerifyChainCheck = (ident: string): any | undefined => {
     return wrapJavaPerform(() => {
       try {
-        const TrustManagerImpl = Java.use("com.android.org.conscrypt.TrustManagerImpl");
+        const trustManagerImpl: TrustManagerImpl = Java.use("com.android.org.conscrypt.TrustManagerImpl");
         send(
           c.blackBright(`Found com.android.org.conscrypt.TrustManagerImpl, ` +
             `overriding TrustManagerImpl.verifyChain()`),
@@ -158,7 +160,7 @@ export namespace sslpinning {
 
         // https://github.com/google/conscrypt/blob/c88f9f55a523f128f0e4dace76a34724bfa1e88c/
         //  platform/src/main/java/org/conscrypt/TrustManagerImpl.java#L650
-        const TrustManagerImplverifyChain = TrustManagerImpl.verifyChain;
+        const TrustManagerImplverifyChain = trustManagerImpl.verifyChain;
         // tslint:disable-next-line:only-arrow-functions
         TrustManagerImplverifyChain.implementation = function(untrustedChain, trustAnchorChain,
                                                               host, clientAuth, ocspData, tlsSctData) {
@@ -187,8 +189,8 @@ export namespace sslpinning {
   const trustManagerImplCheckTrustedRecursiveCheck = (ident: string): any | undefined => {
     return wrapJavaPerform(() => {
       try {
-        const ArrayList: JavaClass = Java.use("java.util.ArrayList");
-        const TrustManagerImpl: JavaClass = Java.use("com.android.org.conscrypt.TrustManagerImpl");
+        const arrayList: ArrayList = Java.use("java.util.ArrayList");
+        const trustManagerImpl: TrustManagerImpl = Java.use("com.android.org.conscrypt.TrustManagerImpl");
         send(
           c.blackBright(`Found com.android.org.conscrypt.TrustManagerImpl, ` +
             `overriding TrustManagerImpl.checkTrustedRecursive()`),
@@ -196,7 +198,7 @@ export namespace sslpinning {
 
         // https://android.googlesource.com/platform/external/conscrypt/+/1186465/src/
         //  platform/java/org/conscrypt/TrustManagerImpl.java#391
-        const TrustManagerImplcheckTrustedRecursive = TrustManagerImpl.checkTrustedRecursive;
+        const TrustManagerImplcheckTrustedRecursive = trustManagerImpl.checkTrustedRecursive;
         // tslint:disable-next-line:only-arrow-functions
         TrustManagerImplcheckTrustedRecursive.implementation = function(certs, host, clientAuth, untrustedChain,
                                                                         trustAnchorChain, used) {
@@ -206,7 +208,7 @@ export namespace sslpinning {
           );
 
           // Return an empty list
-          return ArrayList.$new();
+          return arrayList.$new();
         };
 
         return TrustManagerImplcheckTrustedRecursive;

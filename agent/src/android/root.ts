@@ -2,7 +2,7 @@ import { colors as c } from "../lib/color";
 import { IJob } from "../lib/interfaces";
 import { jobs } from "../lib/jobs";
 import { wrapJavaPerform } from "./lib/libjava";
-import { JavaClass } from "./lib/types";
+import { File, IOException, JavaString, Runtime } from "./lib/types";
 
 export namespace root {
   const commonPaths = [
@@ -23,8 +23,8 @@ export namespace root {
 
   const testKeysCheck = (success: boolean, ident: string): any => {
     return wrapJavaPerform(() => {
-      const JavaString: JavaClass = Java.use("java.lang.String");
-      const StringContains = JavaString.contains;
+      const javaString: JavaString = Java.use("java.lang.String");
+      const StringContains = javaString.contains;
 
       StringContains.implementation = function(check: string) {
         if (check !== "test-keys") {
@@ -46,9 +46,9 @@ export namespace root {
 
   const execSuCheck = (success: boolean, ident: string): any => {
     return wrapJavaPerform(() => {
-      const Runtime: JavaClass = Java.use("java.lang.Runtime");
-      const IOException: JavaClass = Java.use("java.io.IOException");
-      const RuntimeExec = Runtime.exec.overload("java.lang.String");
+      const runtime: Runtime = Java.use("java.lang.Runtime");
+      const iOException: IOException = Java.use("java.io.IOException");
+      const RuntimeExec = runtime.exec.overload("java.lang.String");
 
       RuntimeExec.implementation = function(command: string) {
         if (command.endsWith("su")) {
@@ -57,7 +57,7 @@ export namespace root {
             return this.apply(this, arguments);
           } else {
             send(c.blackBright(`[${ident}] `) + `Check for 'su' using command exec detected, throwing IOException.`);
-            throw IOException.$new("objection anti-root");
+            throw iOException.$new("objection anti-root");
           }
         }
 
@@ -71,8 +71,8 @@ export namespace root {
 
   const fileExistsCheck = (success: boolean, ident: string): any => {
     return wrapJavaPerform(() => {
-      const JavaFile: JavaClass = Java.use("java.io.File");
-      const FileExists = JavaFile.exists;
+      const javaFile: File = Java.use("java.io.File");
+      const FileExists = javaFile.exists;
 
       FileExists.implementation = function(command: string) {
         const filename = this.getAbsolutePath();

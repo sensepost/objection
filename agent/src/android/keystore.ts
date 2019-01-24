@@ -1,7 +1,7 @@
 import { colors as c } from "../lib/color";
 import { IKeyStoreEntry } from "./lib/interfaces";
 import { wrapJavaPerform } from "./lib/libjava";
-import { JavaClass } from "./lib/types";
+import { KeyStore } from "./lib/types";
 
 export namespace keystore {
 
@@ -20,13 +20,13 @@ export namespace keystore {
     //     Log.e("E", "Aliases = " + aliases.nextElement());
     // }
     return wrapJavaPerform(() => {
-      const KeyStore: JavaClass = Java.use("java.security.KeyStore");
+      const keyStore: KeyStore = Java.use("java.security.KeyStore");
       const entries: IKeyStoreEntry[] = [];
 
       // Prepare the AndroidKeyStore keystore provider and load it.
       // Maybe at a later stage we should support adding other stores
       // like from file or JKS.
-      const ks: JavaClass = KeyStore.getInstance("AndroidKeyStore");
+      const ks: KeyStore = keyStore.getInstance("AndroidKeyStore");
       ks.load(null, null);
 
       // Get the aliases and loop through them. The aliases() method
@@ -60,12 +60,12 @@ export namespace keystore {
     //     ks.deleteEntry(aliases.nextElement());
     // }
     return wrapJavaPerform(() => {
-      const KeyStore: JavaClass = Java.use("java.security.KeyStore");
+      const keyStore: KeyStore = Java.use("java.security.KeyStore");
 
       // Prepare the AndroidKeyStore keystore provider and load it.
       // Maybe at a later stage we should support adding other stores
       // like from file or JKS.
-      const ks: JavaClass = KeyStore.getInstance("AndroidKeyStore");
+      const ks: KeyStore = keyStore.getInstance("AndroidKeyStore");
       ks.load(null, null);
 
       // Get the aliases and loop through them. The aliases() method

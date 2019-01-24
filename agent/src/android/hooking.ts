@@ -2,7 +2,7 @@ import { colors as c } from "../lib/color";
 import { IJob } from "../lib/interfaces";
 import { jobs } from "../lib/jobs";
 import { getApplicationContext, wrapJavaPerform } from "./lib/libjava";
-import { JavaClass } from "./lib/types";
+import { ActivityThread, ArrayMap, JavaClass, PackageManager, Throwable } from "./lib/types";
 
 export namespace hooking {
 
@@ -25,7 +25,7 @@ export namespace hooking {
   export const getClassMethods = (className: string): Promise<string[]> => {
     return wrapJavaPerform(() => {
 
-      const clazz = Java.use(className);
+      const clazz: JavaClass = Java.use(className);
 
       return clazz.class.getDeclaredMethods().map((method) => {
         return method.toGenericString();
@@ -98,7 +98,7 @@ export namespace hooking {
     send(`Attempting to watch class ${c.green(clazz)} and method ${c.green(method)}.`);
 
     return wrapJavaPerform(() => {
-      const Throwable = Java.use("java.lang.Throwable");
+      const throwable: Throwable = Java.use("java.lang.Throwable");
       const targetClass: JavaClass = Java.use(clazz);
 
       // Ensure that the method exists on the class
@@ -132,7 +132,7 @@ export namespace hooking {
           if (dbt) {
             send(
               c.blackBright(`[${job.identifier}] `) + "Backtrace:\n\t" +
-              Throwable.$new().getStackTrace().map((traceElement) => traceElement.toString() + "\n\t").join(""),
+              throwable.$new().getStackTrace().map((traceElement) => traceElement.toString() + "\n\t").join(""),
             );
           }
 
@@ -174,8 +174,8 @@ export namespace hooking {
   export const getActivities = (): Promise<string[]> => {
     return wrapJavaPerform(() => {
 
-      const PackageManager = Java.use("android.content.pm.PackageManager");
-      const GET_ACTIVITIES = PackageManager.GET_ACTIVITIES.value;
+      const packageManager: PackageManager = Java.use("android.content.pm.PackageManager");
+      const GET_ACTIVITIES = packageManager.GET_ACTIVITIES.value;
       const context = getApplicationContext();
 
       return Array.prototype.concat(context.getPackageManager()
@@ -188,20 +188,20 @@ export namespace hooking {
 
   export const getServices = (): Promise<string[]> => {
     return wrapJavaPerform(() => {
-      const ActivityThread = Java.use("android.app.ActivityThread");
-      const ArrayMap = Java.use("android.util.ArrayMap");
-      const PackageManager = Java.use("android.content.pm.PackageManager");
+      const activityThread: ActivityThread = Java.use("android.app.ActivityThread");
+      const arrayMap: ArrayMap = Java.use("android.util.ArrayMap");
+      const packageManager: PackageManager = Java.use("android.content.pm.PackageManager");
 
-      const GET_SERVICES = PackageManager.GET_SERVICES.value;
+      const GET_SERVICES = packageManager.GET_SERVICES.value;
 
-      const currentApplication = ActivityThread.currentApplication();
+      const currentApplication = activityThread.currentApplication();
       // not using the helper as we need other variables too
       const context = currentApplication.getApplicationContext();
 
       let services = [];
 
-      currentApplication.mLoadedApk.value.mServices.value.values().toArray().map((arrayMap) => {
-        Java.cast(arrayMap, ArrayMap).keySet().toArray().map((service) => {
+      currentApplication.mLoadedApk.value.mServices.value.values().toArray().map((potentialServices) => {
+        Java.cast(potentialServices, arrayMap).keySet().toArray().map((service) => {
           services.push(service.$className);
         });
       });
@@ -218,20 +218,20 @@ export namespace hooking {
 
   export const getBroadcastReceivers = (): Promise<string[]> => {
     return wrapJavaPerform(() => {
-      const ActivityThread = Java.use("android.app.ActivityThread");
-      const ArrayMap = Java.use("android.util.ArrayMap");
-      const PackageManager = Java.use("android.content.pm.PackageManager");
+      const activityThread: ActivityThread = Java.use("android.app.ActivityThread");
+      const arrayMap: ArrayMap = Java.use("android.util.ArrayMap");
+      const packageManager: PackageManager = Java.use("android.content.pm.PackageManager");
 
-      const GET_RECEIVERS = PackageManager.GET_RECEIVERS.value;
+      const GET_RECEIVERS = packageManager.GET_RECEIVERS.value;
 
-      const currentApplication = ActivityThread.currentApplication();
+      const currentApplication = activityThread.currentApplication();
       // not using the helper as we need other variables too
       const context = currentApplication.getApplicationContext();
 
       let receivers = [];
 
-      currentApplication.mLoadedApk.value.mReceivers.value.values().toArray().map((arrayMap) => {
-        Java.cast(arrayMap, ArrayMap).keySet().toArray().map((receiver) => {
+      currentApplication.mLoadedApk.value.mReceivers.value.values().toArray().map((potentialReceivers) => {
+        Java.cast(potentialReceivers, arrayMap).keySet().toArray().map((receiver) => {
           receivers.push(receiver.$className);
         });
       });
