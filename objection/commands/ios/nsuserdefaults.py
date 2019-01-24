@@ -13,6 +13,6 @@ def get(args: list = None) -> None:
     """
 
     api = state_connection.get_api()
-    defaults = api.nsuser_defaults_get()
+    defaults = api.ios_nsuser_defaults_get()
 
     click.secho(defaults, bold=True)

@@ -60,10 +60,10 @@ export const ios = {
   iosMonitorPasteboard: (): void => pasteboard.monitor(),
 
   // ios keychain
-  keychainAdd: (key: string, data: string): boolean => ioskeychain.add(key, data),
-  keychainEmpty: (): void => ioskeychain.empty(),
-  keychainList: (): IKeychainItem[] => ioskeychain.list(),
+  iosKeychainAdd: (key: string, data: string): boolean => ioskeychain.add(key, data),
+  iosKeychainEmpty: (): void => ioskeychain.empty(),
+  iosKeychainList: (): IKeychainItem[] => ioskeychain.list(),
 
   // ios nsuserdefaults
-  nsuserDefaultsGet: (): NSUserDefaults | any => nsuserdefaults.get(),
+  iosNsuserDefaultsGet: (): NSUserDefaults | any => nsuserdefaults.get(),
 };

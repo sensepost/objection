@@ -62,7 +62,7 @@ def dump(args: list = None) -> None:
 
     click.secho('Dumping the iOS keychain...', dim=True)
     api = state_connection.get_api()
-    keychain = api.keychain_list()
+    keychain = api.ios_keychain_list()
 
     if _should_output_json(args):
         destination = args[1]
@@ -101,7 +101,7 @@ def clear(args: list = None) -> None:
     click.secho('Clearing the keychain...', dim=True)
 
     api = state_connection.get_api()
-    api.keychain_empty()
+    api.ios_keychain_empty()
 
     click.secho('Keychain cleared', fg='green')
 
@@ -126,7 +126,7 @@ def add(args: list) -> None:
     click.secho('Value:     {0}'.format(value), dim=True)
 
     api = state_connection.get_api()
-    if api.keychain_add(key, value):
+    if api.ios_keychain_add(key, value):
         click.secho('Successfully added the keychain item', fg='green')
         return
 
