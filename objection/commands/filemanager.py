@@ -88,7 +88,7 @@ def cd(args: list) -> None:
     # see if its legit.
     else:
 
-        proposed_path = os.path.join(current_dir, path)
+        proposed_path = "/".join([current_dir, path])
 
         # assume the proposed_path does not exist by default
         does_exist = False
@@ -394,7 +394,7 @@ def _download_ios(path: str, destination: str) -> None:
     # if the path we got is not absolute, join it with the
     # current working directory
     if not os.path.isabs(path):
-        path = os.path.join(pwd(), path)
+        path = "/".join([pwd(), path])
 
     api = state_connection.get_api()
 
@@ -430,7 +430,7 @@ def _download_android(path: str, destination: str) -> None:
     # if the path we got is not absolute, join it with the
     # current working directory
     if not os.path.isabs(path):
-        path = os.path.join(pwd(), path)
+        path = "/".join([pwd(), path])
 
     api = state_connection.get_api()
 
@@ -470,7 +470,7 @@ def upload(args: list) -> None:
         return
 
     source = args[0]
-    destination = args[1] if len(args) > 1 else os.path.join(pwd(), os.path.basename(source))
+    destination = args[1] if len(args) > 1 else "/".join([pwd(), os.path.basename(source)])
 
     if device_state.device_type == 'ios':
         _upload_ios(source, destination)
@@ -489,7 +489,7 @@ def _upload_ios(path: str, destination: str) -> None:
     """
 
     if not os.path.isabs(destination):
-        destination = os.path.join(pwd(), destination)
+        destination = "/".join([pwd(), destination])
 
     api = state_connection.get_api()
     click.secho('Uploading {0} to {1}'.format(path, destination), fg='green', dim=True)
@@ -523,7 +523,7 @@ def _upload_android(path: str, destination: str) -> None:
     """
 
     if not os.path.isabs(destination):
-        destination = os.path.join(pwd(), destination)
+        destination = "/".join([pwd(), destination])
 
     api = state_connection.get_api()
     click.secho('Uploading {0} to {1}'.format(path, destination), fg='green', dim=True)
