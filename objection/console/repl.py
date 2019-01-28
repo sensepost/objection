@@ -6,10 +6,8 @@ import click
 import delegator
 import frida
 from prompt_toolkit import PromptSession
-from prompt_toolkit.application import run_in_terminal
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.history import FileHistory
-from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.styles import Style
 
 from objection.utils.agent import Agent
@@ -20,23 +18,6 @@ from ..commands.device import get_device_info
 from ..state.app import app_state
 from ..state.connection import state_connection
 from ..utils.helpers import get_tokens
-
-bindings = KeyBindings()
-
-
-@bindings.add('c-c')
-def _(_):
-    """
-        Warn about exiting when Ctrl+C is pressed
-
-        :param _:
-        :return:
-    """
-
-    def print_warn():
-        click.secho('[warning] To exit, press ctrl+d or issue the exit command.', dim=True)
-
-    run_in_terminal(print_warn)
 
 
 class Repl(object):
@@ -50,9 +31,23 @@ class Repl(object):
 
         self.completer = CommandCompleter()
         self.commands_repository = COMMANDS
+        self.session = self.get_prompt_session()
 
-        self.session = PromptSession(
+    def get_prompt_session(self) -> PromptSession:
+        """
+            Starts a new prompt session.
+
+            :return:
+        """
+
+        return PromptSession(
             history=FileHistory(os.path.expanduser('~/.objection/objection_history')),
+            completer=self.completer,
+            style=self.get_prompt_style(),
+            # key_bindings=bindings,
+            auto_suggest=AutoSuggestFromHistory(),
+            reserve_space_for_menu=4,
+            complete_in_thread=True
         )
 
     @staticmethod
@@ -354,15 +349,7 @@ class Repl(object):
 
             try:
 
-                document = self.session.prompt(
-                    self.get_prompt_message(),  # prompt message
-                    completer=self.completer,
-                    style=self.get_prompt_style(),
-                    key_bindings=bindings,
-                    auto_suggest=AutoSuggestFromHistory(),
-                    reserve_space_for_menu=4,
-                    complete_in_thread=True
-                )
+                document = self.session.prompt(self.get_prompt_message())
 
                 # check if this is an exit command
                 if document.strip() in ('quit', 'exit', 'bye'):
@@ -380,9 +367,6 @@ class Repl(object):
                     # find something to run
                     self.run_command(document)
 
-                except KeyboardInterrupt:
-                    pass
-
                 except frida.core.RPCException as e:
                     click.secho('A Frida agent exception has occured.', fg='red', bold=True)
                     click.secho('{0}'.format(e), fg='red')
@@ -394,6 +378,9 @@ class Repl(object):
                     click.secho('{0}'.format(e), fg='red')
                     click.secho('\nPython stack trace: {}'.format(traceback.format_exc()), dim=True)
 
-            except (KeyboardInterrupt, EOFError):
+            except KeyboardInterrupt:
+                pass
+
+            except EOFError:
                 click.secho('Exiting...', dim=True)
                 break
