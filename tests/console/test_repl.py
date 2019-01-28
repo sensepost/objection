@@ -1,5 +1,6 @@
 import unittest
 from unittest import mock
+from unittest.mock import MagicMock
 
 from frida import TimedOutError
 
@@ -32,7 +33,7 @@ class TestRepl(unittest.TestCase):
         self.assertEqual(type(self.repl.prompt_tokens), list)
         self.assertEqual(len(self.repl.prompt_tokens), 0)
 
-        tokens = self.repl.get_prompt_tokens(None)
+        tokens = self.repl.get_prompt_message()
 
         # [(Token.Applicationname, 'unknown application'),
         # (Token.On, ''), (Token.Devicetype, ''), (Token.Version, ' '), (Token.Connection, '[usb] # ')]
@@ -45,7 +46,7 @@ class TestRepl(unittest.TestCase):
     def test_gets_prompt_tokens_after_setting_them(self):
         self.repl.set_prompt_tokens(('a', 'b', 'c', 'd'))
 
-        tokens = self.repl.get_prompt_tokens(None)
+        tokens = self.repl.get_prompt_message()
 
         self.assertEqual(tokens[0][1], 'a')
         self.assertEqual(tokens[1][1], ' on ')
@@ -166,9 +167,9 @@ class TestRepl(unittest.TestCase):
 
         self.assertEqual(output, expected_output)
 
-    @mock.patch('objection.console.repl.prompt')
-    def test_starts_repl_and_exists_cleanly_with_banner(self, prompt):
-        prompt.return_value = 'exit'
+    def test_starts_repl_and_exists_cleanly_with_banner(self):
+        self.repl.session = MagicMock(name='session')
+        self.repl.session.prompt.return_value = 'exit'
 
         with capture(self.repl.start_repl, False) as o:
             output = o
@@ -188,9 +189,9 @@ Exiting...\n""".format(__version__))
 
         self.assertEqual(output, expected_output)
 
-    @mock.patch('objection.console.repl.prompt')
-    def test_starts_repl_and_exists_cleanly_with_banner_and_quiet_flag(self, prompt):
-        prompt.return_value = 'exit'
+    def test_starts_repl_and_exists_cleanly_with_banner_and_quiet_flag(self):
+        self.repl.session = MagicMock(name='session')
+        self.repl.session.prompt.return_value = 'exit'
 
         with capture(self.repl.start_repl, True) as o:
             output = o
@@ -199,22 +200,10 @@ Exiting...\n""".format(__version__))
 
         self.assertEqual(output, expected_output)
 
-    @mock.patch('objection.console.repl.prompt')
-    def test_starts_repl_and_catches_ctrl_c(self, prompt):
-        prompt.side_effect = KeyboardInterrupt()
-
-        with capture(self.repl.start_repl, True) as o:
-            output = o
-
-        expected_output = 'Exiting...\n'
-
-        self.assertRaises(KeyboardInterrupt)
-        self.assertEqual(output, expected_output)
-
-    @mock.patch('objection.console.repl.prompt')
+    @mock.patch('objection.console.repl.PromptSession')
     @mock.patch('objection.console.repl.Repl.run_command')
     def test_runs_commands_and_catches_exceptions(self, prompt, run_command):
-        prompt.return_value = 'ios keychain clear'
+        prompt.return_value.prompt.return_value = 'ios keychain clear'
         run_command.side_effect = TypeError()
 
         self.assertRaises(TypeError)

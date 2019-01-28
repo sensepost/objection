@@ -5,13 +5,12 @@ import traceback
 import click
 import delegator
 import frida
-import pygments.styles
-from prompt_toolkit import AbortAction, prompt
+from prompt_toolkit import PromptSession
+from prompt_toolkit.application import run_in_terminal
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.history import FileHistory
-from prompt_toolkit.styles import default_style_extensions, style_from_dict
-from pygments.style import Style
-from pygments.token import Token
+from prompt_toolkit.key_binding import KeyBindings
+from prompt_toolkit.styles import Style
 
 from objection.utils.agent import Agent
 from .commands import COMMANDS
@@ -22,58 +21,22 @@ from ..state.app import app_state
 from ..state.connection import state_connection
 from ..utils.helpers import get_tokens
 
+bindings = KeyBindings()
 
-class PromptStyle(Style):
+
+@bindings.add('c-c')
+def _(_):
     """
-        Class used to define some visual attributes for the
-        REPL prompt.
+        Warn about exiting when Ctrl+C is pressed
+
+        :param _:
+        :return:
     """
 
-    def __init__(self) -> None:
-        self.style = self._init_style()
+    def print_warn():
+        click.secho('[warning] To exit, press ctrl+d or issue the exit command.', dim=True)
 
-    @staticmethod
-    def _init_style() -> dict:
-        """
-            Grab the values for the prompt styling.
-
-            :return:
-        """
-
-        style = pygments.styles.get_style_by_name('vim')
-
-        styles = {}
-        styles.update(style.styles)
-        styles.update(default_style_extensions)
-
-        styles.update({
-            # completions
-            Token.Menu.Completions.Completion.Current: 'bg:#00aaaa #000000',
-            Token.Menu.Completions.Completion: 'bg:#008888 #ffffff',
-            Token.Menu.Completions.ProgressButton: 'bg:#003333',
-            Token.Menu.Completions.ProgressBar: 'bg:#00aaaa',
-
-            # User input.
-            Token: '#ff0066',
-
-            # Prompt.
-            Token.Applicationname: '#007cff',
-            Token.On: '#00aa00',
-            Token.Devicetype: '#00ff48',
-            Token.Version: '#00ff48',
-            Token.Connection: '#717171'
-        })
-
-        return style_from_dict(styles)
-
-    def get_style(self) -> dict:
-        """
-            Return the style for this Class.
-
-            :return:
-        """
-
-        return self.style
+    run_in_terminal(print_warn)
 
 
 class Repl(object):
@@ -88,6 +51,31 @@ class Repl(object):
         self.completer = CommandCompleter()
         self.commands_repository = COMMANDS
 
+        self.session = PromptSession(
+            history=FileHistory(os.path.expanduser('~/.objection/objection_history')),
+        )
+
+    @staticmethod
+    def get_prompt_style() -> Style:
+        """
+            Get the style to use for our prompt
+
+            :return:
+        """
+
+        return Style.from_dict({
+            # completions menu
+            'completion-menu.completion.current': 'bg:#00aaaa #000000',
+            'completion-menu.completion': 'bg:#008888 #ffffff',
+
+            # Prompt.
+            'applicationname': '#007cff',
+            'on': '#00aa00',
+            'devicetype': '#00ff48',
+            'version': '#00ff48',
+            'connection': '#717171'
+        })
+
     def set_prompt_tokens(self, device_info: tuple) -> None:
         """
             Set prompt tokens sourced from a command.device.device_info()
@@ -96,25 +84,23 @@ class Repl(object):
             :param device_info:
             :return:
         """
-
         device_name, system_name, model, system_version = device_info
 
         self.prompt_tokens = [
-            (Token.Applicationname, device_name),
-            (Token.On, ' on '),
-            (Token.Devicetype, '(' + model + ': '),
-            (Token.Version, system_version + ') '),
-            (Token.Connection, '[' + state_connection.get_comms_type_string() + '] # '),
+            ('class:applicationname', device_name),
+            ('class:on', ' on '),
+            ('class:devicetype', '(' + model + ': '),
+            ('class:version', system_version + ') '),
+            ('class:connection', '[' + state_connection.get_comms_type_string() + '] # '),
         ]
 
-    def get_prompt_tokens(self, _) -> list:
+    def get_prompt_message(self) -> list:
         """
             Return prompt tokens to use in the cli app.
 
             If none were set during the init of this class, it
             is assumed that the connection failed.
 
-            :param _:
             :return:
         """
 
@@ -122,11 +108,11 @@ class Repl(object):
             return self.prompt_tokens
 
         return [
-            (Token.Applicationname, 'unknown application'),
-            (Token.On, ''),
-            (Token.Devicetype, ''),
-            (Token.Version, ' '),
-            (Token.Connection, '[' + state_connection.get_comms_type_string() + '] # '),
+            ('class:applicationname', 'unknown application'),
+            ('class:on', ''),
+            ('class:devicetype', ''),
+            ('class:version', ' '),
+            ('class:connection', '[' + state_connection.get_comms_type_string() + '] # '),
         ]
 
     def run_command(self, document: str) -> None:
@@ -368,14 +354,14 @@ class Repl(object):
 
             try:
 
-                document = prompt(
-                    get_prompt_tokens=self.get_prompt_tokens,
+                document = self.session.prompt(
+                    self.get_prompt_message(),  # prompt message
                     completer=self.completer,
-                    style=PromptStyle().get_style(),
-                    history=FileHistory(os.path.expanduser('~/.objection/objection_history')),
+                    style=self.get_prompt_style(),
+                    key_bindings=bindings,
                     auto_suggest=AutoSuggestFromHistory(),
-                    on_abort=AbortAction.RETRY,
-                    reserve_space_for_menu=4
+                    reserve_space_for_menu=4,
+                    complete_in_thread=True
                 )
 
                 # check if this is an exit command
@@ -393,6 +379,9 @@ class Repl(object):
 
                     # find something to run
                     self.run_command(document)
+
+                except KeyboardInterrupt:
+                    pass
 
                 except frida.core.RPCException as e:
                     click.secho('A Frida agent exception has occured.', fg='red', bold=True)
