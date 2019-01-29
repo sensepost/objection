@@ -147,7 +147,7 @@ class Agent(object):
         if not app_state.should_debug():
             agent = agent[:-1]
 
-        return ''.join(agent)
+        return ''.join([str(x) for x in agent])
 
     def inject(self):
         """
