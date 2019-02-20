@@ -1,8 +1,12 @@
+import threading
+import time
+
 import click
 import frida
 
 from .repl import Repl
 from ..__init__ import __version__
+from ..api.app import create_app as create_api_app
 from ..commands.device import get_device_info
 from ..commands.mobile_packages import patch_ios_ipa, patch_android_apk
 from ..state.app import app_state
@@ -17,12 +21,15 @@ from ..utils.helpers import normalize_gadget_name, print_frida_connection_help, 
               show_default=True)
 @click.option('--host', '-h', default='127.0.0.1', show_default=True)
 @click.option('--port', '-p', required=False, default=27042, show_default=True)
+@click.option('--api-host', '-ah', default='127.0.0.1', show_default=True)
+@click.option('--api-port', '-ap', required=False, default=8888, show_default=True)
 @click.option('--gadget', '-g', required=False, default='Gadget',
               help='Name of the Frida Gadget/Process to connect to.', show_default=True)
 @click.option('--serial', '-S', required=False, default=None, help='A device serial to connect to.')
 @click.option('--debug', '-d', required=False, default=False, is_flag=True,
               help='Enabled debug mode whith verbose output.')
-def cli(network: bool, host: str, port: int, gadget: str, serial: str, debug: bool) -> None:
+def cli(network: bool, host: str, port: int, api_host: str, api_port: int,
+        gadget: str, serial: str, debug: bool) -> None:
     """
         \b
              _     _         _   _
@@ -50,7 +57,27 @@ def cli(network: bool, host: str, port: int, gadget: str, serial: str, debug: bo
     if serial:
         state_connection.device_serial = serial
 
+    # set api parameters
+    app_state.api_host = api_host
+    app_state.api_port = api_port
+
     state_connection.gadget_name = normalize_gadget_name(gadget_name=gadget)
+
+
+@cli.command()
+def api():
+    """
+        Start the objection API server in headless mode.
+    """
+
+    agent = Agent()
+    agent.inject()
+    state_connection.set_agent(agent=agent)
+
+    click.secho('Starting API server on {host}:{port}'.format(
+        host=app_state.api_host, port=app_state.api_port), fg='yellow', bold=True)
+
+    create_api_app().run(host=app_state.api_host, port=app_state.api_port, debug=app_state.debug)
 
 
 @cli.command()
@@ -61,7 +88,9 @@ def cli(network: bool, host: str, port: int, gadget: str, serial: str, debug: bo
 @click.option('--file-commands', '-c', required=False, type=click.File('r'),
               help=('A file containing objection commands, seperated by a ' 'newline, that will be '
                     'executed before showing the prompt.'))
-def explore(startup_command: str, quiet: bool, file_commands) -> None:
+@click.option('--api', '-a', required=False, default=False, is_flag=True,
+              help='Start the objection API server.')
+def explore(startup_command: str, quiet: bool, file_commands, api: bool) -> None:
     """
         Start the objection exploration REPL.
     """
@@ -111,6 +140,27 @@ def explore(startup_command: str, quiet: bool, file_commands) -> None:
             r.run_command(command)
 
     warn_about_older_operating_systems()
+
+    # start the api server
+    if api:
+        def api_thread():
+            """
+                Small method to run Flash non-blocking
+
+                :return:
+            """
+
+            a = create_api_app()
+            a.run(host=app_state.api_host, port=app_state.api_port)
+
+        click.secho('Starting API server on {host}:{port}'.format(
+            host=app_state.api_host, port=app_state.api_port), fg='yellow', bold=True)
+
+        thread = threading.Thread(target=api_thread)
+        thread.daemon = True
+        thread.start()
+
+        time.sleep(2)
 
     # run the REPL and wait for more commands
     r.set_prompt_tokens(device_info)

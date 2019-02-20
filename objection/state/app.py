@@ -4,6 +4,8 @@ class AppState(object):
     def __init__(self):
         self.debug_hooks = False
         self.debug = False
+        self.api_host = '127.0.0.1'
+        self.api_port = 8888
         self.successful_commands = []
 
     def add_command_to_history(self, command: str) -> None:
