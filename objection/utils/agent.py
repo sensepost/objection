@@ -34,7 +34,8 @@ class Agent(object):
 
         atexit.register(self.cleanup)
 
-    def _on_message(self, message: dict, data):
+    @staticmethod
+    def _on_message(message: dict, data):
         """
             The callback to run when a message is received from the agent.
 
@@ -58,6 +59,32 @@ class Agent(object):
 
         except Exception as e:
             click.secho('Failed to process an incoming message from agent: {0}'.format(e), fg='red', bold=True)
+            raise e
+
+    @staticmethod
+    def _on_detach(message: str):
+        """
+            The callback to run for the detach signal
+
+            :param message:
+            :return:
+        """
+
+        try:
+
+            # log the hook response if needed
+            if app_state.should_debug():
+                click.secho('- [incoming message] ' + '-' * 18, dim=True)
+                click.secho(json.dumps(message, indent=2, sort_keys=True), dim=True)
+                click.secho('- [./incoming message] ' + '-' * 16, dim=True)
+
+            # process the response
+            if message:
+                click.secho('(session detach message) ' + message, fg='red')
+
+        except Exception as e:
+            click.secho('Failed to process an incoming message for a session detach signal: {0}'.format(e), fg='red',
+                        bold=True)
             raise e
 
     @staticmethod
@@ -106,17 +133,22 @@ class Agent(object):
             Attempt to get a Frida session on a device.
         """
 
+        if self.session:
+            return self.session
+
         self.device = self._get_device()
 
         # try and get the target process.
         try:
 
             debug_print('Attempting to attach to process: `{process}`'.format(process=state_connection.gadget_name))
-            session = self.device.attach(state_connection.gadget_name)
+            self.session = self.device.attach(state_connection.gadget_name)
             debug_print('Process attached!')
             self.resumed = True
 
-            return session
+            self.session.on('detached', self._on_detach)
+
+            return self.session
 
         except frida.ProcessNotFoundError:
             debug_print(
@@ -159,8 +191,8 @@ class Agent(object):
 
         debug_print('Injecting agent...')
 
-        self.session = self._get_session()
-        self.script = self.session.create_script(source=self._get_agent_source())
+        session = self._get_session()
+        self.script = session.create_script(source=self._get_agent_source())
         self.script.on('message', self._on_message)
         self.script.load()
 
