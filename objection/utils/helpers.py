@@ -1,3 +1,4 @@
+import re
 import shlex
 
 import click
@@ -127,6 +128,18 @@ def clean_argument_flags(args: list) -> list:
     """
 
     return [x for x in args if not x.startswith('--')]
+
+
+def to_snake_case(w: str) -> str:
+    """
+        https://stackoverflow.com/a/1176023
+
+        :param w:
+        :return:
+    """
+
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', w)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
 
 def print_frida_connection_help() -> None:
