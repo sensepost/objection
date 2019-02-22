@@ -230,8 +230,13 @@ class Agent(object):
             :return:
         """
 
-        if self.script:
-            click.secho('Asking jobs to stop...', dim=True)
-            job_manager_state.cleanup()
-            click.secho('Unloading objection agent...', dim=True)
-            self.unload()
+        try:
+
+            if self.script:
+                click.secho('Asking jobs to stop...', dim=True)
+                job_manager_state.cleanup()
+                click.secho('Unloading objection agent...', dim=True)
+                self.unload()
+
+        except frida.InvalidOperationError as e:
+            click.secho('Unable to run cleanups: {error}'.format(error=str(e)), fg='yellow', dim=True)

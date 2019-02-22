@@ -71,7 +71,13 @@ def api():
     """
 
     agent = Agent()
-    agent.inject()
+
+    try:
+        agent.inject()
+    except frida.ServerNotRunningError as e:
+        click.secho('Unable to connect to the frida server: {error}'.format(error=str(e)), fg='red')
+        return
+
     state_connection.set_agent(agent=agent)
 
     click.secho('Starting API server on {host}:{port}'.format(
@@ -96,7 +102,14 @@ def explore(startup_command: str, quiet: bool, file_commands, api: bool) -> None
     """
 
     agent = Agent()
-    agent.inject()
+
+    try:
+        agent.inject()
+    except frida.ServerNotRunningError as e:
+        click.secho('Unable to connect to the frida server: {error}'.format(error=str(e)), fg='red')
+        return
+
+    # set the frida agent
     state_connection.set_agent(agent=agent)
 
     # start the main REPL
