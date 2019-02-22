@@ -73,6 +73,7 @@ COMMANDS = {
 
     'ls': {
         'meta': 'List files in the current working directory',
+        'dynamic': filemanager.list_folders_in_current_fm_directory,
         'exec': filemanager.ls,
     },
 

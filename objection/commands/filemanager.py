@@ -219,6 +219,8 @@ def ls(args: list) -> None:
         path = pwd()
     else:
         path = args[0]
+        if not os.path.isabs(path):
+            path = os.path.join(pwd(), path)
 
     # based on the runtime, execute the correct ls method.
     if device_state.device_type == 'ios':
