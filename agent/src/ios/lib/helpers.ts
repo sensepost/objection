@@ -1,16 +1,7 @@
 import { NSBundle, NSDictionary, NSFileManager } from "./types";
 
-// small helper functions for iOS based environments
-
-export const isNSKeyedArchived = (data: ArrayBuffer): boolean => {
-
-  const magic: ArrayBuffer = data.slice(0, 8);
-  const magicString: string = String.fromCharCode.apply(null, Array.prototype.slice.call(magic));
-
-  // 62 70 6c 69 73 74 30 30
-  return magicString === "bplist00";
-};
-
+// Attempt to unarchive data. Returning a string of `` indicates that the
+// unarchiving failed.
 export const unArchiveDataAndGetString = (data: ObjC.Object | any): string => {
 
   try {
@@ -22,7 +13,10 @@ export const unArchiveDataAndGetString = (data: ObjC.Object | any): string => {
     const NSKeyedUnarchiver = ObjC.classes.NSKeyedUnarchiver;
     const unArchivedData: any = NSKeyedUnarchiver.unarchiveTopLevelObjectWithData_error_(data, NULL);
 
-    if (unArchivedData === null) { return `(data unArchive failed for blob type: ${data.$className})`; }
+    // if we have a null value, this data is probably not archived
+    if (unArchivedData === null) {
+      return ``;
+    }
 
     switch (unArchivedData.$className) {
 
@@ -31,18 +25,17 @@ export const unArchiveDataAndGetString = (data: ObjC.Object | any): string => {
         const dict: NSDictionary = new ObjC.Object(unArchivedData);
         const enumerator = dict.keyEnumerator();
         let key;
-        const stringData: string[] = [];
+        const s: object = {};
 
         // tslint:disable-next-line:no-conditional-assignment
         while ((key = enumerator.nextObject()) !== null) {
-          const value = dict.objectForKey_(key);
-          stringData.push(`${key}: ${value}`);
+          s[key] = `${dict.objectForKey_(key)}`;
         }
 
-        return stringData.join(", ");
+        return JSON.stringify(s);
 
       default:
-        return `(data unArchive error for class: ${unArchivedData.$className})`;
+        return ``;
     }
 
   } catch (e) {
@@ -60,13 +53,23 @@ export const dataToString = (raw: any, o: string = null): string => {
 
     switch (dataObject.$className) {
       case "__NSCFData":
-        const dataBytes: ArrayBuffer = Memory.readByteArray(dataObject.bytes(), dataObject.length());
 
-        // If we have data that was archived with NSKeyedArchiver, try and undo that.
-        if (isNSKeyedArchived(dataBytes)) { return unArchiveDataAndGetString(dataObject); }
+        try {
+          const unarchivedData: string = unArchiveDataAndGetString(dataObject);
+          if (unarchivedData.length > 0) {
+            return unarchivedData;
+          }
+          // tslint:disable-next-line:no-empty
+        } catch (e) { }
 
-        // Otherwise, just read & convert the bytes read to a string.
-        return String.fromCharCode.apply(null, Array.prototype.slice.call(dataBytes));
+        try {
+
+          const data: string = Memory.readUtf8String(dataObject.bytes(), dataObject.length());
+          if (data.length > 0) {
+            return data;
+          }
+          // tslint:disable-next-line:no-empty
+        } catch (e) { }
 
       case "__NSCFNumber":
         return dataObject.integerValue();
