@@ -94,9 +94,11 @@ def api():
 @click.option('--file-commands', '-c', required=False, type=click.File('r'),
               help=('A file containing objection commands, seperated by a ' 'newline, that will be '
                     'executed before showing the prompt.'))
-@click.option('--api', '-a', required=False, default=False, is_flag=True,
+@click.option('--startup-script', '-S', required=False, type=click.File('r'),
+              help='A script to import and run before the repl polls the device for information.')
+@click.option('--enable-api', '-a', required=False, default=False, is_flag=True,
               help='Start the objection API server.')
-def explore(startup_command: str, quiet: bool, file_commands, api: bool) -> None:
+def explore(startup_command: str, quiet: bool, file_commands, startup_script: click.File, enable_api: bool) -> None:
     """
         Start the objection exploration REPL.
     """
@@ -121,6 +123,12 @@ def explore(startup_command: str, quiet: bool, file_commands, api: bool) -> None
         for command in startup_command:
             click.secho('Running a startup command... {0}'.format(command), dim=True)
             r.run_command(command)
+
+    # If we have a script, import and run that asap
+    if startup_script:
+        click.secho('Importing and running startup script at: {location}'.format(location=startup_script), dim=True)
+        response = agent.ad_hoc(startup_script.read())
+        print(response)
 
     try:
 
@@ -155,7 +163,7 @@ def explore(startup_command: str, quiet: bool, file_commands, api: bool) -> None
     warn_about_older_operating_systems()
 
     # start the api server
-    if api:
+    if enable_api:
         def api_thread():
             """
                 Small method to run Flash non-blocking

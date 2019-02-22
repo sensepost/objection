@@ -141,7 +141,8 @@ class Agent(object):
         # try and get the target process.
         try:
 
-            debug_print('Attempting to attach to process: `{process}`'.format(process=state_connection.gadget_name))
+            debug_print('Attempting to attach to process: `{process}`'.format(
+                process=state_connection.gadget_name))
             self.session = self.device.attach(state_connection.gadget_name)
             debug_print('Process attached!')
             self.resumed = True
@@ -151,8 +152,8 @@ class Agent(object):
             return self.session
 
         except frida.ProcessNotFoundError:
-            debug_print(
-                'Unable to find process: `{process}`, attempting spawn'.format(process=state_connection.gadget_name))
+            debug_print('Unable to find process: `{process}`, attempting spawn'.format(
+                process=state_connection.gadget_name))
 
         # TODO: Handle the fact that gadget mode can't spawn
 
@@ -209,6 +210,42 @@ class Agent(object):
 
         return self
 
+    def ad_hoc(self, source: str, unload=True) -> list:
+        """
+            Executes an adhoc script, capturing the output
+
+            :param source:
+            :param unload:
+            :return:
+        """
+
+        message_buffer = []
+
+        def on_message(message: str, data):
+            """
+                Simple message buffer helper.
+
+                :param message:
+                :param data:
+                :return:
+            """
+
+            message_buffer.append(message)
+
+        session = self._get_session()
+        script = session.create_script(source=source)
+        script.on('message', on_message)
+        script.load()
+
+        if not self.resumed:
+            debug_print('Resuming PID `{pid}`'.format(pid=self.spawned_pid))
+            self.device.resume(self.spawned_pid)
+
+        if unload:
+            script.unload()
+
+        return message_buffer
+
     def exports(self) -> frida.core.ScriptExports:
         """
             Get the exports of the agent.
@@ -219,9 +256,15 @@ class Agent(object):
         return self.script.exports
 
     def unload(self) -> None:
+        """
+            Run cleanup routines on an angent.
 
-        debug_print('Calling unload()')
-        self.script.unload()
+            :return:
+        """
+
+        if self.script:
+            debug_print('Calling unload()')
+            self.script.unload()
 
     def cleanup(self) -> None:
         """
