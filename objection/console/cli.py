@@ -27,7 +27,7 @@ from ..utils.helpers import normalize_gadget_name, print_frida_connection_help, 
               help='Name of the Frida Gadget/Process to connect to.', show_default=True)
 @click.option('--serial', '-S', required=False, default=None, help='A device serial to connect to.')
 @click.option('--debug', '-d', required=False, default=False, is_flag=True,
-              help='Enabled debug mode whith verbose output.')
+              help='Enable debug mode with verbose output. (Includes agent source map in stack traces)')
 def cli(network: bool, host: str, port: int, api_host: str, api_port: int,
         gadget: str, serial: str, debug: bool) -> None:
     """
