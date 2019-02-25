@@ -381,7 +381,8 @@ class AndroidPatcher(BasePlatformPatcher):
 
         # if not, error if --skip-resources was used because the manifest is encoded
         elif skip_resources is True:
-            click.secho('Cannot patch an APK for Internet permission when --skip-resources is set, remove this and try again.', fg='red')
+            click.secho('Cannot patch an APK for Internet permission when --skip-resources '
+                        'is set, remove this and try again.', fg='red')
             raise Exception('Cannot --skip-resources with no Internet permission')
 
         # if not, we need to inject an element with it

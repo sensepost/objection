@@ -319,7 +319,6 @@ Readable: True  Writable: True
     def test_lists_unreadable_android_directory_using_helper_method(self, mock_api):
         mock_api.return_value.android_file_ls.return_value = {
             'path': '/foo/bar',
-            'path': '/foo/bar',
             'readable': False,
             'writable': False,
             'files': {}
