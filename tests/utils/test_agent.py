@@ -7,7 +7,12 @@ from objection.utils.agent import Agent
 
 class TestAgent(unittest.TestCase):
 
-    @unittest.skipUnless(os.path.exists('../objection/agent.js'), 'Requires compiled agent.')
+    def setUp(self):
+        agent_path = os.path.abspath(
+            os.path.join(os.path.abspath(os.path.dirname(__file__)), '../../objection', 'agent.js'))
+        if not os.path.exists(agent_path):
+            self.skipTest('Compiled agent not available')
+
     @mock.patch('objection.utils.agent.app_state')
     def test_agent_loads_from_disk_successfully_without_debug(self, mock_app_state):
         mock_app_state.should_debug.return_value = False
@@ -18,7 +23,6 @@ class TestAgent(unittest.TestCase):
         self.assertTrue(mock_app_state.should_debug.called)
         self.assertTrue('rpc.exports' in source)
 
-    @unittest.skipUnless(os.path.exists('../objection/agent.js'), 'Requires compiled agent.')
     @mock.patch('objection.utils.agent.app_state')
     def test_agent_loads_from_disk_successfully_with_debug(self, mock_app_state):
         mock_app_state.should_debug.return_value = True
