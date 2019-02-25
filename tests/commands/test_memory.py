@@ -43,6 +43,7 @@ class TestMemory(unittest.TestCase):
             output = o
 
         expected_output = """Will dump 1 rw- images, totalling 100.0 B
+
 Memory dumped to file: /foo
 """
 
