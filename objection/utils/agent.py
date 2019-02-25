@@ -174,7 +174,7 @@ class Agent(object):
                             'If this is a development install, check the wiki for more '
                             'information on building the agent.'.format(location=self.agent_path))
 
-        with open(self.agent_path, 'r') as f:
+        with open(self.agent_path, 'r', encoding='utf-8') as f:
             agent = f.readlines()
 
         # If we are not in debug mode, strip the source map
