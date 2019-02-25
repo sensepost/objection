@@ -156,11 +156,8 @@ export namespace ioskeychain {
 
     // Add the keychain entry
     const result: any = libObjc.SecItemAdd(itemDict, NULL);
-    if (!result.isNull()) {
-      return false;
-    }
 
-    return true;
+    return result.isNull();
   };
 
   // decode the access control attributes on a keychain
