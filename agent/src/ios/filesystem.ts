@@ -60,7 +60,6 @@ export namespace iosfilesystem {
 
   export const pathIsFile = (path: string): boolean => {
     const fm: NSFileManager = getFileManager();
-    const p = NSString.stringWithString_(path);
 
     const isDir: NativePointer = Memory.alloc(Process.pointerSize);
     fm.fileExistsAtPath_isDirectory_(path, isDir);

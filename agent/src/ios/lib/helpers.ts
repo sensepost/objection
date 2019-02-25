@@ -43,7 +43,7 @@ export const unArchiveDataAndGetString = (data: ObjC.Object | any): string => {
   }
 };
 
-export const dataToString = (raw: any, o: string = null): string => {
+export const dataToString = (raw: any): string => {
 
   if (raw === null) { return ""; }
 
