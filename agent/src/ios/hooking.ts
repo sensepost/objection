@@ -241,7 +241,7 @@ export namespace hooking {
               `${c.green(selector)} ` +
               `Return value was: ${c.red(retval.toString())}, overriding to ${c.green(FALSE.toString())}`,
             );
-            retval.replace(TRUE);
+            retval.replace(FALSE);
             break;
         }
       },
