@@ -51,7 +51,7 @@ export namespace sslpinning {
 
     // If AFNetworking is not a thing, just move on.
     if (!(AFHTTPSessionManager && AFSecurityPolicy)) {
-      return;
+      return [];
     }
 
     send(c.blackBright(`[${ident}] `) + `Found AFNetworking library. Hooking known pinning methods.`);
