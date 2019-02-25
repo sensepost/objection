@@ -54,13 +54,11 @@ export namespace androidshell {
         stdOutStringBuilder.append(lineBuffer + "\n");
       }
 
-      const commandOutput: IExecutedCommand = {
+      return {
         command: cmd,
         stdErr: stdErrStringBuilder.toString(),
         stdOut: stdOutStringBuilder.toString(),
       };
-
-      return commandOutput;
     });
   };
 }

@@ -17,7 +17,6 @@ export const wrapJavaPerform = (fn: any): Promise<any> => {
 export const getApplicationContext = (): any => {
   const ActivityThread = Java.use("android.app.ActivityThread");
   const currentApplication = ActivityThread.currentApplication();
-  const context = currentApplication.getApplicationContext();
 
-  return context;
+  return currentApplication.getApplicationContext();
 };

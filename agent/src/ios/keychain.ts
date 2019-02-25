@@ -83,7 +83,7 @@ export namespace ioskeychain {
     searchDictionary.setObject_forKey_(kCFBooleanTrue, kSec.kSecReturnRef);
     searchDictionary.setObject_forKey_(kSec.kSecMatchLimitAll, kSec.kSecMatchLimit);
 
-    const kcItems: IKeychainItem[] = [].concat.apply([], itemClasses.map((clazz) => {
+    return [].concat.apply([], itemClasses.map((clazz) => {
 
       const clazzItems: IKeychainItem[] = [];
       searchDictionary.setObject_forKey_(clazz, kSec.kSecClass);
@@ -139,8 +139,6 @@ export namespace ioskeychain {
       return clazzItems;
 
     }).filter((n) => n !== undefined));
-
-    return kcItems;
   };
 
   // add a string entry to the keychain

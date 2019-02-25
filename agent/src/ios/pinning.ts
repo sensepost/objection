@@ -191,7 +191,7 @@ export namespace sslpinning {
     send(c.blackBright(`[${ident}] `) + `Found NSURLSession based classes. Hooking known pinning methods.`);
 
     // hook all of the methods that matched the selector
-    const invocations: InvocationListener[] = search.map((i) => {
+    return search.map((i) => {
       return Interceptor.attach(i.address, {
         onEnter(args) {
           // 0
@@ -249,8 +249,6 @@ export namespace sslpinning {
         },
       });
     });
-
-    return invocations;
   };
 
   // TrustKit
