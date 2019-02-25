@@ -49,4 +49,4 @@ def clear(args: list) -> None:
     """
 
     app_state.clear_command_history()
-    click.secho('Commnad history cleared.', fg='green')
+    click.secho('Command history cleared.', fg='green')

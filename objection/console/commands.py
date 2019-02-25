@@ -31,7 +31,7 @@ from ..utils.helpers import list_current_jobs
 # dynamic: A method to execute that would return completions to populate in the prompt
 # exec: The *actual* method to execute when the command is issued.
 
-# commands help is stored in the helpfiles directory as a txt file.
+# commands help is stored in the help files directory as a txt file.
 
 COMMANDS = {
 

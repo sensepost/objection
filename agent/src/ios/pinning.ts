@@ -413,7 +413,7 @@ export namespace sslpinning {
     // return peerTrust;
   };
 
-  // exposed method to setup all of the intercaptor invocations and replacements
+  // exposed method to setup all of the interceptor invocations and replacements
   export const disable = (q: boolean): void => {
 
     if (q) {

@@ -57,7 +57,7 @@ class JobManagerState(object):
 
             except frida.InvalidOperationError:
 
-                click.secho(('[job manager] Job: {0} - An error occured stopping job. Device may '
+                click.secho(('[job manager] Job: {0} - An error occurred stopping job. Device may '
                              'no longer be available.'.format(job.id)), fg='red', dim=True)
 
 

@@ -254,7 +254,7 @@ class AndroidPatcher(BasePlatformPatcher):
             ]), timeout=self.command_run_timeout)
 
             if len(o.err) > 0:
-                click.secho('An error may have occured while running aapt.', fg='red')
+                click.secho('An error may have occurred while running aapt.', fg='red')
                 click.secho(o.err, fg='red')
 
             self.aapt = o.out
@@ -360,7 +360,7 @@ class AndroidPatcher(BasePlatformPatcher):
         ]), timeout=self.command_run_timeout)
 
         if len(o.err) > 0:
-            click.secho('An error may have occured while extracting the APK.', fg='red')
+            click.secho('An error may have occurred while extracting the APK.', fg='red')
             click.secho(o.err, fg='red')
 
     def inject_internet_permission(self, skip_resources: bool = False):
@@ -374,7 +374,7 @@ class AndroidPatcher(BasePlatformPatcher):
 
         internet_permission = 'android.permission.INTERNET'
 
-        # if the app already has the internet permission, easymode :D
+        # if the app already has the internet permission, easy mode :D
         if internet_permission in self._get_appt_output():
             click.secho('App already has android.permission.INTERNET', fg='green')
             return
@@ -559,7 +559,7 @@ class AndroidPatcher(BasePlatformPatcher):
 
         click.secho('Reading smali from: {0}'.format(activity_path), dim=True)
 
-        # apktool d smali will have a commentline line: '# direct methods'
+        # apktool d smali will have a comment line line: '# direct methods'
         with open(activity_path, 'r') as f:
             smali_lines = f.readlines()
 
@@ -583,7 +583,7 @@ class AndroidPatcher(BasePlatformPatcher):
             click.secho('Injecting into an existing constructor', fg='yellow')
 
             # need to find the end of the existing call. so, enumerate all of
-            # the lines in the orignal smali sources and mark the offsets of the
+            # the lines in the original smali sources and mark the offsets of the
             # lines that contain '.end method'. the search starts right after the
             # original inject marker so that we can pick the top most .end method
             # when we are done searching. this is also why the # represented in the

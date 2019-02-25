@@ -42,5 +42,5 @@ bar
         with capture(clear, []) as o:
             output = o
 
-        self.assertEqual(output, 'Commnad history cleared.\n')
+        self.assertEqual(output, 'Command history cleared.\n')
         self.assertEqual(len(app_state.successful_commands), 0)

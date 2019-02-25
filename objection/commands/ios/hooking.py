@@ -3,7 +3,7 @@ import click
 from objection.state.connection import state_connection
 from objection.utils.helpers import clean_argument_flags
 
-# a thumbsucked list of prefixes used in Objective-C runtime
+# a thumb sucked list of prefixes used in Objective-C runtime
 # for iOS applications. This is not a science, but a gut feeling.
 native_prefixes = [
     '_',

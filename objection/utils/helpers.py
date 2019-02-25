@@ -145,7 +145,7 @@ def to_snake_case(w: str) -> str:
 def print_frida_connection_help() -> None:
     """
         Prints help information about connecting to devices and
-        processess.
+        processes.
 
         :return:
     """
@@ -164,7 +164,7 @@ def print_frida_connection_help() -> None:
 
 def warn_about_older_operating_systems() -> None:
     """
-        Prints a warning to the console about the reccomended Android and
+        Prints a warning to the console about the recommended Android and
         iOS versions to use with objection.
 
         :return:

@@ -371,7 +371,7 @@ class Repl(object):
                     self.run_command(document)
 
                 except frida.core.RPCException as e:
-                    click.secho('A Frida agent exception has occured.', fg='red', bold=True)
+                    click.secho('A Frida agent exception has occurred.', fg='red', bold=True)
                     click.secho('{0}'.format(e), fg='red')
                     click.secho('\nPython stack trace: {}'.format(traceback.format_exc()), dim=True)
 

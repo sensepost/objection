@@ -160,7 +160,7 @@ export namespace ioskeychain {
 
   // decode the access control attributes on a keychain
   // entry into a human readable string. Getting an idea of what the
-  // constriants actually are is done using an undocumented method,
+  // constraints actually are is done using an undocumented method,
   // SecAccessControlGetConstraints.
   const decodeAcl = (entry: NSDictionary): string => {
     const acl = new ObjC.Object(

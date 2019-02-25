@@ -87,7 +87,7 @@ def connect(args: list) -> None:
 def disconnect(args: list = None) -> None:
     """
         Disconnects from the currently connected/cached SQLite database file
-        by clearing the statemager and deleting the locally cached copy.
+        by clearing the statemanager and deleting the locally cached copy.
 
         :param args:
         :return:

@@ -257,7 +257,7 @@ class Agent(object):
 
     def unload(self) -> None:
         """
-            Run cleanup routines on an angent.
+            Run cleanup routines on an agent.
 
             :return:
         """

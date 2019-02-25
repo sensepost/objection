@@ -8,8 +8,8 @@ export namespace nsuserdefaults {
     // NSUserDefaults *d = [[NSUserDefaults alloc] init];
     // NSLog(@"%@", [d dictionaryRepresentation]);
 
-    const defauts: NSUserDefaults = ObjC.classes.NSUserDefaults;
-    const data: NSDictionary = defauts.alloc().init().dictionaryRepresentation();
+    const defaults: NSUserDefaults = ObjC.classes.NSUserDefaults;
+    const data: NSDictionary = defaults.alloc().init().dictionaryRepresentation();
 
     return data.toString();
   };
