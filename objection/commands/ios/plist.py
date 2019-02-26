@@ -23,7 +23,7 @@ def cat(args: list = None) -> None:
 
     if not os.path.isabs(plist):
         pwd = filemanager.pwd()
-        plist = os.path.join(pwd, plist)
+        plist = "/".join([pwd, plist])
 
     api = state_connection.get_api()
     plist_data = api.ios_plist_read(plist)
