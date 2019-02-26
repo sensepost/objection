@@ -1,3 +1,4 @@
+import os
 import unittest
 from unittest import mock
 
@@ -5,6 +6,13 @@ from objection.utils.agent import Agent
 
 
 class TestAgent(unittest.TestCase):
+
+    def setUp(self):
+        agent_path = os.path.abspath(
+            os.path.join(os.path.abspath(os.path.dirname(__file__)), '../../objection', 'agent.js'))
+        if not os.path.exists(agent_path):
+            self.skipTest('Compiled agent not available')
+
     @mock.patch('objection.utils.agent.app_state')
     def test_agent_loads_from_disk_successfully_without_debug(self, mock_app_state):
         mock_app_state.should_debug.return_value = False
