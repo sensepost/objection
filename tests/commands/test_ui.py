@@ -3,7 +3,7 @@ from unittest import mock
 
 from objection.commands.ui import alert, _alert_ios, ios_screenshot, dump_ios_ui, bypass_touchid, android_screenshot, \
     android_flag_secure
-from objection.state.device import device_state
+from objection.state.device import device_state, Ios
 from ..helpers import capture
 
 
@@ -13,7 +13,7 @@ class TestUI(unittest.TestCase):
 
     @mock.patch('objection.commands.ui._alert_ios')
     def test_alert_helper_method_proxy_calls_ios(self, mock_alert_ios):
-        device_state.device_type = 'ios'
+        device_state.device_type = Ios()
 
         alert([])
 
@@ -21,7 +21,7 @@ class TestUI(unittest.TestCase):
 
     @mock.patch('objection.commands.ui._alert_ios')
     def test_alert_helper_method_proxy_calls_ios_custom_message(self, mock_alert_ios):
-        device_state.device_type = 'ios'
+        device_state.device_type = Ios()
 
         alert(['foo'])
 

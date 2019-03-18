@@ -3,7 +3,7 @@ from unittest import mock
 
 from objection.commands.filemanager import cd, _path_exists_ios, _path_exists_android, pwd, pwd_print, _pwd_ios, \
     _pwd_android, ls, _ls_ios, _ls_android, download, _download_ios, _download_android, upload
-from objection.state.device import device_state
+from objection.state.device import device_state, Ios, Android
 from objection.state.filemanager import file_manager_state
 from ..helpers import capture
 
@@ -48,7 +48,7 @@ class TestFileManager(unittest.TestCase):
         mock_path_exists_ios.return_value = True
 
         file_manager_state.cwd = '/foo'
-        device_state.device_type = 'ios'
+        device_state.device_type = Ios
 
         with capture(cd, ['/foo/bar/baz']) as o:
             output = o
@@ -61,7 +61,7 @@ class TestFileManager(unittest.TestCase):
         mock_path_exists_android.return_value = True
 
         file_manager_state.cwd = '/foo'
-        device_state.device_type = 'android'
+        device_state.device_type = Android
 
         with capture(cd, ['/foo/bar/baz']) as o:
             output = o
@@ -74,7 +74,7 @@ class TestFileManager(unittest.TestCase):
         mock_path_exists_ios.return_value = False
 
         file_manager_state.cwd = '/foo'
-        device_state.device_type = 'ios'
+        device_state.device_type = Ios
 
         with capture(cd, ['/foo/bar/baz']) as o:
             output = o
@@ -87,7 +87,7 @@ class TestFileManager(unittest.TestCase):
         mock_path_exists_ios.return_value = True
 
         file_manager_state.cwd = '/foo'
-        device_state.device_type = 'ios'
+        device_state.device_type = Ios
 
         with capture(cd, ['bar']) as o:
             output = o
@@ -100,7 +100,7 @@ class TestFileManager(unittest.TestCase):
         mock_path_exists_android.return_value = True
 
         file_manager_state.cwd = '/foo'
-        device_state.device_type = 'android'
+        device_state.device_type = Android
 
         with capture(cd, ['bar']) as o:
             output = o
@@ -113,7 +113,7 @@ class TestFileManager(unittest.TestCase):
         mock_path_exists_ios.return_value = False
 
         file_manager_state.cwd = '/foo'
-        device_state.device_type = 'ios'
+        device_state.device_type = Ios
 
         with capture(cd, ['bar']) as o:
             output = o
@@ -141,7 +141,7 @@ class TestFileManager(unittest.TestCase):
     @mock.patch('objection.commands.filemanager._pwd_ios')
     def test_returns_current_directory_via_helper_for_ios(self, mock_pwd_ios):
         mock_pwd_ios.return_value = '/foo/bar'
-        device_state.device_type = 'ios'
+        device_state.device_type = Ios
 
         self.assertEqual(pwd(), '/foo/bar')
         self.assertTrue(mock_pwd_ios.called)
@@ -149,7 +149,7 @@ class TestFileManager(unittest.TestCase):
     @mock.patch('objection.commands.filemanager._pwd_android')
     def test_returns_current_directory_via_helper_for_android(self, mock_pwd_android):
         mock_pwd_android.return_value = '/foo/bar'
-        device_state.device_type = 'android'
+        device_state.device_type = Android
 
         self.assertEqual(pwd(), '/foo/bar')
         self.assertTrue(mock_pwd_android.called)
@@ -179,7 +179,7 @@ class TestFileManager(unittest.TestCase):
     @mock.patch('objection.commands.filemanager.pwd')
     @mock.patch('objection.commands.filemanager._ls_ios')
     def test_ls_gets_pwd_from_helper_with_no_argument(self, _, mock_pwd):
-        device_state.device_type = 'ios'
+        device_state.device_type = Ios
 
         ls([])
 
@@ -187,7 +187,7 @@ class TestFileManager(unittest.TestCase):
 
     @mock.patch('objection.commands.filemanager._ls_ios')
     def test_ls_calls_ios_helper_method(self, mock_ls_ios):
-        device_state.device_type = 'ios'
+        device_state.device_type = Ios
 
         ls(['/foo/bar'])
 
@@ -195,7 +195,7 @@ class TestFileManager(unittest.TestCase):
 
     @mock.patch('objection.commands.filemanager._ls_android')
     def test_ls_calls_android_helper_method(self, mock_ls_android):
-        device_state.device_type = 'android'
+        device_state.device_type = Android
 
         ls(['/foo/bar'])
 
@@ -337,7 +337,7 @@ Readable: True  Writable: True
 
     @mock.patch('objection.commands.filemanager._download_ios')
     def test_download_platform_proxy_calls_ios_method(self, mock_download_ios):
-        device_state.device_type = 'ios'
+        device_state.device_type = Ios
 
         download(['/foo', '/bar'])
 
@@ -345,7 +345,7 @@ Readable: True  Writable: True
 
     @mock.patch('objection.commands.filemanager._download_android')
     def test_download_platform_proxy_calls_android_method(self, mock_download_android):
-        device_state.device_type = 'android'
+        device_state.device_type = Android
 
         download(['/foo', '/bar'])
 
@@ -447,7 +447,7 @@ Successfully downloaded /foo to /bar
 
     @mock.patch('objection.commands.filemanager._upload_ios')
     def test_file_upload_method_proxy_calls_ios_helper_method(self, mock_upload_ios):
-        device_state.device_type = 'ios'
+        device_state.device_type = Ios
 
         upload(['/foo', '/bar'])
 
@@ -455,7 +455,7 @@ Successfully downloaded /foo to /bar
 
     @mock.patch('objection.commands.filemanager._upload_android')
     def test_file_upload_method_proxy_calls_android_helper_method(self, mock_upload_android):
-        device_state.device_type = 'android'
+        device_state.device_type = Android
 
         upload(['/foo', '/bar'])
 

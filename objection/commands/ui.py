@@ -1,7 +1,7 @@
 import click
 
 from objection.state.connection import state_connection
-from ..state.device import device_state
+from ..state.device import device_state, Ios, Android
 
 
 def alert(args: list = None) -> None:
@@ -18,10 +18,10 @@ def alert(args: list = None) -> None:
     else:
         message = args[0]
 
-    if device_state.device_type == 'ios':
+    if device_state.device_type == Ios:
         _alert_ios(message)
 
-    if device_state.device_type == 'android':
+    if device_state.device_type == Android:
         pass
 
 

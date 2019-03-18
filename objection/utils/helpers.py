@@ -5,7 +5,7 @@ import click
 from pkg_resources import parse_version
 
 from ..state.app import app_state
-from ..state.device import device_state
+from ..state.device import device_state, Ios, Android
 from ..state.jobs import job_manager_state
 
 
@@ -174,7 +174,7 @@ def warn_about_older_operating_systems() -> None:
     ios_supported = '9'
 
     # android & ios version warnings
-    if device_state.device_type == 'android' and (
+    if device_state.device_type == Android and (
             parse_version(device_state.os_version) < parse_version(android_supported)):
         click.secho('Warning: You appear to be running Android {0} which may result in '
                     'some hooks failing.\nIt is recommended to use at least an Android '
@@ -182,7 +182,7 @@ def warn_about_older_operating_systems() -> None:
                     fg='yellow')
 
     # android & ios version warnings
-    if device_state.device_type == 'ios' and (
+    if device_state.device_type == Ios and (
             parse_version(device_state.os_version) < parse_version(ios_supported)):
         click.secho('Warning: You appear to be running iOS {0} which may result in '
                     'some hooks failing.\nIt is recommended to use at least an iOS '

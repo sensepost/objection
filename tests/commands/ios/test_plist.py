@@ -2,6 +2,7 @@ import unittest
 from unittest import mock
 
 from objection.commands.ios.plist import cat
+from objection.state.device import device_state, Ios
 from ...helpers import capture
 
 
@@ -26,6 +27,8 @@ class TestPlist(unittest.TestCase):
     def test_cat_with_relative(self, mock_file_manager, mock_api):
         mock_file_manager.pwd.return_value = '/baz'
         mock_api.return_value.ios_plist_read.return_value = 'foobar'
+
+        device_state.device_type = Ios
 
         with capture(cat, ['foo']) as o:
             output = o
