@@ -180,7 +180,7 @@ export namespace sslpinning {
     const NSURLCredential: ObjC.Object = ObjC.classes.NSURLCredential;
     const resolver = new ApiResolver("objc");
     // - [NSURLSession URLSession:didReceiveChallenge:completionHandler:]
-    const search: ObjC.Object[] = resolver.enumerateMatchesSync(
+    const search: ObjC.Object[] = resolver.enumerateMatches(
       "-[* URLSession:didReceiveChallenge:completionHandler:]");
 
     // Move along if no NSURLSession usage is found

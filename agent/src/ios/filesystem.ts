@@ -66,7 +66,7 @@ export namespace iosfilesystem {
 
     // deref the isDir pointer to get the bool
     // *isDir === 1 means the path is a directory
-    return Memory.readInt(isDir) === 0;
+    return isDir.readInt() === 0;
   };
 
   // returns a 'pwd' that assumes the current bundle's path

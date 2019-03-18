@@ -63,8 +63,7 @@ export const dataToString = (raw: any): string => {
         } catch (e) { }
 
         try {
-
-          const data: string = Memory.readUtf8String(dataObject.bytes(), dataObject.length());
+          const data: string = dataObject.readUtf8String(dataObject.length());
           if (data.length > 0) {
             return data;
           }

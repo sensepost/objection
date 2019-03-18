@@ -1,6 +1,6 @@
 // dumps all of the keychain items available to the current
 // application.
-import { reverseEnumLookup } from "../lib/helpers";
+import { debugDump, reverseEnumLookup } from "../lib/helpers";
 import { kSec } from "./lib/constants";
 import { dataToString } from "./lib/helpers";
 import { IKeychainItem } from "./lib/interfaces";
@@ -90,14 +90,14 @@ export namespace ioskeychain {
 
       // prepare a pointer for the results and call SecItemCopyMatching to get them
       const resultsPointer: NativePointer = Memory.alloc(Process.pointerSize);
-      // const copyResult: NativePointer = SecItemCopyMatching(searchDictionary, resultsPointer);
       const copyResult: NativePointer = libObjc.SecItemCopyMatching(searchDictionary, resultsPointer);
 
       // without results (aka non-zero OSStatus) we just move along.
       if (!copyResult.isNull()) { return; }
 
       // read the resultant dict of the lookup from memory
-      const searchResults: NSDictionary = new ObjC.Object(Memory.readPointer(resultsPointer));
+      // const searchResults: NSDictionary = new ObjC.Object(Memory.readPointer(resultsPointer));
+      const searchResults: NSDictionary = new ObjC.Object(resultsPointer.readPointer());
 
       // if the results in the dict is empty (which is not something I expect),
       // fail fast too.

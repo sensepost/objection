@@ -39,7 +39,7 @@
     "@babel/runtime-corejs2": "^7",
     "@types/node": "^10.12",
     "frida-compile": "^8",
-    "frida-gum-types": "^2",
+    "frida-gum-types": "^4",
     "tslint": "^5"
   }
 }
