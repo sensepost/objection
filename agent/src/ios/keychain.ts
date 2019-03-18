@@ -96,7 +96,6 @@ export namespace ioskeychain {
       if (!copyResult.isNull()) { return; }
 
       // read the resultant dict of the lookup from memory
-      // const searchResults: NSDictionary = new ObjC.Object(Memory.readPointer(resultsPointer));
       const searchResults: NSDictionary = new ObjC.Object(resultsPointer.readPointer());
 
       // if the results in the dict is empty (which is not something I expect),
