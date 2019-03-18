@@ -210,9 +210,9 @@ class Agent(object):
 
         return self
 
-    def ad_hoc(self, source: str, unload=True) -> list:
+    def single(self, source: str, unload=True) -> list:
         """
-            Executes an adhoc script, capturing the output
+            Executes a single adhoc script, capturing the output and returning it.
 
             :param source:
             :param unload:
@@ -245,6 +245,28 @@ class Agent(object):
             script.unload()
 
         return message_buffer
+
+    def background(self, source: str):
+        """
+            Executes an artibrary Frida script in the background, using the
+            default on_message handler for incoming messages from the script.
+
+            :param source:
+            :return:
+        """
+
+        debug_print('Loading a background script')
+
+        session = self._get_session()
+        script = session.create_script(source=source)
+        script.on('message', self._on_message)
+        script.load()
+
+        if not self.resumed:
+            debug_print('Resuming PID `{pid}`'.format(pid=self.spawned_pid))
+            self.device.resume(self.spawned_pid)
+
+        debug_print('Background script loaded')
 
     def exports(self) -> frida.core.ScriptExports:
         """

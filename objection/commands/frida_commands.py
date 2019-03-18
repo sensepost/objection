@@ -1,8 +1,10 @@
+import os
+
 import click
 from tabulate import tabulate
 
 from objection.state.connection import state_connection
-from ..utils.helpers import sizeof_fmt
+from ..utils.helpers import sizeof_fmt, clean_argument_flags
 
 
 def _should_disable_exception_handler(args: list = None) -> bool:
@@ -34,3 +36,34 @@ def frida_environment(args: list = None) -> None:
         ('Debugger Attached', frida_env['debugger']),
         ('Frida Heap Size', sizeof_fmt(frida_env['heap']))
     ]))
+
+
+def load_background(args: list = None) -> None:
+    """
+        Loads a Frida script and runs it in the background.
+
+        :param args:
+        :return:
+    """
+
+    if len(clean_argument_flags(args)) <= 0:
+        click.secho('Usage: import <local path to frida-script> (optional name)',
+                    bold=True)
+        return
+
+    source = args[0]
+
+    # support ~ syntax
+    if source.startswith('~'):
+        source = os.path.expanduser(source)
+
+    if not os.path.isfile(source):
+        click.secho('Unable to import file {0}'.format(source), fg='red')
+        return
+
+    # read the hook sources
+    with open(source, 'r') as f:
+        hook = ''.join(f.read())
+
+    agent = state_connection.get_agent()
+    agent.background(hook)

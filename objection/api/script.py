@@ -25,7 +25,7 @@ def runonce():
     try:
 
         # run the script
-        response = state_connection.get_agent().ad_hoc(source)
+        response = state_connection.get_agent().single(source)
 
         if 'json' in request.args and request.args.get('json').lower() == 'false':
             return response

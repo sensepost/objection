@@ -127,7 +127,7 @@ def explore(startup_command: str, quiet: bool, file_commands, startup_script: cl
     # If we have a script, import and run that asap
     if startup_script:
         click.secho('Importing and running startup script at: {location}'.format(location=startup_script), dim=True)
-        response = agent.ad_hoc(startup_script.read())
+        response = agent.single(startup_script.read())
         print(response)
 
     try:

@@ -45,6 +45,11 @@ COMMANDS = {
         'exec': None,  # handled in the Repl class itself
     },
 
+    'import': {
+        'meta': 'Import fridascript from a full path and run it',
+        'exec': frida_commands.load_background
+    },
+
     # file manager commands
 
     'cd': {
