@@ -1,6 +1,6 @@
 // dumps all of the keychain items available to the current
 // application.
-import { debugDump, reverseEnumLookup } from "../lib/helpers";
+import { reverseEnumLookup } from "../lib/helpers";
 import { kSec } from "./lib/constants";
 import { dataToString } from "./lib/helpers";
 import { IKeychainItem } from "./lib/interfaces";
