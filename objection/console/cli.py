@@ -9,6 +9,7 @@ from ..__init__ import __version__
 from ..api.app import create_app as create_api_app
 from ..commands.device import get_device_info
 from ..commands.mobile_packages import patch_ios_ipa, patch_android_apk
+from ..commands.plugin import load_plugin
 from ..state.app import app_state
 from ..state.connection import state_connection
 from ..utils.agent import Agent
@@ -98,7 +99,8 @@ def api():
               help='A script to import and run before the repl polls the device for information.')
 @click.option('--enable-api', '-a', required=False, default=False, is_flag=True,
               help='Start the objection API server.')
-def explore(startup_command: str, quiet: bool, file_commands, startup_script: click.File, enable_api: bool) -> None:
+@click.option('--plugin-folder', '-P', required=False, default=None, help='The folder to load plugins from.')
+def explore(startup_command: str, quiet: bool, file_commands, startup_script: click.File, enable_api: bool, plugin_folder: str) -> None:
     """
         Start the objection exploration REPL.
     """
@@ -113,6 +115,14 @@ def explore(startup_command: str, quiet: bool, file_commands, startup_script: cl
 
     # set the frida agent
     state_connection.set_agent(agent=agent)
+
+    # load plugins
+    if plugin_folder:
+        import os
+        folder = os.path.abspath(plugin_folder)
+        for p in os.scandir(folder):
+            if p.is_file() or p.name.startswith('.'): continue
+            load_plugin([p.path])
 
     # start the main REPL
     r = Repl()
