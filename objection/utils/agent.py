@@ -160,7 +160,8 @@ class Agent(object):
         self.spawned_pid = self.device.spawn(state_connection.gadget_name)
         debug_print('PID `{pid}` spawned, attaching...'.format(pid=self.spawned_pid))
 
-        return self.device.attach(state_connection.gadget_name)
+        self.session = self.device.attach(state_connection.gadget_name)
+        return self.session
 
     def _get_agent_source(self) -> str:
         """
