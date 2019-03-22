@@ -156,7 +156,7 @@ COMMANDS = {
 
             'search': {
                 'meta': 'Search for pattern in the applications memory',
-                'flags': ['--string'],
+                'flags': ['--string', '--offsets-only'],
                 'exec': memory.find_pattern
             },
 

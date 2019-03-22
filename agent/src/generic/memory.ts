@@ -1,3 +1,5 @@
+import { colors } from "../lib/color";
+
 export namespace memory {
 
   export const listModules = (): Module[] => {
@@ -22,11 +24,18 @@ export namespace memory {
     return new NativePointer(address).readByteArray(size);
   };
 
-  export const search = (pattern: string): string[] => {
+  export const search = (pattern: string, onlyOffsets: boolean = false): string[] => {
     const addresses = listRanges("rw-")
       .map((range) => {
         return Memory.scanSync(range.base, range.size, pattern)
           .map((match) => {
+            if (!onlyOffsets) {
+              colors.log(hexdump(match.address, {
+                ansi: true,
+                header: false,
+                length: 48,
+              }));
+            }
             return match.address.toString();
           });
       });

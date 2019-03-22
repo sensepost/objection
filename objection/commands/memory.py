@@ -20,6 +20,18 @@ def _is_string_input(args: list) -> bool:
     return len(args) > 0 and '--string' in args
 
 
+def _should_only_dump_offsets(args: list) -> bool:
+    """
+        Checks if --offsets-only is in the list pf tokens received
+        from the command line.
+
+        :param args:
+        :return:
+    """
+
+    return '--offsets-only' in args
+
+
 # TODO: Dump memory on hooked methods.
 # A PR in the repo this method is based on has an idea for this
 #
@@ -172,7 +184,7 @@ def find_pattern(args: list) -> None:
     """
 
     if len(clean_argument_flags(args)) <= 0:
-        click.secho('Usage: memory search "<pattern eg: 41 41 41 ?? 41>" (--string)', bold=True)
+        click.secho('Usage: memory search "<pattern eg: 41 41 41 ?? 41>" (--string) (--offsets-only)', bold=True)
         return
 
     # if we got a string as input, convert it to hex
@@ -184,12 +196,13 @@ def find_pattern(args: list) -> None:
     click.secho('Searching for: {0}'.format(pattern), dim=True)
 
     api = state_connection.get_api()
-    data = api.memory_search(pattern)
+    data = api.memory_search(pattern, _should_only_dump_offsets(args))
 
     if len(data) > 0:
         click.secho('Pattern matched at {0} addresses'.format(len(data)), fg='green')
-        for address in data:
-            click.secho(address)
+        if _should_only_dump_offsets(args):
+            for address in data:
+                click.secho(address)
 
     else:
         click.secho('Unable to find the pattern in any memory region')

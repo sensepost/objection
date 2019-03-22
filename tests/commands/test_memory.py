@@ -118,7 +118,7 @@ function  test        32768
         with capture(find_pattern, []) as o:
             output = o
 
-        self.assertEqual(output, 'Usage: memory search "<pattern eg: 41 41 41 ?? 41>" (--string)\n')
+        self.assertEqual(output, 'Usage: memory search "<pattern eg: 41 41 41 ?? 41>" (--string) (--offsets-only)\n')
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_find_pattern_without_string_argument(self, mock_api):
@@ -129,7 +129,6 @@ function  test        32768
 
         expected_output = """Searching for: 41 41 41
 Pattern matched at 1 addresses
-0x08000000
 """
 
         self.assertEqual(output, expected_output)
@@ -142,6 +141,19 @@ Pattern matched at 1 addresses
             output = o
 
         expected_output = """Searching for: 66 6f 6f 2d 62 61 72 2d 62 61 7a
+Pattern matched at 1 addresses
+"""
+
+        self.assertEqual(output, expected_output)
+
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_find_pattern_without_string_argument_with_offets_only(self, mock_api):
+        mock_api.return_value.memory_search.return_value = ['0x08000000']
+
+        with capture(find_pattern, ['41 41 41', '--offsets-only']) as o:
+            output = o
+
+        expected_output = """Searching for: 41 41 41
 Pattern matched at 1 addresses
 0x08000000
 """
