@@ -10,7 +10,7 @@ It is also possible to provide a raw string, which should be suffixed with the
 --string flag, indicating to the command that it should convert the string to
 bytes before executing the search. Wildcards are not supported in string searches.
 
-Output may be controller primarily with the --offsets-only flag which indicates
+Output may be controlled primarily with the --offsets-only flag which indicates
 wether a small hexdump of matched memory regions should occur, or if only the
 matched offsets should be printed.
 
