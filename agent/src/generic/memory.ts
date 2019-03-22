@@ -23,7 +23,7 @@ export namespace memory {
   };
 
   export const search = (pattern: string): string[] => {
-    const addresses = listRanges("r--")
+    const addresses = listRanges("rw-")
       .map((range) => {
         return Memory.scanSync(range.base, range.size, pattern)
           .map((match) => {
