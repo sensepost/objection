@@ -103,8 +103,9 @@ Dumped keychain to: foo.json
         self.assertTrue(mock_open.called)
 
     @mock.patch('objection.state.connection.state_connection.get_api')
-    def test_clear(self, mock_api):
-        mock_api.return_value.ios_keychain_empty.called
+    @mock.patch('objection.commands.ios.keychain.click.confirm')
+    def test_clear(self, mock_confirm, mock_api):
+        mock_confirm.return_value = True
 
         with capture(clear, []) as o:
             output = o

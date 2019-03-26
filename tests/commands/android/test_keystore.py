@@ -38,7 +38,10 @@ test     True   True
         self.assertEqual(output, expected_output)
 
     @mock.patch('objection.state.connection.state_connection.get_api')
-    def test_clear(self, mock_api):
+    @mock.patch('objection.commands.android.keystore.click.confirm')
+    def test_clear(self, mock_confirm, mock_api):
+        mock_confirm.return_value = True
+
         clear()
 
         self.assertTrue(mock_api.return_value.android_keystore_clear.called)
