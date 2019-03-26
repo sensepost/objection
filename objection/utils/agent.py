@@ -41,6 +41,7 @@ class Agent(object):
 
             :param message:
             :param data:
+
             :return:
         """
 
@@ -62,11 +63,13 @@ class Agent(object):
             raise e
 
     @staticmethod
-    def _on_detach(message: str):
+    def _on_detach(message: str, crash):
         """
             The callback to run for the detach signal
 
             :param message:
+            :param crash:
+
             :return:
         """
 
@@ -81,6 +84,12 @@ class Agent(object):
             # process the response
             if message:
                 click.secho('(session detach message) ' + message, fg='red')
+
+            # Frida 12.3 crash reporting
+            # https://www.nowsecure.com/blog/2019/02/07/frida-12-3-debuts-new-crash-reporting-feature/
+            if crash:
+                click.secho('(process crash report)', fg='red')
+                click.secho('\n\t{0}'.format(crash.report), dim=True)
 
         except Exception as e:
             click.secho('Failed to process an incoming message for a session detach signal: {0}'.format(e), fg='red',
