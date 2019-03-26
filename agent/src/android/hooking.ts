@@ -40,7 +40,11 @@ export namespace hooking {
       const uniqueMethods: string[] = clazzInstance.class.getDeclaredMethods().map((method) => {
         // perform a cleanup of the method. An example after toGenericString() would be:
         // public void android.widget.ScrollView.draw(android.graphics.Canvas) throws Exception
-        let m = method.toGenericString();
+        // public final rx.c.b<java.lang.Throwable> com.apple.android.music.icloud.a.a(rx.c.b<java.lang.Throwable>)
+        let m: string = method.toGenericString();
+
+        // Remove generics from the method
+        while (m.includes("<")) { m = m.replace(/<.*?>/g, ""); }
 
         // remove any "Throws" the method may have
         if (m.indexOf(" throws ") !== -1) { m = m.substring(0, m.indexOf(" throws ")); }
