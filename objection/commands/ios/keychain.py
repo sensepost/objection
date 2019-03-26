@@ -98,8 +98,8 @@ def clear(args: list = None) -> None:
         :return:
     """
 
-    # if not click.confirm('Are you sure you want to clear the iOS keychain?'):
-    #     return
+    if not click.confirm('Are you sure you want to clear the iOS keychain?'):
+        return
 
     click.secho('Clearing the keychain...', dim=True)
 
