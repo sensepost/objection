@@ -1,4 +1,5 @@
 import click
+import frida
 
 from objection.state.connection import state_connection
 from objection.utils.helpers import clean_argument_flags
@@ -277,11 +278,17 @@ def search_methods(args: list) -> None:
         if class_filter and class_filter.lower() not in class_name.lower():
             continue
 
-        for method in api.android_hooking_get_class_methods(class_name):
-            # get only the raw method, minus returns, throws and args
-            method = method.split('(')[0].split(' ')[-1]
-            if search.lower() in method.lower():
-                click.secho(method)
-                found += 1
+        try:
+
+            for method in api.android_hooking_get_class_methods(class_name):
+                # get only the raw method, minus returns, throws and args
+                method = method.split('(')[0].split(' ')[-1]
+                if search.lower() in method.lower():
+                    click.secho(method)
+                    found += 1
+
+        except frida.core.RPCException as e:
+            click.secho('Enumerating methods for class \'{0}\' failed with: {1}'.format(class_name, e), fg='red', dim=True)
+            click.secho('Ignoring error and continuing search...', dim=True)
 
     click.secho('\nFound {0} methods'.format(found), bold=True)
