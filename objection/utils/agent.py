@@ -35,7 +35,7 @@ class Agent(object):
         atexit.register(self.cleanup)
 
     @staticmethod
-    def _on_message(message: dict, data):
+    def on_message(message: dict, data):
         """
             The callback to run when a message is received from the agent.
 
@@ -63,7 +63,7 @@ class Agent(object):
             raise e
 
     @staticmethod
-    def _on_detach(message: str, crash):
+    def on_detach(message: str, crash):
         """
             The callback to run for the detach signal
 
@@ -137,7 +137,7 @@ class Agent(object):
 
         raise Exception('Failed to find a device to attach to!')
 
-    def _get_session(self) -> frida.core.Session:
+    def get_session(self) -> frida.core.Session:
         """
             Attempt to get a Frida session on a device.
         """
@@ -156,7 +156,7 @@ class Agent(object):
             debug_print('Process attached!')
             self.resumed = True
 
-            self.session.on('detached', self._on_detach)
+            self.session.on('detached', self.on_detach)
 
             return self.session
 
@@ -202,9 +202,9 @@ class Agent(object):
 
         debug_print('Injecting agent...')
 
-        session = self._get_session()
+        session = self.get_session()
         self.script = session.create_script(source=self._get_agent_source())
-        self.script.on('message', self._on_message)
+        self.script.on('message', self.on_message)
         self.script.load()
 
         if not self.resumed:
@@ -242,7 +242,7 @@ class Agent(object):
 
             message_buffer.append(message)
 
-        session = self._get_session()
+        session = self.get_session()
         script = session.create_script(source=source)
         script.on('message', on_message)
         script.load()
@@ -267,9 +267,9 @@ class Agent(object):
 
         debug_print('Loading a background script')
 
-        session = self._get_session()
+        session = self.get_session()
         script = session.create_script(source=source)
-        script.on('message', self._on_message)
+        script.on('message', self.on_message)
         script.load()
 
         if not self.resumed:

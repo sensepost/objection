@@ -1,3 +1,4 @@
+import os
 import threading
 import time
 
@@ -13,7 +14,8 @@ from ..commands.plugin import load_plugin
 from ..state.app import app_state
 from ..state.connection import state_connection
 from ..utils.agent import Agent
-from ..utils.helpers import normalize_gadget_name, print_frida_connection_help, warn_about_older_operating_systems
+from ..utils.helpers import normalize_gadget_name, print_frida_connection_help, warn_about_older_operating_systems, \
+    debug_print
 
 
 # Start the Click command group
@@ -100,7 +102,8 @@ def api():
 @click.option('--enable-api', '-a', required=False, default=False, is_flag=True,
               help='Start the objection API server.')
 @click.option('--plugin-folder', '-P', required=False, default=None, help='The folder to load plugins from.')
-def explore(startup_command: str, quiet: bool, file_commands, startup_script: click.File, enable_api: bool, plugin_folder: str) -> None:
+def explore(startup_command: str, quiet: bool, file_commands, startup_script: click.File, enable_api: bool,
+            plugin_folder: str) -> None:
     """
         Start the objection exploration REPL.
     """
@@ -118,10 +121,16 @@ def explore(startup_command: str, quiet: bool, file_commands, startup_script: cl
 
     # load plugins
     if plugin_folder:
-        import os
         folder = os.path.abspath(plugin_folder)
+        debug_print('[plugin] Plugins path is: {0}'.format(folder))
+
         for p in os.scandir(folder):
-            if p.is_file() or p.name.startswith('.'): continue
+            # skip files and hidden directories
+            if p.is_file() or p.name.startswith('.'):
+                debug_print('[plugin] Skipping {0}'.format(p.name))
+                continue
+
+            debug_print('[plugin] Attempting to load plugin at {0}'.format(p.path))
             load_plugin([p.path])
 
     # start the main REPL
