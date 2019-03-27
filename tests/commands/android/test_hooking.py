@@ -4,7 +4,7 @@ from unittest import mock
 from objection.commands.android.hooking import _string_is_true, _should_dump_backtrace, _should_dump_args, \
     _should_dump_return_value, show_android_classes, show_android_class_methods, watch_class_method, \
     show_registered_broadcast_receivers, show_registered_services, show_registered_activities, \
-    set_method_return_value, search_class
+    set_method_return_value, search_class, search_methods
 from ...helpers import capture
 
 
@@ -241,6 +241,90 @@ Found 3 classes
 com.foo.bar.baz
 
 Found 2 classes
+"""
+
+        self.assertEqual(output, expected_output)
+
+    def test_search_method_validates_arguments(self):
+        with capture(search_methods, []) as o:
+            output = o
+
+        self.assertEqual(output, 'Usage: android hooking search methods <name> (optional: <package-filter>)\n')
+
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    @mock.patch('objection.commands.android.hooking.click.confirm')
+    def test_search_class_handles_empty_data_with_no_filter(self, mock_confirm, mock_api):
+        mock_api.return_value.android_hooking_get_classes.return_value = []
+        mock_api.return_value.android_hooking_get_class_methods.return_value = []
+
+        # answer yes to the filter warning
+        mock_confirm.return_value = True
+
+        with capture(search_methods, ['hteeteepee']) as o:
+            output = o
+
+        expected_output = """Warning, searching all classes may take some time and in some cases, crash the target application.
+Found 0 classes, searching methods (this may take some time)...
+
+Found 0 methods
+"""
+
+        self.assertEqual(output, expected_output)
+
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_search_class_handles_empty_data_with_filter(self, mock_api):
+        mock_api.return_value.android_hooking_get_classes.return_value = []
+        mock_api.return_value.android_hooking_get_class_methods.return_value = []
+
+        with capture(search_methods, ['hteeteepee', 'com.foo']) as o:
+            output = o
+
+        expected_output = """Found 0 classes, searching methods (this may take some time)...
+Filtering classes with com.foo
+
+Found 0 methods
+"""
+
+        self.assertEqual(output, expected_output)
+
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    @mock.patch('objection.commands.android.hooking.click.confirm')
+    def test_search_class_with_no_filter(self, mock_confirm, mock_api):
+        mock_api.return_value.android_hooking_get_classes.return_value = ['com.foo.bar']
+        mock_api.return_value.android_hooking_get_class_methods.return_value = ['invoke_hteeteepee_method']
+
+        # answer yes to the filter warning
+        mock_confirm.return_value = True
+
+        with capture(search_methods, ['hteeteepee']) as o:
+            output = o
+
+        expected_output = """Warning, searching all classes may take some time and in some cases, crash the target application.
+Found 1 classes, searching methods (this may take some time)...
+invoke_hteeteepee_method
+
+Found 1 methods
+"""
+
+        self.assertEqual(output, expected_output)
+
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    @mock.patch('objection.commands.android.hooking.click.confirm')
+    def test_search_class_with_filter(self, mock_confirm, mock_api):
+        mock_api.return_value.android_hooking_get_classes.return_value = ['com.foo.bar', 'com.test.suite']
+        mock_api.return_value.android_hooking_get_class_methods.return_value = ['invoke_hteeteepee_method']
+
+        # answer yes to the filter warning
+        mock_confirm.return_value = True
+
+        with capture(search_methods, ['hteeteepee', 'com.test']) as o:
+            output = o
+
+        expected_output = """Found 2 classes, searching methods (this may take some time)...
+Filtering classes with com.test
+invoke_hteeteepee_method
+
+Found 1 methods
 """
 
         self.assertEqual(output, expected_output)

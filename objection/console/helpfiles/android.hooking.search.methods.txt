@@ -1,0 +1,13 @@
+Command: android hooking search methods
+
+Usage: android hooking search methods <search string> (optional: package-filter)
+
+Search for class methods in the current Java runtime with the search string
+as part of the class name. An optional package filter may be used to limit
+the method search to a specific namespace.
+
+WARNING: This command may easily crash the application without a filter.
+
+Examples:
+   android hooking search classes jailbreak com.package
+   android hooking search classes sslpinning

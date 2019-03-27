@@ -216,8 +216,7 @@ def set_method_return_value(args: list = None) -> None:
 
 def search_class(args: list) -> None:
     """
-        Searches the current Android application for instances
-        of a class.
+        Searches the current Android application for a class.
 
         :param args:
         :return:
@@ -241,3 +240,48 @@ def search_class(args: list) -> None:
             found += 1
 
     click.secho('\nFound {0} classes'.format(found), bold=True)
+
+
+def search_methods(args: list) -> None:
+    """
+        Searches the current Android application for a class method.
+
+        :param args:
+        :return:
+    """
+
+    if len(clean_argument_flags(args)) < 1:
+        click.secho('Usage: android hooking search methods <name> (optional: <package-filter>)', bold=True)
+        return
+
+    search = args[0]
+    class_filter = args[1] if len(clean_argument_flags(args)) > 1 else None
+    found = 0
+
+    if not class_filter:
+        click.secho('Warning, searching all classes may take some time and in some cases, '
+                    'crash the target application.', fg='yellow')
+        if not click.confirm('Continue?'):
+            return
+
+    api = state_connection.get_api()
+
+    # get the classes we have
+    classes = api.android_hooking_get_classes()
+    click.secho('Found {0} classes, searching methods (this may take some time)...'.format(len(classes)), dim=True)
+    if class_filter:
+        click.secho('Filtering classes with {0}'.format(class_filter), dim=True)
+
+    # loop the classes and check the methods
+    for class_name in sorted(classes):
+        if class_filter and class_filter.lower() not in class_name.lower():
+            continue
+
+        for method in api.android_hooking_get_class_methods(class_name):
+            # get only the raw method, minus returns, throws and args
+            method = method.split('(')[0].split(' ')[-1]
+            if search.lower() in method.lower():
+                click.secho(method)
+                found += 1
+
+    click.secho('\nFound {0} methods'.format(found), bold=True)

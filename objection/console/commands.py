@@ -304,6 +304,10 @@ COMMANDS = {
                             'classes': {
                                 'meta': 'Search for Java classes matching a name',
                                 'exec': android_hooking.search_class
+                            },
+                            'methods': {
+                                'meta': 'Search for Java methods matching a name',
+                                'exec': android_hooking.search_methods
                             }
                         }
                     }
