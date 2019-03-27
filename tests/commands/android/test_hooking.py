@@ -312,7 +312,9 @@ Found 1 methods
     @mock.patch('objection.commands.android.hooking.click.confirm')
     def test_search_class_with_filter(self, mock_confirm, mock_api):
         mock_api.return_value.android_hooking_get_classes.return_value = ['com.foo.bar', 'com.test.suite']
-        mock_api.return_value.android_hooking_get_class_methods.return_value = ['invoke_hteeteepee_method']
+        mock_api.return_value.android_hooking_get_class_methods.return_value = [
+            'public void invoke_hteeteepee_method(java.lang.String) throws java.lang.NullPointerException'
+        ]
 
         # answer yes to the filter warning
         mock_confirm.return_value = True
