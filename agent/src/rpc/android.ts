@@ -1,5 +1,6 @@
 import { clipboard } from "../android/clipboard";
 import { androidfilesystem } from "../android/filesystem";
+import { heap } from "../android/heap";
 import { hooking } from "../android/hooking";
 import { intent } from "../android/intent";
 import { keystore } from "../android/keystore";
@@ -36,6 +37,9 @@ export const android = {
   androidHookingWatchClass: (clazz: string): Promise<void> => hooking.watchClass(clazz),
   androidHookingWatchMethod: (fqClazz: string, dargs: boolean, dbt: boolean, dret: boolean): Promise<void> =>
     hooking.watchMethod(fqClazz, dargs, dbt, dret),
+
+  // android heap methods
+  androidLivePrintClassInstances: (clazz: string): Promise<void> => heap.printInstances(clazz),
 
   // android intents
   androidIntentStartActivity: (activityClass: string): Promise<void> => intent.startActivity(activityClass),

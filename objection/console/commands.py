@@ -8,6 +8,7 @@ from ..commands import sqlite
 from ..commands import ui
 from ..commands.android import clipboard
 from ..commands.android import command
+from ..commands.android import heap
 from ..commands.android import hooking as android_hooking
 from ..commands.android import intents
 from ..commands.android import keystore
@@ -307,6 +308,15 @@ COMMANDS = {
                         }
                     }
                 },
+            },
+            'heap': {
+                'meta': 'Commands to work with the Android Heap',
+                'commands': {
+                    'print_instances': {
+                        'meta': 'Lists the currently live instances of a particular class',
+                        'exec': heap.live_instances
+                    }
+                }
             },
             'keystore': {
                 'meta': 'Commands to work with the Android KeyStore',
