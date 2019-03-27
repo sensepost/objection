@@ -3,6 +3,7 @@ from ..commands import device
 from ..commands import filemanager
 from ..commands import frida_commands
 from ..commands import jobs
+from ..commands import plugin
 from ..commands import memory
 from ..commands import sqlite
 from ..commands import ui
@@ -35,6 +36,16 @@ from ..utils.helpers import list_current_jobs
 # commands help is stored in the help files directory as a txt file.
 
 COMMANDS = {
+
+    'plugin': {
+        'meta': 'Work with plugins',
+        'commands': {
+            'load': {
+                'meta': 'Load a plugin',
+                'exec': plugin.load_plugin
+            }
+        }
+    },
 
     '!': {
         'meta': 'Execute an Operating System command',
