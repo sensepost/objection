@@ -2,7 +2,7 @@ import os
 import importlib.util
 import click
 
-from ..console import commands
+import objection.console.commands
 
 
 def load_plugin(args: list = None) -> None:
@@ -23,7 +23,7 @@ def load_plugin(args: list = None) -> None:
         path = os.path.join(path, '__init__.py')
 
     spec = importlib.util.spec_from_file_location('', path)
-    plugin = importlib.util.module_from_spec(spec)
+    plugin = spec.loader.load_module()
     spec.loader.exec_module(plugin)
 
     namespace = plugin.namespace
@@ -33,7 +33,7 @@ def load_plugin(args: list = None) -> None:
     plugin.__name__ = namespace
     instance = plugin.plugin(namespace)
 
-    commands.COMMANDS['plugin']['commands'][instance.namespace] = instance.implementation
+    objection.console.commands.COMMANDS['plugin']['commands'][instance.namespace] = instance.implementation
     instance._inject()
 
     click.secho('Loaded plugin: ' + plugin.__name__)
