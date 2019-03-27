@@ -34,6 +34,5 @@ def load_plugin(args: list = None) -> None:
     instance = plugin.plugin(namespace)
 
     objection.console.commands.COMMANDS['plugin']['commands'][instance.namespace] = instance.implementation
-    instance._inject()
 
     click.secho('Loaded plugin: ' + plugin.__name__)
