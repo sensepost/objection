@@ -34,6 +34,8 @@ def frida_environment(args: list = None) -> None:
         ('Process Architecture', frida_env['arch']),
         ('Process Platform', frida_env['platform']),
         ('Debugger Attached', frida_env['debugger']),
+        ('Script Runtime', frida_env['runtime']),
+        ('Script Filename', frida_env['filename']),
         ('Frida Heap Size', sizeof_fmt(frida_env['heap']))
     ]))
 

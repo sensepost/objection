@@ -29,8 +29,10 @@ export namespace environment {
     return {
       arch: Process.arch,
       debugger: Process.isDebuggerAttached(),
+      filename: Script.fileName,
       heap: Frida.heapSize,
       platform: Process.platform,
+      runtime: Script.runtime,
       version: Frida.version,
     };
   };
