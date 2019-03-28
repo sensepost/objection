@@ -1,0 +1,16 @@
+Command: plugin load
+
+Usage: plugin load <plugin path> (optional: namespace)
+
+Loads an objection plugin into the current session. For more information on
+plugins, please refer to the project wiki at:
+    https://github.com/sensepost/objection/wiki 
+
+By default, plugin commands are nested beneath the plugin context menu and
+will use the plugin's built-in namespace as the subcommand to use. However,
+this namespace may be specified at load time, overriding the plugins buil-in
+name.
+
+Examples:
+   plugin load ~/home/objection-plugins/feature
+   plugin load ~/home/objection-plugins/feature newname

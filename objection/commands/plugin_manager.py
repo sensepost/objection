@@ -16,7 +16,7 @@ def load_plugin(args: list = None) -> None:
     """
 
     if len(args) <= 0:
-        click.secho('Usage: plugin load <plugin path> [<plugin namespace>]', bold=True)
+        click.secho('Usage: plugin load <plugin path> (<plugin namespace>)', bold=True)
         return
 
     path = os.path.abspath(args[0])
