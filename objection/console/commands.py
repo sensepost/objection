@@ -3,7 +3,7 @@ from ..commands import device
 from ..commands import filemanager
 from ..commands import frida_commands
 from ..commands import jobs
-from ..commands import plugin
+from ..commands import plugin_manager
 from ..commands import memory
 from ..commands import sqlite
 from ..commands import ui
@@ -42,7 +42,7 @@ COMMANDS = {
         'commands': {
             'load': {
                 'meta': 'Load a plugin',
-                'exec': plugin.load_plugin
+                'exec': plugin_manager.load_plugin
             }
         }
     },

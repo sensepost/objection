@@ -43,13 +43,13 @@ class VersionInfo(Plugin):
     def version(self, args: list):
         """
             Tests a plugin by calling an RPC export method
-            called work, and printing the result.
+            called getInformation, and printing the result.
 
             :param args:
             :return:
         """
 
-        v = self.api.getInformation()
+        v = self.api.get_information()
         print('Frida version: {0}'.format(v))
 
 

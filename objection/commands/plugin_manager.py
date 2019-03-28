@@ -4,7 +4,6 @@ import traceback
 
 import click
 
-import objection.console.commands
 from ..utils.plugin import Plugin as PluginType
 
 
@@ -54,5 +53,7 @@ def load_plugin(args: list = None) -> None:
         click.secho('Failed to load plugin \'{0}\'. Invalid plugin type.'.format(namespace), fg='red', bold=True)
         return
 
-    objection.console.commands.COMMANDS['plugin']['commands'][instance.namespace] = instance.implementation
+    from ..console import commands
+    commands.COMMANDS['plugin']['commands'][instance.namespace] = instance.implementation
+
     click.secho('Loaded plugin: {0}'.format(plugin.__name__), bold=True)

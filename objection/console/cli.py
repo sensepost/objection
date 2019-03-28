@@ -10,7 +10,7 @@ from ..__init__ import __version__
 from ..api.app import create_app as create_api_app
 from ..commands.device import get_device_info
 from ..commands.mobile_packages import patch_ios_ipa, patch_android_apk
-from ..commands.plugin import load_plugin
+from ..commands.plugin_manager import load_plugin
 from ..state.app import app_state
 from ..state.connection import state_connection
 from ..utils.agent import Agent
