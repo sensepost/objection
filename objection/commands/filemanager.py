@@ -552,6 +552,56 @@ def _upload_android(path: str, destination: str) -> None:
         del _ls_cache[os.path.dirname(destination)]
 
 
+def rm(args: list) -> None:
+    """
+        Remove a file from the remote filesystem.
+
+        :param args:
+        :return:
+    """
+
+    if len(args) < 1:
+        click.secho('Usage: rm <target remote file>', bold=True)
+        return
+
+    target = args[0]
+
+    if not os.path.isabs(target):
+        target = device_state.device_type.path_seperator.join([pwd(), target])
+
+    if not click.confirm('Really delete {0} ?'.format(target)):
+        click.secho('Not deleting {0}'.format(target), dim=True)
+        return
+
+    if device_state.device_type == Ios:
+        raise NotImplementedError
+
+    if device_state.device_type == Android:
+        _rm_android(target)
+
+
+def _rm_android(t: str) -> None:
+    """
+        Removes a file from an Android device.
+
+        :param t:
+        :return:
+    """
+
+    api = state_connection.get_api()
+
+    if not _path_exists_android(t):
+        click.secho('{0} does not exist'.format(t), fg='red')
+        return
+
+    if api.android_file_delete(t):
+        click.secho('{0} successfully deleted'.format(t), fg='green')
+
+    # update the file system cache entry
+    if os.path.dirname(t) in _ls_cache:
+        del _ls_cache[os.path.dirname(t)]
+
+
 def _get_short_ios_listing() -> list:
     """
         Get a shortened file and directory listing for

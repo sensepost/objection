@@ -8,7 +8,7 @@ export namespace intent {
   const FLAG_ACTIVITY_NEW_TASK = 0x10000000;
 
   // starts an Android activity
-  // This method does not year allow for 'extra' data to be send along
+  // This method does not yet allow for 'extra' data to be send along
   // with the intent.
   export const startActivity = (activityClass: string): Promise<void> => {
     // -- Sample Java

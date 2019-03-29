@@ -1,4 +1,5 @@
 import * as fs from "fs";
+import { colors } from "../lib/color";
 import { hexStringToBytes } from "../lib/helpers";
 import { IAndroidFilesystem } from "./lib/interfaces";
 import { getApplicationContext, wrapJavaPerform } from "./lib/libjava";
@@ -88,6 +89,20 @@ export namespace androidfilesystem {
 
     writeStream.write(hexStringToBytes(data));
     writeStream.end();
+  };
+
+  export const deleteFile = (path: string): Promise<boolean> => {
+    // -- Sample Java Code
+    //
+    // File d = new File(".");
+    // d.delete();
+
+    return wrapJavaPerform(() => {
+      const file: File = Java.use("java.io.File");
+      const currentFile: JavaClass = file.$new(path);
+
+      return currentFile.delete();
+    });
   };
 
   export const ls = (p: string): Promise<IAndroidFilesystem> => {

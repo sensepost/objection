@@ -2,7 +2,7 @@ import unittest
 from unittest import mock
 
 from objection.commands.filemanager import cd, _path_exists_ios, _path_exists_android, pwd, pwd_print, _pwd_ios, \
-    _pwd_android, ls, _ls_ios, _ls_android, download, _download_ios, _download_android, upload
+    _pwd_android, ls, _ls_ios, _ls_android, download, _download_ios, _download_android, upload, rm, _rm_android
 from objection.state.device import device_state, Ios, Android
 from objection.state.filemanager import file_manager_state
 from ..helpers import capture
@@ -126,6 +126,53 @@ class TestFileManager(unittest.TestCase):
         mock_api.return_value.ios_file_exists.return_value = True
 
         self.assertTrue(_path_exists_ios('/foo/bar'))
+
+    def test_rm_dispatcher_validates_arguments(self):
+        with capture(rm, []) as o:
+            output = o
+
+        expected = 'Usage: rm <target remote file>\n'
+
+        self.assertEqual(output, expected)
+
+    @mock.patch('objection.commands.filemanager.click.confirm')
+    @mock.patch('objection.commands.filemanager._rm_android')
+    def test_rm_dispatcher_confirms_before_delete(self, mock_android_rm, mock_confirm):
+        device_state.device_type = Android
+        file_manager_state.cwd = '/foo'
+        mock_confirm.return_value = False
+
+        with capture(rm, ['poo']) as o:
+            output = o
+
+        expected = 'Not deleting /foo/poo\n'
+
+        self.assertEqual(output, expected)
+        self.assertFalse(mock_android_rm.called)
+
+    @mock.patch('objection.commands.filemanager.click.confirm')
+    @mock.patch('objection.commands.filemanager._rm_android')
+    def test_rm_dispatcher_calls_android_rm_helper(self, mock_android_rm, mock_confirm):
+        device_state.device_type = Android
+        mock_android_rm.return_value = True
+        mock_confirm.return_value = True
+
+        rm('/poo')
+
+        self.assertTrue(mock_android_rm.called)
+
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    @mock.patch('objection.commands.filemanager._path_exists_android')
+    def test_rm_android_helper_file_exists(self, mock_exists, mock_api):
+        mock_exists.return_value = True
+        mock_api.return_value.android_file_delete.return_value = True
+
+        with capture(_rm_android, '/poo') as o:
+            output = o
+
+        expected = '/poo successfully deleted\n'
+
+        self.assertTrue(output, expected)
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_android_path_exists_helper(self, mock_api):

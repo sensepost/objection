@@ -3,8 +3,8 @@ from ..commands import device
 from ..commands import filemanager
 from ..commands import frida_commands
 from ..commands import jobs
-from ..commands import plugin_manager
 from ..commands import memory
+from ..commands import plugin_manager
 from ..commands import sqlite
 from ..commands import ui
 from ..commands.android import clipboard
@@ -117,6 +117,12 @@ COMMANDS = {
                 'exec': filemanager.download
             }
         }
+    },
+
+    'rm': {
+        'meta': 'Delete files from the remote filesystem',
+        'dynamic': filemanager.list_files_in_current_fm_directory,
+        'exec': filemanager.rm
     },
 
     # device and env info commands
