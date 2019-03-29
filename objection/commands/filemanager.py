@@ -513,7 +513,8 @@ def _upload_ios(path: str, destination: str) -> None:
 
     # unset the cache key for this directory so the next short listing
     # will have updated contents
-    del _ls_cache[os.path.dirname(destination)]
+    if os.path.dirname(destination) in _ls_cache:
+        del _ls_cache[os.path.dirname(destination)]
 
 
 def _upload_android(path: str, destination: str) -> None:
@@ -547,7 +548,8 @@ def _upload_android(path: str, destination: str) -> None:
 
     # unset the cache key for this directory so the next short listing
     # will have updated contents
-    del _ls_cache[os.path.dirname(destination)]
+    if os.path.dirname(destination) in _ls_cache:
+        del _ls_cache[os.path.dirname(destination)]
 
 
 def _get_short_ios_listing() -> list:
