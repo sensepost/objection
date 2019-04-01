@@ -7,8 +7,8 @@ import { IKeychainItem } from "./lib/interfaces";
 import { libObjc } from "./lib/libobjc";
 import {
   NSDictionary,
-  NSMutableDictionary,
-  NSString,
+  NSMutableDictionary as NSMutableDictionaryType,
+  NSString as NSStringType,
 } from "./lib/types";
 
 const { NSMutableDictionary, NSString } = ObjC.classes;
@@ -27,7 +27,7 @@ export namespace ioskeychain {
 
   // clean out the keychain
   export const empty = (): void => {
-    const searchDictionary = NSMutableDictionary.alloc().init();
+    const searchDictionary: NSMutableDictionaryType = NSMutableDictionary.alloc().init();
     itemClasses.forEach((clazz) => {
 
       // set the class-type we are querying for now & delete
@@ -77,7 +77,7 @@ export namespace ioskeychain {
     const kCFBooleanTrue = ObjC.classes.__NSCFBoolean.numberWithBool_(true);
 
     // the base query dictionary to use for the keychain lookups
-    const searchDictionary = NSMutableDictionary.alloc().init();
+    const searchDictionary: NSMutableDictionaryType = NSMutableDictionary.alloc().init();
     searchDictionary.setObject_forKey_(kCFBooleanTrue, kSec.kSecReturnAttributes);
     searchDictionary.setObject_forKey_(kCFBooleanTrue, kSec.kSecReturnData);
     searchDictionary.setObject_forKey_(kCFBooleanTrue, kSec.kSecReturnRef);
@@ -143,9 +143,9 @@ export namespace ioskeychain {
   // add a string entry to the keychain
   export const add = (key: string, data: string): boolean => {
     // Convert the key and data to NSData
-    const dataString: NSString = NSString.stringWithString_(data).dataUsingEncoding_(NSUTF8StringEncoding);
-    const dataKey: NSString = NSString.stringWithString_(key).dataUsingEncoding_(NSUTF8StringEncoding);
-    const itemDict: NSMutableDictionary = NSMutableDictionary.alloc().init();
+    const dataString: NSStringType = NSString.stringWithString_(data).dataUsingEncoding_(NSUTF8StringEncoding);
+    const dataKey: NSStringType = NSString.stringWithString_(key).dataUsingEncoding_(NSUTF8StringEncoding);
+    const itemDict: NSMutableDictionaryType = NSMutableDictionary.alloc().init();
 
     itemDict.setObject_forKey_(kSec.kSecClassGenericPassword, kSec.kSecClass);
     itemDict.setObject_forKey_(dataKey, kSec.kSecAttrService);

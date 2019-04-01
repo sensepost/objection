@@ -1,5 +1,4 @@
 import * as fs from "fs";
-import { colors } from "../lib/color";
 import { hexStringToBytes } from "../lib/helpers";
 import { IAndroidFilesystem } from "./lib/interfaces";
 import { getApplicationContext, wrapJavaPerform } from "./lib/libjava";
