@@ -44,13 +44,13 @@ def load_plugin(args: list = None) -> None:
         instance = plugin.plugin(namespace)
         assert isinstance(instance, PluginType)
 
+    except AssertionError:
+        click.secho('Failed to load plugin \'{0}\'. Invalid plugin type.'.format(namespace), fg='red', bold=True)
+        return
+
     except Exception as e:
         click.secho('Failed to load plugin \'{0}\' with error: {1}'.format(namespace, str(e)), fg='red', bold=True)
         click.secho('{0}'.format(traceback.format_exc()), dim=True)
-        return
-
-    except AssertionError:
-        click.secho('Failed to load plugin \'{0}\'. Invalid plugin type.'.format(namespace), fg='red', bold=True)
         return
 
     from ..console import commands
