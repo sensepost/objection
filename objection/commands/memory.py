@@ -1,4 +1,5 @@
 import os
+import json
 
 import click
 from tabulate import tabulate
@@ -30,6 +31,17 @@ def _should_only_dump_offsets(args: list) -> bool:
     """
 
     return '--offsets-only' in args
+
+
+def _should_output_json(args: list) -> bool:
+    """
+        Checks if --json is in the list of tokens received from the command line.
+
+        :param args:
+        :return:
+    """
+
+    return len(args) > 0 and '--json' in args
 
 
 # TODO: Dump memory on hooked methods.
@@ -134,8 +146,26 @@ def list_modules(args: list = None) -> None:
         :return:
     """
 
+    if _should_output_json(args) and len(args) < 2:
+        click.secho('Usage: memory list modules (--json <local destination>)', bold=True)
+        return
+
+    if not _should_output_json(args):
+        click.secho('Save the output by adding `--json modules.json` to this command', dim=True)
+
     api = state_connection.get_api()
     modules = api.memory_list_modules()
+
+    if _should_output_json(args):
+        destination = args[1]
+
+        click.secho('Writing modules as json to {0}...'.format(destination), dim=True)
+
+        with open(destination, 'w') as f:
+            f.write(json.dumps(modules, indent=2))
+
+        click.secho('Wrote modules to: {0}'.format(destination), fg='green')
+        return
 
     # Just dump it to the screen
     click.secho(tabulate(
@@ -156,6 +186,13 @@ def list_exports(args: list) -> None:
         :return:
     """
 
+    if _should_output_json(args) and len(args) < 3:
+        click.secho('Usage: memory list exports <module name> (--json <local destination>)', bold=True)
+        return
+
+    if not _should_output_json(args):
+        click.secho('Save the output by adding `--json exports.json` to this command', dim=True)
+
     if len(clean_argument_flags(args)) <= 0:
         click.secho('Usage: memory list exports <module name>', bold=True)
         return
@@ -164,6 +201,17 @@ def list_exports(args: list) -> None:
 
     api = state_connection.get_api()
     exports = api.memory_list_exports(module_to_list)
+
+    if _should_output_json(args):
+        destination = args[1]
+
+        click.secho('Writing exports as json to {0}...'.format(destination), dim=True)
+
+        with open(destination, 'w') as f:
+            f.write(json.dumps(exports, indent=2))
+
+        click.secho('Wrote exports to: {0}'.format(destination), fg='green')
+        return
 
     # Just dump it to the screen
     click.secho(tabulate(
