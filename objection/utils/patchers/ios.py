@@ -69,11 +69,15 @@ class IosGadget(BasePlatformGadget):
         dylib = requests.get(download_url, stream=True)
 
         # save the requests stream to file
-        with open(self.ios_dylib_gadget_archive_path, 'wb') as f:
-            click.secho('Downloading iOS dylib to {0}...'.format(self.ios_dylib_gadget_archive_path),
-                        fg='green', dim=True)
+        try:
+            with open(self.ios_dylib_gadget_archive_path, 'wb') as f:
+                click.secho('Downloading iOS dylib to {0}...'.format(self.ios_dylib_gadget_archive_path),
+                            fg='green', dim=True)
 
-            shutil.copyfileobj(dylib.raw, f)
+                shutil.copyfileobj(dylib.raw, f)
+        except:
+            if os.path.isfile(self.ios_dylib_gadget_archive_path):
+                os.remove(self.ios_dylib_gadget_archive_path)
 
         return self
 
@@ -106,9 +110,15 @@ class IosGadget(BasePlatformGadget):
 
         click.secho('Unpacking {0}...'.format(self.ios_dylib_gadget_archive_path), dim=True)
 
-        with lzma.open(self.ios_dylib_gadget_archive_path) as f:
-            with open(self.ios_dylib_gadget_path, 'wb') as g:
-                g.write(f.read())
+        try:
+            with lzma.open(self.ios_dylib_gadget_archive_path) as f:
+                with open(self.ios_dylib_gadget_path, 'wb') as g:
+                    g.write(f.read())
+        except:
+            if os.path.isfile(self.ios_dylib_gadget_archive_path):
+                os.remove(self.ios_dylib_gadget_archive_path)
+            if os.path.isfile(self.ios_dylib_gadget_path):
+                os.remove(self.ios_dylib_gadget_path)
 
         return self
 
