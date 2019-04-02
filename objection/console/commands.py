@@ -162,11 +162,13 @@ COMMANDS = {
                 'commands': {
                     'modules': {
                         'meta': 'List loaded modules in the current process',
+                        'flags': ['--json'],
                         'exec': memory.list_modules
                     },
 
                     'exports': {
                         'meta': 'List the exports of a module',
+                        'flags': ['--json'],
                         'exec': memory.list_exports
                     }
                 },
@@ -426,7 +428,7 @@ COMMANDS = {
                         'exec': keychain.dump
                     },
                     'clear': {
-                        'meta': 'Delete all keychain entries for the current app\s entitlement group',
+                        'meta': 'Delete all keychain entries for the current app\'s entitlement group',
                         'exec': keychain.clear
                     },
                     'add': {

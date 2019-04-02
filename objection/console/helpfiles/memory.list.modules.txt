@@ -1,9 +1,12 @@
 Command: memory list modules
 
-Usage: memory list modules
+Usage: memory list modules (optional: --json <filename>)
 
 List all of the modules loaded in the current process, detailing their base
 address, size and location on disk.
+Providing a filename with the --json flag will output all of the module
+attributes to the file specified for later inspection.
 
 Examples:
    memory list modules
+   memory list modules --json modules.json
