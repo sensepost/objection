@@ -34,7 +34,7 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
         github_version = gadget_version
         click.secho('Using manually specified version: {0}'.format(gadget_version), fg='green', bold=True)
     else:
-        github_version = github.set_latest_version()
+        github_version = github.get_latest_version()
         click.secho('Using latest Github gadget version: {0}'.format(github_version), fg='green', bold=True)
 
     # get the local version number of the stored gadget
@@ -119,7 +119,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
         github_version = gadget_version
         click.secho('Using manually specified version: {0}'.format(gadget_version), fg='green', bold=True)
     else:
-        github_version = github.set_latest_version()
+        github_version = github.get_latest_version()
         click.secho('Using latest Github gadget version: {0}'.format(github_version), fg='green', bold=True)
 
     # get local version of the stored gadget

@@ -71,7 +71,7 @@ class TestGithub(unittest.TestCase):
 
         mock_requests.get.return_value = mock_response
 
-        result = self.github.set_latest_version()
+        result = self.github.get_latest_version()
 
         self.assertEqual(result, self.mock_response['tag_name'])
 
