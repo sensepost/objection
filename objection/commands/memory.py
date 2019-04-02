@@ -157,7 +157,7 @@ def list_modules(args: list = None) -> None:
     modules = api.memory_list_modules()
 
     if _should_output_json(args):
-        destination = args[1]
+        destination = args[args.index('--json') + 1]
 
         click.secho('Writing modules as json to {0}...'.format(destination), dim=True)
 
@@ -203,7 +203,7 @@ def list_exports(args: list) -> None:
     exports = api.memory_list_exports(module_to_list)
 
     if _should_output_json(args):
-        destination = args[1]
+        destination = args[args.index('--json') + 1]
 
         click.secho('Writing exports as json to {0}...'.format(destination), dim=True)
 
