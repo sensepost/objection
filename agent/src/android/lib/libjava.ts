@@ -20,3 +20,15 @@ export const getApplicationContext = (): any => {
 
   return currentApplication.getApplicationContext();
 };
+
+// A helper method to access the R class for the app.
+// Typical usage within an app would be something like:
+//  R.id.content_frame.
+//
+// Using this method, the above example would be:
+//  R("content_frame", "id")
+export const R = (name: string, type: string): any => {
+  const context = getApplicationContext();
+  // https://github.com/bitpay/android-sdk/issues/14#issue-202495610
+  return context.getResources().getIdentifier(name, type, context.getPackageName());
+};
