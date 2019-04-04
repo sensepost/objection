@@ -193,6 +193,21 @@ def show_registered_activities(args: list = None) -> None:
     click.secho('\nFound {0} classes'.format(len(activities)), bold=True)
 
 
+def get_current_activity(args: list = None) -> None:
+    """
+        Get the currently active activity
+
+        :param args:
+        :return:
+    """
+
+    api = state_connection.get_api()
+    activity = api.android_hooking_get_current_activity()
+
+    click.secho('Activity: {0}'.format(activity['activity']), bold=True)
+    click.secho('Fragment: {0}'.format(activity['fragment']))
+
+
 def set_method_return_value(args: list = None) -> None:
     """
         Sets a Java methods return value to a specified boolean.
@@ -288,7 +303,8 @@ def search_methods(args: list) -> None:
                     found += 1
 
         except frida.core.RPCException as e:
-            click.secho('Enumerating methods for class \'{0}\' failed with: {1}'.format(class_name, e), fg='red', dim=True)
+            click.secho('Enumerating methods for class \'{0}\' failed with: {1}'.format(class_name, e), fg='red',
+                        dim=True)
             click.secho('Ignoring error and continuing search...', dim=True)
 
     click.secho('\nFound {0} methods'.format(found), bold=True)

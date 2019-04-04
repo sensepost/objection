@@ -317,6 +317,15 @@ COMMANDS = {
                             }
                         }
                     },
+                    'get': {
+                        'meta': 'Get various values',
+                        'commands': {
+                            'current_activity': {
+                                'meta': 'Get the currently foregrounded activity',
+                                'exec': android_hooking.get_current_activity
+                            }
+                        }
+                    },
                     'search': {
                         'meta': 'Search for various classes and or methods',
                         'commands': {

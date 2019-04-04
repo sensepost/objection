@@ -16,3 +16,8 @@ export interface IKeyStoreEntry {
     is_certificate: boolean;
     is_key: boolean;
 }
+
+export interface ICurrentActivityFragment {
+    activivity: string|null;
+    fragment: string|null;
+}

@@ -4,7 +4,7 @@ from unittest import mock
 from objection.commands.android.hooking import _string_is_true, _should_dump_backtrace, _should_dump_args, \
     _should_dump_return_value, show_android_classes, show_android_class_methods, watch_class_method, \
     show_registered_broadcast_receivers, show_registered_services, show_registered_activities, \
-    set_method_return_value, search_class, search_methods
+    set_method_return_value, search_class, search_methods, get_current_activity
 from ...helpers import capture
 
 
@@ -211,6 +211,22 @@ Found 3 classes
         set_method_return_value(['com.foo.bar', 'isValid.overload(\'bar\')', 'false'])
 
         self.assertTrue(mock_api.return_value.android_hooking_set_method_return.called)
+
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_get_current_activity_and_fragment(self, mock_api):
+        mock_api.return_value.android_hooking_get_current_activity.return_value = {
+            'activity': 'foo',
+            'fragment': 'bar',
+        }
+
+        with capture(get_current_activity, []) as o:
+            output = o
+
+        expected_output = """Activity: foo
+Fragment: bar
+"""
+
+        self.assertEqual(output, expected_output)
 
     def test_search_class_validates_arguments(self):
         with capture(search_class, []) as o:

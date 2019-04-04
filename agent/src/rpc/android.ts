@@ -4,7 +4,7 @@ import { heap } from "../android/heap";
 import { hooking } from "../android/hooking";
 import { intent } from "../android/intent";
 import { keystore } from "../android/keystore";
-import { IExecutedCommand, IKeyStoreEntry } from "../android/lib/interfaces";
+import { ICurrentActivityFragment, IExecutedCommand, IKeyStoreEntry } from "../android/lib/interfaces";
 import { sslpinning } from "../android/pinning";
 import { root } from "../android/root";
 import { androidshell } from "../android/shell";
@@ -31,6 +31,7 @@ export const android = {
   // android hooking
   androidHookingGetClassMethods: (className: string): Promise<string[]> => hooking.getClassMethods(className),
   androidHookingGetClasses: (): Promise<string[]> => hooking.getClasses(),
+  androidHookingGetCurrentActivity: (): Promise<ICurrentActivityFragment> => hooking.getCurrentActivity(),
   androidHookingListActivities: (): Promise<string[]> => hooking.getActivities(),
   androidHookingListBroadcastReceivers: (): Promise<string[]> => hooking.getBroadcastReceivers(),
   androidHookingListServices: (): Promise<string[]> => hooking.getServices(),

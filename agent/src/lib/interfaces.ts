@@ -9,14 +9,12 @@ export interface IFridaInfo {
 }
 
 export interface IIosPackage {
-
   applicationName: string;
   deviceName: string;
   identifierForVendor: string;
   model: string;
   systemName: string;
   systemVersion: string;
-
 }
 
 export interface IAndroidPackage {

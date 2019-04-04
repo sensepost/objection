@@ -1,8 +1,11 @@
 import { colors as c } from "../lib/color";
 import { IJob } from "../lib/interfaces";
 import { jobs } from "../lib/jobs";
-import { getApplicationContext, wrapJavaPerform } from "./lib/libjava";
-import { ActivityThread, ArrayMap, JavaClass, PackageManager, Throwable } from "./lib/types";
+import { ICurrentActivityFragment } from "./lib/interfaces";
+import { getApplicationContext, R, wrapJavaPerform } from "./lib/libjava";
+import {
+  Activity, ActivityClientRecord, ActivityThread, ArrayMap, JavaClass, PackageManager, Throwable,
+} from "./lib/types";
 
 export namespace hooking {
 
@@ -172,6 +175,42 @@ export namespace hooking {
 
       // register the job
       jobs.add(job);
+    });
+  };
+
+  export const getCurrentActivity = (): Promise<ICurrentActivityFragment> => {
+    return wrapJavaPerform(() => {
+      const activityThread: ActivityThread = Java.use("android.app.ActivityThread");
+      const activity: Activity = Java.use("android.app.Activity");
+      const activityClientRecord: ActivityClientRecord = Java.use("android.app.ActivityThread$ActivityClientRecord");
+
+      const currentActivityThread = activityThread.currentActivityThread();
+      const activityRecords = currentActivityThread.mActivities.value.values().toArray();
+      let currentActivity;
+
+      for (const i of activityRecords) {
+        const activityRecord = Java.cast(i, activityClientRecord);
+        if (!activityRecord.paused.value) {
+          currentActivity = Java.cast(Java.cast(activityRecord, activityClientRecord).activity.value, activity);
+          break;
+        }
+      }
+
+      if (currentActivity) {
+        // Discover an active fragment
+        const fm = currentActivity.getFragmentManager();
+        const fragment = fm.findFragmentById(R("content_frame", "id"));
+
+        return {
+          activity: currentActivity.$className,
+          fragment: fragment.$className,
+        };
+      }
+
+      return  {
+        activity: null,
+        fragment: null,
+      };
     });
   };
 
