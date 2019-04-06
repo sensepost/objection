@@ -122,7 +122,8 @@ class Agent(object):
 
             try:
 
-                device = frida.get_device('tcp')
+                device = frida.get_device_manager().add_remote_device('{host}:{port}'.format(
+                    host=state_connection.host, port=state_connection.port))
                 click.secho('Using networked device @`{n}`'.format(n=device.name), bold=True)
 
                 return device
