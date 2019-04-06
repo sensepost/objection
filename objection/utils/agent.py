@@ -119,21 +119,11 @@ class Agent(object):
                 return device
 
         if state_connection.get_comms_type() == state_connection.TYPE_REMOTE:
+            device = frida.get_device_manager().add_remote_device('{host}:{port}'.format(
+                host=state_connection.host, port=state_connection.port))
+            click.secho('Using networked device @`{n}`'.format(n=device.name), bold=True)
 
-            try:
-
-                device = frida.get_device_manager().add_remote_device('{host}:{port}'.format(
-                    host=state_connection.host, port=state_connection.port))
-                click.secho('Using networked device @`{n}`'.format(n=device.name), bold=True)
-
-                return device
-
-            except frida.TimedOutError:
-                device = frida.get_device_manager().add_remote_device(
-                    '{host}:{port}'.format(host=state_connection.host, port=state_connection.port))
-                click.secho('Using networked device @`{n}`'.format(n=device.name), bold=True)
-
-                return device
+            return device
 
         raise Exception('Failed to find a device to attach to!')
 
