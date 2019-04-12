@@ -1,10 +1,12 @@
 import { binarycookies } from "../ios/binarycookies";
+import { bundles } from "../ios/bundles";
 import { credentialstorage } from "../ios/credentialstorage";
 import { iosfilesystem } from "../ios/filesystem";
 import { hooking } from "../ios/hooking";
 import { iosjailbreak } from "../ios/jailbreak";
 import { ioskeychain } from "../ios/keychain";
-import { ICredential, IIosCookie, IIosFileSystem, IKeychainItem } from "../ios/lib/interfaces";
+import { BundleType } from "../ios/lib/constants";
+import { ICredential, IFramework, IIosCookie, IIosFileSystem, IKeychainItem } from "../ios/lib/interfaces";
 import { NSUserDefaults } from "../ios/lib/types";
 import { nsuserdefaults } from "../ios/nsuserdefaults";
 import { pasteboard } from "../ios/pasteboard";
@@ -58,6 +60,10 @@ export const ios = {
 
   // ios pasteboard
   iosMonitorPasteboard: (): void => pasteboard.monitor(),
+
+  // ios frameworks & bundles
+  iosBundlesGetBundles: (): IFramework[] => bundles.getBundles(BundleType.NSBundleAllBundles),
+  iosBundlesGetFrameworks: (): IFramework[] => bundles.getBundles(BundleType.NSBundleFramework),
 
   // ios keychain
   iosKeychainAdd: (key: string, data: string): boolean => ioskeychain.add(key, data),

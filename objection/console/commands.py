@@ -15,6 +15,7 @@ from ..commands.android import intents
 from ..commands.android import keystore
 from ..commands.android import pinning as android_pinning
 from ..commands.android import root
+from ..commands.ios import bundles
 from ..commands.ios import cookies
 from ..commands.ios import hooking as ios_hooking
 from ..commands.ios import jailbreak
@@ -454,6 +455,21 @@ COMMANDS = {
                         'meta': 'Cat a plist',
                         'dynamic': filemanager.list_files_in_current_fm_directory,
                         'exec': plist.cat
+                    }
+                }
+            },
+            'bundles': {
+                'meta': 'Work with iOS Bundles',
+                'commands': {
+                    'list_frameworks': {
+                        'meta': 'Lists all of the application\'s bundles that represent frameworks',
+                        'flags': ['--include-apple-frameworks', '--full-path'],
+                        'exec': bundles.show_frameworks
+                    },
+                    'list_bundles': {
+                        'meta': 'Lists all of the application\'s non framework bundles',
+                        'flags': ['--full-path'],
+                        'exec': bundles.show_bundles
                     }
                 }
             },

@@ -55,3 +55,10 @@ export interface ICredential {
   protocol: string;
   user: string;
 }
+
+export interface IFramework {
+  version: string|null;
+  executable: string|null;
+  bundle: string|null;
+  path: string|null;
+}

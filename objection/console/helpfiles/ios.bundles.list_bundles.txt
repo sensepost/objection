@@ -1,0 +1,15 @@
+Command: ios bundles list_bundles
+
+Usage: ios bundles list_bundles (optional: --full-path)
+
+Returns all the application's non-framework bundles. [1]
+
+Output includes the frameworks executable, bundle name and version. The path
+value is truncated by default, however, adding the --full-path flag would
+print the entire path to the framework.
+
+[1] https://developer.apple.com/documentation/foundation/nsbundle/1413705-allbundles?language=objc
+
+Examples:
+   ios bundles list_bundles
+   ios bundles list_bundles --full-path
