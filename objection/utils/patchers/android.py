@@ -490,53 +490,19 @@ class AndroidPatcher(BasePlatformPatcher):
         xml.write(os.path.join(self.apk_temp_directory, 'AndroidManifest.xml'),
                   encoding='utf-8', xml_declaration=True)
 
-    def inject_load_library(self, target_class: str = None):
+    def _determine_smali_path_for_class(self, target_class) -> str:
         """
-            Injects a loadLibrary call into a class.
-            If a target class is not specified, we will make an attempt
-            at searching for a launchable activity in the target APK.
+            Attempts to determine the local path for a target class' smali
 
-            Most of the idea for this comes from:
-                https://koz.io/using-frida-on-android-without-root/
-
+            :param target_class:
             :return:
         """
 
-        # raw smali to inject.
-        # ref: https://koz.io/using-frida-on-android-without-root/
+        # convert to a filesystem path, just like how it would be on disk
+        # from the apktool dump
+        target_class = target_class.replace('.', '/')
 
-        # if no constructor is present, the full_load_library is used
-        full_load_library = ('.method static constructor <clinit>()V\n'
-                             '   .locals 1\n'
-                             '\n'
-                             '   .prologue\n'
-                             '   const-string v0, "frida-gadget"\n'
-                             '\n'
-                             '   invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V\n'
-                             '\n'
-                             '   return-void\n'
-                             '.end method\n')
-
-        # if an existing constructor is present, this partial_load_library
-        # will be used instead
-        partial_load_library = ('    const-string v0, "frida-gadget"\n'
-                                '\n'
-                                '    invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V\n')
-
-        # determine the path to the smali we should inject the load_library
-        # call into. a user may specify a specific class to target, otherwise
-        # we get a class name from the internal launchable activity method
-        # of this class. Next, replace .'s with /'s to get the path apktool would
-        # have left it on disk.
-
-        if target_class:
-            click.secho('Using target class: {0}'.format(target_class), fg='green', bold=True)
-            activity = target_class.replace('.', '/')
-        else:
-            click.secho('Target class not specified, searching for launchable activity...', fg='green', bold=True)
-            activity = self._get_launchable_activity().replace('.', '/')
-
-        activity_path = os.path.join(self.apk_temp_directory, 'smali', activity) + '.smali'
+        activity_path = os.path.join(self.apk_temp_directory, 'smali', target_class) + '.smali'
 
         # check if the activity path exists. If not, try and see if this may have been
         # a multidex setup
@@ -555,7 +521,7 @@ class AndroidPatcher(BasePlatformPatcher):
                     break
 
                 # determine the path to the launchable activity again
-                activity_path = os.path.join(smali_path, activity) + '.smali'
+                activity_path = os.path.join(smali_path, target_class) + '.smali'
 
                 # if we found the activity, stop the loop
                 if os.path.exists(activity_path):
@@ -566,24 +532,74 @@ class AndroidPatcher(BasePlatformPatcher):
         if not os.path.exists(activity_path):
             raise Exception('Unable to find smali to patch!')
 
-        click.secho('Reading smali from: {0}'.format(activity_path), dim=True)
+        return activity_path
 
-        # apktool d smali will have a comment line line: '# direct methods'
-        with open(activity_path, 'r') as f:
-            smali_lines = f.readlines()
+    @staticmethod
+    def _determine_end_of_smali_method_from_line(smali: list, start: int) -> int:
+        """
+            Determines where the .end method line is.
 
-        # search for the line starting with '# direct methods' in it
-        inject_marker = [i for i, x in enumerate(smali_lines) if '# direct methods' in x]
+            This method is also aware of a methods that 'returns' and will
+            return the line before that too.
 
-        # TODO: check if <clinit> doesnt already exist
+            :param smali:
+            :param start:
+            :return:
+        """
 
-        # ensure we got a marker
-        if len(inject_marker) <= 0:
-            raise Exception('Unable to determine position to inject a loadLibrary call')
+        # enumerate all of # the lines in the original smali sources and mark the offsets of the
+        # lines that contain '.end method'. the search starts right after the
+        # original inject marker so that we can pick the top most .end method
+        # when we are done searching. this is also why the # represented in the
+        # inject marker is added to the calculated marker in the list of end methods.
+        end_methods = [(i + start) for i, x in enumerate(smali[start:]) if '.end method' in x]
 
-        # pick the first position for the inject. add one line as we
-        # want to inject right below the comment we matched
-        inject_marker = inject_marker[0] + 1
+        # ensure that we found at least one .end method
+        if len(end_methods) <= 0:
+            raise Exception('Unable to find the end of the existing constructor')
+
+        # set the last line of the constructors method to the one
+        # just before the .end method line
+        end_of_method = end_methods[0] - 1
+
+        # check if the constructor has a return type call. if it does,
+        # move up one line again to inject our loadLibrary before the return
+        if 'return' in smali[end_of_method]:
+            end_of_method -= 1
+
+        return end_of_method
+
+    def _patch_smali_with_load_library(self, smali_lines: list, inject_marker: int) -> list:
+        """
+            Patches a list of smali lines with the appropriate
+            loadLibrary call based on wether a constructor already
+            exists or not.
+
+            :param smali_lines:
+            :param inject_marker:
+            :return:
+        """
+
+        # raw smali to inject.
+        # ref: https://koz.io/using-frida-on-android-without-root/
+
+        # if no constructor is present, the full_load_library is used
+        full_load_library = ('.method static constructor <clinit>()V\n'
+                             '   .locals 0\n'  # _revalue_locals_count() will ++ this
+                             '\n'
+                             '   .prologue\n'
+                             '   const-string v0, "frida-gadget"\n'
+                             '\n'
+                             '   invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V\n'
+                             '\n'
+                             '   return-void\n'
+                             '.end method\n')
+
+        # if an existing constructor is present, this partial_load_library
+        # will be used instead
+        partial_load_library = ('\n    const-string v0, "frida-gadget"\n'
+                                '\n'
+                                '    invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V\n')
 
         # Check if there is an existing clinit here. If there is, then we need
         # to determine where the constructor ends and inject a simple loadLibrary
@@ -591,27 +607,7 @@ class AndroidPatcher(BasePlatformPatcher):
         if 'clinit' in smali_lines[inject_marker]:
             click.secho('Injecting into an existing constructor', fg='yellow')
 
-            # need to find the end of the existing call. so, enumerate all of
-            # the lines in the original smali sources and mark the offsets of the
-            # lines that contain '.end method'. the search starts right after the
-            # original inject marker so that we can pick the top most .end method
-            # when we are done searching. this is also why the # represented in the
-            # inject marker is added to the calculated marker in the list of end methods.
-            end_methods = [(i + inject_marker) for i, x in enumerate(smali_lines[inject_marker:]) if '.end method' in x]
-
-            # ensure that we found at least one .end method
-            if len(end_methods) <= 0:
-                raise Exception('Unable to find the end of the constructor')
-
-            # set the last line of the constructors method to the one
-            # just before the .end method line
-            end_of_constructor = end_methods[0] - 1
-
-            # check if the constructor has a return type call. if it does,
-            # move up one line again to inject our loadLibrary before the return
-            if 'return' in smali_lines[end_of_constructor]:
-                end_of_constructor -= 1
-
+            end_of_constructor = self._determine_end_of_smali_method_from_line(smali_lines, inject_marker)
             click.secho('Injecting loadLibrary call at line: {0}'.format(end_of_constructor), dim=True, fg='green')
 
             patched_smali = \
@@ -626,6 +622,110 @@ class AndroidPatcher(BasePlatformPatcher):
             # inject the load_library code between
             patched_smali = \
                 smali_lines[:inject_marker] + full_load_library.splitlines(keepends=True) + smali_lines[inject_marker:]
+
+        return patched_smali
+
+    def _revalue_locals_count(self, patched_smali: list, inject_marker: int):
+        """
+            Attempt to ++ the first .locals declaration in a list of
+            smali lines confined to the same method.
+
+            :param patched_smali:
+            :param inject_marker:
+            :return:
+        """
+
+        def _h():
+            click.secho('Could not update .locals value. Sometimes this may break things,'
+                        'but not always. If the applications crashes after patching, try '
+                        'and add the --pause flag, fixing the patched smali manually.', fg='yellow')
+
+        # next, update the .locals count (if its defined)
+        # if this step fails, its not really a big deal as many times its not
+        # fatal. however, if it does fail, warn about it.
+        click.secho('Attempting to fix the constructors .locals count', dim=True)
+        end_of_method = self._determine_end_of_smali_method_from_line(patched_smali, inject_marker)
+
+        # check if we have a .locals declaration right after the start of our
+        # already matched constructor
+        defined_locals = [i for i, x in enumerate(patched_smali[inject_marker:end_of_method])
+                          if '.locals' in x]
+
+        if len(defined_locals) <= 0:
+            click.secho('Unable to determine any .locals for the target constructor', fg='yellow')
+            _h()
+            return patched_smali
+
+        # determine the offset for the first matched .locals definition
+        locals_smali_offset = defined_locals[0] + inject_marker
+
+        try:
+            defined_local_value = patched_smali[locals_smali_offset].split(' ')[-1]
+            defined_local_value_as_int = int(defined_local_value, 10)
+            new_locals_value = defined_local_value_as_int + 1
+
+        except ValueError as e:
+            click.secho(
+                'Unable to parse .locals value for the injected constructor with error: {0}'.format(str(e)),
+                fg='yellow')
+            _h()
+
+            return patched_smali
+
+        click.secho('Current locals value is {0}, updating to {1}:'.format(
+            defined_local_value_as_int, new_locals_value), dim=True)
+
+        # simply search / replace the integer values we already calculated on the relevant line
+        patched_smali[locals_smali_offset] = patched_smali[locals_smali_offset].replace(
+            str(defined_local_value_as_int), str(new_locals_value))
+
+        return patched_smali
+
+    def inject_load_library(self, target_class: str = None):
+        """
+            Injects a loadLibrary call into a class.
+            If a target class is not specified, we will make an attempt
+            at searching for a launchable activity in the target APK.
+
+            Most of the idea for this comes from:
+                https://koz.io/using-frida-on-android-without-root/
+
+            :return:
+        """
+
+        # determine the path to the smali we should inject the load_library
+        # call into. a user may specify a specific class to target, otherwise
+        # we get a class name from the internal launchable activity method
+        # of this class.
+
+        if target_class:
+            click.secho('Using target class: {0} for patch'.format(target_class), fg='green', bold=True)
+        else:
+            click.secho('Target class not specified, searching for launchable activity instead...', fg='green',
+                        bold=True)
+
+        activity_path = self._determine_smali_path_for_class(
+            target_class if target_class else self._get_launchable_activity())
+
+        click.secho('Reading smali from: {0}'.format(activity_path), dim=True)
+
+        # apktool d smali will have a comment line line: '# direct methods'
+        with open(activity_path, 'r') as f:
+            smali_lines = f.readlines()
+
+        # search for the line starting with '# direct methods' in it
+        inject_marker = [i for i, x in enumerate(smali_lines) if '# direct methods' in x]
+
+        # ensure we got a marker
+        if len(inject_marker) <= 0:
+            raise Exception('Unable to determine position to inject a loadLibrary call')
+
+        # pick the first position for the inject. add one line as we
+        # want to inject right below the comment we matched
+        inject_marker = inject_marker[0] + 1
+
+        patched_smali = self._patch_smali_with_load_library(smali_lines, inject_marker)
+        patched_smali = self._revalue_locals_count(patched_smali, inject_marker)
 
         click.secho('Writing patched smali back to: {0}'.format(activity_path), dim=True)
 
