@@ -95,8 +95,8 @@ def api():
 @click.option('--quiet', '-q', required=False, default=False, is_flag=True,
               help='Do not display the objection logo on startup.')
 @click.option('--file-commands', '-c', required=False, type=click.File('r'),
-              help=('A file containing objection commands, separated by a ' 'newline, that will be '
-                    'executed before showing the prompt.'))
+              help=('A file containing objection commands, separated by a '
+                    'newline, that will run before the repl polls the device for information.'))
 @click.option('--startup-script', '-S', required=False, type=click.File('r'),
               help='A script to import and run before the repl polls the device for information.')
 @click.option('--enable-api', '-a', required=False, default=False, is_flag=True,
