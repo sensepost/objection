@@ -136,8 +136,6 @@ MapKit                    za.apple.MapKit                             1  /MapKit
         with capture(show_bundles, ['--full-path']) as o:
             output = o
 
-        print(output)
-
         expected = """Executable                Bundle                                Version  Path
 ------------------------  ----------------------------------  ---------  ------------------------------------------------------------------------
 AppleIDSSOAuthentication  com.apple.AppleIDSSOAuthentication          1  /AppleIDSSOAuthentication

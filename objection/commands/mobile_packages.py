@@ -77,7 +77,7 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
 
 def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup: bool = True,
                       enable_debug: bool = True, gadget_version: str = None, skip_resources: bool = False,
-                      network_security_config: bool = False) -> None:
+                      network_security_config: bool = False, target_class: str = None) -> None:
     """
         Patches an Android APK by extracting, patching SMALI, repackaging
         and signing a new APK.
@@ -158,7 +158,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
     if network_security_config:
         patcher.add_network_security_config()
 
-    patcher.inject_load_library()
+    patcher.inject_load_library(target_class=target_class)
     patcher.add_gadget_to_apk(architecture, android_gadget.get_frida_library_path())
 
     # if we are required to pause, do that.

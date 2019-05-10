@@ -490,10 +490,11 @@ class AndroidPatcher(BasePlatformPatcher):
         xml.write(os.path.join(self.apk_temp_directory, 'AndroidManifest.xml'),
                   encoding='utf-8', xml_declaration=True)
 
-    def inject_load_library(self):
+    def inject_load_library(self, target_class: str = None):
         """
-            Injects a loadLibrary call into the launchable
-            activity of a target APK.
+            Injects a loadLibrary call into a class.
+            If a target class is not specified, we will make an attempt
+            at searching for a launchable activity in the target APK.
 
             Most of the idea for this comes from:
                 https://koz.io/using-frida-on-android-without-root/
@@ -522,11 +523,19 @@ class AndroidPatcher(BasePlatformPatcher):
                                 '\n'
                                 '    invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V\n')
 
-        # the path to the smali we should inject the load_library call
-        # into. we get a class name from the internal method of this
-        # class, so replace .'s to /'s to get the path apktool would
+        # determine the path to the smali we should inject the load_library
+        # call into. a user may specify a specific class to target, otherwise
+        # we get a class name from the internal launchable activity method
+        # of this class. Next, replace .'s with /'s to get the path apktool would
         # have left it on disk.
-        activity = self._get_launchable_activity().replace('.', '/')
+
+        if target_class:
+            click.secho('Using target class: {0}'.format(target_class), fg='green', bold=True)
+            activity = target_class.replace('.', '/')
+        else:
+            click.secho('Target class not specified, searching for launchable activity...', fg='green', bold=True)
+            activity = self._get_launchable_activity().replace('.', '/')
+
         activity_path = os.path.join(self.apk_temp_directory, 'smali', activity) + '.smali'
 
         # check if the activity path exists. If not, try and see if this may have been
