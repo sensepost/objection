@@ -283,6 +283,38 @@ export namespace sslpinning {
     });
   };
 
+  const cordovaCustomURLConnectionDelegate = (ident: string): InvocationListener => {
+    // https://github.com/EddyVerbruggen/SSLCertificateChecker-PhoneGap-Plugin/blob/
+    //  67634bfdf4a31bb09b301db40f8f27fbd8818f61/src/ios/SSLCertificateChecker.m#L109-L116
+    if (!ObjC.classes.CustomURLConnectionDelegate) {
+      return;
+    }
+
+    send(c.blackBright(`[${ident}] `) + `Found SSLCertificateChecker-PhoneGap-Plugin.` +
+      ` Hooking known pinning methods.`);
+
+    return Interceptor.attach(ObjC.classes.CustomURLConnectionDelegate["- isFingerprintTrusted:"].implementation, {
+      onLeave(retval) {
+        qsend(quiet,
+          c.blackBright(`[${ident}] `) + `[SSLCertificateChecker-PhoneGap-Plugin] Called ` +
+          c.green(`-[CustomURLConnectionDelegate isFingerprintTrusted:]`) + ` with result ` +
+          c.red(retval.toString()),
+        );
+
+        if (retval.isNull()) {
+          qsend(quiet,
+            c.blackBright(`[${ident}] `) + `[SSLCertificateChecker-PhoneGap-Plugin] ` +
+            c.blueBright(`Altered `) +
+            c.green(`-[CustomURLConnectionDelegate isFingerprintTrusted:]`) + ` mode to ` +
+            c.green(`0x1`),
+          );
+
+          retval.replace(new NativePointer(0x1));
+        }
+      },
+    });
+  };
+
   const sSLSetSessionOption = (ident: string): NativePointerValue => {
     const kSSLSessionOptionBreakOnServerAuth = 0;
     const noErr = 0;
@@ -438,6 +470,7 @@ export namespace sslpinning {
       job.invocations.push(i);
     });
     job.invocations.push(trustKit(job.identifier));
+    job.invocations.push(cordovaCustomURLConnectionDelegate(job.identifier));
 
     // Low level hooks.
 
