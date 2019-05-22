@@ -75,7 +75,7 @@ class IosGadget(BasePlatformGadget):
                             fg='green', dim=True)
 
                 shutil.copyfileobj(dylib.raw, f)
-        except:
+        except Exception:
             if os.path.isfile(self.ios_dylib_gadget_archive_path):
                 os.remove(self.ios_dylib_gadget_archive_path)
 
@@ -114,7 +114,7 @@ class IosGadget(BasePlatformGadget):
             with lzma.open(self.ios_dylib_gadget_archive_path) as f:
                 with open(self.ios_dylib_gadget_path, 'wb') as g:
                     g.write(f.read())
-        except:
+        except Exception:
             if os.path.isfile(self.ios_dylib_gadget_archive_path):
                 os.remove(self.ios_dylib_gadget_archive_path)
             if os.path.isfile(self.ios_dylib_gadget_path):
