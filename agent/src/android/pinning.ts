@@ -220,6 +220,36 @@ export namespace sslpinning {
       }
     });
   };
+  
+  const phoneGapSSLCertificateChecker = (ident: string): any | undefined => {
+    return wrapJavaPerform(() => {
+      try {
+        const sslCertificateChecker: SSLCertificateChecker = Java.use("nl.xservices.plugins.SSLCertificateChecker");
+        send(
+          c.blackBright(`Found nl.xservices.plugins.SSLCertificateChecker, ` +
+            `overriding SSLCertificateChecker.execute()`),
+        );
+
+        const SSLCertificateCheckerExecute = sslCertificateChecker.execute;
+
+        // tslint:disable-next-line:only-arrow-functions
+        SSLCertificateCheckerExecute.overload('java.lang.String', 'org.json.JSONArray', 'org.apache.cordova.CallbackContext').implementation = function(string,jsonArray,callBackContext) {
+          qsend(quiet,
+            c.blackBright(`[${ident}] `) + `Called ` +
+            c.green(`SSLCertificateChecker.execute()`) +
+            `, not throwing an exception.`,
+          );
+        };
+		callBackContext.success("CONNECTION_SECURE");
+        return true;
+
+      } catch (err) {
+        if (err.message.indexOf("ClassNotFoundException") === 0) {
+          throw new Error(err);
+        }
+      }
+    });
+  };
 
   // the main exported function to run all of the pinning bypass methods known
   export const disable = (q: boolean): void => {
@@ -239,6 +269,7 @@ export namespace sslpinning {
     job.implementations.push(appceleratorTitaniumPinningTrustManager(job.identifier));
     job.implementations.push(trustManagerImplVerifyChainCheck(job.identifier));
     job.implementations.push(trustManagerImplCheckTrustedRecursiveCheck(job.identifier));
+    job.implementations.push(phoneGapSSLCertificateChecker(job.identifier));
     jobs.add(job);
   };
 }
