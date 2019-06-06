@@ -11,12 +11,15 @@ export namespace hooking {
 
   const splitClassMethod = (fqClazz: string): string[] => {
     // split a fully qualified class name, assuming the last period denotes the method
-    const methodSeperatorIndex: number = fqClazz.lastIndexOf(".");
+    // Except in cases where the classname ends in ".overload(...)" (i.e. overloaded methods), which should be in method
+    const [wholeMatch, methodNoOverload, overloadSignature] = fqClazz.match("^(.*?)(\.overload\(.+\))?$");
+    const methodSeperatorIndex: number = methodNoOverload.lastIndexOf(".");
 
-    const clazz: string = fqClazz.substring(0, methodSeperatorIndex);
-    const method: string = fqClazz.substring(methodSeperatorIndex + 1); // Increment by 1 to exclude the leading period
+    const clazz: string = methodNoOverload.substring(0, methodSeperatorIndex);
+    const method: string = methodNoOverload.substring(methodSeperatorIndex + 1); // Increment by 1 to exclude the leading period
 
-    return [clazz, method];
+    if(overloadSignature == undefined)  return [clazz, method, undefined];
+    else return [clazz, method, overloadSignature.substring(1)]
   };
 
   export const getClasses = (): Promise<string[]> => {
@@ -101,7 +104,8 @@ export namespace hooking {
   };
 
   export const watchMethod = (fqClazz: string, dargs: boolean, dbt: boolean, dret: boolean): Promise<void> => {
-    const [clazz, method] = splitClassMethod(fqClazz);
+    // TODO: Allow users to specify an overload to watch here - splitClassMethod should return it.
+    const [clazz, method, overload] = splitClassMethod(fqClazz);
     send(`Attempting to watch class ${c.green(clazz)} and method ${c.green(method)}.`);
 
     return wrapJavaPerform(() => {
@@ -290,8 +294,8 @@ export namespace hooking {
   };
 
   export const setReturnValue = (fqClazz: string, newRet: boolean): Promise<void> => {
-    const [clazz, method] = splitClassMethod(fqClazz);
-    send(`Attempting to modify return value for class ${c.green(clazz)} and method ${c.green(method)}.`);
+    const [clazz, method, overload] = splitClassMethod(fqClazz);
+    send(`Attempting to modify return value for class ${c.green(clazz)} and method ${c.green(method)}` + (overload != undefined ? ` with overload ${c.green(overload)}.` : `.`));
 
     return wrapJavaPerform(() => {
       const job: IJob = {
@@ -301,11 +305,16 @@ export namespace hooking {
       };
 
       const clazzInstance: JavaClass = Java.use(clazz);
-      const methodInstance = clazzInstance[method];
+      const methodInstance = (
+          overload == undefined ?
+              clazzInstance[method] :
+              eval("clazzInstance[method]." + overload)
+      )
       // TODO, check that the method in question actually returns a bool
 
       // get the argument types for this method
       const calleeArgTypes: string[] = methodInstance.argumentTypes.map((arg) => arg.className);
+
       send(`Hooking ${c.green(clazz)}.${c.greenBright(method)}(${c.red(calleeArgTypes.join(", "))})`);
 
       // tslint:disable-next-line:only-arrow-functions
