@@ -86,7 +86,7 @@ def get_tokens(text: str) -> list:
 
     try:
 
-        tokens = shlex.split(text)
+        tokens = shlex.split(text, posix=False)
 
     except ValueError:
 
