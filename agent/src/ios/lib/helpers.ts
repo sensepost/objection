@@ -1,5 +1,5 @@
 import { NSUTF8StringEncoding } from "./constants";
-import { NSBundle, NSDictionary, NSFileManager, NSString } from "./types";
+import { NSBundle, NSDictionary, NSFileManager, NSString as NSStringType } from "./types";
 
 const NSString = ObjC.classes.NSString;
 
@@ -104,7 +104,7 @@ export const bytesToUTF8 = (data: any): string => {
     return data.toString();
   }
 
-  const s: NSString = NSString.alloc().initWithBytes_length_encoding_(
+  const s: NSStringType = NSString.alloc().initWithBytes_length_encoding_(
     data.bytes(), data.length(), NSUTF8StringEncoding);
 
   if (s) {
