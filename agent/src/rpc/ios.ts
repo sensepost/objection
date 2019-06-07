@@ -68,7 +68,7 @@ export const ios = {
   // ios keychain
   iosKeychainAdd: (key: string, data: string): boolean => ioskeychain.add(key, data),
   iosKeychainEmpty: (): void => ioskeychain.empty(),
-  iosKeychainList: (): IKeychainItem[] => ioskeychain.list(),
+  iosKeychainList: (smartDecode): IKeychainItem[] => ioskeychain.list(smartDecode),
 
   // ios nsuserdefaults
   iosNsuserDefaultsGet: (): NSUserDefaults | any => nsuserdefaults.get(),

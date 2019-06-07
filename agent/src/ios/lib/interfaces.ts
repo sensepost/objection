@@ -20,6 +20,7 @@ export interface IKeychainItem {
   account: string;
   label: string;
   data: string;
+  dataHex: string;
 }
 
 export interface IIosFileSystem {

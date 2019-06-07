@@ -1,4 +1,7 @@
-import { NSBundle, NSDictionary, NSFileManager } from "./types";
+import { NSUTF8StringEncoding } from "./constants";
+import { NSBundle, NSDictionary, NSFileManager, NSString } from "./types";
+
+const NSString = ObjC.classes.NSString;
 
 // Attempt to unarchive data. Returning a string of `` indicates that the
 // unarchiving failed.
@@ -43,7 +46,7 @@ export const unArchiveDataAndGetString = (data: ObjC.Object | any): string => {
   }
 };
 
-export const dataToString = (raw: any): string => {
+export const smartDataToString = (raw: any): string => {
 
   if (raw === null) { return ""; }
 
@@ -87,15 +90,42 @@ export const dataToString = (raw: any): string => {
   }
 };
 
-export const getNSFileManager = (): NSFileManager => {
+export const bytesToUTF8 = (data: any): string => {
+  // Sample Objective-C
+  //
+  // char buf[] = "\x41\x42\x43\x44";
+  // NSString *p = [[NSString alloc] initWithBytes:buf length:5 encoding:NSUTF8StringEncoding];
 
+  if (data === null) {
+    return "";
+  }
+
+  if (!data.hasOwnProperty("bytes")) {
+    return data.toString();
+  }
+
+  const s: NSString = NSString.alloc().initWithBytes_length_encoding_(
+    data.bytes(), data.length(), NSUTF8StringEncoding);
+
+  if (s) {
+    return s.UTF8String();
+  }
+
+  return "";
+};
+
+export const bytesToHexString = (data: any): string => {
+  // https://stackoverflow.com/a/50767210
+  const buffer: ArrayBuffer = data.bytes().readByteArray(data.length());
+  return Array.from(new Uint8Array(buffer)).map((b) => b.toString(16)).join("");
+};
+
+export const getNSFileManager = (): NSFileManager => {
   const NSFM = ObjC.classes.NSFileManager;
   return NSFM.defaultManager();
 };
 
 export const getNSMainBundle = (): NSBundle => {
-
   const bundle = ObjC.classes.NSBundle;
   return bundle.mainBundle();
-
 };

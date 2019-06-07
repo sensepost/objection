@@ -434,7 +434,7 @@ COMMANDS = {
                 'commands': {
                     'dump': {
                         'meta': 'Dump the keychain for the current app\'s entitlement group',
-                        'flags': ['--json'],
+                        'flags': ['--json', '--smart'],
                         'exec': keychain.dump
                     },
                     'clear': {

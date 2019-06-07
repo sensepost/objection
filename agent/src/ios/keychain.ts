@@ -1,8 +1,8 @@
 // dumps all of the keychain items available to the current
 // application.
 import { reverseEnumLookup } from "../lib/helpers";
-import { kSec } from "./lib/constants";
-import { dataToString } from "./lib/helpers";
+import { kSec, NSUTF8StringEncoding } from "./lib/constants";
+import { bytesToHexString, bytesToUTF8, smartDataToString } from "./lib/helpers";
 import { IKeychainItem } from "./lib/interfaces";
 import { libObjc } from "./lib/libobjc";
 import {
@@ -12,7 +12,6 @@ import {
 } from "./lib/types";
 
 const { NSMutableDictionary, NSString } = ObjC.classes;
-const NSUTF8StringEncoding = 4;
 
 // keychain item times to query for
 const itemClasses = [
@@ -38,7 +37,7 @@ export namespace ioskeychain {
 
   // dump the contents of the iOS keychain, returning the
   // results as an array representation.
-  export const list = (): IKeychainItem[] => {
+  export const list = (smartDecode: boolean = false): IKeychainItem[] => {
     // -- Sample Objective-C
     //
     // NSMutableDictionary *query = [[NSMutableDictionary alloc] init];
@@ -111,27 +110,31 @@ export namespace ioskeychain {
         clazzItems.push({
           access_control: (data.containsKey_(kSec.kSecAttrAccessControl)) ? decodeAcl(data) : "",
           accessible_attribute: reverseEnumLookup(kSec,
-            dataToString(data.objectForKey_(kSec.kSecAttrAccessible))),
-          account: dataToString(data.objectForKey_(kSec.kSecAttrAccount)),
-          alias: dataToString(data.objectForKey_(kSec.kSecAttrAlias)),
-          comment: dataToString(data.objectForKey_(kSec.kSecAttrComment)),
-          create_date: dataToString(data.objectForKey_(kSec.kSecAttrCreationDate)),
-          creator: dataToString(data.objectForKey_(kSec.kSecAttrCreator)),
-          custom_icon: dataToString(data.objectForKey_(kSec.kSecAttrHasCustomIcon)),
-          data: (clazz !== "keys") ? dataToString(data.objectForKey_(kSec.kSecValueData)) :
+            bytesToUTF8(data.objectForKey_(kSec.kSecAttrAccessible))),
+          account: bytesToUTF8(data.objectForKey_(kSec.kSecAttrAccount)),
+          alias: bytesToUTF8(data.objectForKey_(kSec.kSecAttrAlias)),
+          comment: bytesToUTF8(data.objectForKey_(kSec.kSecAttrComment)),
+          create_date: bytesToUTF8(data.objectForKey_(kSec.kSecAttrCreationDate)),
+          creator: bytesToUTF8(data.objectForKey_(kSec.kSecAttrCreator)),
+          custom_icon: bytesToUTF8(data.objectForKey_(kSec.kSecAttrHasCustomIcon)),
+          data: (clazz !== "keys") ?
+            (smartDecode) ?
+              smartDataToString(data.objectForKey_(kSec.kSecValueData)) :
+              bytesToUTF8(data.objectForKey_(kSec.kSecValueData)) :
             "(Key data not displayed)",
-          description: dataToString(data.objectForKey_(kSec.kSecAttrDescription)),
-          entitlement_group: dataToString(data.objectForKey_(kSec.kSecAttrAccessGroup)),
-          generic: dataToString(data.objectForKey_(kSec.kSecAttrGeneric)),
-          invisible: dataToString(data.objectForKey_(kSec.kSecAttrIsInvisible)),
+          dataHex: bytesToHexString(data.objectForKey_(kSec.kSecValueData)),
+          description: bytesToUTF8(data.objectForKey_(kSec.kSecAttrDescription)),
+          entitlement_group: bytesToUTF8(data.objectForKey_(kSec.kSecAttrAccessGroup)),
+          generic: bytesToUTF8(data.objectForKey_(kSec.kSecAttrGeneric)),
+          invisible: bytesToUTF8(data.objectForKey_(kSec.kSecAttrIsInvisible)),
           item_class: reverseEnumLookup(kSec, clazz),
-          label: dataToString(data.objectForKey_(kSec.kSecAttrLabel)),
-          modification_date: dataToString(data.objectForKey_(kSec.kSecAttrModificationDate)),
-          negative: dataToString(data.objectForKey_(kSec.kSecAttrIsNegative)),
-          protected: dataToString(data.objectForKey_(kSec.kSecProtectedDataItemAttr)),
-          script_code: dataToString(data.objectForKey_(kSec.kSecAttrScriptCode)),
-          service: dataToString(data.objectForKey_(kSec.kSecAttrService)),
-          type: dataToString(data.objectForKey_(kSec.kSecAttrType)),
+          label: bytesToUTF8(data.objectForKey_(kSec.kSecAttrLabel)),
+          modification_date: bytesToUTF8(data.objectForKey_(kSec.kSecAttrModificationDate)),
+          negative: bytesToUTF8(data.objectForKey_(kSec.kSecAttrIsNegative)),
+          protected: bytesToUTF8(data.objectForKey_(kSec.kSecProtectedDataItemAttr)),
+          script_code: bytesToUTF8(data.objectForKey_(kSec.kSecAttrScriptCode)),
+          service: bytesToUTF8(data.objectForKey_(kSec.kSecAttrService)),
+          type: bytesToUTF8(data.objectForKey_(kSec.kSecAttrType)),
         });
       }
 
@@ -176,7 +179,7 @@ export namespace ioskeychain {
     while ((aclItemkey = aclEnum.nextObject()) !== null) {
       const aclItem: NSDictionary = acl.objectForKey_(aclItemkey);
 
-      switch (dataToString(aclItemkey)) {
+      switch (smartDataToString(aclItemkey)) {
 
         // Defaults?
         case "dacl":
@@ -193,7 +196,7 @@ export namespace ioskeychain {
           // tslint:disable-next-line:no-conditional-assignment
           while ((constraintItemKey = constraintEnum.nextObject()) !== null) {
 
-            switch (dataToString(constraintItemKey)) {
+            switch (smartDataToString(constraintItemKey)) {
               case "cpo":
                 flags.push("kSecAccessControlUserPresence");
                 break;
