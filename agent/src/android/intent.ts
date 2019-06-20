@@ -24,7 +24,7 @@ export namespace intent {
       const androidIntent: Intent = Java.use("android.content.Intent");
 
       // Get the Activity class's .class
-      const newActivity: string = Java.use(activityClass).class;
+      const newActivity: string = Java.use(activityClass).$className;
       send(`Starting activity ${c.green(activityClass)}...`);
 
       // Init and launch the intent
@@ -51,7 +51,7 @@ export namespace intent {
       const androidIntent: Intent = Java.use("android.content.Intent");
 
       // Get the Activity class's .class
-      const newService: string = Java.use(serviceClass).class;
+      const newService: string = Java.use(serviceClass).$className;
       send(`Starting service ${c.green(serviceClass)}...`);
 
       // Init and launch the intent
