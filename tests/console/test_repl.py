@@ -175,11 +175,11 @@ class TestRepl(unittest.TestCase):
             output = o
 
         expected_output = ("""
-     _     _         _   _
- ___| |_  |_|___ ___| |_|_|___ ___
-| . | . | | | -_|  _|  _| | . |   |
-|___|___|_| |___|___|_| |_|___|_|_|
-        |___|(object)inject(ion) v{0}
+     _   _         _   _
+ ___| |_|_|___ ___| |_|_|___ ___
+| . | . | | -_|  _|  _| | . |   |
+|___|___| |___|___|_| |_|___|_|_|
+      |___|(object)inject(ion) v{0}
 
      Runtime Mobile Exploration
         by: @leonjza from @sensepost
