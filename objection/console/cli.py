@@ -35,11 +35,11 @@ def cli(network: bool, host: str, port: int, api_host: str, api_port: int,
         gadget: str, serial: str, debug: bool) -> None:
     """
         \b
-             _     _         _   _
-         ___| |_  |_|___ ___| |_|_|___ ___
-        | . | . | | | -_|  _|  _| | . |   |
-        |___|___|_| |___|___|_| |_|___|_|_|
-                |___|(object)inject(ion)
+             _   _         _   _
+         ___| |_|_|___ ___| |_|_|___ ___
+        | . | . | | -_|  _|  _| | . |   |
+        |___|___| |___|___|_| |_|___|_|_|
+              |___|(object)inject(ion)
         \b
              Runtime Mobile Exploration
                 by: @leonjza from @sensepost
