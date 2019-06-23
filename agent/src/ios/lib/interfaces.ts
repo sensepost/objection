@@ -63,3 +63,12 @@ export interface IFramework {
   bundle: string|null;
   path: string|null;
 }
+
+export interface IHeapObject {
+  className: string;
+  handle: string;
+  ivars: any[string];
+  kind: string;
+  methods: string[];
+  superClass: string;
+}

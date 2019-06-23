@@ -2,11 +2,12 @@ import { binarycookies } from "../ios/binarycookies";
 import { bundles } from "../ios/bundles";
 import { credentialstorage } from "../ios/credentialstorage";
 import { iosfilesystem } from "../ios/filesystem";
+import { heap } from "../ios/heap";
 import { hooking } from "../ios/hooking";
 import { iosjailbreak } from "../ios/jailbreak";
 import { ioskeychain } from "../ios/keychain";
 import { BundleType } from "../ios/lib/constants";
-import { ICredential, IFramework, IIosCookie, IIosFileSystem, IKeychainItem } from "../ios/lib/interfaces";
+import { ICredential, IFramework, IHeapObject, IIosCookie, IIosFileSystem, IKeychainItem } from "../ios/lib/interfaces";
 import { NSUserDefaults } from "../ios/lib/types";
 import { nsuserdefaults } from "../ios/nsuserdefaults";
 import { pasteboard } from "../ios/pasteboard";
@@ -30,6 +31,13 @@ export const ios = {
   iosFileReadable: (path: string): boolean => iosfilesystem.readable(path),
   iosFileUpload: (path: string, data: string): void => iosfilesystem.writeFile(path, data),
   iosFileWritable: (path: string): boolean => iosfilesystem.writable(path),
+
+  // ios heap
+  iosHeapExecMethod: (pointer: string, method: string, returnString: boolean): void =>
+    heap.callInstanceMethod(pointer, method, returnString),
+  iosHeapPrintIvars: (pointer: string, toUTF8: boolean): [string, any[string]] => heap.getIvars(pointer, toUTF8),
+  iosHeapPrintLiveInstances: (clazz: string): IHeapObject[] => heap.getInstances(clazz),
+  iosHeapPrintMethods: (pointer: string): [string, any[string]] => heap.getMethods(pointer),
 
   // ios hooking
   iosHookingGetClassMethods: (className: string, includeParents: boolean): string[] =>
