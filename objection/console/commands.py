@@ -9,7 +9,7 @@ from ..commands import sqlite
 from ..commands import ui
 from ..commands.android import clipboard
 from ..commands.android import command
-from ..commands.android import heap
+from ..commands.android import heap as android_heap
 from ..commands.android import hooking as android_hooking
 from ..commands.android import intents
 from ..commands.android import keystore
@@ -17,6 +17,7 @@ from ..commands.android import pinning as android_pinning
 from ..commands.android import root
 from ..commands.ios import bundles
 from ..commands.ios import cookies
+from ..commands.ios import heap as ios_heap
 from ..commands.ios import hooking as ios_hooking
 from ..commands.ios import jailbreak
 from ..commands.ios import keychain
@@ -347,7 +348,7 @@ COMMANDS = {
                 'commands': {
                     'print_instances': {
                         'meta': 'Lists the currently live instances of a particular class',
-                        'exec': heap.live_instances
+                        'exec': android_heap.live_instances
                     }
                 }
             },
@@ -520,6 +521,40 @@ COMMANDS = {
                     'biometrics_bypass': {
                         'meta': 'Hook the iOS Biometrics LAContext and respond with successful auth',
                         'exec': ui.bypass_touchid
+                    }
+                }
+            },
+            'heap': {
+                'meta': 'Commands to work with the iOS heap',
+                'commands': {
+                    'print': {
+                        'meta': 'Print information about objects on the iOS heap',
+                        'commands': {
+                            'ivars': {
+                                'meta': 'Print instance variables for an Objective-C object',
+                                'flags': ['--to-utf8'],
+                                'exec': ios_heap.ivars
+                            },
+                            'methods': {
+                                'meta': 'Print instance methods for an Objective-C object',
+                                'flags': ['--without-arguments'],
+                                'exec': ios_heap.methods
+                            }
+                        }
+                    },
+                    'search': {
+                        'meta': 'Search for information about the current iOS heap',
+                        'commands': {
+                            'instances': {
+                                'meta': 'Search for live instances of a particular class',
+                                'exec': ios_heap.instances
+                            }
+                        }
+                    },
+                    'execute': {
+                        'meta': 'Execute methods on objects on the iOS heap',
+                        'flags': ['--return-string'],
+                        'exec': ios_heap.execute
                     }
                 }
             },
