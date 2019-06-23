@@ -139,34 +139,34 @@ export namespace sslpinning {
       });
 
     // +[AFSecurityPolicy policyWithPinningMode:withPinnedCertificates:]
-    const policyWithPinningModewithPinnedCertificates: InvocationListener = Interceptor.attach(
-
-      AFSecurityPolicy["+ policyWithPinningMode:withPinnedCertificates:"].implementation, {
-        onEnter(args) {
-          // typedef NS_ENUM(NSUInteger, AFSSLPinningMode) {
-          //     AFSSLPinningModeNone,
-          //     AFSSLPinningModePublicKey,
-          //     AFSSLPinningModeCertificate,
-          // };
-          qsend(quiet,
-            c.blackBright(`[${ident}] `) + `[AFNetworking] Called ` +
-            c.green(`+[AFSecurityPolicy policyWithPinningMode:withPinnedCertificates:]`) + ` with mode ` +
-            c.red(args[2].toString()),
-          );
-
-          if (!args[2].isNull()) {
+    const policyWithPinningModewithPinnedCertificates: InvocationListener =
+      (AFSecurityPolicy["+ policyWithPinningMode:withPinnedCertificates:"]) ? Interceptor.attach(
+        AFSecurityPolicy["+ policyWithPinningMode:withPinnedCertificates:"].implementation, {
+          onEnter(args) {
+            // typedef NS_ENUM(NSUInteger, AFSSLPinningMode) {
+            //     AFSSLPinningModeNone,
+            //     AFSSLPinningModePublicKey,
+            //     AFSSLPinningModeCertificate,
+            // };
             qsend(quiet,
-              c.blackBright(`[${ident}] `) + `[AFNetworking] ` +
-              c.blueBright(`Altered `) +
-              c.green(`+[AFSecurityPolicy policyWithPinningMode:withPinnedCertificates:]`) + ` mode to ` +
-              c.green(`0x0`),
+              c.blackBright(`[${ident}] `) + `[AFNetworking] Called ` +
+              c.green(`+[AFSecurityPolicy policyWithPinningMode:withPinnedCertificates:]`) + ` with mode ` +
+              c.red(args[2].toString()),
             );
 
-            // effectively set to AFSSLPinningModeNone
-            args[2] = new NativePointer(0x0);
-          }
-        },
-      });
+            if (!args[2].isNull()) {
+              qsend(quiet,
+                c.blackBright(`[${ident}] `) + `[AFNetworking] ` +
+                c.blueBright(`Altered `) +
+                c.green(`+[AFSecurityPolicy policyWithPinningMode:withPinnedCertificates:]`) + ` mode to ` +
+                c.green(`0x0`),
+              );
+
+              // effectively set to AFSSLPinningModeNone
+              args[2] = new NativePointer(0x0);
+            }
+          },
+        }) : null;
 
     return [
       setSSLPinningmode,

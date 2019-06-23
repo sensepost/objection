@@ -49,7 +49,8 @@ export namespace jobs {
         // detach any invocations
         if (job.invocations && job.invocations.length > 0) {
           job.invocations.forEach((invocation) => {
-            invocation.detach();
+            (invocation) ? invocation.detach() :
+              c.log(c.blackBright(`[warn] Skipping detach on null`));
           });
         }
 
