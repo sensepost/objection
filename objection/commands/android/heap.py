@@ -1,9 +1,10 @@
 import click
+from tabulate import tabulate
 
 from objection.state.connection import state_connection
 
 
-def live_instances(args: list) -> None:
+def instances(args: list) -> None:
     """
         Asks the agent to print the currently live instances of a particular class
 
@@ -18,4 +19,15 @@ def live_instances(args: list) -> None:
     target_class = args[0]
 
     api = state_connection.get_api()
-    api.android_live_print_class_instances(target_class)
+    instance_results = api.android_live_get_class_instances(target_class)
+
+    if len(instance_results) <= 0:
+        return
+
+    click.secho(tabulate(
+        [[
+            entry['handleString'],
+            entry['className'],
+            entry['asString'],
+        ] for entry in instance_results], headers=['Handle', 'Class', 'toString()'],
+    ))
