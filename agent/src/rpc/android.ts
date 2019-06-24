@@ -41,7 +41,7 @@ export const android = {
     hooking.watchMethod(fqClazz, dargs, dbt, dret),
 
   // android heap methods
-  androidLivePrintClassInstances: (clazz: string): Promise<void> => heap.printInstances(clazz),
+  androidLiveGetClassInstances: (clazz: string): Promise<Java.Wrapper[]> => heap.getInstances(clazz),
 
   // android intents
   androidIntentStartActivity: (activityClass: string): Promise<void> => intent.startActivity(activityClass),

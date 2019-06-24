@@ -18,6 +18,13 @@ export interface IKeyStoreEntry {
 }
 
 export interface ICurrentActivityFragment {
-    activivity: string|null;
-    fragment: string|null;
+    activivity: string | null;
+    fragment: string | null;
+}
+
+export interface IHeapObject {
+    asString: string;
+    className: string;
+    handle: Java.Wrapper;
+    handleString: string;
 }

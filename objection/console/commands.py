@@ -346,9 +346,15 @@ COMMANDS = {
             'heap': {
                 'meta': 'Commands to work with the Android Heap',
                 'commands': {
-                    'print_instances': {
-                        'meta': 'Lists the currently live instances of a particular class',
-                        'exec': android_heap.live_instances
+                    'search': {
+                        'meta': 'Search for information about the current Android heap',
+                        'commands': {
+                            'instances': {
+                                'meta': 'Search for live instances of a particular class',
+                                'exec': android_heap.instances
+
+                            }
+                        }
                     }
                 }
             },
