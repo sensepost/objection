@@ -1,3 +1,5 @@
+import pprint
+
 import click
 from tabulate import tabulate
 
@@ -95,8 +97,6 @@ def ivars(args: list) -> None:
     api = state_connection.get_api()
     ivar_results = api.ios_heap_print_ivars(target_pointer, _should_print_as_utf8(args))
 
-    # click.secho(pprint.pformat(ivar_results[1]))
-
     click.secho(tabulate(
         [[
             key, value
@@ -158,5 +158,4 @@ def execute(args: list) -> None:
     api = state_connection.get_api()
     exec_results = api.ios_heap_exec_method(target_pointer, method, _should_return_as_string(args))
 
-    from pprint import pprint
-    pprint(exec_results)
+    click.secho(pprint.pformat(exec_results))
