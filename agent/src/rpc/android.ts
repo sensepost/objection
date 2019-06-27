@@ -4,6 +4,7 @@ import { heap } from "../android/heap";
 import { hooking } from "../android/hooking";
 import { intent } from "../android/intent";
 import { keystore } from "../android/keystore";
+import { IHeapObject, IJavaField } from "../android/lib/interfaces";
 import { ICurrentActivityFragment, IExecutedCommand, IKeyStoreEntry } from "../android/lib/interfaces";
 import { sslpinning } from "../android/pinning";
 import { root } from "../android/root";
@@ -41,7 +42,13 @@ export const android = {
     hooking.watchMethod(fqClazz, dargs, dbt, dret),
 
   // android heap methods
-  androidLiveGetClassInstances: (clazz: string): Promise<Java.Wrapper[]> => heap.getInstances(clazz),
+  androidHeapEvaluateHandleMethod: (handle: string, js: string): Promise<void> => heap.evaluate(handle, js),
+  androidHeapExecuteHandleMethod: (handle: string, method: string, returnString: boolean): Promise<string|null> =>
+    heap.execute(handle, method, returnString),
+  androidHeapGetLiveClassInstances: (clazz: string, fresh: boolean): Promise<IHeapObject[]> =>
+    heap.getInstances(clazz, fresh),
+  androidHeapPrintFields: (handle: string): Promise<IJavaField[]> => heap.fields(handle),
+  androidHeapPrintMethods: (handle: string): Promise<string[]> => heap.methods(handle),
 
   // android intents
   androidIntentStartActivity: (activityClass: string): Promise<void> => intent.startActivity(activityClass),

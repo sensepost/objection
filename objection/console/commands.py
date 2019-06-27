@@ -351,10 +351,34 @@ COMMANDS = {
                         'commands': {
                             'instances': {
                                 'meta': 'Search for live instances of a particular class',
+                                'flags': ['--fresh'],
                                 'exec': android_heap.instances
 
                             }
                         }
+                    },
+                    'print': {
+                        'meta': 'Print information about objects on the iOS heap',
+                        'commands': {
+                            'fields': {
+                                'meta': 'Print instance fields for a Java object handle',
+                                'exec': android_heap.fields
+                            },
+                            'methods': {
+                                'meta': 'Print instance methods for an Android handle',
+                                'flags': ['--without-arguments'],
+                                'exec': android_heap.methods
+                            }
+                        }
+                    },
+                    'execute': {
+                        'meta': 'Execute methods on Java class handles',
+                        'flags': ['--return-string'],
+                        'exec': android_heap.execute
+                    },
+                    'evaluate': {
+                        'meta': 'Evaluate JavaScript on Java class handle',
+                        'exec': android_heap.evaluate
                     }
                 }
             },
