@@ -33,6 +33,7 @@ export const ios = {
   iosFileWritable: (path: string): boolean => iosfilesystem.writable(path),
 
   // ios heap
+  iosHeapEvaluateJs: (pointer: string, js: string): void => heap.evaluate(pointer, js),
   iosHeapExecMethod: (pointer: string, method: string, returnString: boolean): void =>
     heap.callInstanceMethod(pointer, method, returnString),
   iosHeapPrintIvars: (pointer: string, toUTF8: boolean): [string, any[string]] => heap.getIvars(pointer, toUTF8),

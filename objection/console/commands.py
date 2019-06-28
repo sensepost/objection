@@ -585,6 +585,10 @@ COMMANDS = {
                         'meta': 'Execute methods on objects on the iOS heap',
                         'flags': ['--return-string'],
                         'exec': ios_heap.execute
+                    },
+                    'evaluate': {
+                        'meta': 'Evaluate JavaScript on objects on the iOS heap',
+                        'exec': ios_heap.evaluate
                     }
                 }
             },
