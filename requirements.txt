@@ -6,3 +6,4 @@ tabulate
 delegator.py
 requests
 flask
+pygments

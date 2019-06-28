@@ -83,4 +83,10 @@ export namespace heap {
     }
     return i[method]();
   };
+
+  export const evaluate = (pointer: string, js: string): void => {
+    const ptr = resolvePointer(pointer);
+    // tslint:disable-next-line:no-eval
+    eval(js);
+  };
 }

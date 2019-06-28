@@ -1,6 +1,9 @@
 import pprint
 
 import click
+from prompt_toolkit import prompt
+from prompt_toolkit.lexers import PygmentsLexer
+from pygments.lexers.html import JavascriptLexer
 from tabulate import tabulate
 
 from objection.state.connection import state_connection
@@ -159,3 +162,31 @@ def execute(args: list) -> None:
     exec_results = api.ios_heap_exec_method(target_pointer, method, _should_return_as_string(args))
 
     click.secho(pprint.pformat(exec_results))
+
+
+def evaluate(args: list) -> None:
+    """
+        Evaluate JavaScript on an Objective-C pointer.
+
+        :param args:
+        :return:
+    """
+
+    if len(args) < 1:
+        click.secho('Usage: ios heap execute js <pointer> (eg: 0x600001130660)', bold=True)
+        return
+
+    target_pointer = args[0]
+
+    js = prompt(
+        click.secho('Enter JavaScript to evaluate on the pointer:\n'
+                    '(ESCAPE followed by ENTER to accept)\n' +
+                    '(The pointer at `{pointer}` will be available as the `ptr` variable.)\n'.format(
+                        pointer=target_pointer
+                    ), dim=True),
+        multiline=True, lexer=PygmentsLexer(JavascriptLexer)).strip()
+
+    click.secho('JavaScript capture complete. Evaluating...', dim=True)
+
+    api = state_connection.get_api()
+    api.ios_heap_evaluate_js(target_pointer, js)
