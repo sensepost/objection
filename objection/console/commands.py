@@ -1,4 +1,5 @@
 from ..commands import command_history
+from ..commands import custom
 from ..commands import device
 from ..commands import filemanager
 from ..commands import frida_commands
@@ -137,6 +138,11 @@ COMMANDS = {
     'frida': {
         'meta': 'Get information about the Frida environment',
         'exec': frida_commands.frida_environment
+    },
+
+    'evaluate': {
+        'meta': 'Evaluate JavaScript within the agent',
+        'exec': custom.evaluate
     },
 
     # memory commands
