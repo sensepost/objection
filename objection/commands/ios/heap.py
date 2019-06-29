@@ -3,7 +3,7 @@ import pprint
 import click
 from prompt_toolkit import prompt
 from prompt_toolkit.lexers import PygmentsLexer
-from pygments.lexers.html import JavascriptLexer
+from pygments.lexers.javascript import JavascriptLexer
 from tabulate import tabulate
 
 from objection.state.connection import state_connection
