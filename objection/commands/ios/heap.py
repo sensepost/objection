@@ -179,12 +179,11 @@ def evaluate(args: list) -> None:
     target_pointer = args[0]
 
     js = prompt(
-        click.secho('Enter JavaScript to evaluate on the pointer:\n'
-                    '(ESCAPE followed by ENTER to accept)\n' +
-                    '(The pointer at `{pointer}` will be available as the `ptr` variable.)\n'.format(
-                        pointer=target_pointer
-                    ), dim=True),
-        multiline=True, lexer=PygmentsLexer(JavascriptLexer)).strip()
+        click.secho('(The pointer at `{pointer}` will be available as the `ptr` variable.)n'.format(
+            pointer=target_pointer
+        ), dim=True),
+        multiline=True, lexer=PygmentsLexer(JavascriptLexer),
+        bottom_toolbar='JavaScript edit mode. [ESC] and then [ENTER] to accept. [CTRL] + C to cancel.').strip()
 
     click.secho('JavaScript capture complete. Evaluating...', dim=True)
 

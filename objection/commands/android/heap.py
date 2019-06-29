@@ -167,12 +167,11 @@ def evaluate(args: list) -> None:
     target_handle = args[0]
 
     js = prompt(
-        click.secho('Enter JavaScript to evaluate on the handle:\n'
-                    '(ESCAPE followed by ENTER to accept)\n' +
-                    '(The handle at `{handle}` will be available as the `clazz` variable.)\n'.format(
+        click.secho('(The handle at `{handle}` will be available as the `clazz` variable.)'.format(
                         handle=target_handle
                     ), dim=True),
-        multiline=True, lexer=PygmentsLexer(JavascriptLexer)).strip()
+        multiline=True, lexer=PygmentsLexer(JavascriptLexer),
+        bottom_toolbar='JavaScript edit mode. [ESC] and then [ENTER] to accept. [CTRL] + C to cancel.').strip()
 
     click.secho('JavaScript capture complete. Evaluating...', dim=True)
 
