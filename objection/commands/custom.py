@@ -35,9 +35,8 @@ def evaluate(args: list) -> None:
             javascript = ''.join(f.readlines())
     else:
         javascript = prompt(
-            click.secho('Enter JavaScript to evaluate on the handle:\n'
-                        '(ESCAPE followed by ENTER to accept)\n', dim=True),
-            multiline=True, lexer=PygmentsLexer(JavascriptLexer)).strip()
+            multiline=True, lexer=PygmentsLexer(JavascriptLexer),
+            bottom_toolbar='JavaScript edit mode. [ESC] and then [ENTER] to accept. [CTRL] + C to cancel.').strip()
 
     if len(javascript) <= 0:
         click.secho('JavaScript to evaluate appears empty. Skipping.', fg='yellow')
