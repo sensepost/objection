@@ -16,6 +16,7 @@ from ..commands.android import intents
 from ..commands.android import keystore
 from ..commands.android import pinning as android_pinning
 from ..commands.android import root
+from ..commands.ios import binary
 from ..commands.ios import bundles
 from ..commands.ios import cookies
 from ..commands.ios import heap as ios_heap
@@ -466,6 +467,15 @@ COMMANDS = {
     'ios': {
         'meta': 'Commands specific to iOS',
         'commands': {
+            'info': {
+                'meta': 'Get iOS and application related information',
+                'commands': {
+                    'binary': {
+                        'meta': 'Get information about application binaries and dylibs',
+                        'exec': binary.info
+                    }
+                }
+            },
             'keychain': {
                 'meta': 'Work with the iOS keychain',
                 'commands': {

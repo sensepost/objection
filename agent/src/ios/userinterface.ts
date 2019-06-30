@@ -1,4 +1,5 @@
-import sc = require("frida-screenshot");
+// tslint:disable-next-line:no-var-requires
+const sc = require("frida-screenshot");
 import { colors as c } from "../lib/color";
 import { IJob } from "../lib/interfaces";
 import { jobs } from "../lib/jobs";

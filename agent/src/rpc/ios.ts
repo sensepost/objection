@@ -1,3 +1,4 @@
+import { binary } from "../ios/binary";
 import { binarycookies } from "../ios/binarycookies";
 import { bundles } from "../ios/bundles";
 import { credentialstorage } from "../ios/credentialstorage";
@@ -7,7 +8,10 @@ import { hooking } from "../ios/hooking";
 import { iosjailbreak } from "../ios/jailbreak";
 import { ioskeychain } from "../ios/keychain";
 import { BundleType } from "../ios/lib/constants";
-import { ICredential, IFramework, IHeapObject, IIosCookie, IIosFileSystem, IKeychainItem } from "../ios/lib/interfaces";
+import {
+  IBinaryModuleDictionary, ICredential, IFramework,
+  IHeapObject, IIosCookie, IIosFileSystem, IKeychainItem,
+} from "../ios/lib/interfaces";
 import { NSUserDefaults } from "../ios/lib/types";
 import { nsuserdefaults } from "../ios/nsuserdefaults";
 import { pasteboard } from "../ios/pasteboard";
@@ -16,6 +20,9 @@ import { plist } from "../ios/plist";
 import { userinterface } from "../ios/userinterface";
 
 export const ios = {
+  // binary
+  iosBinaryInfo: (): IBinaryModuleDictionary => binary.info(),
+
   // ios binary cookies
   iosCookiesGet: (): IIosCookie[] => binarycookies.get(),
 
