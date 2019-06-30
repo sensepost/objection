@@ -13,7 +13,7 @@ export namespace binary {
       //   uint32_t	cryptid;	/* which enryption system, 0 means not-encrypted yet */
       // };
       if (cmd.type === "encryption_info" || cmd.type === "encryption_info_64") {
-        if (cmd.id === 1) {
+        if (cmd.id !== 0) {
           return true;
         }
       }
