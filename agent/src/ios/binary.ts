@@ -29,12 +29,16 @@ export namespace binary {
       if (!a.path.includes(".app")) {
         return;
       }
+
+      const imports: Set<string> = new Set(a.enumerateImports().map((i) => i.name));
       const fb = iosfilesystem.readFile(a.path);
 
       try {
         const exe = macho.parse(fb);
 
         parsedModules[a.name] = {
+          arc: imports.has("_objc_release"),
+          canary: imports.has("__stack_chk_fail"),
           encrypted: isEncrypted(exe.cmds),
           pie: exe.flags.pie ? true : false,
           rootSafe: exe.flags.root_safe ? true : false,

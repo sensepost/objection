@@ -78,6 +78,8 @@ export interface IBinaryModuleDictionary {
 }
 
 export interface IBinaryInfo {
+  arc: boolean;
+  canary: boolean;
   encrypted: boolean;
   pie: boolean;
   rootSafe: boolean;
