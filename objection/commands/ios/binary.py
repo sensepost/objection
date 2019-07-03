@@ -6,8 +6,7 @@ from objection.state.connection import state_connection
 
 def info(args: list) -> None:
     """
-        Gets cookies using the iOS NSHTTPCookieStorage sharedHTTPCookieStorage
-        and prints them to the screen.
+        Gets information about binaries and frameworks.
 
         :param args:
         :return:
@@ -22,8 +21,10 @@ def info(args: list) -> None:
             information['type'],
             information['encrypted'],
             information['pie'],
+            information['arc'],
+            information['canary'],
             information['stackExec'],
             information['rootSafe']
         ] for name, information in binary_info.items()],
-        headers=['Name', 'Type', 'Encrypted', 'PIE', 'Stack Exec', 'RootSafe'],
+        headers=['Name', 'Type', 'Encrypted', 'PIE', 'ARC', 'Canary', 'Stack Exec', 'RootSafe'],
     ))
