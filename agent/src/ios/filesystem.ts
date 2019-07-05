@@ -99,6 +99,17 @@ export namespace iosfilesystem {
     writeStream.end();
   };
 
+  export const deleteFile = (path: string): boolean => {
+    const fm: NSFileManager = getFileManager();
+
+    const err: NativePointer = Memory.alloc(Process.pointerSize);
+    fm.removeItemAtPath_error_(path, err);
+
+    // deref the isDir pointer to get the bool
+    // *isDir === 1 means the path is a directory
+    return err.readInt() === 0;
+  };
+
   export const ls = (path: string): IIosFileSystem => {
     // -- Sample Objective-C
     //
