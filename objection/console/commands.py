@@ -1,3 +1,4 @@
+from objection.commands import http
 from ..commands import command_history
 from ..commands import custom
 from ..commands import device
@@ -119,7 +120,27 @@ COMMANDS = {
                 'meta': 'Download a file',
                 'dynamic': filemanager.list_files_in_current_fm_directory,
                 'exec': filemanager.download
-            }
+            },
+
+            # http file server
+
+            'http': {
+                'meta': 'Work with an on device HTTP file server',
+                'commands': {
+                    'start': {
+                        'meta': 'Start\'s an HTTP server in the current working directory',
+                        'exec': http.start
+                    },
+                    'status': {
+                        'meta': 'Get the status of the HTTP server',
+                        'exec': http.status
+                    },
+                    'stop': {
+                        'meta': 'Stop\'s a running HTTP server',
+                        'exec': http.stop
+                    }
+                }
+            },
         }
     },
 
