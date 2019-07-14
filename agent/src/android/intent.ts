@@ -24,7 +24,7 @@ export namespace intent {
       const androidIntent: Intent = Java.use("android.content.Intent");
 
       // Get the Activity class's .class
-      const newActivity: string = Java.use(activityClass).$className;
+      const newActivity: Java.Wrapper = Java.use(activityClass).class;
       send(`Starting activity ${c.green(activityClass)}...`);
 
       // Init and launch the intent
