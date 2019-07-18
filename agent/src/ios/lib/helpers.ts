@@ -117,7 +117,7 @@ export const bytesToUTF8 = (data: any): string => {
 export const bytesToHexString = (data: any): string => {
   // https://stackoverflow.com/a/50767210
   const buffer: ArrayBuffer = data.bytes().readByteArray(data.length());
-  return Array.from(new Uint8Array(buffer)).map((b) => b.toString(16)).join("");
+  return Array.from(new Uint8Array(buffer)).map((b) => ("0" + b.toString(16)).substr(-2)).join("");
 };
 
 export const getNSFileManager = (): NSFileManager => {
