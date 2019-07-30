@@ -430,7 +430,7 @@ class AndroidPatcher(BasePlatformPatcher):
             return
 
         # set the debuggable flag
-        application_tag.attrib['android:debuggable'] = 'true'
+        application_tag.attrib['{http://schemas.android.com/apk/res/android}debuggable'] = 'true'
 
         click.secho('Writing new Android manifest...', dim=True)
         xml.write(os.path.join(self.apk_temp_directory, 'AndroidManifest.xml'),
@@ -484,7 +484,7 @@ class AndroidPatcher(BasePlatformPatcher):
 
         # set the networkSecurityConfig xml location
         # this is in res/xml/network_security_config.xml
-        application_tag.attrib['android:networkSecurityConfig'] = '@xml/network_security_config'
+        application_tag.attrib['{http://schemas.android.com/apk/res/android}networkSecurityConfig'] = '@xml/network_security_config'
 
         click.secho('Writing new Android manifest...', dim=True)
         xml.write(os.path.join(self.apk_temp_directory, 'AndroidManifest.xml'),
