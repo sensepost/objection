@@ -41,7 +41,7 @@ export interface IIosCookie {
   name: string;
   version: string;
   value: string;
-  expiresDate: string|undefined;
+  expiresDate: string | undefined;
   domain: string;
   path: string;
   isSecure: boolean;
@@ -58,8 +58,31 @@ export interface ICredential {
 }
 
 export interface IFramework {
-  version: string|null;
-  executable: string|null;
-  bundle: string|null;
-  path: string|null;
+  version: string | null;
+  executable: string | null;
+  bundle: string | null;
+  path: string | null;
+}
+
+export interface IHeapObject {
+  className: string;
+  handle: string;
+  ivars: any[string];
+  kind: string;
+  methods: string[];
+  superClass: string;
+}
+
+export interface IBinaryModuleDictionary {
+  [index: string]: IBinaryInfo;
+}
+
+export interface IBinaryInfo {
+  arc: boolean;
+  canary: boolean;
+  encrypted: boolean;
+  pie: boolean;
+  rootSafe: boolean;
+  stackExec: boolean;
+  type: string;
 }

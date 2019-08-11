@@ -574,7 +574,7 @@ def rm(args: list) -> None:
         return
 
     if device_state.device_type == Ios:
-        raise NotImplementedError
+        _rm_ios(target)
 
     if device_state.device_type == Android:
         _rm_android(target)
@@ -595,6 +595,28 @@ def _rm_android(t: str) -> None:
         return
 
     if api.android_file_delete(t):
+        click.secho('{0} successfully deleted'.format(t), fg='green')
+
+    # update the file system cache entry
+    if os.path.dirname(t) in _ls_cache:
+        del _ls_cache[os.path.dirname(t)]
+
+
+def _rm_ios(t: str) -> None:
+    """
+        Removes a file from an iOS device.
+
+        :param t:
+        :return:
+    """
+
+    api = state_connection.get_api()
+
+    if not _path_exists_ios(t):
+        click.secho('{0} does not exist'.format(t), fg='red')
+        return
+
+    if api.ios_file_delete(t):
         click.secho('{0} successfully deleted'.format(t), fg='green')
 
     # update the file system cache entry
