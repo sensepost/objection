@@ -112,7 +112,7 @@ def explore(startup_command: str, quiet: bool, file_commands, startup_script: cl
 
     try:
         agent.inject()
-    except (frida.ServerNotRunningError, frida.NotSupportedError) as e:
+    except frida.ServerNotRunningError as e:
         click.secho('Unable to connect to the frida server: {error}'.format(error=str(e)), fg='red')
         return
 
@@ -298,8 +298,10 @@ def device_type():
 @click.option('--binary-name', '-b', help='Name of the Mach-O binary in the IPA (used to patch with Frida)')
 @click.option('--skip-cleanup', '-k', is_flag=True,
               help='Do not clean temporary files once finished.', show_default=True)
+@click.option('--pause', '-p', is_flag=True, help='Pause the patcher before rebuilding the IPA.',
+              show_default=True)
 def patchipa(source: str, gadget_version: str, codesign_signature: str, provision_file: str, binary_name: str,
-             skip_cleanup: bool) -> None:
+             skip_cleanup: bool, pause: bool) -> None:
     """
         Patch an IPA with the FridaGadget dylib.
     """

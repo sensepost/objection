@@ -11,7 +11,7 @@ from ..utils.patchers.ios import IosGadget, IosPatcher
 
 
 def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, binary_name: str,
-                  skip_cleanup: bool, gadget_version: str = None) -> None:
+                  skip_cleanup: bool, gadget_version: str = None, pause: bool = False) -> None:
     """
         Patches an iOS IPA by extracting, injecting the Frida dylib,
         codesigning the dylib and app executable and rezipping the IPA.
@@ -67,6 +67,16 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
     patcher.set_application_binary(binary=binary_name)
     patcher.patch_and_codesign_binary(
         frida_gadget=ios_gadget.get_gadget_path(), codesign_signature=codesign_signature)
+
+    # give a chance to make any last minute modifications if needed
+    if pause:
+        click.secho(('Patching paused. The next step is to rebuild the IPA. '
+                     'If you require any manual fixes, the current temp '
+                     'directory is:'), bold=True)
+        click.secho('{0}'.format(patcher.app_folder), fg='green', bold=True)
+
+        input('Press ENTER to continue...')
+
     patcher.archive_and_codesign(original_name=source, codesign_signature=codesign_signature)
 
     click.secho('Copying final ipa from {0} to current directory...'.format(patcher.get_patched_ipa_path()))
@@ -90,6 +100,8 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
         :param gadget_version:
         :param skip_resources:
         :param network_security_config:
+        :param target_class:
+
         :return:
     """
 
