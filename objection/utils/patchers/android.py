@@ -1,5 +1,6 @@
 import lzma
 import os
+import shlex
 import shutil
 import tempfile
 import xml.etree.ElementTree as ElementTree
@@ -222,7 +223,7 @@ class AndroidPatcher(BasePlatformPatcher):
         if not os.path.exists(source):
             raise Exception('Source {0} not found.'.format(source))
 
-        self.apk_source = source
+        self.apk_source = shlex.quote(source)
 
         return self
 
@@ -484,7 +485,8 @@ class AndroidPatcher(BasePlatformPatcher):
 
         # set the networkSecurityConfig xml location
         # this is in res/xml/network_security_config.xml
-        application_tag.attrib['{http://schemas.android.com/apk/res/android}networkSecurityConfig'] = '@xml/network_security_config'
+        application_tag.attrib[
+            '{http://schemas.android.com/apk/res/android}networkSecurityConfig'] = '@xml/network_security_config'
 
         click.secho('Writing new Android manifest...', dim=True)
         xml.write(os.path.join(self.apk_temp_directory, 'AndroidManifest.xml'),
