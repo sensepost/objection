@@ -857,4 +857,4 @@ class AndroidPatcher(BasePlatformPatcher):
             os.remove(self.apk_temp_frida_patched_aligned)
 
         except Exception as err:
-            click.secho('Failed to cleanup with error: {0}'.format(err), fg='red')
+            click.secho('Failed to cleanup with error: {0}'.format(err), fg='red', dim=True)

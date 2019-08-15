@@ -207,9 +207,9 @@ class IosPatcher(BasePlatformPatcher):
                                for f in fn if 'embedded.mobileprovision' in f]
 
         if len(possible_provisions) <= 0:
-            click.secho('No provisioning files found. Please specify one or generate one by building an app.',
-                        fg='red')
-            return
+            message = 'No provisioning files found. Please specify one or generate one by building an app.'
+            click.secho(message, fg='red')
+            raise Exception(message)
 
         # we have some provisioning profiles, lets find the one
         # with the most days left
@@ -459,4 +459,4 @@ class IosPatcher(BasePlatformPatcher):
             os.remove(self.patched_codesigned_ipa_path)
 
         except Exception as err:
-            click.secho('Failed to cleanup with error: {0}'.format(err), fg='red')
+            click.secho('Failed to cleanup with error: {0}'.format(err), fg='red', dim=True)
