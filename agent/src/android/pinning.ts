@@ -4,7 +4,7 @@ import { IJob } from "../lib/interfaces";
 import { jobs } from "../lib/jobs";
 import { wrapJavaPerform } from "./lib/libjava";
 import {
-  ArrayList, CertificatePinner, PinningTrustManager, SSLContext, TrustManagerImpl, X509TrustManager,
+  ArrayList, CertificatePinner, PinningTrustManager, SSLContext, TrustManagerImpl, X509TrustManager,SSLCertificateChecker,
 } from "./lib/types";
 
 export namespace sslpinning {
@@ -239,9 +239,10 @@ export namespace sslpinning {
             c.green(`SSLCertificateChecker.execute()`) +
             `, not throwing an exception.`,
           );
+          callBackContext.success("CONNECTION_SECURE");
+          return true;
         };
-		callBackContext.success("CONNECTION_SECURE");
-        return true;
+		
 
       } catch (err) {
         if (err.message.indexOf("ClassNotFoundException") === 0) {
