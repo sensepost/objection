@@ -4,7 +4,8 @@ import { IJob } from "../lib/interfaces";
 import { jobs } from "../lib/jobs";
 import { wrapJavaPerform } from "./lib/libjava";
 import {
-  ArrayList, CertificatePinner, PinningTrustManager, SSLContext, TrustManagerImpl, X509TrustManager,SSLCertificateChecker,
+  ArrayList, CertificatePinner, PinningTrustManager, SSLCertificateChecker,
+  SSLContext, TrustManagerImpl, X509TrustManager,
 } from "./lib/types";
 
 export namespace sslpinning {
@@ -220,7 +221,7 @@ export namespace sslpinning {
       }
     });
   };
-  
+
   const phoneGapSSLCertificateChecker = (ident: string): any | undefined => {
     return wrapJavaPerform(() => {
       try {
@@ -232,17 +233,18 @@ export namespace sslpinning {
 
         const SSLCertificateCheckerExecute = sslCertificateChecker.execute;
 
-        // tslint:disable-next-line:only-arrow-functions
-        SSLCertificateCheckerExecute.overload('java.lang.String', 'org.json.JSONArray', 'org.apache.cordova.CallbackContext').implementation = function(string,jsonArray,callBackContext) {
-          qsend(quiet,
-            c.blackBright(`[${ident}] `) + `Called ` +
-            c.green(`SSLCertificateChecker.execute()`) +
-            `, not throwing an exception.`,
-          );
-          callBackContext.success("CONNECTION_SECURE");
-          return true;
-        };
-		
+        SSLCertificateCheckerExecute.overload(
+          "java.lang.String", "org.json.JSONArray", "org.apache.cordova.CallbackContext").implementation =
+          // tslint:disable-next-line:only-arrow-functions
+          function(str, jsonArray, callBackContext) {
+            qsend(quiet,
+              c.blackBright(`[${ident}] `) + `Called ` +
+              c.green(`SSLCertificateChecker.execute()`) +
+              `, not throwing an exception.`,
+            );
+            callBackContext.success("CONNECTION_SECURE");
+            return true;
+          };
 
       } catch (err) {
         if (err.message.indexOf("ClassNotFoundException") === 0) {
