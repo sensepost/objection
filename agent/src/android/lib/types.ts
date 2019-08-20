@@ -12,6 +12,7 @@ export type X509TrustManager = JavaClass | any;
 export type SSLContext = JavaClass | any;
 export type CertificatePinner = JavaClass | any;
 export type PinningTrustManager = JavaClass | any;
+export type SSLCertificateChecker = JavaClass | any;
 export type TrustManagerImpl = JavaClass | any;
 export type ArrayList = JavaClass | any;
 export type JavaString = JavaClass | any;
