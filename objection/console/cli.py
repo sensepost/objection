@@ -294,7 +294,7 @@ def device_type():
 @click.option('--codesign-signature', '-c',
               help='Codesigning Identity to use. Get it with: `security find-identity -p codesigning -v`',
               required=True)
-@click.option('--provision-file', '-p', help='The .mobileprovision file to use in the patched .ipa')
+@click.option('--provision-file', '-P', help='The .mobileprovision file to use in the patched .ipa')
 @click.option('--binary-name', '-b', help='Name of the Mach-O binary in the IPA (used to patch with Frida)')
 @click.option('--skip-cleanup', '-k', is_flag=True,
               help='Do not clean temporary files once finished.', show_default=True)
