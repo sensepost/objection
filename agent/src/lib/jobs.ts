@@ -15,7 +15,7 @@ export namespace jobs {
     currentJobs.push(jobData);
   };
 
-  // determine of a job already exists based on an identifer
+  // determine of a job already exists based on an identifier
   export const hasIdent = (ident: string): boolean => {
 
     const m: IJob[] = currentJobs.filter((job) => {
@@ -39,7 +39,7 @@ export namespace jobs {
     return m.length > 0;
   };
 
-  // kills a job by detatching any invocations and removing
+  // kills a job by detaching any invocations and removing
   // the job by identifier
   export const kill = (ident: string): boolean => {
     currentJobs.forEach((job) => {
@@ -49,7 +49,8 @@ export namespace jobs {
         // detach any invocations
         if (job.invocations && job.invocations.length > 0) {
           job.invocations.forEach((invocation) => {
-            invocation.detach();
+            (invocation) ? invocation.detach() :
+              c.log(c.blackBright(`[warn] Skipping detach on null`));
           });
         }
 

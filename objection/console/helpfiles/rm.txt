@@ -1,0 +1,9 @@
+Command: rm
+
+Usage: rm <file on remote device>
+
+Delete a file on the remote operating system.
+
+Examples:
+   rm file.txt
+   rm /path/to/file.png

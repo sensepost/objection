@@ -5,7 +5,7 @@ import click
 from tabulate import tabulate
 
 from ..state.connection import state_connection
-from ..state.device import device_state
+from ..state.device import device_state, Ios, Android
 from ..state.filemanager import file_manager_state
 from ..utils.helpers import sizeof_fmt
 
@@ -66,10 +66,10 @@ def cd(args: list) -> None:
         does_exist = False
 
         # check for existence based on the runtime
-        if device_state.device_type == 'ios':
+        if device_state.device_type == Ios:
             does_exist = _path_exists_ios(path)
 
-        if device_state.device_type == 'android':
+        if device_state.device_type == Android:
             does_exist = _path_exists_android(path)
 
         # if we checked with the device that the path exists
@@ -88,16 +88,16 @@ def cd(args: list) -> None:
     # see if its legit.
     else:
 
-        proposed_path = "/".join([current_dir, path])
+        proposed_path = device_state.device_type.path_seperator.join([current_dir, path])
 
         # assume the proposed_path does not exist by default
         does_exist = False
 
         # check for existence based on the runtime
-        if device_state.device_type == 'ios':
+        if device_state.device_type == Ios:
             does_exist = _path_exists_ios(proposed_path)
 
-        if device_state.device_type == 'android':
+        if device_state.device_type == Android:
             does_exist = _path_exists_android(proposed_path)
 
         # if we checked with the device that the path exists
@@ -153,10 +153,10 @@ def pwd(args: list = None) -> str:
     if file_manager_state.cwd is not None:
         return file_manager_state.cwd
 
-    if device_state.device_type == 'ios':
+    if device_state.device_type == Ios:
         return _pwd_ios()
 
-    if device_state.device_type == 'android':
+    if device_state.device_type == Android:
         return _pwd_android()
 
 
@@ -219,12 +219,14 @@ def ls(args: list) -> None:
         path = pwd()
     else:
         path = args[0]
+        if not os.path.isabs(path):
+            path = device_state.device_type.path_seperator.join([pwd(), path])
 
     # based on the runtime, execute the correct ls method.
-    if device_state.device_type == 'ios':
+    if device_state.device_type == Ios:
         _ls_ios(path)
 
-    if device_state.device_type == 'android':
+    if device_state.device_type == Android:
         _ls_android(path)
 
 
@@ -375,10 +377,10 @@ def download(args: list) -> None:
     source = args[0]
     destination = args[1] if len(args) > 1 else os.path.basename(source)
 
-    if device_state.device_type == 'ios':
+    if device_state.device_type == Ios:
         _download_ios(source, destination)
 
-    if device_state.device_type == 'android':
+    if device_state.device_type == Android:
         _download_android(source, destination)
 
 
@@ -394,7 +396,7 @@ def _download_ios(path: str, destination: str) -> None:
     # if the path we got is not absolute, join it with the
     # current working directory
     if not os.path.isabs(path):
-        path = "/".join([pwd(), path])
+        path = device_state.device_type.path_seperator.join([pwd(), path])
 
     api = state_connection.get_api()
 
@@ -430,7 +432,7 @@ def _download_android(path: str, destination: str) -> None:
     # if the path we got is not absolute, join it with the
     # current working directory
     if not os.path.isabs(path):
-        path = "/".join([pwd(), path])
+        path = device_state.device_type.path_seperator.join([pwd(), path])
 
     api = state_connection.get_api()
 
@@ -470,12 +472,13 @@ def upload(args: list) -> None:
         return
 
     source = args[0]
-    destination = args[1] if len(args) > 1 else "/".join([pwd(), os.path.basename(source)])
+    destination = args[1] if len(args) > 1 else device_state.device_type.path_seperator.join(
+        [pwd(), os.path.basename(source)])
 
-    if device_state.device_type == 'ios':
+    if device_state.device_type == Ios:
         _upload_ios(source, destination)
 
-    if device_state.device_type == 'android':
+    if device_state.device_type == Android:
         _upload_android(source, destination)
 
 
@@ -489,7 +492,7 @@ def _upload_ios(path: str, destination: str) -> None:
     """
 
     if not os.path.isabs(destination):
-        destination = "/".join([pwd(), destination])
+        destination = device_state.device_type.path_seperator.join([pwd(), destination])
 
     api = state_connection.get_api()
     click.secho('Uploading {0} to {1}'.format(path, destination), fg='green', dim=True)
@@ -510,7 +513,8 @@ def _upload_ios(path: str, destination: str) -> None:
 
     # unset the cache key for this directory so the next short listing
     # will have updated contents
-    del _ls_cache[os.path.dirname(destination)]
+    if os.path.dirname(destination) in _ls_cache:
+        del _ls_cache[os.path.dirname(destination)]
 
 
 def _upload_android(path: str, destination: str) -> None:
@@ -523,7 +527,7 @@ def _upload_android(path: str, destination: str) -> None:
     """
 
     if not os.path.isabs(destination):
-        destination = "/".join([pwd(), destination])
+        destination = device_state.device_type.path_seperator.join([pwd(), destination])
 
     api = state_connection.get_api()
     click.secho('Uploading {0} to {1}'.format(path, destination), fg='green', dim=True)
@@ -544,7 +548,80 @@ def _upload_android(path: str, destination: str) -> None:
 
     # unset the cache key for this directory so the next short listing
     # will have updated contents
-    del _ls_cache[os.path.dirname(destination)]
+    if os.path.dirname(destination) in _ls_cache:
+        del _ls_cache[os.path.dirname(destination)]
+
+
+def rm(args: list) -> None:
+    """
+        Remove a file from the remote filesystem.
+
+        :param args:
+        :return:
+    """
+
+    if len(args) < 1:
+        click.secho('Usage: rm <target remote file>', bold=True)
+        return
+
+    target = args[0]
+
+    if not os.path.isabs(target):
+        target = device_state.device_type.path_seperator.join([pwd(), target])
+
+    if not click.confirm('Really delete {0} ?'.format(target)):
+        click.secho('Not deleting {0}'.format(target), dim=True)
+        return
+
+    if device_state.device_type == Ios:
+        _rm_ios(target)
+
+    if device_state.device_type == Android:
+        _rm_android(target)
+
+
+def _rm_android(t: str) -> None:
+    """
+        Removes a file from an Android device.
+
+        :param t:
+        :return:
+    """
+
+    api = state_connection.get_api()
+
+    if not _path_exists_android(t):
+        click.secho('{0} does not exist'.format(t), fg='red')
+        return
+
+    if api.android_file_delete(t):
+        click.secho('{0} successfully deleted'.format(t), fg='green')
+
+    # update the file system cache entry
+    if os.path.dirname(t) in _ls_cache:
+        del _ls_cache[os.path.dirname(t)]
+
+
+def _rm_ios(t: str) -> None:
+    """
+        Removes a file from an iOS device.
+
+        :param t:
+        :return:
+    """
+
+    api = state_connection.get_api()
+
+    if not _path_exists_ios(t):
+        click.secho('{0} does not exist'.format(t), fg='red')
+        return
+
+    if api.ios_file_delete(t):
+        click.secho('{0} successfully deleted'.format(t), fg='green')
+
+    # update the file system cache entry
+    if os.path.dirname(t) in _ls_cache:
+        del _ls_cache[os.path.dirname(t)]
 
 
 def _get_short_ios_listing() -> list:
@@ -639,10 +716,10 @@ def list_folders_in_current_fm_directory() -> dict:
     resp = {}
 
     # get the folders based on the runtime
-    if device_state.device_type == 'ios':
+    if device_state.device_type == Ios:
         response = _get_short_ios_listing()
 
-    elif device_state.device_type == 'android':
+    elif device_state.device_type == Android:
         response = _get_short_android_listing()
 
     # looks like we landed in an unknown runtime.
@@ -670,10 +747,10 @@ def list_files_in_current_fm_directory() -> dict:
     resp = {}
 
     # check for existence based on the runtime
-    if device_state.device_type == 'ios':
+    if device_state.device_type == Ios:
         response = _get_short_ios_listing()
 
-    elif device_state.device_type == 'android':
+    elif device_state.device_type == Android:
         response = _get_short_android_listing()
 
     # looks like we landed in an unknown runtime.

@@ -7,6 +7,7 @@ import delegator
 import frida
 from prompt_toolkit import PromptSession
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
+from prompt_toolkit.completion import FuzzyCompleter
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.styles import Style
 
@@ -29,7 +30,7 @@ class Repl(object):
         self.cli = None
         self.prompt_tokens = []
 
-        self.completer = CommandCompleter()
+        self.completer = FuzzyCompleter(CommandCompleter())
         self.commands_repository = COMMANDS
         self.session = self.get_prompt_session()
 
@@ -44,10 +45,9 @@ class Repl(object):
             history=FileHistory(os.path.expanduser('~/.objection/objection_history')),
             completer=self.completer,
             style=self.get_prompt_style(),
-            # key_bindings=bindings,
             auto_suggest=AutoSuggestFromHistory(),
             reserve_space_for_menu=4,
-            complete_in_thread=True
+            complete_in_thread=True,
         )
 
     @staticmethod
@@ -62,6 +62,9 @@ class Repl(object):
             # completions menu
             'completion-menu.completion.current': 'bg:#00aaaa #000000',
             'completion-menu.completion': 'bg:#008888 #ffffff',
+
+            # fuzzy match outside
+            'completion-menu.completion fuzzymatch.outside': 'fg:#000000',
 
             # Prompt.
             'applicationname': '#007cff',
@@ -329,11 +332,11 @@ class Repl(object):
         """
 
         banner = ("""
-     _     _         _   _
- ___| |_  |_|___ ___| |_|_|___ ___
-| . | . | | | -_|  _|  _| | . |   |
-|___|___|_| |___|___|_| |_|___|_|_|
-        |___|(object)inject(ion) v{0}
+     _   _         _   _
+ ___| |_|_|___ ___| |_|_|___ ___
+| . | . | | -_|  _|  _| | . |   |
+|___|___| |___|___|_| |_|___|_|_|
+      |___|(object)inject(ion) v{0}
 
      Runtime Mobile Exploration
         by: @leonjza from @sensepost
@@ -368,7 +371,7 @@ class Repl(object):
                     self.run_command(document)
 
                 except frida.core.RPCException as e:
-                    click.secho('A Frida agent exception has occured.', fg='red', bold=True)
+                    click.secho('A Frida agent exception has occurred.', fg='red', bold=True)
                     click.secho('{0}'.format(e), fg='red')
                     click.secho('\nPython stack trace: {}'.format(traceback.format_exc()), dim=True)
 

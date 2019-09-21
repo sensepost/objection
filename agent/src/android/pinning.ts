@@ -4,14 +4,15 @@ import { IJob } from "../lib/interfaces";
 import { jobs } from "../lib/jobs";
 import { wrapJavaPerform } from "./lib/libjava";
 import {
-  ArrayList, CertificatePinner, PinningTrustManager, SSLContext, TrustManagerImpl, X509TrustManager,
+  ArrayList, CertificatePinner, PinningTrustManager, SSLCertificateChecker,
+  SSLContext, TrustManagerImpl, X509TrustManager,
 } from "./lib/types";
 
 export namespace sslpinning {
   // a simple flag to control if we should be quiet or not
   let quiet: boolean = false;
 
-  const sslContextEmprtyTrustManager = (ident: string): any => {
+  const sslContextEmptyTrustManager = (ident: string): any => {
     // -- Sample Java
     //
     // "Generic" TrustManager Example
@@ -143,7 +144,7 @@ export namespace sslpinning {
   };
 
   // Android 7+ TrustManagerImpl.verifyChain()
-  // The work in the following NCC blogpost was a great help for this hook!
+  // The work in the following NCC blog post was a great help for this hook!
   // hattip @AdriVillaB :)
   // https://www.nccgroup.trust/uk/about-us/newsroom-and-events/
   //  blogs/2017/november/bypassing-androids-network-security-configuration/
@@ -221,6 +222,38 @@ export namespace sslpinning {
     });
   };
 
+  const phoneGapSSLCertificateChecker = (ident: string): any | undefined => {
+    return wrapJavaPerform(() => {
+      try {
+        const sslCertificateChecker: SSLCertificateChecker = Java.use("nl.xservices.plugins.SSLCertificateChecker");
+        send(
+          c.blackBright(`Found nl.xservices.plugins.SSLCertificateChecker, ` +
+            `overriding SSLCertificateChecker.execute()`),
+        );
+
+        const SSLCertificateCheckerExecute = sslCertificateChecker.execute;
+
+        SSLCertificateCheckerExecute.overload(
+          "java.lang.String", "org.json.JSONArray", "org.apache.cordova.CallbackContext").implementation =
+          // tslint:disable-next-line:only-arrow-functions
+          function(str, jsonArray, callBackContext) {
+            qsend(quiet,
+              c.blackBright(`[${ident}] `) + `Called ` +
+              c.green(`SSLCertificateChecker.execute()`) +
+              `, not throwing an exception.`,
+            );
+            callBackContext.success("CONNECTION_SECURE");
+            return true;
+          };
+
+      } catch (err) {
+        if (err.message.indexOf("ClassNotFoundException") === 0) {
+          throw new Error(err);
+        }
+      }
+    });
+  };
+
   // the main exported function to run all of the pinning bypass methods known
   export const disable = (q: boolean): void => {
     if (q) {
@@ -234,11 +267,12 @@ export namespace sslpinning {
       type: "android-sslpinning-disable",
     };
 
-    job.implementations.push(sslContextEmprtyTrustManager(job.identifier));
+    job.implementations.push(sslContextEmptyTrustManager(job.identifier));
     job.implementations.push(okHttp3CertificatePinnerCheck(job.identifier));
     job.implementations.push(appceleratorTitaniumPinningTrustManager(job.identifier));
     job.implementations.push(trustManagerImplVerifyChainCheck(job.identifier));
     job.implementations.push(trustManagerImplCheckTrustedRecursiveCheck(job.identifier));
+    job.implementations.push(phoneGapSSLCertificateChecker(job.identifier));
     jobs.add(job);
   };
 }

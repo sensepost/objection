@@ -41,7 +41,7 @@ class Github(object):
         # and return it
         return results
 
-    def set_latest_version(self) -> str:
+    def get_latest_version(self) -> str:
         """
             Call Github and get the tag_name of the latest
             release.

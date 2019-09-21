@@ -18,6 +18,18 @@ def _should_output_json(args: list) -> bool:
     return len(args) > 0 and '--json' in args
 
 
+def _should_do_smart_decode(args: list) -> bool:
+    """
+        Checks if --smart is in the list of tokens received from the
+        command line.
+
+        :param args:
+        :return:
+    """
+
+    return len(args) > 0 and '--smart' in args
+
+
 def _has_minimum_flags_to_add_item(args: list) -> bool:
     """
         Ensure that all of the flags are present for a keychain
@@ -62,7 +74,7 @@ def dump(args: list = None) -> None:
 
     click.secho('Dumping the iOS keychain...', dim=True)
     api = state_connection.get_api()
-    keychain = api.ios_keychain_list()
+    keychain = api.ios_keychain_list(_should_do_smart_decode(args))
 
     if _should_output_json(args):
         destination = args[1]
@@ -97,6 +109,9 @@ def clear(args: list = None) -> None:
         :param args:
         :return:
     """
+
+    if not click.confirm('Are you sure you want to clear the iOS keychain?'):
+        return
 
     click.secho('Clearing the keychain...', dim=True)
 

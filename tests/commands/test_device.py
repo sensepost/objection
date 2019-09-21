@@ -2,6 +2,7 @@ import unittest
 from unittest import mock
 
 from objection.commands.device import get_device_info, get_environment, _get_ios_environment, _get_android_environment
+from objection.state.device import Android, Ios
 from ..helpers import capture
 
 
@@ -33,7 +34,7 @@ class TestDevice(unittest.TestCase):
     @mock.patch('objection.commands.device._get_ios_environment')
     @mock.patch('objection.commands.device.device_state')
     def test_gets_environment_and_calls_ios_platform_specific_method(self, mock_device_state, mock_ios_environment):
-        type(mock_device_state).device_type = mock.PropertyMock(return_value='ios')
+        type(mock_device_state).device_type = mock.PropertyMock(return_value=Ios)
 
         get_environment()
 
@@ -43,7 +44,7 @@ class TestDevice(unittest.TestCase):
     @mock.patch('objection.commands.device.device_state')
     def test_gets_environment_and_calls_android_platform_specific_method(self, mock_device_state,
                                                                          mock_android_environment):
-        type(mock_device_state).device_type = mock.PropertyMock(return_value='android')
+        type(mock_device_state).device_type = mock.PropertyMock(return_value=Android)
 
         get_environment()
 

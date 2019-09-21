@@ -75,7 +75,7 @@ export namespace hooking {
 
   export const watchMethod = (selector: string, dargs: boolean, dbt: boolean, dret: boolean): void => {
     const resolver = new ApiResolver("objc");
-    const matchedMethod = {
+    let matchedMethod = {
       address: undefined,
       name: undefined,
     };
@@ -83,16 +83,8 @@ export namespace hooking {
     // handle the resolvers error it may throw if the selector format
     // is off.
     try {
-      resolver.enumerateMatches(selector, {
-        onComplete: () => {
-          send(c.blackBright(`Selector address enumeration complete.`));
-          return;
-        },
-        onMatch: (match) => {
-          matchedMethod.name = match.name;
-          matchedMethod.address = match.address;
-        },
-      });
+      // select the first match
+      matchedMethod = resolver.enumerateMatches(selector)[0];
     } catch (error) {
       send(
         `${c.red(`Error!`)} Unable to find address for selector ${c.redBright(`${selector}`)}! ` +
@@ -174,7 +166,7 @@ export namespace hooking {
     const FALSE = new NativePointer(0x0);
 
     const resolver = new ApiResolver("objc");
-    const matchedMethod = {
+    let matchedMethod = {
       address: undefined,
       name: undefined,
     };
@@ -182,16 +174,8 @@ export namespace hooking {
     // handle the resolvers error it may throw if the selector format
     // is off.
     try {
-      resolver.enumerateMatches(selector, {
-        onComplete: () => {
-          send(c.blackBright(`Selector address enumeration complete.`));
-          return;
-        },
-        onMatch: (match) => {
-          matchedMethod.name = match.name;
-          matchedMethod.address = match.address;
-        },
-      });
+      // select the first match
+      matchedMethod = resolver.enumerateMatches(selector)[0];
     } catch (error) {
       send(
         `${c.red(`Error!`)} Unable to find address for selector ${c.redBright(`${selector}`)}! ` +
@@ -241,7 +225,7 @@ export namespace hooking {
               `${c.green(selector)} ` +
               `Return value was: ${c.red(retval.toString())}, overriding to ${c.green(FALSE.toString())}`,
             );
-            retval.replace(TRUE);
+            retval.replace(FALSE);
             break;
         }
       },

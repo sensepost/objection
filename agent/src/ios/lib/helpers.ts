@@ -1,16 +1,10 @@
-import { NSBundle, NSDictionary, NSFileManager } from "./types";
+import { NSUTF8StringEncoding } from "./constants";
+import { NSBundle, NSDictionary, NSFileManager, NSString as NSStringType } from "./types";
 
-// small helper functions for iOS based environments
+const NSString = ObjC.classes.NSString;
 
-export const isNSKeyedArchived = (data: ArrayBuffer): boolean => {
-
-  const magic: ArrayBuffer = data.slice(0, 8);
-  const magicString: string = String.fromCharCode.apply(null, Array.prototype.slice.call(magic));
-
-  // 62 70 6c 69 73 74 30 30
-  return magicString === "bplist00";
-};
-
+// Attempt to unarchive data. Returning a string of `` indicates that the
+// unarchiving failed.
 export const unArchiveDataAndGetString = (data: ObjC.Object | any): string => {
 
   try {
@@ -22,7 +16,10 @@ export const unArchiveDataAndGetString = (data: ObjC.Object | any): string => {
     const NSKeyedUnarchiver = ObjC.classes.NSKeyedUnarchiver;
     const unArchivedData: any = NSKeyedUnarchiver.unarchiveTopLevelObjectWithData_error_(data, NULL);
 
-    if (unArchivedData === null) { return `(data unArchive failed for blob type: ${data.$className})`; }
+    // if we have a null value, this data is probably not archived
+    if (unArchivedData === null) {
+      return ``;
+    }
 
     switch (unArchivedData.$className) {
 
@@ -31,18 +28,17 @@ export const unArchiveDataAndGetString = (data: ObjC.Object | any): string => {
         const dict: NSDictionary = new ObjC.Object(unArchivedData);
         const enumerator = dict.keyEnumerator();
         let key;
-        const stringData: string[] = [];
+        const s: object = {};
 
         // tslint:disable-next-line:no-conditional-assignment
         while ((key = enumerator.nextObject()) !== null) {
-          const value = dict.objectForKey_(key);
-          stringData.push(`${key}: ${value}`);
+          s[key] = `${dict.objectForKey_(key)}`;
         }
 
-        return stringData.join(", ");
+        return JSON.stringify(s);
 
       default:
-        return `(data unArchive error for class: ${unArchivedData.$className})`;
+        return ``;
     }
 
   } catch (e) {
@@ -50,7 +46,7 @@ export const unArchiveDataAndGetString = (data: ObjC.Object | any): string => {
   }
 };
 
-export const dataToString = (raw: any, o: string = null): string => {
+export const smartDataToString = (raw: any): string => {
 
   if (raw === null) { return ""; }
 
@@ -60,13 +56,22 @@ export const dataToString = (raw: any, o: string = null): string => {
 
     switch (dataObject.$className) {
       case "__NSCFData":
-        const dataBytes: ArrayBuffer = Memory.readByteArray(dataObject.bytes(), dataObject.length());
 
-        // If we have data that was archived with NSKeyedArchiver, try and undo that.
-        if (isNSKeyedArchived(dataBytes)) { return unArchiveDataAndGetString(dataObject); }
+        try {
+          const unarchivedData: string = unArchiveDataAndGetString(dataObject);
+          if (unarchivedData.length > 0) {
+            return unarchivedData;
+          }
+          // tslint:disable-next-line:no-empty
+        } catch (e) { }
 
-        // Otherwise, just read & convert the bytes read to a string.
-        return String.fromCharCode.apply(null, Array.prototype.slice.call(dataBytes));
+        try {
+          const data: string = dataObject.readUtf8String(dataObject.length());
+          if (data.length > 0) {
+            return data;
+          }
+          // tslint:disable-next-line:no-empty
+        } catch (e) { }
 
       case "__NSCFNumber":
         return dataObject.integerValue();
@@ -85,15 +90,42 @@ export const dataToString = (raw: any, o: string = null): string => {
   }
 };
 
-export const getNSFileManager = (): NSFileManager => {
+export const bytesToUTF8 = (data: any): string => {
+  // Sample Objective-C
+  //
+  // char buf[] = "\x41\x42\x43\x44";
+  // NSString *p = [[NSString alloc] initWithBytes:buf length:5 encoding:NSUTF8StringEncoding];
 
+  if (data === null) {
+    return "";
+  }
+
+  if (!data.hasOwnProperty("bytes")) {
+    return data.toString();
+  }
+
+  const s: NSStringType = NSString.alloc().initWithBytes_length_encoding_(
+    data.bytes(), data.length(), NSUTF8StringEncoding);
+
+  if (s) {
+    return s.UTF8String();
+  }
+
+  return "";
+};
+
+export const bytesToHexString = (data: any): string => {
+  // https://stackoverflow.com/a/50767210
+  const buffer: ArrayBuffer = data.bytes().readByteArray(data.length());
+  return Array.from(new Uint8Array(buffer)).map((b) => ("0" + b.toString(16)).substr(-2)).join("");
+};
+
+export const getNSFileManager = (): NSFileManager => {
   const NSFM = ObjC.classes.NSFileManager;
   return NSFM.defaultManager();
 };
 
 export const getNSMainBundle = (): NSBundle => {
-
   const bundle = ObjC.classes.NSBundle;
   return bundle.mainBundle();
-
 };

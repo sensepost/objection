@@ -2,7 +2,7 @@ import unittest
 from unittest import mock
 
 from objection.commands.ios.keychain import _should_output_json, dump, clear, add, \
-    _has_minimum_flags_to_add_item, _get_flag_value
+    _has_minimum_flags_to_add_item, _get_flag_value, _should_do_smart_decode
 from ...helpers import capture
 
 
@@ -35,6 +35,16 @@ class TestKeychain(unittest.TestCase):
 
     def test_has_minumum_flags_to_add_item_returns_false(self):
         result = _has_minimum_flags_to_add_item(['--key', 'test_key'])
+
+        self.assertFalse(result)
+
+    def test_should_do_smart_decode_returns_true(self):
+        result = _should_do_smart_decode(['--json', '--smart'])
+
+        self.assertTrue(result)
+
+    def test_should_do_smart_decode_returns_false(self):
+        result = _should_do_smart_decode(['--json'])
 
         self.assertFalse(result)
 
@@ -103,8 +113,9 @@ Dumped keychain to: foo.json
         self.assertTrue(mock_open.called)
 
     @mock.patch('objection.state.connection.state_connection.get_api')
-    def test_clear(self, mock_api):
-        mock_api.return_value.ios_keychain_empty.called
+    @mock.patch('objection.commands.ios.keychain.click.confirm')
+    def test_clear(self, mock_confirm, mock_api):
+        mock_confirm.return_value = True
 
         with capture(clear, []) as o:
             output = o

@@ -51,7 +51,7 @@ export namespace sslpinning {
 
     // If AFNetworking is not a thing, just move on.
     if (!(AFHTTPSessionManager && AFSecurityPolicy)) {
-      return;
+      return [];
     }
 
     send(c.blackBright(`[${ident}] `) + `Found AFNetworking library. Hooking known pinning methods.`);
@@ -139,34 +139,34 @@ export namespace sslpinning {
       });
 
     // +[AFSecurityPolicy policyWithPinningMode:withPinnedCertificates:]
-    const policyWithPinningModewithPinnedCertificates: InvocationListener = Interceptor.attach(
-
-      AFSecurityPolicy["+ policyWithPinningMode:withPinnedCertificates:"].implementation, {
-        onEnter(args) {
-          // typedef NS_ENUM(NSUInteger, AFSSLPinningMode) {
-          //     AFSSLPinningModeNone,
-          //     AFSSLPinningModePublicKey,
-          //     AFSSLPinningModeCertificate,
-          // };
-          qsend(quiet,
-            c.blackBright(`[${ident}] `) + `[AFNetworking] Called ` +
-            c.green(`+[AFSecurityPolicy policyWithPinningMode:withPinnedCertificates:]`) + ` with mode ` +
-            c.red(args[2].toString()),
-          );
-
-          if (!args[2].isNull()) {
+    const policyWithPinningModewithPinnedCertificates: InvocationListener =
+      (AFSecurityPolicy["+ policyWithPinningMode:withPinnedCertificates:"]) ? Interceptor.attach(
+        AFSecurityPolicy["+ policyWithPinningMode:withPinnedCertificates:"].implementation, {
+          onEnter(args) {
+            // typedef NS_ENUM(NSUInteger, AFSSLPinningMode) {
+            //     AFSSLPinningModeNone,
+            //     AFSSLPinningModePublicKey,
+            //     AFSSLPinningModeCertificate,
+            // };
             qsend(quiet,
-              c.blackBright(`[${ident}] `) + `[AFNetworking] ` +
-              c.blueBright(`Altered `) +
-              c.green(`+[AFSecurityPolicy policyWithPinningMode:withPinnedCertificates:]`) + ` mode to ` +
-              c.green(`0x0`),
+              c.blackBright(`[${ident}] `) + `[AFNetworking] Called ` +
+              c.green(`+[AFSecurityPolicy policyWithPinningMode:withPinnedCertificates:]`) + ` with mode ` +
+              c.red(args[2].toString()),
             );
 
-            // effectively set to AFSSLPinningModeNone
-            args[2] = new NativePointer(0x0);
-          }
-        },
-      });
+            if (!args[2].isNull()) {
+              qsend(quiet,
+                c.blackBright(`[${ident}] `) + `[AFNetworking] ` +
+                c.blueBright(`Altered `) +
+                c.green(`+[AFSecurityPolicy policyWithPinningMode:withPinnedCertificates:]`) + ` mode to ` +
+                c.green(`0x0`),
+              );
+
+              // effectively set to AFSSLPinningModeNone
+              args[2] = new NativePointer(0x0);
+            }
+          },
+        }) : null;
 
     return [
       setSSLPinningmode,
@@ -180,7 +180,7 @@ export namespace sslpinning {
     const NSURLCredential: ObjC.Object = ObjC.classes.NSURLCredential;
     const resolver = new ApiResolver("objc");
     // - [NSURLSession URLSession:didReceiveChallenge:completionHandler:]
-    const search: ObjC.Object[] = resolver.enumerateMatchesSync(
+    const search: ApiResolverMatch[] = resolver.enumerateMatches(
       "-[* URLSession:didReceiveChallenge:completionHandler:]");
 
     // Move along if no NSURLSession usage is found
@@ -191,7 +191,7 @@ export namespace sslpinning {
     send(c.blackBright(`[${ident}] `) + `Found NSURLSession based classes. Hooking known pinning methods.`);
 
     // hook all of the methods that matched the selector
-    const invocations: InvocationListener[] = search.map((i) => {
+    return search.map((i) => {
       return Interceptor.attach(i.address, {
         onEnter(args) {
           // 0
@@ -249,8 +249,6 @@ export namespace sslpinning {
         },
       });
     });
-
-    return invocations;
   };
 
   // TrustKit
@@ -280,6 +278,38 @@ export namespace sslpinning {
           );
 
           retval.replace(new NativePointer(0x0));
+        }
+      },
+    });
+  };
+
+  const cordovaCustomURLConnectionDelegate = (ident: string): InvocationListener => {
+    // https://github.com/EddyVerbruggen/SSLCertificateChecker-PhoneGap-Plugin/blob/
+    //  67634bfdf4a31bb09b301db40f8f27fbd8818f61/src/ios/SSLCertificateChecker.m#L109-L116
+    if (!ObjC.classes.CustomURLConnectionDelegate) {
+      return;
+    }
+
+    send(c.blackBright(`[${ident}] `) + `Found SSLCertificateChecker-PhoneGap-Plugin.` +
+      ` Hooking known pinning methods.`);
+
+    return Interceptor.attach(ObjC.classes.CustomURLConnectionDelegate["- isFingerprintTrusted:"].implementation, {
+      onLeave(retval) {
+        qsend(quiet,
+          c.blackBright(`[${ident}] `) + `[SSLCertificateChecker-PhoneGap-Plugin] Called ` +
+          c.green(`-[CustomURLConnectionDelegate isFingerprintTrusted:]`) + ` with result ` +
+          c.red(retval.toString()),
+        );
+
+        if (retval.isNull()) {
+          qsend(quiet,
+            c.blackBright(`[${ident}] `) + `[SSLCertificateChecker-PhoneGap-Plugin] ` +
+            c.blueBright(`Altered `) +
+            c.green(`-[CustomURLConnectionDelegate isFingerprintTrusted:]`) + ` mode to ` +
+            c.green(`0x1`),
+          );
+
+          retval.replace(new NativePointer(0x1));
         }
       },
     });
@@ -415,7 +445,7 @@ export namespace sslpinning {
     // return peerTrust;
   };
 
-  // exposed method to setup all of the intercaptor invocations and replacements
+  // exposed method to setup all of the interceptor invocations and replacements
   export const disable = (q: boolean): void => {
 
     if (q) {
@@ -440,6 +470,7 @@ export namespace sslpinning {
       job.invocations.push(i);
     });
     job.invocations.push(trustKit(job.identifier));
+    job.invocations.push(cordovaCustomURLConnectionDelegate(job.identifier));
 
     // Low level hooks.
 

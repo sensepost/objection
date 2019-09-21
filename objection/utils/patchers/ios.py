@@ -69,11 +69,15 @@ class IosGadget(BasePlatformGadget):
         dylib = requests.get(download_url, stream=True)
 
         # save the requests stream to file
-        with open(self.ios_dylib_gadget_archive_path, 'wb') as f:
-            click.secho('Downloading iOS dylib to {0}...'.format(self.ios_dylib_gadget_archive_path),
-                        fg='green', dim=True)
+        try:
+            with open(self.ios_dylib_gadget_archive_path, 'wb') as f:
+                click.secho('Downloading iOS dylib to {0}...'.format(self.ios_dylib_gadget_archive_path),
+                            fg='green', dim=True)
 
-            shutil.copyfileobj(dylib.raw, f)
+                shutil.copyfileobj(dylib.raw, f)
+        except Exception:
+            if os.path.isfile(self.ios_dylib_gadget_archive_path):
+                os.remove(self.ios_dylib_gadget_archive_path)
 
         return self
 
@@ -106,9 +110,15 @@ class IosGadget(BasePlatformGadget):
 
         click.secho('Unpacking {0}...'.format(self.ios_dylib_gadget_archive_path), dim=True)
 
-        with lzma.open(self.ios_dylib_gadget_archive_path) as f:
-            with open(self.ios_dylib_gadget_path, 'wb') as g:
-                g.write(f.read())
+        try:
+            with lzma.open(self.ios_dylib_gadget_archive_path) as f:
+                with open(self.ios_dylib_gadget_path, 'wb') as g:
+                    g.write(f.read())
+        except Exception:
+            if os.path.isfile(self.ios_dylib_gadget_archive_path):
+                os.remove(self.ios_dylib_gadget_archive_path)
+            if os.path.isfile(self.ios_dylib_gadget_path):
+                os.remove(self.ios_dylib_gadget_path)
 
         return self
 
@@ -197,9 +207,9 @@ class IosPatcher(BasePlatformPatcher):
                                for f in fn if 'embedded.mobileprovision' in f]
 
         if len(possible_provisions) <= 0:
-            click.secho('No provisioning files found. Please specify one or generate one by building an app.',
-                        fg='red')
-            return
+            message = 'No provisioning files found. Please specify one or generate one by building an app.'
+            click.secho(message, fg='red')
+            raise Exception(message)
 
         # we have some provisioning profiles, lets find the one
         # with the most days left
@@ -449,4 +459,4 @@ class IosPatcher(BasePlatformPatcher):
             os.remove(self.patched_codesigned_ipa_path)
 
         except Exception as err:
-            click.secho('Failed to cleanup with error: {0}'.format(err), fg='red')
+            click.secho('Failed to cleanup with error: {0}'.format(err), fg='red', dim=True)

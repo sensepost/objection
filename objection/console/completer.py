@@ -106,14 +106,14 @@ class CommandCompleter(Completer):
             :return:
         """
 
-        commands = {}
-
         # get the stuff we have typed so far
         word_before_cursor = document.get_word_before_cursor()
 
-        # get command suggestions if we are not expecting an OS command
-        if not document.text.startswith('!'):
-            commands.update(self.find_completions(document))
+        # if this is an os command, we can't complete anything
+        if document.text.startswith('!'):
+            return
+
+        commands = self.find_completions(document)
 
         # if there are no commands return
         if len(commands) <= 0:

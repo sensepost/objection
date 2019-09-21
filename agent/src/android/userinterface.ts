@@ -27,7 +27,7 @@ export namespace userinterface {
       let currentActivity;
 
       for (const i of activityRecords) {
-        const activityRecord = Java.cast(activityRecords[i], activityClientRecord);
+        const activityRecord = Java.cast(i, activityClientRecord);
 
         if (!activityRecord.paused.value) {
           currentActivity = Java.cast(Java.cast(activityRecord, activityClientRecord).activity.value, activity);

@@ -2,7 +2,7 @@ import * as fs from "fs";
 import { hexStringToBytes } from "../lib/helpers";
 import { getNSFileManager } from "./lib/helpers";
 import { IIosFilePath, IIosFileSystem } from "./lib/interfaces";
-import { NSDictionary, NSFileManager, NSString } from "./lib/types";
+import { NSDictionary, NSFileManager, NSString as NSStringType } from "./lib/types";
 
 const { NSString } = ObjC.classes;
 
@@ -29,7 +29,7 @@ export namespace iosfilesystem {
     // }
 
     const fm: NSFileManager = getFileManager();
-    const p = NSString.stringWithString_(path);
+    const p: NSStringType = NSString.stringWithString_(path);
 
     return fm.fileExistsAtPath_(p);
   };
@@ -41,7 +41,7 @@ export namespace iosfilesystem {
     // NSLog(@"%d / readable?", [fm isReadableFileAtPath:@"/"]);
 
     const fm: NSFileManager = getFileManager();
-    const p = NSString.stringWithString_(path);
+    const p: NSStringType = NSString.stringWithString_(path);
 
     return fm.isReadableFileAtPath_(p);
   };
@@ -53,21 +53,20 @@ export namespace iosfilesystem {
     // NSLog(@"%d / readable?", [fm isReadableFileAtPath:@"/"]);
 
     const fm: NSFileManager = getFileManager();
-    const p = NSString.stringWithString_(path);
+    const p: NSStringType = NSString.stringWithString_(path);
 
     return fm.isWritableFileAtPath_(p);
   };
 
   export const pathIsFile = (path: string): boolean => {
     const fm: NSFileManager = getFileManager();
-    const p = NSString.stringWithString_(path);
 
     const isDir: NativePointer = Memory.alloc(Process.pointerSize);
     fm.fileExistsAtPath_isDirectory_(path, isDir);
 
     // deref the isDir pointer to get the bool
     // *isDir === 1 means the path is a directory
-    return Memory.readInt(isDir) === 0;
+    return isDir.readInt() === 0;
   };
 
   // returns a 'pwd' that assumes the current bundle's path
@@ -100,6 +99,17 @@ export namespace iosfilesystem {
     writeStream.end();
   };
 
+  export const deleteFile = (path: string): boolean => {
+    const fm: NSFileManager = getFileManager();
+
+    const err: NativePointer = Memory.alloc(Process.pointerSize);
+    fm.removeItemAtPath_error_(path, err);
+
+    // deref the isDir pointer to get the bool
+    // *isDir === 1 means the path is a directory
+    return err.readInt() === 0;
+  };
+
   export const ls = (path: string): IIosFileSystem => {
     // -- Sample Objective-C
     //
@@ -114,7 +124,7 @@ export namespace iosfilesystem {
     // }
 
     const fm: NSFileManager = getFileManager();
-    const p: NSString = NSString.stringWithString_(path);
+    const p: NSStringType = NSString.stringWithString_(path);
 
     const response: IIosFileSystem = {
       files: {},
@@ -143,8 +153,8 @@ export namespace iosfilesystem {
       };
 
       // generate a full path to the file
-      let currentFilePath = [path, "/", file].join("");
-      currentFilePath = NSString.stringWithString_(currentFilePath);
+      const filePath: string = [path, "/", file].join("");
+      const currentFilePath: NSStringType = NSString.stringWithString_(filePath);
 
       // check read / write
       pathFileData.readable = fm.isReadableFileAtPath_(currentFilePath);

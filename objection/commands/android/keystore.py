@@ -27,5 +27,8 @@ def clear(args: list = None) -> None:
         :return:
     """
 
+    if not click.confirm('Are you sure you want to clear the Android keystore?'):
+        return
+
     api = state_connection.get_api()
     api.android_keystore_clear()

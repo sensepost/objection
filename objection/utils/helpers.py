@@ -1,10 +1,11 @@
+import re
 import shlex
 
 import click
 from pkg_resources import parse_version
 
 from ..state.app import app_state
-from ..state.device import device_state
+from ..state.device import device_state, Ios, Android
 from ..state.jobs import job_manager_state
 
 
@@ -129,10 +130,22 @@ def clean_argument_flags(args: list) -> list:
     return [x for x in args if not x.startswith('--')]
 
 
+def to_snake_case(w: str) -> str:
+    """
+        https://stackoverflow.com/a/1176023
+
+        :param w:
+        :return:
+    """
+
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', w)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
+
 def print_frida_connection_help() -> None:
     """
         Prints help information about connecting to devices and
-        processess.
+        processes.
 
         :return:
     """
@@ -151,7 +164,7 @@ def print_frida_connection_help() -> None:
 
 def warn_about_older_operating_systems() -> None:
     """
-        Prints a warning to the console about the reccomended Android and
+        Prints a warning to the console about the recommended Android and
         iOS versions to use with objection.
 
         :return:
@@ -161,7 +174,7 @@ def warn_about_older_operating_systems() -> None:
     ios_supported = '9'
 
     # android & ios version warnings
-    if device_state.device_type == 'android' and (
+    if device_state.device_type == Android and (
             parse_version(device_state.os_version) < parse_version(android_supported)):
         click.secho('Warning: You appear to be running Android {0} which may result in '
                     'some hooks failing.\nIt is recommended to use at least an Android '
@@ -169,7 +182,7 @@ def warn_about_older_operating_systems() -> None:
                     fg='yellow')
 
     # android & ios version warnings
-    if device_state.device_type == 'ios' and (
+    if device_state.device_type == Ios and (
             parse_version(device_state.os_version) < parse_version(ios_supported)):
         click.secho('Warning: You appear to be running iOS {0} which may result in '
                     'some hooks failing.\nIt is recommended to use at least an iOS '

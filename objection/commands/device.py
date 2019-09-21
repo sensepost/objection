@@ -2,7 +2,7 @@ import click
 from tabulate import tabulate
 
 from ..state.connection import state_connection
-from ..state.device import device_state
+from ..state.device import device_state, Android, Ios
 from ..utils.helpers import pretty_concat
 
 
@@ -23,7 +23,7 @@ def get_device_info() -> tuple:
 
     # ios device information
     if environment == 'ios':
-        device_state.device_type = 'ios'
+        device_state.device_type = Ios
         package_info = api.env_ios()
 
         # {'applicationName': 'za.sensepost.ipewpew',
@@ -37,7 +37,7 @@ def get_device_info() -> tuple:
 
     # android device information
     if environment == 'android':
-        device_state.device_type = 'android'
+        device_state.device_type = Android
         package_info = api.env_android()
 
         # {'application_name': 'com.sensepost.apewpew',
@@ -61,10 +61,10 @@ def get_environment(args: list = None) -> None:
         :return:
     """
 
-    if device_state.device_type == 'ios':
+    if device_state.device_type == Ios:
         _get_ios_environment()
 
-    if device_state.device_type == 'android':
+    if device_state.device_type == Android:
         _get_android_environment()
 
 

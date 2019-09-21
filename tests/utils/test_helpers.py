@@ -1,5 +1,6 @@
 import unittest
 
+from objection.state.device import device_state, Ios
 from objection.utils.helpers import clean_argument_flags
 from objection.utils.helpers import get_tokens
 from objection.utils.helpers import normalize_gadget_name
@@ -76,6 +77,7 @@ For more information, please refer to the objection wiki at: https://github.com/
         self.assertEqual(output, expected_output)
 
     def test_warns_about_operating_system_versions(self):
+        device_state.device_type = Ios
         with capture(warn_about_older_operating_systems) as o:
             output = o
 

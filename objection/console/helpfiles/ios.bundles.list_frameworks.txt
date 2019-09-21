@@ -1,0 +1,23 @@
+Command: ios bundles list_frameworks
+
+Usage: ios bundles list_frameworks (optional: --include-apple-frameworks) (optional: --full-path)
+
+Returns all of the application's bundles that represent frameworks. Only 
+frameworks with one or more Objective-C classes in them are included. [1]
+
+Output includes the frameworks executable, bundle name and version. The path
+value is truncated by default, however, adding the --full-path flag would
+print the entire path to the framework.
+
+The --include-apple-frameworks flag signals the command to also output
+bundles that form part of the com.apple package namespace. By default this
+is hidden and only external frameworks not in the com.apple namespace is
+retured.
+
+[1] https://developer.apple.com/documentation/foundation/nsbundle/1408056-allframeworks?language=objc
+
+Examples:
+   ios bundles list_frameworks
+   ios bundles list_frameworks --include-apple-frameworks
+   ios bundles list_frameworks --include-apple-frameworks --full-path
+   ios bundles list_frameworks --full-path

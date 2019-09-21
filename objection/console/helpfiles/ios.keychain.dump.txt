@@ -1,15 +1,22 @@
 Command: ios keychain dump
 
-Usage: ios keychain dump (optional: --json <filename>)
+Usage: ios keychain dump (optional: --json <filename>) (optional: --smart)
 
 Extracts the keychain items for the current application. This is achieved by iterating
 over the keychain type classes available in iOS and populating a search dictionary
 with them. This dictionary is then used as a query to SecItemCopyMatching() and the
 results parsed.
+
+Use the --smart flag to attempt smart decoding of items in the keychain. By default,
+UTF8 string representations of data will be displayed. For a hex string of the data,
+use the --json flag which will indlude a 'dataHex' key.
+
+By default, only a small subset of each entry is displayed. For a more complete dump,
+use the --json flag.
+
 Items that will be accessible include everything stored with the entitlement group used
-during the patching/signing process.
-Providing a filename with the --json flag will dump all of the keychain attributes
-to the file specified for later inspection.
+during the patching/signing process. Providing a filename with the --json flag will dump
+all of the keychain attributes to the file specified for later inspection.
 
 Examples:
    ios keychain dump

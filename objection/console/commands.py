@@ -1,19 +1,26 @@
+from objection.commands import http
 from ..commands import command_history
+from ..commands import custom
 from ..commands import device
 from ..commands import filemanager
 from ..commands import frida_commands
 from ..commands import jobs
 from ..commands import memory
+from ..commands import plugin_manager
 from ..commands import sqlite
 from ..commands import ui
 from ..commands.android import clipboard
 from ..commands.android import command
+from ..commands.android import heap as android_heap
 from ..commands.android import hooking as android_hooking
 from ..commands.android import intents
 from ..commands.android import keystore
 from ..commands.android import pinning as android_pinning
 from ..commands.android import root
+from ..commands.ios import binary
+from ..commands.ios import bundles
 from ..commands.ios import cookies
+from ..commands.ios import heap as ios_heap
 from ..commands.ios import hooking as ios_hooking
 from ..commands.ios import jailbreak
 from ..commands.ios import keychain
@@ -31,9 +38,19 @@ from ..utils.helpers import list_current_jobs
 # dynamic: A method to execute that would return completions to populate in the prompt
 # exec: The *actual* method to execute when the command is issued.
 
-# commands help is stored in the helpfiles directory as a txt file.
+# commands help is stored in the help files directory as a txt file.
 
 COMMANDS = {
+
+    'plugin': {
+        'meta': 'Work with plugins',
+        'commands': {
+            'load': {
+                'meta': 'Load a plugin',
+                'exec': plugin_manager.load_plugin
+            }
+        }
+    },
 
     '!': {
         'meta': 'Execute an Operating System command',
@@ -43,6 +60,11 @@ COMMANDS = {
     'reconnect': {
         'meta': 'Reconnect to the current device',
         'exec': None,  # handled in the Repl class itself
+    },
+
+    'import': {
+        'meta': 'Import fridascript from a full path and run it',
+        'exec': frida_commands.load_background
     },
 
     # file manager commands
@@ -73,6 +95,7 @@ COMMANDS = {
 
     'ls': {
         'meta': 'List files in the current working directory',
+        'dynamic': filemanager.list_folders_in_current_fm_directory,
         'exec': filemanager.ls,
     },
 
@@ -97,8 +120,34 @@ COMMANDS = {
                 'meta': 'Download a file',
                 'dynamic': filemanager.list_files_in_current_fm_directory,
                 'exec': filemanager.download
-            }
+            },
+
+            # http file server
+
+            'http': {
+                'meta': 'Work with an on device HTTP file server',
+                'commands': {
+                    'start': {
+                        'meta': 'Start\'s an HTTP server in the current working directory',
+                        'exec': http.start
+                    },
+                    'status': {
+                        'meta': 'Get the status of the HTTP server',
+                        'exec': http.status
+                    },
+                    'stop': {
+                        'meta': 'Stop\'s a running HTTP server',
+                        'exec': http.stop
+                    }
+                }
+            },
         }
+    },
+
+    'rm': {
+        'meta': 'Delete files from the remote filesystem',
+        'dynamic': filemanager.list_files_in_current_fm_directory,
+        'exec': filemanager.rm
     },
 
     # device and env info commands
@@ -111,6 +160,11 @@ COMMANDS = {
     'frida': {
         'meta': 'Get information about the Frida environment',
         'exec': frida_commands.frida_environment
+    },
+
+    'evaluate': {
+        'meta': 'Evaluate JavaScript within the agent',
+        'exec': custom.evaluate
     },
 
     # memory commands
@@ -138,11 +192,13 @@ COMMANDS = {
                 'commands': {
                     'modules': {
                         'meta': 'List loaded modules in the current process',
+                        'flags': ['--json'],
                         'exec': memory.list_modules
                     },
 
                     'exports': {
                         'meta': 'List the exports of a module',
+                        'flags': ['--json'],
                         'exec': memory.list_exports
                     }
                 },
@@ -150,7 +206,7 @@ COMMANDS = {
 
             'search': {
                 'meta': 'Search for pattern in the applications memory',
-                'flags': ['--string'],
+                'flags': ['--string', '--offsets-only'],
                 'exec': memory.find_pattern
             },
 
@@ -291,16 +347,68 @@ COMMANDS = {
                             }
                         }
                     },
+                    'get': {
+                        'meta': 'Get various values',
+                        'commands': {
+                            'current_activity': {
+                                'meta': 'Get the currently foregrounded activity',
+                                'exec': android_hooking.get_current_activity
+                            }
+                        }
+                    },
                     'search': {
                         'meta': 'Search for various classes and or methods',
                         'commands': {
                             'classes': {
                                 'meta': 'Search for Java classes matching a name',
                                 'exec': android_hooking.search_class
+                            },
+                            'methods': {
+                                'meta': 'Search for Java methods matching a name',
+                                'exec': android_hooking.search_methods
                             }
                         }
                     }
                 },
+            },
+            'heap': {
+                'meta': 'Commands to work with the Android Heap',
+                'commands': {
+                    'search': {
+                        'meta': 'Search for information about the current Android heap',
+                        'commands': {
+                            'instances': {
+                                'meta': 'Search for live instances of a particular class',
+                                'flags': ['--fresh'],
+                                'exec': android_heap.instances
+
+                            }
+                        }
+                    },
+                    'print': {
+                        'meta': 'Print information about objects on the iOS heap',
+                        'commands': {
+                            'fields': {
+                                'meta': 'Print instance fields for a Java object handle',
+                                'exec': android_heap.fields
+                            },
+                            'methods': {
+                                'meta': 'Print instance methods for an Android handle',
+                                'flags': ['--without-arguments'],
+                                'exec': android_heap.methods
+                            }
+                        }
+                    },
+                    'execute': {
+                        'meta': 'Execute methods on Java class handles',
+                        'flags': ['--return-string'],
+                        'exec': android_heap.execute
+                    },
+                    'evaluate': {
+                        'meta': 'Evaluate JavaScript on Java class handle',
+                        'exec': android_heap.evaluate
+                    }
+                }
             },
             'keystore': {
                 'meta': 'Commands to work with the Android KeyStore',
@@ -380,16 +488,25 @@ COMMANDS = {
     'ios': {
         'meta': 'Commands specific to iOS',
         'commands': {
+            'info': {
+                'meta': 'Get iOS and application related information',
+                'commands': {
+                    'binary': {
+                        'meta': 'Get information about application binaries and dylibs',
+                        'exec': binary.info
+                    }
+                }
+            },
             'keychain': {
                 'meta': 'Work with the iOS keychain',
                 'commands': {
                     'dump': {
                         'meta': 'Dump the keychain for the current app\'s entitlement group',
-                        'flags': ['--json'],
+                        'flags': ['--json', '--smart'],
                         'exec': keychain.dump
                     },
                     'clear': {
-                        'meta': 'Delete all keychain entries for the current app\s entitlement group',
+                        'meta': 'Delete all keychain entries for the current app\'s entitlement group',
                         'exec': keychain.clear
                     },
                     'add': {
@@ -406,6 +523,21 @@ COMMANDS = {
                         'meta': 'Cat a plist',
                         'dynamic': filemanager.list_files_in_current_fm_directory,
                         'exec': plist.cat
+                    }
+                }
+            },
+            'bundles': {
+                'meta': 'Work with iOS Bundles',
+                'commands': {
+                    'list_frameworks': {
+                        'meta': 'Lists all of the application\'s bundles that represent frameworks',
+                        'flags': ['--include-apple-frameworks', '--full-path'],
+                        'exec': bundles.show_frameworks
+                    },
+                    'list_bundles': {
+                        'meta': 'Lists all of the application\'s non framework bundles',
+                        'flags': ['--full-path'],
+                        'exec': bundles.show_bundles
                     }
                 }
             },
@@ -456,6 +588,44 @@ COMMANDS = {
                     'biometrics_bypass': {
                         'meta': 'Hook the iOS Biometrics LAContext and respond with successful auth',
                         'exec': ui.bypass_touchid
+                    }
+                }
+            },
+            'heap': {
+                'meta': 'Commands to work with the iOS heap',
+                'commands': {
+                    'print': {
+                        'meta': 'Print information about objects on the iOS heap',
+                        'commands': {
+                            'ivars': {
+                                'meta': 'Print instance variables for an Objective-C object',
+                                'flags': ['--to-utf8'],
+                                'exec': ios_heap.ivars
+                            },
+                            'methods': {
+                                'meta': 'Print instance methods for an Objective-C object',
+                                'flags': ['--without-arguments'],
+                                'exec': ios_heap.methods
+                            }
+                        }
+                    },
+                    'search': {
+                        'meta': 'Search for information about the current iOS heap',
+                        'commands': {
+                            'instances': {
+                                'meta': 'Search for live instances of a particular class',
+                                'exec': ios_heap.instances
+                            }
+                        }
+                    },
+                    'execute': {
+                        'meta': 'Execute methods on objects on the iOS heap',
+                        'flags': ['--return-string'],
+                        'exec': ios_heap.execute
+                    },
+                    'evaluate': {
+                        'meta': 'Evaluate JavaScript on objects on the iOS heap',
+                        'exec': ios_heap.evaluate
                     }
                 }
             },

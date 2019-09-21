@@ -1,7 +1,7 @@
 import click
 
 from objection.state.connection import state_connection
-from ..state.device import device_state
+from ..state.device import device_state, Ios, Android
 
 
 def alert(args: list = None) -> None:
@@ -18,10 +18,10 @@ def alert(args: list = None) -> None:
     else:
         message = args[0]
 
-    if device_state.device_type == 'ios':
+    if device_state.device_type == Ios:
         _alert_ios(message)
 
-    if device_state.device_type == 'android':
+    if device_state.device_type == Android:
         pass
 
 
@@ -102,7 +102,7 @@ def android_screenshot(args: list = None) -> None:
         click.secho('Usage: android ui screenshot <local png destination>', bold=True)
         return
 
-    # add the .png extention if it does not already exist
+    # add the .png extension if it does not already exist
     destination = args[0] if args[0].endswith('.png') else args[0] + '.png'
 
     # download the file

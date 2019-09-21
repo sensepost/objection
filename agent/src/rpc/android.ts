@@ -1,9 +1,11 @@
 import { clipboard } from "../android/clipboard";
 import { androidfilesystem } from "../android/filesystem";
+import { heap } from "../android/heap";
 import { hooking } from "../android/hooking";
 import { intent } from "../android/intent";
 import { keystore } from "../android/keystore";
-import { IExecutedCommand, IKeyStoreEntry } from "../android/lib/interfaces";
+import { IHeapObject, IJavaField } from "../android/lib/interfaces";
+import { ICurrentActivityFragment, IExecutedCommand, IKeyStoreEntry } from "../android/lib/interfaces";
 import { sslpinning } from "../android/pinning";
 import { root } from "../android/root";
 import { androidshell } from "../android/shell";
@@ -18,6 +20,7 @@ export const android = {
 
   // android filesystem
   androidFileCwd: () => androidfilesystem.pwd(),
+  androidFileDelete: (path: string) => androidfilesystem.deleteFile(path),
   androidFileDownload: (path: string) => androidfilesystem.readFile(path),
   androidFileExists: (path: string) => androidfilesystem.exists(path),
   androidFileLs: (path: string) => androidfilesystem.ls(path),
@@ -29,6 +32,7 @@ export const android = {
   // android hooking
   androidHookingGetClassMethods: (className: string): Promise<string[]> => hooking.getClassMethods(className),
   androidHookingGetClasses: (): Promise<string[]> => hooking.getClasses(),
+  androidHookingGetCurrentActivity: (): Promise<ICurrentActivityFragment> => hooking.getCurrentActivity(),
   androidHookingListActivities: (): Promise<string[]> => hooking.getActivities(),
   androidHookingListBroadcastReceivers: (): Promise<string[]> => hooking.getBroadcastReceivers(),
   androidHookingListServices: (): Promise<string[]> => hooking.getServices(),
@@ -36,6 +40,15 @@ export const android = {
   androidHookingWatchClass: (clazz: string): Promise<void> => hooking.watchClass(clazz),
   androidHookingWatchMethod: (fqClazz: string, dargs: boolean, dbt: boolean, dret: boolean): Promise<void> =>
     hooking.watchMethod(fqClazz, dargs, dbt, dret),
+
+  // android heap methods
+  androidHeapEvaluateHandleMethod: (handle: string, js: string): Promise<void> => heap.evaluate(handle, js),
+  androidHeapExecuteHandleMethod: (handle: string, method: string, returnString: boolean): Promise<string|null> =>
+    heap.execute(handle, method, returnString),
+  androidHeapGetLiveClassInstances: (clazz: string, fresh: boolean): Promise<IHeapObject[]> =>
+    heap.getInstances(clazz, fresh),
+  androidHeapPrintFields: (handle: string): Promise<IJavaField[]> => heap.fields(handle),
+  androidHeapPrintMethods: (handle: string): Promise<string[]> => heap.methods(handle),
 
   // android intents
   androidIntentStartActivity: (activityClass: string): Promise<void> => intent.startActivity(activityClass),

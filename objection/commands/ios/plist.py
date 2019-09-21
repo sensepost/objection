@@ -4,6 +4,7 @@ import click
 
 from objection.commands import filemanager
 from objection.state.connection import state_connection
+from objection.state.device import device_state
 
 
 def cat(args: list = None) -> None:
@@ -23,7 +24,7 @@ def cat(args: list = None) -> None:
 
     if not os.path.isabs(plist):
         pwd = filemanager.pwd()
-        plist = os.path.join(pwd, plist)
+        plist = device_state.device_type.path_seperator.join([pwd, plist])
 
     api = state_connection.get_api()
     plist_data = api.ios_plist_read(plist)

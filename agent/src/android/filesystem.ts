@@ -90,6 +90,20 @@ export namespace androidfilesystem {
     writeStream.end();
   };
 
+  export const deleteFile = (path: string): Promise<boolean> => {
+    // -- Sample Java Code
+    //
+    // File d = new File(".");
+    // d.delete();
+
+    return wrapJavaPerform(() => {
+      const file: File = Java.use("java.io.File");
+      const currentFile: JavaClass = file.$new(path);
+
+      return currentFile.delete();
+    });
+  };
+
   export const ls = (p: string): Promise<IAndroidFilesystem> => {
     // -- Sample Java Code
     //

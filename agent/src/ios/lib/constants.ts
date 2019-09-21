@@ -94,3 +94,9 @@ export enum NSSearchPaths {
 }
 
 export const NSUserDomainMask = 1;
+export const NSUTF8StringEncoding = 4;
+
+export enum BundleType {
+  NSBundleFramework = 1,
+  NSBundleAllBundles,
+}

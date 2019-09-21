@@ -1,8 +1,11 @@
 import { colors as c } from "../lib/color";
 import { IJob } from "../lib/interfaces";
 import { jobs } from "../lib/jobs";
-import { getApplicationContext, wrapJavaPerform } from "./lib/libjava";
-import { ActivityThread, ArrayMap, JavaClass, PackageManager, Throwable } from "./lib/types";
+import { ICurrentActivityFragment } from "./lib/interfaces";
+import { getApplicationContext, R, wrapJavaPerform } from "./lib/libjava";
+import {
+  Activity, ActivityClientRecord, ActivityThread, ArrayMap, JavaClass, PackageManager, Throwable,
+} from "./lib/types";
 
 export namespace hooking {
 
@@ -40,7 +43,11 @@ export namespace hooking {
       const uniqueMethods: string[] = clazzInstance.class.getDeclaredMethods().map((method) => {
         // perform a cleanup of the method. An example after toGenericString() would be:
         // public void android.widget.ScrollView.draw(android.graphics.Canvas) throws Exception
-        let m = method.toGenericString();
+        // public final rx.c.b<java.lang.Throwable> com.apple.android.music.icloud.a.a(rx.c.b<java.lang.Throwable>)
+        let m: string = method.toGenericString();
+
+        // Remove generics from the method
+        while (m.includes("<")) { m = m.replace(/<.*?>/g, ""); }
 
         // remove any "Throws" the method may have
         if (m.indexOf(" throws ") !== -1) { m = m.substring(0, m.indexOf(" throws ")); }
@@ -168,6 +175,42 @@ export namespace hooking {
 
       // register the job
       jobs.add(job);
+    });
+  };
+
+  export const getCurrentActivity = (): Promise<ICurrentActivityFragment> => {
+    return wrapJavaPerform(() => {
+      const activityThread: ActivityThread = Java.use("android.app.ActivityThread");
+      const activity: Activity = Java.use("android.app.Activity");
+      const activityClientRecord: ActivityClientRecord = Java.use("android.app.ActivityThread$ActivityClientRecord");
+
+      const currentActivityThread = activityThread.currentActivityThread();
+      const activityRecords = currentActivityThread.mActivities.value.values().toArray();
+      let currentActivity;
+
+      for (const i of activityRecords) {
+        const activityRecord = Java.cast(i, activityClientRecord);
+        if (!activityRecord.paused.value) {
+          currentActivity = Java.cast(Java.cast(activityRecord, activityClientRecord).activity.value, activity);
+          break;
+        }
+      }
+
+      if (currentActivity) {
+        // Discover an active fragment
+        const fm = currentActivity.getFragmentManager();
+        const fragment = fm.findFragmentById(R("content_frame", "id"));
+
+        return {
+          activity: currentActivity.$className,
+          fragment: fragment.$className,
+        };
+      }
+
+      return  {
+        activity: null,
+        fragment: null,
+      };
     });
   };
 

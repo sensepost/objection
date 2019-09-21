@@ -80,13 +80,13 @@ export namespace root {
           if (success) {
             send(
               c.blackBright(`[${ident}] `) +
-              `File existance check for ${filename} detected, marking as ${c.green("true")}.`,
+              `File existence check for ${filename} detected, marking as ${c.green("true")}.`,
             );
             return true;
           } else {
             send(
               c.blackBright(`[${ident}] `) +
-              `File existance check for ${filename} detected, marking as ${c.green("false")}.`,
+              `File existence check for ${filename} detected, marking as ${c.green("false")}.`,
             );
             return false;
           }
