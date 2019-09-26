@@ -2,9 +2,11 @@
 
 `objection` is a runtime mobile exploration toolkit, powered by [Frida](https://www.frida.re/), built to help you assess the security posture of your mobile applications, without needing a jailbreak.
 
-<img align="right" src="./images/objection.png" height="220" alt="objection">
+[![Twitter](https://img.shields.io/badge/Twitter-%40leonjza-blue.svg)](https://twitter.com/leonjza)
+[![PyPi](https://badge.fury.io/py/objection.svg)](https://pypi.python.org/pypi/objection)
+[![Travis](https://travis-ci.org/sensepost/objection.svg?branch=master)](https://travis-ci.org/sensepost/objection)
 
-## key features
+<img align="right" src="./images/objection.png" height="220" alt="objection">
 
 - Supports both iOS and Android.
 - Inspect and interact with container file systems.
@@ -15,10 +17,6 @@
 - And much, much [more](https://github.com/sensepost/objection/wiki/Features)...
 
 Screenshots are available in the [wiki](https://github.com/sensepost/objection/wiki/Screenshots).
-
-[![Twitter](https://img.shields.io/badge/Twitter-%40leonjza-blue.svg)](https://twitter.com/leonjza)
-[![PyPi](https://badge.fury.io/py/objection.svg)](https://pypi.python.org/pypi/objection)
-[![Travis](https://travis-ci.org/sensepost/objection.svg?branch=master)](https://travis-ci.org/sensepost/objection)
 
 ## installation
 
