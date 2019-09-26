@@ -31,7 +31,7 @@
     "frida-java": "^2",
     "frida-objc": "^3",
     "frida-screenshot": "^2",
-    "macho": "^1.3"
+    "macho": "^1"
   },
   "devDependencies": {
     "@types/frida-gum": "^13",
