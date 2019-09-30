@@ -1,3 +1,4 @@
+import { colors } from "../../lib/color";
 import { NSUTF8StringEncoding } from "./constants";
 import { NSBundle, NSDictionary, NSFileManager, NSString as NSStringType } from "./types";
 
@@ -116,6 +117,9 @@ export const bytesToUTF8 = (data: any): string => {
 
 export const bytesToHexString = (data: any): string => {
   // https://stackoverflow.com/a/50767210
+  if (data == null) {
+    return "";
+  }
   const buffer: ArrayBuffer = data.bytes().readByteArray(data.length());
   return Array.from(new Uint8Array(buffer)).map((b) => ("0" + b.toString(16)).substr(-2)).join("");
 };

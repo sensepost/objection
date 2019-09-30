@@ -187,6 +187,7 @@ export namespace ioskeychain {
 
         case "osgn":
           flags.push("kSecAttrKeyClassPrivate");
+          break;
 
         case "od":
           const constraints: NSDictionary = aclItem;
