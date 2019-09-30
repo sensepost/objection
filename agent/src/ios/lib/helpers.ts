@@ -1,4 +1,3 @@
-import { colors } from "../../lib/color";
 import { NSUTF8StringEncoding } from "./constants";
 import { NSBundle, NSDictionary, NSFileManager, NSString as NSStringType } from "./types";
 
