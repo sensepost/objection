@@ -58,6 +58,20 @@ const nativeExports: any = {
     moduleName: "libcoretls_cfhelpers.dylib",
     retType: "int",
   },
+  
+  // iOS 11+ libboringssl methods
+  SSL_CTX_set_custom_verify: {
+    argTypes: ["pointer", "int", "pointer"],
+    exportName: "SSL_CTX_set_custom_verify",
+    moduleName: "libboringssl.dylib",
+    retType: "void",
+  },
+  SSL_get_psk_identity: {
+    argTypes: ["pointer"],
+    exportName: "SSL_get_psk_identity",
+    moduleName: "libboringssl.dylib",
+    retType: "pointer",
+  },
 };
 
 const api: any = {
@@ -72,6 +86,9 @@ const api: any = {
 
   nw_tls_create_peer_trust: null,
   tls_helper_create_peer_trust: null,
+  
+  SSL_CTX_set_custom_verify: null,
+  SSL_get_psk_identity: null,
 };
 
 // proxy method resolution

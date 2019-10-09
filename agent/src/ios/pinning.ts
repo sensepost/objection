@@ -445,6 +445,43 @@ export namespace sslpinning {
     // return peerTrust;
   };
 
+  // SSL_CTX_set_custom_verify
+  const sSLCtxSetCustomVerify = (ident: string): InvocationListener => {
+    const setCustomVerify = libObjc.SSL_CTX_set_custom_verify;
+    const getPskIdentity = libObjc.SSL_get_psk_identity;
+
+    if (setCustomVerify.isNull() || getPskIdentity.isNull()) {
+      return null;
+    }
+
+    var customVerifyCallback = new NativeCallback(function(ssl, out_alert) {
+      qsend(quiet,
+        c.blackBright(`[${ident}] `) + `Called ` +
+        c.green(`custom SSL context verify callback`) +
+        `, returning SSL_VERIFY_NONE.`,
+      );
+      return 0;
+    }, "int", ["pointer", "pointer"]);
+
+    Interceptor.replace(setCustomVerify, new NativeCallback(function(ssl, mode, callback) {
+      qsend(quiet,
+        c.blackBright(`[${ident}] `) + `Called ` +
+        c.green(`SSL_CTX_set_custom_verify()`) +
+        `, setting custom callback.`,
+      );
+      setCustomVerify(ssl, mode, customVerifyCallback);
+    }, "void", ["pointer", "int", "pointer"]));
+
+    Interceptor.replace(getPskIdentity, new NativeCallback(function(ssl) {
+      qsend(quiet,
+        c.blackBright(`[${ident}] `) + `Called ` +
+        c.green(`SSL_get_psk_identity()`) +
+        `, returning "fakePSKidentity".`,
+      );
+      return "fakePSKidentity";
+    }, "pointer", ["pointer"]));
+  };
+
   // exposed method to setup all of the interceptor invocations and replacements
   export const disable = (q: boolean): void => {
 
@@ -484,6 +521,10 @@ export namespace sslpinning {
     send(c.blackBright(`Hooking lower level TLS methods`));
     job.replacements.push(tlsHelperCreatePeerTrust(job.identifier));
     job.invocations.push(nwTlsCreatePeerTrust(job.identifier));
+
+    // iOS 11>
+    send(c.blackBright(`Hooking BoringSSL methods`));
+    job.invocations.push(sSLCtxSetCustomVerify(job.identifier));
 
     jobs.add(job);
   };
