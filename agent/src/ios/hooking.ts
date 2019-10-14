@@ -54,6 +54,16 @@ export namespace hooking {
     // with parents as true, include methods from a parent class,
     // otherwise simply hook the target class' own  methods
     const watchInvocations = (parents ? target.$methods : target.$ownMethods).map((method) => {
+      // filter and make sure we have a type and name. Looks like some methods can
+      // have '' as name... am expecting something like "- isJailBroken"
+      if (method.split(" ").length !== 2) {
+        send(
+          c.red(`Skipping method `) + `${c.greenBright(`'` + method + `'`)}` +
+          c.red(`, does not match <type> <name> format`));
+        return;
+      }
+
+      send(c.blackBright(`Watching method: ${c.greenBright(method)}`));
       return Interceptor.attach(target[method].implementation, {
         onEnter: (args) => {
           const receiver = new ObjC.Object(args[0]);
