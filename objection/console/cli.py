@@ -336,9 +336,14 @@ def patchapk(source: str, architecture: str, gadget_version: str, pause: bool, s
         Patch an APK with the frida-gadget.so.
     """
 
-    # ensure we have the decode-resources flag if we have the network-security-config flag.
+    # ensure we decode resources if we have the network-security-config flag.
     if network_security_config and skip_resources:
-        click.secho('The --network-security-config flag requires the --decode-resources flag as well.', fg='red')
+        click.secho('The --network-security-config flag is incompatible with the --skip-resources flag.', fg='red')
+        return
+
+    # ensure we decode resources if we have the enable-debug flag.
+    if enable_debug and skip_resources:
+        click.secho('The --enable-debug flag is incompatible with the --skip-resources flag.', fg='red')
         return
 
     patch_android_apk(**locals())
