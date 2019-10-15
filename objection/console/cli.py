@@ -341,6 +341,11 @@ def patchapk(source: str, architecture: str, gadget_version: str, pause: bool, s
         click.secho('The --network-security-config flag is incompatible with the --skip-resources flag.', fg='red')
         return
 
+    # ensure we decode resources if we have the enable-debug flag.
+    if enable_debug and skip_resources:
+        click.secho('The --enable-debug flag is incompatible with the --skip-resources flag.', fg='red')
+        return
+
     patch_android_apk(**locals())
 
 
