@@ -59,59 +59,89 @@ export namespace sslpinning {
     // -[AFSecurityPolicy setSSLPinningMode:]
     const setSSLPinningmode: InvocationListener = Interceptor.attach(
       AFSecurityPolicy["- setSSLPinningMode:"].implementation, {
-        onEnter(args) {
-          // typedef NS_ENUM(NSUInteger, AFSSLPinningMode) {
-          //     AFSSLPinningModeNone,
-          //     AFSSLPinningModePublicKey,
-          //     AFSSLPinningModeCertificate,
-          // };
+      onEnter(args) {
+        // typedef NS_ENUM(NSUInteger, AFSSLPinningMode) {
+        //     AFSSLPinningModeNone,
+        //     AFSSLPinningModePublicKey,
+        //     AFSSLPinningModeCertificate,
+        // };
+        qsend(quiet,
+          c.blackBright(`[${ident}] `) + `[AFNetworking] Called ` +
+          c.green(`-[AFSecurityPolicy setSSLPinningMode:]`) + ` with mode ` +
+          c.red(args[2].toString()),
+        );
+
+        if (!args[2].isNull()) {
           qsend(quiet,
-            c.blackBright(`[${ident}] `) + `[AFNetworking] Called ` +
-            c.green(`-[AFSecurityPolicy setSSLPinningMode:]`) + ` with mode ` +
-            c.red(args[2].toString()),
+            c.blackBright(`[${ident}] `) + `[AFNetworking] ` +
+            c.blueBright(`Altered `) +
+            c.green(`-[AFSecurityPolicy setSSLPinningMode:]`) + ` mode to ` +
+            c.green(`0x0`),
           );
 
-          if (!args[2].isNull()) {
-            qsend(quiet,
-              c.blackBright(`[${ident}] `) + `[AFNetworking] ` +
-              c.blueBright(`Altered `) +
-              c.green(`-[AFSecurityPolicy setSSLPinningMode:]`) + ` mode to ` +
-              c.green(`0x0`),
-            );
-
-            // update mode to 0 (AFSSLPinningModeNone), bypassing it.
-            args[2] = new NativePointer(0x0);
-          }
-        },
-      });
+          // update mode to 0 (AFSSLPinningModeNone), bypassing it.
+          args[2] = new NativePointer(0x0);
+        }
+      },
+    });
 
     // -[AFSecurityPolicy setAllowInvalidCertificates:]
     const setAllowInvalidCertificates: InvocationListener = Interceptor.attach(
       AFSecurityPolicy["- setAllowInvalidCertificates:"].implementation, {
-        onEnter(args) {
+      onEnter(args) {
+        qsend(quiet,
+          c.blackBright(`[${ident}] `) + `[AFNetworking] Called ` +
+          c.green(`-[AFSecurityPolicy setAllowInvalidCertificates:]`) + ` with allow ` +
+          c.red(args[2].toString()),
+        );
+
+        if (args[2].equals(new NativePointer(0x0))) {
           qsend(quiet,
-            c.blackBright(`[${ident}] `) + `[AFNetworking] Called ` +
-            c.green(`-[AFSecurityPolicy setAllowInvalidCertificates:]`) + ` with allow ` +
-            c.red(args[2].toString()),
+            c.blackBright(`[${ident}] `) + `[AFNetworking] ` +
+            c.blueBright(`Altered `) +
+            c.green(`-[AFSecurityPolicy setAllowInvalidCertificates:]`) + ` allow to ` +
+            c.green(`0x1`),
           );
 
-          if (args[2].equals(new NativePointer(0x0))) {
-            qsend(quiet,
-              c.blackBright(`[${ident}] `) + `[AFNetworking] ` +
-              c.blueBright(`Altered `) +
-              c.green(`-[AFSecurityPolicy setAllowInvalidCertificates:]`) + ` allow to ` +
-              c.green(`0x1`),
-            );
-
-            // Basically, do [policy setAllowInvalidCertificates:YES];
-            args[2] = new NativePointer(0x1);
-          }
-        },
-      });
+          // Basically, do [policy setAllowInvalidCertificates:YES];
+          args[2] = new NativePointer(0x1);
+        }
+      },
+    });
 
     // +[AFSecurityPolicy policyWithPinningMode:]
     const policyWithPinningMode: InvocationListener = Interceptor.attach(
       AFSecurityPolicy["+ policyWithPinningMode:"].implementation, {
+      onEnter(args) {
+        // typedef NS_ENUM(NSUInteger, AFSSLPinningMode) {
+        //     AFSSLPinningModeNone,
+        //     AFSSLPinningModePublicKey,
+        //     AFSSLPinningModeCertificate,
+        // };
+        qsend(quiet,
+          c.blackBright(`[${ident}] `) + `[AFNetworking] Called ` +
+          c.green(`+[AFSecurityPolicy policyWithPinningMode:]`) + ` with mode ` +
+          c.red(args[2].toString()),
+        );
+
+        if (!args[2].isNull()) {
+          qsend(quiet,
+            c.blackBright(`[${ident}] `) + `[AFNetworking] ` +
+            c.blueBright(`Altered `) +
+            c.green(`+[AFSecurityPolicy policyWithPinningMode:]`) + ` mode to ` +
+            c.green(`0x0`),
+          );
+
+          // effectively set to AFSSLPinningModeNone
+          args[2] = new NativePointer(0x0);
+        }
+      },
+    });
+
+    // +[AFSecurityPolicy policyWithPinningMode:withPinnedCertificates:]
+    const policyWithPinningModewithPinnedCertificates: InvocationListener =
+      (AFSecurityPolicy["+ policyWithPinningMode:withPinnedCertificates:"]) ? Interceptor.attach(
+        AFSecurityPolicy["+ policyWithPinningMode:withPinnedCertificates:"].implementation, {
         onEnter(args) {
           // typedef NS_ENUM(NSUInteger, AFSSLPinningMode) {
           //     AFSSLPinningModeNone,
@@ -120,7 +150,7 @@ export namespace sslpinning {
           // };
           qsend(quiet,
             c.blackBright(`[${ident}] `) + `[AFNetworking] Called ` +
-            c.green(`+[AFSecurityPolicy policyWithPinningMode:]`) + ` with mode ` +
+            c.green(`+[AFSecurityPolicy policyWithPinningMode:withPinnedCertificates:]`) + ` with mode ` +
             c.red(args[2].toString()),
           );
 
@@ -128,7 +158,7 @@ export namespace sslpinning {
             qsend(quiet,
               c.blackBright(`[${ident}] `) + `[AFNetworking] ` +
               c.blueBright(`Altered `) +
-              c.green(`+[AFSecurityPolicy policyWithPinningMode:]`) + ` mode to ` +
+              c.green(`+[AFSecurityPolicy policyWithPinningMode:withPinnedCertificates:]`) + ` mode to ` +
               c.green(`0x0`),
             );
 
@@ -136,37 +166,7 @@ export namespace sslpinning {
             args[2] = new NativePointer(0x0);
           }
         },
-      });
-
-    // +[AFSecurityPolicy policyWithPinningMode:withPinnedCertificates:]
-    const policyWithPinningModewithPinnedCertificates: InvocationListener =
-      (AFSecurityPolicy["+ policyWithPinningMode:withPinnedCertificates:"]) ? Interceptor.attach(
-        AFSecurityPolicy["+ policyWithPinningMode:withPinnedCertificates:"].implementation, {
-          onEnter(args) {
-            // typedef NS_ENUM(NSUInteger, AFSSLPinningMode) {
-            //     AFSSLPinningModeNone,
-            //     AFSSLPinningModePublicKey,
-            //     AFSSLPinningModeCertificate,
-            // };
-            qsend(quiet,
-              c.blackBright(`[${ident}] `) + `[AFNetworking] Called ` +
-              c.green(`+[AFSecurityPolicy policyWithPinningMode:withPinnedCertificates:]`) + ` with mode ` +
-              c.red(args[2].toString()),
-            );
-
-            if (!args[2].isNull()) {
-              qsend(quiet,
-                c.blackBright(`[${ident}] `) + `[AFNetworking] ` +
-                c.blueBright(`Altered `) +
-                c.green(`+[AFSecurityPolicy policyWithPinningMode:withPinnedCertificates:]`) + ` mode to ` +
-                c.green(`0x0`),
-              );
-
-              // effectively set to AFSSLPinningModeNone
-              args[2] = new NativePointer(0x0);
-            }
-          },
-        }) : null;
+      }) : null;
 
     return [
       setSSLPinningmode,
@@ -188,7 +188,7 @@ export namespace sslpinning {
       return [];
     }
 
-    send(c.blackBright(`[${ident}] `) + `Found NSURLSession based classes. Hooking known pinning methods.`);
+    send(c.blackBright(`Found NSURLSession based classes. Hooking known pinning methods.`));
 
     // hook all of the methods that matched the selector
     return search.map((i) => {
@@ -454,7 +454,7 @@ export namespace sslpinning {
       return null;
     }
 
-    var customVerifyCallback = new NativeCallback(function(ssl, out_alert) {
+    const customVerifyCallback = new NativeCallback(function(ssl, out_alert) {
       qsend(quiet,
         c.blackBright(`[${ident}] `) + `Called ` +
         c.green(`custom SSL context verify callback`) +
