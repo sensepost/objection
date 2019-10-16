@@ -754,7 +754,7 @@ class AndroidPatcher(BasePlatformPatcher):
         click.secho('Copying Frida gadget to libs path...', fg='green', dim=True)
         shutil.copyfile(gadget_source, os.path.join(libs_path, 'libfrida-gadget.so'))
 
-    def build_new_apk(self):
+    def build_new_apk(self, use_aapt2: bool = False):
         """
             Build a new .apk with the frida-gadget patched in.
 
@@ -766,6 +766,7 @@ class AndroidPatcher(BasePlatformPatcher):
             self.required_commands['apktool']['location'],
             'build',
             self.apk_temp_directory,
+        ] + (['--use-aapt2'] if use_aapt2 else []) + [
             '-o',
             self.apk_temp_frida_patched
         ]), timeout=self.command_run_timeout)
