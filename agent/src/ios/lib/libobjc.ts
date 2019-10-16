@@ -58,7 +58,7 @@ const nativeExports: any = {
     moduleName: "libcoretls_cfhelpers.dylib",
     retType: "int",
   },
-  
+
   // iOS 11+ libboringssl methods
   SSL_CTX_set_custom_verify: {
     argTypes: ["pointer", "int", "pointer"],
@@ -86,7 +86,7 @@ const api: any = {
 
   nw_tls_create_peer_trust: null,
   tls_helper_create_peer_trust: null,
-  
+
   SSL_CTX_set_custom_verify: null,
   SSL_get_psk_identity: null,
 };
