@@ -1,7 +1,7 @@
 import unittest
 from unittest import mock
 
-from objection.commands.ios.keychain import _should_output_json, dump, clear, add, \
+from objection.commands.ios.keychain import _should_output_json, dump, dump_raw, clear, add, \
     _has_minimum_flags_to_add_item, _get_flag_value, _should_do_smart_decode
 from ...helpers import capture
 
@@ -87,6 +87,15 @@ Created    Accessible    ACL    Type    Account    Service    Data
 now        None          None           foo        foo        bar
 """
         self.assertEqual(output, expected_output)
+
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_dump_raw(self, mock_api):
+        mock_api.return_value.ios_keychain_list_raw.return_value = []
+
+        with capture(dump_raw, []) as o:
+            _ = o
+
+        self.assertTrue(mock_api.return_value.ios_keychain_list_raw.called)
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     @mock.patch('objection.commands.ios.keychain.open', create=True)

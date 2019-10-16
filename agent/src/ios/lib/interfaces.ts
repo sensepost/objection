@@ -1,3 +1,10 @@
+import { NSDictionary } from "./types";
+
+export interface IKeychainData {
+  clazz: string;
+  data: NSDictionary;
+}
+
 export interface IKeychainItem {
   item_class: string;
   create_date: string;

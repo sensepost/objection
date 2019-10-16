@@ -102,6 +102,21 @@ def dump(args: list = None) -> None:
     ))
 
 
+def dump_raw(args: list = None) -> None:
+    """
+        Dump the iOS keychain, but without any parsing.
+        The agent will output the entries it finds here.
+
+        :param args:
+        :return:
+    """
+
+    click.secho('Note: You may be asked to authenticate using the devices passcode or TouchID')
+    click.secho('Dumping the iOS keychain...', dim=True)
+    api = state_connection.get_api()
+    keychain = api.ios_keychain_list_raw()
+
+
 def clear(args: list = None) -> None:
     """
         Clear the iOS keychain.

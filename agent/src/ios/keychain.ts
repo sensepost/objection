@@ -1,9 +1,10 @@
 // dumps all of the keychain items available to the current
 // application.
+import { colors as c } from "../lib/color";
 import { reverseEnumLookup } from "../lib/helpers";
 import { kSec, NSUTF8StringEncoding } from "./lib/constants";
 import { bytesToHexString, bytesToUTF8, smartDataToString } from "./lib/helpers";
-import { IKeychainItem } from "./lib/interfaces";
+import { IKeychainData, IKeychainItem } from "./lib/interfaces";
 import { libObjc } from "./lib/libobjc";
 import {
   NSDictionary,
@@ -23,21 +24,8 @@ const itemClasses = [
 ];
 
 export namespace ioskeychain {
-
-  // clean out the keychain
-  export const empty = (): void => {
-    const searchDictionary: NSMutableDictionaryType = NSMutableDictionary.alloc().init();
-    itemClasses.forEach((clazz) => {
-
-      // set the class-type we are querying for now & delete
-      searchDictionary.setObject_forKey_(clazz, kSec.kSecClass);
-      libObjc.SecItemDelete(searchDictionary);
-    });
-  };
-
-  // dump the contents of the iOS keychain, returning the
-  // results as an array representation.
-  export const list = (smartDecode: boolean = false): IKeychainItem[] => {
+  // The parent method that enumerates the iOS keychain
+  const enumerateKeychain = (): IKeychainData[] => {
     // -- Sample Objective-C
     //
     // NSMutableDictionary *query = [[NSMutableDictionary alloc] init];
@@ -83,8 +71,8 @@ export namespace ioskeychain {
     searchDictionary.setObject_forKey_(kSec.kSecMatchLimitAll, kSec.kSecMatchLimit);
 
     // loop each of the keychain class types and extract data
-    const itemClassResults: IKeychainItem[][] = itemClasses.map((clazz) => {
-      const clazzItems: IKeychainItem[] = [];
+    const itemClassResults: IKeychainData[][] = itemClasses.map((clazz) => {
+      const data: IKeychainData[] = [];  // start empty.
       searchDictionary.setObject_forKey_(clazz, kSec.kSecClass);
 
       // prepare a pointer for the results and call SecItemCopyMatching to get them
@@ -92,56 +80,84 @@ export namespace ioskeychain {
       const copyResult: NativePointer = libObjc.SecItemCopyMatching(searchDictionary, resultsPointer);
 
       // without results (aka non-zero OSStatus) we just move along.
-      if (!copyResult.isNull()) { return; }
+      if (!copyResult.isNull()) { return data; }
 
       // read the resultant dict of the lookup from memory
       const searchResults: NSDictionary = new ObjC.Object(resultsPointer.readPointer());
 
       // if the results in the dict is empty (which is not something I expect),
       // fail fast too.
-      if (searchResults.length <= 0) { return; }
+      if (searchResults.length <= 0) { return data; }
 
       // read each key chain entry for the current item_class and populate
       // the item_class items we will return
       for (let i: number = 0; i < searchResults.count(); i++) {
-
-        const data: NSDictionary = searchResults.objectAtIndex_(i);
-
-        clazzItems.push({
-          access_control: (data.containsKey_(kSec.kSecAttrAccessControl)) ? decodeAcl(data) : "",
-          accessible_attribute: reverseEnumLookup(kSec,
-            bytesToUTF8(data.objectForKey_(kSec.kSecAttrAccessible))),
-          account: bytesToUTF8(data.objectForKey_(kSec.kSecAttrAccount)),
-          alias: bytesToUTF8(data.objectForKey_(kSec.kSecAttrAlias)),
-          comment: bytesToUTF8(data.objectForKey_(kSec.kSecAttrComment)),
-          create_date: bytesToUTF8(data.objectForKey_(kSec.kSecAttrCreationDate)),
-          creator: bytesToUTF8(data.objectForKey_(kSec.kSecAttrCreator)),
-          custom_icon: bytesToUTF8(data.objectForKey_(kSec.kSecAttrHasCustomIcon)),
-          data: (clazz !== "keys") ?
-            (smartDecode) ?
-              smartDataToString(data.objectForKey_(kSec.kSecValueData)) :
-              bytesToUTF8(data.objectForKey_(kSec.kSecValueData)) :
-            "(Key data not displayed)",
-          dataHex: bytesToHexString(data.objectForKey_(kSec.kSecValueData)),
-          description: bytesToUTF8(data.objectForKey_(kSec.kSecAttrDescription)),
-          entitlement_group: bytesToUTF8(data.objectForKey_(kSec.kSecAttrAccessGroup)),
-          generic: bytesToUTF8(data.objectForKey_(kSec.kSecAttrGeneric)),
-          invisible: bytesToUTF8(data.objectForKey_(kSec.kSecAttrIsInvisible)),
-          item_class: reverseEnumLookup(kSec, clazz),
-          label: bytesToUTF8(data.objectForKey_(kSec.kSecAttrLabel)),
-          modification_date: bytesToUTF8(data.objectForKey_(kSec.kSecAttrModificationDate)),
-          negative: bytesToUTF8(data.objectForKey_(kSec.kSecAttrIsNegative)),
-          protected: bytesToUTF8(data.objectForKey_(kSec.kSecProtectedDataItemAttr)),
-          script_code: bytesToUTF8(data.objectForKey_(kSec.kSecAttrScriptCode)),
-          service: bytesToUTF8(data.objectForKey_(kSec.kSecAttrService)),
-          type: bytesToUTF8(data.objectForKey_(kSec.kSecAttrType)),
+        data.push({
+          clazz,
+          data: searchResults.objectAtIndex_(i),
         });
       }
 
-      return clazzItems;
+      return data;
     });
 
     return [].concat(...itemClassResults).filter((n) => n !== undefined);
+  };
+
+  // print raw entries using some Frida magic
+  // to do the toString() repr...
+  export const listRaw = (): void => {
+    enumerateKeychain().forEach((e) => {
+      c.log(e.data);
+    });
+  };
+
+  // dump the contents of the iOS keychain, returning the
+  // results as an array representation.
+  export const list = (smartDecode: boolean = false): IKeychainItem[] => {
+    return enumerateKeychain().map((entry) => {
+      const { data, clazz } = entry;
+      return {
+        access_control: (data.containsKey_(kSec.kSecAttrAccessControl)) ? decodeAcl(data) : "",
+        accessible_attribute: reverseEnumLookup(kSec,
+          bytesToUTF8(data.objectForKey_(kSec.kSecAttrAccessible))),
+        account: bytesToUTF8(data.objectForKey_(kSec.kSecAttrAccount)),
+        alias: bytesToUTF8(data.objectForKey_(kSec.kSecAttrAlias)),
+        comment: bytesToUTF8(data.objectForKey_(kSec.kSecAttrComment)),
+        create_date: bytesToUTF8(data.objectForKey_(kSec.kSecAttrCreationDate)),
+        creator: bytesToUTF8(data.objectForKey_(kSec.kSecAttrCreator)),
+        custom_icon: bytesToUTF8(data.objectForKey_(kSec.kSecAttrHasCustomIcon)),
+        data: (clazz !== "keys") ?
+          (smartDecode) ?
+            smartDataToString(data.objectForKey_(kSec.kSecValueData)) :
+            bytesToUTF8(data.objectForKey_(kSec.kSecValueData)) :
+          "(Key data not displayed)",
+        dataHex: bytesToHexString(data.objectForKey_(kSec.kSecValueData)),
+        description: bytesToUTF8(data.objectForKey_(kSec.kSecAttrDescription)),
+        entitlement_group: bytesToUTF8(data.objectForKey_(kSec.kSecAttrAccessGroup)),
+        generic: bytesToUTF8(data.objectForKey_(kSec.kSecAttrGeneric)),
+        invisible: bytesToUTF8(data.objectForKey_(kSec.kSecAttrIsInvisible)),
+        item_class: reverseEnumLookup(kSec, clazz),
+        label: bytesToUTF8(data.objectForKey_(kSec.kSecAttrLabel)),
+        modification_date: bytesToUTF8(data.objectForKey_(kSec.kSecAttrModificationDate)),
+        negative: bytesToUTF8(data.objectForKey_(kSec.kSecAttrIsNegative)),
+        protected: bytesToUTF8(data.objectForKey_(kSec.kSecProtectedDataItemAttr)),
+        script_code: bytesToUTF8(data.objectForKey_(kSec.kSecAttrScriptCode)),
+        service: bytesToUTF8(data.objectForKey_(kSec.kSecAttrService)),
+        type: bytesToUTF8(data.objectForKey_(kSec.kSecAttrType)),
+      };
+    });
+  };
+
+  // clean out the keychain
+  export const empty = (): void => {
+    const searchDictionary: NSMutableDictionaryType = NSMutableDictionary.alloc().init();
+    itemClasses.forEach((clazz) => {
+
+      // set the class-type we are querying for now & delete
+      searchDictionary.setObject_forKey_(clazz, kSec.kSecClass);
+      libObjc.SecItemDelete(searchDictionary);
+    });
   };
 
   // add a string entry to the keychain

@@ -505,6 +505,10 @@ COMMANDS = {
                         'flags': ['--json', '--smart'],
                         'exec': keychain.dump
                     },
+                    'dump_raw': {
+                        'meta': 'Dump raw, unprocessed keychain entries (advanced)',
+                        'exec': keychain.dump_raw
+                    },
                     'clear': {
                         'meta': 'Delete all keychain entries for the current app\'s entitlement group',
                         'exec': keychain.clear

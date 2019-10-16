@@ -12,7 +12,7 @@ import {
   IBinaryModuleDictionary, ICredential, IFramework,
   IHeapObject, IIosCookie, IIosFileSystem, IKeychainItem,
 } from "../ios/lib/interfaces";
-import { NSUserDefaults } from "../ios/lib/types";
+import { NSDictionary, NSUserDefaults } from "../ios/lib/types";
 import { nsuserdefaults } from "../ios/nsuserdefaults";
 import { pasteboard } from "../ios/pasteboard";
 import { sslpinning } from "../ios/pinning";
@@ -86,6 +86,7 @@ export const ios = {
   iosKeychainAdd: (key: string, data: string): boolean => ioskeychain.add(key, data),
   iosKeychainEmpty: (): void => ioskeychain.empty(),
   iosKeychainList: (smartDecode): IKeychainItem[] => ioskeychain.list(smartDecode),
+  iosKeychainListRaw: (): void => ioskeychain.listRaw(),
 
   // ios nsuserdefaults
   iosNsuserDefaultsGet: (): NSUserDefaults | any => nsuserdefaults.get(),
