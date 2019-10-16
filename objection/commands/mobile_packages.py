@@ -87,7 +87,8 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
 
 def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup: bool = True,
                       enable_debug: bool = True, gadget_version: str = None, skip_resources: bool = False,
-                      network_security_config: bool = False, target_class: str = None) -> None:
+                      network_security_config: bool = False, target_class: str = None,
+                      use_aapt2: bool = False) -> None:
     """
         Patches an Android APK by extracting, patching SMALI, repackaging
         and signing a new APK.
@@ -101,6 +102,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
         :param skip_resources:
         :param network_security_config:
         :param target_class:
+        :param use_aapt2:
 
         :return:
     """
@@ -182,7 +184,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
 
         input('Press ENTER to continue...')
 
-    patcher.build_new_apk()
+    patcher.build_new_apk(use_aapt2=use_aapt2)
     patcher.sign_apk()
     patcher.zipalign_apk()
 
