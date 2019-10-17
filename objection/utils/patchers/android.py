@@ -1,9 +1,12 @@
+import itertools
 import lzma
 import os
+import re
 import shlex
 import shutil
 import tempfile
 import xml.etree.ElementTree as ElementTree
+import zipfile
 from subprocess import list2cmdline
 
 import click
@@ -776,7 +779,29 @@ class AndroidPatcher(BasePlatformPatcher):
                          'output to determine if apktool actually had an error: \n'), fg='red')
             click.secho(o.err, fg='red')
 
+        self._copy_meta_inf()
         click.secho('Built new APK with injected loadLibrary and frida-gadget', fg='green')
+
+    def _copy_meta_inf(self):
+        meta_inf = os.path.join(self.apk_temp_directory, 'original', 'META-INF')
+        standard_files = re.compile(r'^(?:[A-Z]+\.(?:RSA|SF)|MANIFEST\.MF)$')
+        extra_names = list(itertools.filterfalse(standard_files.match, os.listdir(meta_inf)))
+        if extra_names:
+            click.secho('Appending {0} extra entries in META-INF to the APK...'.format(len(extra_names)))
+            with zipfile.ZipFile(self.apk_temp_frida_patched, 'a', zipfile.ZIP_DEFLATED) as apk:
+                for extra_name in extra_names:
+                    full_path = os.path.join(meta_inf, extra_name)
+                    if os.path.isdir(full_path):
+                        prefix_len = len(full_path) + 1 # trailing '/'
+                        for dirpath, _, filenames in os.walk(full_path):
+                            for filename in filenames:
+                                src_name = os.path.join(dirpath, filename)
+                                dest_name = 'META-INF/{dirname}/{path}'.format(
+                                        dirname=extra_name,
+                                        path=src_name[prefix_len:].replace(os.sep, '/'))
+                                apk.write(src_name, dest_name)
+                    else:
+                        apk.write(full_path, 'META-INF/' + extra_name)
 
     def zipalign_apk(self):
         """
