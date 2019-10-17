@@ -1,6 +1,7 @@
 import atexit
 import json
 import os
+from pprint import pprint
 
 import click
 import frida
@@ -56,7 +57,13 @@ class Agent(object):
             # process the response
             if message and 'payload' in message:
                 if len(message['payload']) > 0:
-                    click.secho('(agent) ' + message['payload'])
+                    if isinstance(message['payload'], dict):
+                        click.secho('(agent) ' + json.dumps(message['payload']))
+                    elif isinstance(message['payload'], str):
+                        click.secho('(agent) ' + message['payload'])
+                    else:
+                        click.secho('Dumping unknown agent message', fg='yellow')
+                        pprint(message['payload'])
 
         except Exception as e:
             click.secho('Failed to process an incoming message from agent: {0}'.format(e), fg='red', bold=True)
