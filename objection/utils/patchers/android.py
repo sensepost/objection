@@ -778,6 +778,10 @@ class AndroidPatcher(BasePlatformPatcher):
                          'output to determine if apktool actually had an error: \n'), fg='red')
             click.secho(o.err, fg='red')
 
+        self._copy_meta_inf()
+        click.secho('Built new APK with injected loadLibrary and frida-gadget', fg='green')
+
+    def _copy_meta_inf(self):
         meta_inf = os.path.join(self.apk_temp_directory, 'original', 'META-INF')
         standard_files = re.compile(r'^(?:[A-Z]+\.(?:RSA|SF)|MANIFEST\.MF)$')
         extra_names = list(itertools.filterfalse(standard_files.match, os.listdir(meta_inf)))
@@ -797,8 +801,6 @@ class AndroidPatcher(BasePlatformPatcher):
                                 apk.write(src_name, dest_name)
                     else:
                         apk.write(full_path, 'META-INF/' + extra_name)
-
-        click.secho('Built new APK with injected loadLibrary and frida-gadget', fg='green')
 
     def zipalign_apk(self):
         """
