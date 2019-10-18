@@ -49,6 +49,7 @@ setup(
     package_data={
         '': _package_files(os.path.join(here, 'objection/console/helpfiles'), '.txt') +
             _package_files(os.path.join(here, 'objection/utils/assets'), '.jks') +
+            _package_files(os.path.join(here, 'objection/utils/assets'), '.js') +
             _package_files(os.path.join(here, 'objection/utils/assets'), '.xml') +
             [os.path.join(here, 'objection/agent.js')],  # Frida agent
     },
