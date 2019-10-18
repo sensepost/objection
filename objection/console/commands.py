@@ -112,6 +112,11 @@ COMMANDS = {
     'file': {
         'meta': 'Work with files on the remote filesystem',
         'commands': {
+            'cat': {
+                'meta': 'Print a files contents',
+                'dynamic': filemanager.list_files_in_current_fm_directory,
+                'exec': filemanager.cat
+            },
             'upload': {
                 'meta': 'Upload a file',
                 'exec': filemanager.upload

@@ -1,4 +1,5 @@
 import os
+import tempfile
 import time
 
 import click
@@ -622,6 +623,42 @@ def _rm_ios(t: str) -> None:
     # update the file system cache entry
     if os.path.dirname(t) in _ls_cache:
         del _ls_cache[os.path.dirname(t)]
+
+
+def cat(args: list):
+    """
+        Downloads a file from a remote filesystem and echos
+        it's contents
+
+        This method is simply a proxy to the relevant download methods
+        that echoes the contents and cleans up after itself.
+
+        :param args:
+        :return:
+    """
+
+    if len(args) < 1:
+        click.secho('Usage: file cat <remote location>', bold=True)
+        return
+
+    # determine the source and destination file names.
+    # if we didnt get a specification of where to dump the file,
+    # assume the same name should be used locally.
+    source = args[0]
+    _, destination = tempfile.mkstemp('objection-cat.file')
+
+    if device_state.device_type == Ios:
+        _download_ios(source, destination)
+
+    if device_state.device_type == Android:
+        _download_android(source, destination)
+
+    click.secho('====', dim=True)
+    with open(destination, 'r', encoding='utf-8', errors='ignore') as f:
+        print(f.read(), end='', )
+    click.secho('====', dim=True)
+
+    os.remove(destination)
 
 
 def _get_short_ios_listing() -> list:
