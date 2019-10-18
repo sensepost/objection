@@ -6,5 +6,6 @@ tabulate
 delegator.py
 requests
 flask
+litecli==1.1.0
 q
 twine

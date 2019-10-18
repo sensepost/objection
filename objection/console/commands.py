@@ -229,37 +229,11 @@ COMMANDS = {
     'sqlite': {
         'meta': 'Work with SQLite databases',
         'commands': {
-            'status': {
-                'meta': 'Show the status of the SQLite database connection',
-                'exec': sqlite.status
-            },
-
             'connect': {
-                'meta': 'Connect to a SQLite database (file)',
+                'meta': 'Connect to a SQLite database file',
                 'dynamic': filemanager.list_files_in_current_fm_directory,
                 'exec': sqlite.connect
             },
-            'disconnect': {
-                'meta': 'Disconnect from a SQLite database (file)',
-                'exec': sqlite.disconnect
-            },
-            'execute': {
-                'meta': 'Execute SQLite statements on the connected database',
-                'commands': {
-                    'schema': {
-                        'meta': 'Dump the schema of the connected database',
-                        'exec': sqlite.schema
-                    },
-                    'query': {
-                        'meta': 'Execute a query on the connected SQLite database',
-                        'exec': sqlite.execute
-                    },
-                }
-            },
-            'sync': {
-                'meta': 'Sync the locally cached SQLite database with one on the device',
-                'exec': sqlite.sync
-            }
         }
     },
 

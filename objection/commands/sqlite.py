@@ -1,43 +1,43 @@
 import binascii
 import os
-import sqlite3
+import tempfile
 
 import click
-from tabulate import tabulate
+import litecli
+from litecli.main import LiteCli
 
 from ..commands.filemanager import download, upload, pwd
-from ..state.sqlite import sqlite_manager_state
 
 
-def _get_connection() -> sqlite3.Connection:
+def modify_config(rc):
     """
-        Returns a new connection to the currently locally
-        cached sqlite file.
+        Monkey patches the LiteCLI config to toggle
+        settings that make more sense for us.
 
+        :param rc:
         :return:
     """
 
-    return sqlite3.connect(sqlite_manager_state.temp_file)
+    c = real_get_config(rc)
+    c['main']['less_chatty'] = 'True'
+    c['main']['enable_pager'] = 'False'
+
+    return c
 
 
-def status(args: list) -> None:
+real_get_config = litecli.main.get_config
+litecli.main.get_config = modify_config
+
+
+def cleanup(p) -> None:
     """
-        Prints the status of the currently 'connected' (actually just cached)
-        SQLite database.
+        Remove a cached SQLite db
 
-        :param args:
+        :param p:
         :return:
     """
 
-    db_file = sqlite_manager_state.file
-
-    if not db_file:
-        click.secho('Not connected to any database file', fg='blue')
-
-        return
-
-    click.secho('Connected using file: {0} (locally cached at: {1})'.format(db_file, sqlite_manager_state.temp_file),
-                fg='green')
+    os.remove(p)
 
 
 def connect(args: list) -> None:
@@ -53,18 +53,11 @@ def connect(args: list) -> None:
         click.secho('Usage: sqlite connect <remote_file>', bold=True)
         return
 
-    if sqlite_manager_state.is_connected():
-        click.secho('Already connected to a db. Disconnecting...', fg='yellow')
-        sqlite_manager_state.cleanup()
-
     db_location = args[0]
-    local_path = sqlite_manager_state.get_cache_dir()
-
-    # update the file path too. this will make is_connected return true
-    sqlite_manager_state.file = db_location
+    _, local_path = tempfile.mkstemp('.sqlite')
 
     # update the full remote path for future syncs
-    sqlite_manager_state.full_remote_file = db_location \
+    full_remote_file = db_location \
         if os.path.isabs(db_location) else os.path.join(pwd(), db_location)
 
     click.secho('Caching local copy of database file...', fg='green')
@@ -78,101 +71,17 @@ def connect(args: list) -> None:
     if header != b'53514c69746520666f726d6174203300':
         click.secho('File does not appear to be a SQLite3 db. Try downloading and manually inspecting this one.',
                     fg='red')
-        sqlite_manager_state.cleanup()
+        cleanup(local_path)
         return
 
     click.secho('Connected to SQLite database at: {0}'.format(db_location), fg='green')
 
+    # boot the litecli prompt
+    lite = LiteCli(prompt='SQLite @ {} > '.format(db_location))
+    lite.connect(local_path)
+    lite.run_cli()
 
-def disconnect(args: list = None) -> None:
-    """
-        Disconnects from the currently connected/cached SQLite database file
-        by clearing the statemanager and deleting the locally cached copy.
-
-        :param args:
-        :return:
-    """
-
-    if not sqlite_manager_state.is_connected():
-        click.secho('Not connected to a database.', fg='yellow')
-        return
-
-    # confirm if the user wants to disconnect, warn about the need to sync
-    if click.confirm(('Make sure you run \'sqlite sync\' if needed!\n'
-                      'Are you sure you want to disconnect?')):
-        click.secho('Disconnecting database: {0}'.format(sqlite_manager_state.file))
-
-        # cleanup the connection and cached db
-        sqlite_manager_state.cleanup()
-        return
-
-
-def schema(args=None):
-    """
-        Runs a query that dumps the current databases schema.
-
-        :param args:
-        :return:
-    """
-
-    if not sqlite_manager_state.is_connected():
-        click.secho('Connect using sqlite connect first!', fg='red')
-        return
-
-    query = 'select sql from sqlite_master where type = \'table\''
-    execute(query.split(' '))
-
-
-def execute(args: list) -> None:
-    """
-        Executes a query against the locally cached SQLite database file.
-
-        :param args:
-        :return:
-    """
-
-    if not sqlite_manager_state.is_connected():
-        click.secho('Connect using sqlite connect first!', fg='red')
-        return
-
-    if len(args) <= 1:
-        click.secho('Usage: sqlite execute select <query>', bold=True)
-        return
-
-    query = ' '.join(args)
-
-    connection = _get_connection()
-
-    try:
-
-        with connection:
-            results = connection.execute(query)
-
-    except (sqlite3.OperationalError, sqlite3.Warning, sqlite3.Error) as e:
-
-        click.secho('Error: {0}'.format(e), fg='red')
-        return
-
-    table_data = []
-    for row in results:
-        row_data = [c.decode('utf-8', 'replace') if isinstance(c, bytes) else c for c in row]
-        table_data.append(row_data)
-
-    click.secho(tabulate(table_data), bold=True)
-
-
-def sync(args: list = None) -> None:
-    """
-        Syncs the locally cached copy of the SQLite database with the
-        remote location on a device.
-
-        :param args:
-        :return:
-    """
-
-    if not sqlite_manager_state.is_connected():
-        click.secho('Connect using sqlite connect first!', fg='red')
-        return
-
-    upload([sqlite_manager_state.temp_file, sqlite_manager_state.full_remote_file])
-    click.secho('Database sync complete')
+    # once we left the LiteCLI prompt, sync and cleanup
+    click.secho('Synchronizing database with device...', dim=True)
+    upload([local_path, full_remote_file])
+    cleanup(local_path)
