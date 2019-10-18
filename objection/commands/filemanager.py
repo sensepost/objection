@@ -645,7 +645,7 @@ def cat(args: list):
     # if we didnt get a specification of where to dump the file,
     # assume the same name should be used locally.
     source = args[0]
-    _, destination = tempfile.mkstemp('objection-cat.file')
+    _, destination = tempfile.mkstemp('.file')
 
     if device_state.device_type == Ios:
         _download_ios(source, destination)
