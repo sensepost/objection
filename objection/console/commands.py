@@ -231,6 +231,7 @@ COMMANDS = {
         'commands': {
             'connect': {
                 'meta': 'Connect to a SQLite database file',
+                'flags': ['--sync'],
                 'dynamic': filemanager.list_files_in_current_fm_directory,
                 'exec': sqlite.connect
             },

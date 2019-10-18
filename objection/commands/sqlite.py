@@ -40,6 +40,17 @@ def cleanup(p) -> None:
     os.remove(p)
 
 
+def _should_sync_once_done(args: list) -> bool:
+    """
+        Checks if --sync flag was provided.
+
+        :param args:
+        :return:
+    """
+
+    return '--sync' in args
+
+
 def connect(args: list) -> None:
     """
         Connects to a SQLite database by downloading a copy of the database
@@ -50,7 +61,7 @@ def connect(args: list) -> None:
     """
 
     if len(args) <= 0:
-        click.secho('Usage: sqlite connect <remote_file>', bold=True)
+        click.secho('Usage: sqlite connect <remote_file> (optional: --sync)', bold=True)
         return
 
     db_location = args[0]
@@ -81,7 +92,11 @@ def connect(args: list) -> None:
     lite.connect(local_path)
     lite.run_cli()
 
-    # once we left the LiteCLI prompt, sync and cleanup
-    click.secho('Synchronizing database with device...', dim=True)
-    upload([local_path, full_remote_file])
+    if _should_sync_once_done(args):
+        click.secho('Synchronizing changes back...', dim=True)
+        upload([local_path, full_remote_file])
+    else:
+        click.secho('NOT synchronizing changes back to device. Use --sync if you want that.', fg='green')
+
+    # maak skoon
     cleanup(local_path)
