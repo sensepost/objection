@@ -36,14 +36,16 @@ export const android = {
   androidHookingListActivities: (): Promise<string[]> => hooking.getActivities(),
   androidHookingListBroadcastReceivers: (): Promise<string[]> => hooking.getBroadcastReceivers(),
   androidHookingListServices: (): Promise<string[]> => hooking.getServices(),
-  androidHookingSetMethodReturn: (fqClazz: string, ret: boolean) => hooking.setReturnValue(fqClazz, ret),
+  androidHookingSetMethodReturn: (fqClazz: string, filterOverload: string | null, ret: boolean) =>
+    hooking.setReturnValue(fqClazz, filterOverload, ret),
   androidHookingWatchClass: (clazz: string): Promise<void> => hooking.watchClass(clazz),
-  androidHookingWatchMethod: (fqClazz: string, dargs: boolean, dbt: boolean, dret: boolean): Promise<void> =>
-    hooking.watchMethod(fqClazz, dargs, dbt, dret),
+  androidHookingWatchMethod: (fqClazz: string, filterOverload: string | null, dargs: boolean,
+                              dbt: boolean, dret: boolean): Promise<void> =>
+    hooking.watchMethod(fqClazz, filterOverload, dargs, dbt, dret),
 
   // android heap methods
   androidHeapEvaluateHandleMethod: (handle: string, js: string): Promise<void> => heap.evaluate(handle, js),
-  androidHeapExecuteHandleMethod: (handle: string, method: string, returnString: boolean): Promise<string|null> =>
+  androidHeapExecuteHandleMethod: (handle: string, method: string, returnString: boolean): Promise<string | null> =>
     heap.execute(handle, method, returnString),
   androidHeapGetLiveClassInstances: (clazz: string, fresh: boolean): Promise<IHeapObject[]> =>
     heap.getInstances(clazz, fresh),

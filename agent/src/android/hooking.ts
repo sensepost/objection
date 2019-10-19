@@ -100,9 +100,16 @@ export namespace hooking {
     });
   };
 
-  export const watchMethod = (fqClazz: string, dargs: boolean, dbt: boolean, dret: boolean): Promise<void> => {
+  export const watchMethod = (
+    fqClazz: string, filterOverload: string | null, dargs: boolean, dbt: boolean, dret: boolean,
+  ): Promise<void> => {
     const [clazz, method] = splitClassMethod(fqClazz);
     send(`Attempting to watch class ${c.green(clazz)} and method ${c.green(method)}.`);
+
+    if (filterOverload != null) {
+      send(c.blackBright(`Will filter for method overload with arguments:`) +
+        ` ${c.green(filterOverload)}`);
+    }
 
     return wrapJavaPerform(() => {
       const throwable: Throwable = Java.use("java.lang.Throwable");
@@ -122,9 +129,14 @@ export namespace hooking {
       };
 
       targetClass[method].overloads.forEach((m: any) => {
-
         // get the argument types for this overload
         const calleeArgTypes: string[] = m.argumentTypes.map((arg) => arg.className);
+
+        // check if we need to filter on a specific overload
+        if (filterOverload != null && calleeArgTypes.join(",") !== filterOverload) {
+          return;
+        }
+
         send(`Hooking ${c.green(clazz)}.${c.greenBright(method)}(${c.red(calleeArgTypes.join(", "))})`);
 
         // replace the implementation of this method
@@ -207,7 +219,7 @@ export namespace hooking {
         };
       }
 
-      return  {
+      return {
         activity: null,
         fragment: null,
       };
@@ -289,9 +301,14 @@ export namespace hooking {
     });
   };
 
-  export const setReturnValue = (fqClazz: string, newRet: boolean): Promise<void> => {
+  export const setReturnValue = (fqClazz: string, filterOverload: string | null, newRet: boolean): Promise<void> => {
     const [clazz, method] = splitClassMethod(fqClazz);
     send(`Attempting to modify return value for class ${c.green(clazz)} and method ${c.green(method)}.`);
+
+    if (filterOverload != null) {
+      send(c.blackBright(`Will filter for method overload with arguments:`) +
+        ` ${c.green(filterOverload)}`);
+    }
 
     return wrapJavaPerform(() => {
       const job: IJob = {
@@ -300,33 +317,39 @@ export namespace hooking {
         type: `set-return for: ${fqClazz}`,
       };
 
-      const clazzInstance: JavaClass = Java.use(clazz);
-      const methodInstance = clazzInstance[method];
-      // TODO, check that the method in question actually returns a bool
+      const targetClazz: JavaClass = Java.use(clazz);
 
-      // get the argument types for this method
-      const calleeArgTypes: string[] = methodInstance.argumentTypes.map((arg) => arg.className);
-      send(`Hooking ${c.green(clazz)}.${c.greenBright(method)}(${c.red(calleeArgTypes.join(", "))})`);
+      targetClazz[method].overloads.forEach((m: any) => {
+        // get the argument types for this method
+        const calleeArgTypes: string[] = m.argumentTypes.map((arg) => arg.className);
 
-      // tslint:disable-next-line:only-arrow-functions
-      methodInstance.implementation = function() {
-        let retVal = methodInstance.apply(this, arguments);
-
-        // Override retval if needed
-        if (retVal !== newRet) {
-          send(
-            c.blackBright(`[${job.identifier}] `) + `Return value was not ${c.red(newRet.toString())}, ` +
-            `setting to ${c.green(newRet.toString())}.`,
-          );
-          // update the return value
-          retVal = newRet;
+        // check if we need to filter on a specific overload
+        if (filterOverload != null && calleeArgTypes.join(",") !== filterOverload) {
+          return;
         }
 
-        return retVal;
-      };
+        send(`Hooking ${c.green(clazz)}.${c.greenBright(method)}(${c.red(calleeArgTypes.join(", "))})`);
 
-      // Register the job
-      job.implementations.push(methodInstance);
+        // tslint:disable-next-line:only-arrow-functions
+        m.implementation = function() {
+          let retVal = m.apply(this, arguments);
+
+          // Override retval if needed
+          if (retVal !== newRet) {
+            send(
+              c.blackBright(`[${job.identifier}] `) + `Return value was not ${c.red(newRet.toString())}, ` +
+              `setting to ${c.green(newRet.toString())}.`,
+            );
+            // update the return value
+            retVal = newRet;
+          }
+          return retVal;
+        };
+
+        // record override
+        job.implementations.push(m);
+      });
+
       jobs.add(job);
     });
   };

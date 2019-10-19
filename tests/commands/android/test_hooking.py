@@ -107,9 +107,9 @@ Found 3 method(s)
             output = o
 
         self.assertEqual(output, 'Usage: android hooking watch class_method '
-                                 '<fully qualified class method> (eg: com.example.test.dologin) '
-                                 '(optional: --dump-args) (optional: --dump-backtrace) '
-                                 '(optional: --dump-return)\n')
+                                 '<fully qualified class method> <optional '
+                                 'overload> (optional: --dump-args) (optional:'
+                                 ' --dump-backtrace) (optional: --dump-return)\n')
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_watch_class_method(self, mock_api):
@@ -203,8 +203,8 @@ Found 3 classes
             output = o
 
         self.assertEqual(output, 'Usage: android hooking set return_value '
-                                 '"<fully qualified class method (with overload '
-                                 'if needed)>" (eg: "com.example.test.doLogin") <true/false>\n')
+                                 '"<fully qualified class method>" "<optional'
+                                 ' overload>" (eg: "com.example.test.doLogin") <true/false>\n')
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_set_method_return_value(self, mock_api):

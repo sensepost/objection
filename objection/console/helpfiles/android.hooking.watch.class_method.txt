@@ -1,12 +1,14 @@
 Command: android hooking watch class_method
 
-Usage: android hooking watch class_method <fully qualified class method>
+Usage: android hooking watch class_method <fully qualified class method> <optional overload>
        (optional: --dump-args) (optional: --dump-backtrace)
        (optional: --dump-return)
 
 Hooks a specified class method and reports on invocations, together with
 the number of arguments that method was called with. This command will
-also hook all of the methods available overloads.
+also hook all of the methods available overloads unless a specific
+overload is specified.
+
 If the --include-backtrace flag is provided, a full stack trace that
 lead to the methods invocation will also be dumped. This would aid in
 discovering who called the original method.
@@ -14,5 +16,6 @@ discovering who called the original method.
 Examples:
    android hooking watch class_method com.example.test.login
    android hooking watch class_method com.example.test.helper.executeQuery
+   android hooking watch class_method com.example.test.helper.executeQuery "java.lang.String,java.lang.String"
    android hooking watch class_method com.example.test.helper.executeQuery --dump-backtrace
    android hooking watch class_method com.example.test.login --dump-args --dump-return

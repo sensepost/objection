@@ -125,16 +125,18 @@ def watch_class_method(args: list) -> None:
 
     if len(clean_argument_flags(args)) < 1:
         click.secho(('Usage: android hooking watch class_method <fully qualified class method> '
-                     '(eg: com.example.test.dologin) '
+                     '<optional overload> '
                      '(optional: --dump-args) '
                      '(optional: --dump-backtrace) '
                      '(optional: --dump-return)'), bold=True)
         return
 
     fully_qualified_class = args[0]
+    overload_filter = args[1] if '--' not in args[1] else None
 
     api = state_connection.get_api()
     api.android_hooking_watch_method(fully_qualified_class,
+                                     overload_filter.replace(' ', ''),
                                      _should_dump_args(args),
                                      _should_dump_backtrace(args),
                                      _should_dump_return_value(args))
@@ -218,16 +220,26 @@ def set_method_return_value(args: list = None) -> None:
 
     if len(clean_argument_flags(args)) < 2:
         click.secho(('Usage: android hooking set return_value '
-                     '"<fully qualified class method (with overload if needed)>" (eg: "com.example.test.doLogin") '
+                     '"<fully qualified class method>" "<optional overload>" (eg: "com.example.test.doLogin") '
                      '<true/false>'),
                     bold=True)
         return
 
+    # make sure we got a true/false
+    if args[-1].lower() not in ('true', 'false'):
+        click.secho('Return value must be set to either true or false', bold=True)
+        return
+
     class_name = args[0].replace('\'', '"')  # fun!
-    retval = True if _string_is_true(args[1]) else False
+
+    # check if we got an overload
+    overload_filter = args[1] if len(args) == 3 else None
+    retval = True if _string_is_true(args[-1]) else False
 
     api = state_connection.get_api()
-    api.android_hooking_set_method_return(class_name, retval)
+    api.android_hooking_set_method_return(class_name,
+                                          overload_filter.replace(' ', ''),
+                                          retval)
 
 
 def search_class(args: list) -> None:
