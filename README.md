@@ -2,7 +2,7 @@
 
 `objection` is a runtime mobile exploration toolkit, powered by [Frida](https://www.frida.re/), built to help you assess the security posture of your mobile applications, without needing a jailbreak.
 
-[![Twitter](https://img.shields.io/badge/Twitter-%40leonjza-blue.svg)](https://twitter.com/leonjza)
+[![Twitter](https://img.shields.io/badge/twitter-%40leonjza-blue.svg)](https://twitter.com/leonjza)
 [![PyPi](https://badge.fury.io/py/objection.svg)](https://pypi.python.org/pypi/objection)
 [![Travis](https://travis-ci.org/sensepost/objection.svg?branch=master)](https://travis-ci.org/sensepost/objection)
 
