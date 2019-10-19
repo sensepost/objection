@@ -17,6 +17,7 @@ from ..commands.android import intents
 from ..commands.android import keystore
 from ..commands.android import pinning as android_pinning
 from ..commands.android import root
+from ..commands.android import generate as android_generate
 from ..commands.ios import binary
 from ..commands.ios import bundles
 from ..commands.ios import cookies
@@ -29,7 +30,7 @@ from ..commands.ios import nsuserdefaults
 from ..commands.ios import pasteboard
 from ..commands.ios import pinning as ios_pinning
 from ..commands.ios import plist
-from ..commands.ios import generate
+from ..commands.ios import generate as ios_generate
 from ..utils.helpers import list_current_jobs
 
 # commands are defined with their name being the key, then optionally
@@ -350,6 +351,19 @@ COMMANDS = {
                             }
                         }
                     },
+                    'generate': {
+                        'meta': 'Generate Frida hooks for Android',
+                        'commands': {
+                            'class': {
+                                'meta': 'A generic hook manager for Classes',
+                                'exec': android_generate.clazz
+                            },
+                            'simple': {
+                                'meta': 'Simple hooks for each Class method',
+                                'exec': android_generate.simple
+                            }
+                        }
+                    }
                 },
             },
             'heap': {
@@ -673,11 +687,11 @@ COMMANDS = {
                         'commands': {
                             'class': {
                                 'meta': 'A generic hook manager for Classes',
-                                'exec': generate.clazz
+                                'exec': ios_generate.clazz
                             },
                             'simple': {
                                 'meta': 'Simple hooks for each Class method',
-                                'exec': generate.simple
+                                'exec': ios_generate.simple
                             }
                         }
                     }
