@@ -5,7 +5,6 @@ import uuid
 
 import click
 
-from ..console import commands
 from ..utils.plugin import Plugin as PluginType
 
 
@@ -55,5 +54,6 @@ def load_plugin(args: list = None) -> None:
         click.secho('{0}'.format(traceback.format_exc()), dim=True)
         return
 
+    from ..console import commands
     commands.COMMANDS['plugin']['commands'][instance.namespace] = instance.implementation
     click.secho('Loaded plugin: {0}'.format(plugin.__name__), bold=True)
