@@ -136,7 +136,7 @@ def watch_class_method(args: list) -> None:
 
     api = state_connection.get_api()
     api.android_hooking_watch_method(fully_qualified_class,
-                                     overload_filter.replace(' ', ''),
+                                     overload_filter.replace(' ', '') if overload_filter else overload_filter,
                                      _should_dump_args(args),
                                      _should_dump_backtrace(args),
                                      _should_dump_return_value(args))
