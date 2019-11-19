@@ -784,7 +784,7 @@ class AndroidPatcher(BasePlatformPatcher):
 
     def _copy_meta_inf(self):
         meta_inf = os.path.join(self.apk_temp_directory, 'original', 'META-INF')
-        standard_files = re.compile(r'^(?:[A-Z]+\.(?:RSA|SF)|MANIFEST\.MF)$')
+        standard_files = re.compile(r'^(?:[A-Z0-9_-]+\.(?:RSA|SF)|MANIFEST\.MF)$')
         extra_names = list(itertools.filterfalse(standard_files.match, os.listdir(meta_inf)))
         if extra_names:
             click.secho('Appending {0} extra entries in META-INF to the APK...'.format(len(extra_names)))
