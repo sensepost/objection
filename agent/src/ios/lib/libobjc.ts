@@ -72,6 +72,14 @@ const nativeExports: any = {
     moduleName: "libboringssl.dylib",
     retType: "pointer",
   },
+
+  // iOS 13+ libboringssl methods
+  SSL_set_custom_verify: {
+    argTypes: ["pointer", "int", "pointer"],
+    exportName: "SSL_set_custom_verify",
+    moduleName: "libboringssl.dylib",
+    retType: "void",
+  },
 };
 
 const api: any = {
@@ -89,6 +97,8 @@ const api: any = {
 
   SSL_CTX_set_custom_verify: null,
   SSL_get_psk_identity: null,
+
+  SSL_set_custom_verify: null,
 };
 
 // proxy method resolution
@@ -97,8 +107,9 @@ export const libObjc = new Proxy(api, {
 
     if (target[key] === null) {
 
-      target[key] = new NativeFunction(Module.findExportByName(
-        nativeExports[key].moduleName, nativeExports[key].exportName),
+      const f = Module.findExportByName(
+        nativeExports[key].moduleName, nativeExports[key].exportName) || ptr('0');
+      target[key] = new NativeFunction(f,
         nativeExports[key].retType, nativeExports[key].argTypes);
     }
 
