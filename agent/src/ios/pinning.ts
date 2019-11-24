@@ -448,9 +448,9 @@ export namespace sslpinning {
   // SSL_CTX_set_custom_verify
   const sSLCtxSetCustomVerify = (ident: string): InvocationListener => {
     const getPskIdentity = libObjc.SSL_get_psk_identity;
-    var setCustomVerify = libObjc.SSL_CTX_set_custom_verify;
+    var setCustomVerify = libObjc.SSL_set_custom_verify;
     if (setCustomVerify.isNull()) {
-        setCustomVerify = libObjc.SSL_set_custom_verify;
+        setCustomVerify = libObjc.SSL_CTX_set_custom_verify;
     }
 
     if (setCustomVerify.isNull() || getPskIdentity.isNull()) {
