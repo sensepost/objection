@@ -38,9 +38,9 @@ export namespace memory {
             }
             return match.address.toString();
           });
-      });
+      }).filter((m) => m.length !== 0);
 
-    return [].concat.apply([], addresses);
+    return addresses.reduce((a, b) => a.concat(b));
   };
 
   export const write = (address: string, value: number[]): void => {
