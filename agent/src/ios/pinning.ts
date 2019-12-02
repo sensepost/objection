@@ -448,15 +448,17 @@ export namespace sslpinning {
   // SSL_CTX_set_custom_verify
   const sSLCtxSetCustomVerify = (ident: string): InvocationListener => {
     const getPskIdentity = libObjc.SSL_get_psk_identity;
-    var setCustomVerify = libObjc.SSL_set_custom_verify;
+    let setCustomVerify = libObjc.SSL_set_custom_verify;
     if (setCustomVerify.isNull()) {
-        setCustomVerify = libObjc.SSL_CTX_set_custom_verify;
+      send(c.blackBright(`SSL_set_custom_verify not found, trying SSL_CTX_set_custom_verify`));
+      setCustomVerify = libObjc.SSL_CTX_set_custom_verify;
     }
 
     if (setCustomVerify.isNull() || getPskIdentity.isNull()) {
       return null;
     }
 
+    // tslint:disable-next-line:only-arrow-functions variable-name
     const customVerifyCallback = new NativeCallback(function(ssl, out_alert) {
       qsend(quiet,
         c.blackBright(`[${ident}] `) + `Called ` +
@@ -466,6 +468,7 @@ export namespace sslpinning {
       return 0;
     }, "int", ["pointer", "pointer"]);
 
+    // tslint:disable-next-line:only-arrow-functions
     Interceptor.replace(setCustomVerify, new NativeCallback(function(ssl, mode, callback) {
       qsend(quiet,
         c.blackBright(`[${ident}] `) + `Called ` +
@@ -475,6 +478,7 @@ export namespace sslpinning {
       setCustomVerify(ssl, mode, customVerifyCallback);
     }, "void", ["pointer", "int", "pointer"]));
 
+    // tslint:disable-next-line:only-arrow-functions
     Interceptor.replace(getPskIdentity, new NativeCallback(function(ssl) {
       qsend(quiet,
         c.blackBright(`[${ident}] `) + `Called ` +
