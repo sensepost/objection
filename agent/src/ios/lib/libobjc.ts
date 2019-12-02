@@ -108,7 +108,7 @@ export const libObjc = new Proxy(api, {
     if (target[key] === null) {
 
       const f = Module.findExportByName(
-        nativeExports[key].moduleName, nativeExports[key].exportName) || ptr('0');
+        nativeExports[key].moduleName, nativeExports[key].exportName) || new NativePointer(0x00);
       target[key] = new NativeFunction(f,
         nativeExports[key].retType, nativeExports[key].argTypes);
     }
