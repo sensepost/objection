@@ -55,7 +55,7 @@ setup(
     },
     packages=find_packages(),
     install_requires=requirements,
-    python_requires='>=3.4',
+    python_requires='>=3.5',
     classifiers=[
         'Operating System :: OS Independent',
         'Natural Language :: English',
