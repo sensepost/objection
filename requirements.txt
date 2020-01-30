@@ -1,5 +1,5 @@
 frida
-frida-tools
+frida-tools<6.0.0
 prompt_toolkit>=2.0.9,<3.0.0
 click
 tabulate
