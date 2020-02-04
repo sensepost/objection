@@ -624,6 +624,7 @@ COMMANDS = {
                     },
                     'evaluate': {
                         'meta': 'Evaluate JavaScript on objects on the iOS heap',
+                        'flags': ['--inline'],
                         'exec': ios_heap.evaluate
                     }
                 }
