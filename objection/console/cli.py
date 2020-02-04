@@ -110,8 +110,9 @@ def explore(startup_command: str, quiet: bool, file_commands, startup_script: cl
 
     agent = Agent()
 
+    pause_early = not(file_commands is None and startup_script is None and startup_command is None)
     try:
-        agent.inject()
+        agent.inject(pause_early)
     except (frida.ServerNotRunningError, frida.NotSupportedError) as e:
         click.secho('Unable to connect to the frida server: {error}'.format(error=str(e)), fg='red')
         return
@@ -146,22 +147,8 @@ def explore(startup_command: str, quiet: bool, file_commands, startup_script: cl
     # If we have a script, import and run that asap
     if startup_script:
         click.secho('Importing and running startup script at: {location}'.format(location=startup_script), dim=True)
-        response = agent.single(startup_script.read())
+        response = agent.single(startup_script.read(), pause_early)
         print(response)
-
-    try:
-
-        # poll the device for information. this method also sets
-        # the device type internally in state.device
-        device_info = get_device_info()
-
-    except (frida.TimedOutError, frida.ServerNotRunningError,
-            frida.ProcessNotFoundError, frida.NotSupportedError) as e:
-
-        click.secho('Could not connect with error: {0}'.format(str(e)), fg='red')
-        print_frida_connection_help()
-
-        return
 
     # process commands from a resource file
     if file_commands:
@@ -178,6 +165,22 @@ def explore(startup_command: str, quiet: bool, file_commands, startup_script: cl
             # run the command using the instantiated repl
             click.secho('Running: \'{0}\':\n'.format(command), dim=True)
             r.run_command(command)
+
+    agent.resume()
+
+    try:
+
+        # poll the device for information. this method also sets
+        # the device type internally in state.device
+        device_info = get_device_info()
+
+    except (frida.TimedOutError, frida.ServerNotRunningError,
+            frida.ProcessNotFoundError, frida.NotSupportedError) as e:
+
+        click.secho('Could not connect with error: {0}'.format(str(e)), fg='red')
+        print_frida_connection_help()
+
+        return
 
     warn_about_older_operating_systems()
 

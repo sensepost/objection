@@ -151,7 +151,6 @@ class Agent(object):
                 process=state_connection.gadget_name))
             self.session = self.device.attach(state_connection.gadget_name)
             debug_print('Process attached!')
-            self.resumed = True
 
             self.session.on('detached', self.on_detach)
 
@@ -190,7 +189,7 @@ class Agent(object):
 
         return ''.join([str(x) for x in agent])
 
-    def inject(self):
+    def inject(self, pause_early=False):
         """
             Injects the Objection Agent.
 
@@ -204,9 +203,8 @@ class Agent(object):
         self.script.on('message', self.on_message)
         self.script.load()
 
-        if not self.resumed:
-            debug_print('Resuming PID `{pid}`'.format(pid=self.spawned_pid))
-            self.device.resume(self.spawned_pid)
+        if not self.resumed and not pause_early:
+            self.resume()
 
         # ping the agent
         if not self.exports().ping():
@@ -217,7 +215,12 @@ class Agent(object):
 
         return self
 
-    def single(self, source: str, unload=True) -> list:
+    def resume(self):
+        debug_print('Resuming PID `{pid}`'.format(pid=self.spawned_pid))
+        self.device.resume(self.spawned_pid)
+        self.resumed = True
+
+    def single(self, source: str, unload=True, pause_early=False) -> list:
         """
             Executes a single adhoc script, capturing the output and returning it.
 
@@ -244,9 +247,8 @@ class Agent(object):
         script.on('message', on_message)
         script.load()
 
-        if not self.resumed:
-            debug_print('Resuming PID `{pid}`'.format(pid=self.spawned_pid))
-            self.device.resume(self.spawned_pid)
+        if not self.resumed and not pause_early:
+            self.resume()
 
         if unload:
             script.unload()
@@ -270,8 +272,7 @@ class Agent(object):
         script.load()
 
         if not self.resumed:
-            debug_print('Resuming PID `{pid}`'.format(pid=self.spawned_pid))
-            self.device.resume(self.spawned_pid)
+            self.resume()
 
         debug_print('Background script loaded')
 
