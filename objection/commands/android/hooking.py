@@ -233,12 +233,12 @@ def set_method_return_value(args: list = None) -> None:
     class_name = args[0].replace('\'', '"')  # fun!
 
     # check if we got an overload
-    overload_filter = args[1] if len(args) == 3 else None
+    overload_filter = args[1].replace(' ', '') if len(args) == 3 else None
     retval = True if _string_is_true(args[-1]) else False
 
     api = state_connection.get_api()
     api.android_hooking_set_method_return(class_name,
-                                          overload_filter.replace(' ', ''),
+                                          overload_filter,
                                           retval)
 
 
