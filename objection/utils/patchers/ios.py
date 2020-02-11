@@ -255,16 +255,18 @@ class IosPatcher(BasePlatformPatcher):
         click.secho('Found a valid provisioning profile', fg='green', bold=True)
         self.provision_file = sorted(expirations, key=expirations.get, reverse=True)[0]
 
-    def extract_ipa(self, ipa_source: str) -> None:
+    def extract_ipa(self, ipa_source: str, unzip_unicode) -> None:
         """
             Extracts a source IPA into the temporary directories.
 
             :param ipa_source:
+            :param unzip_unicode:
             :return:
         """
 
         # copy the orignal ipa to the temp directory.
         shutil.copyfile(ipa_source, self.temp_file)
+
         if (unzip_unicode):
             print("\n\nCIAOOOOOOOOOOOO\n\n")
         # this works for IPA which contains unicode characters

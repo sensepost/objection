@@ -64,7 +64,7 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
         return
 
     patcher.set_provsioning_profile(provision_file=provision_file)
-    patcher.extract_ipa(ipa_source=source)
+    patcher.extract_ipa(ipa_source=source,unzip_unicode)
     patcher.set_application_binary(binary=binary_name)
     patcher.patch_and_codesign_binary(
         frida_gadget=ios_gadget.get_gadget_path(), codesign_signature=codesign_signature)
