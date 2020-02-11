@@ -265,7 +265,13 @@ class IosPatcher(BasePlatformPatcher):
 
         # copy the orignal ipa to the temp directory.
         shutil.copyfile(ipa_source, self.temp_file)
-
+        if (unzip_unicode):
+            print("\n\nCIAOOOOOOOOOOOO\n\n")
+        # this works for IPA which contains unicode characters
+        #with zipfile.ZipFile(self.temp_file, 'r') as ipa:
+        #    for info in ipa.infolist():
+        #        info.filename = info.filename.encode('cp437').decode('utf-8')
+        #        ipa.extract(info,self.temp_directory)
         # extract the IPA this should result in a 'Payload' directory
         ipa = zipfile.ZipFile(self.temp_file, 'r')
         ipa.extractall(self.temp_directory)
