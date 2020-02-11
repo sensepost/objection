@@ -1,11 +1,12 @@
 frida
-frida-tools
-prompt_toolkit>=2.0.0,<3.0.0
+frida-tools>=6.0.0
+prompt_toolkit>=3.0.3,<4.0.0
 click
 tabulate
 delegator.py
 requests
 flask
-litecli==1.1.0
+pygments
+litecli>=1.3.0
 q
 twine
