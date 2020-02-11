@@ -11,7 +11,7 @@ from ..utils.patchers.ios import IosGadget, IosPatcher
 
 
 def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, binary_name: str,
-                  skip_cleanup: bool, gadget_version: str = None, pause: bool = False) -> None:
+                  skip_cleanup: bool, unzip_unicode: bool, gadget_version: str = None, pause: bool = False) -> None:
     """
         Patches an iOS IPA by extracting, injecting the Frida dylib,
         codesigning the dylib and app executable and rezipping the IPA.
@@ -21,6 +21,7 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
         :param provision_file:
         :param binary_name:
         :param skip_cleanup:
+        :param unzip_unicode:
         :param gadget_version:
         :return:
     """
