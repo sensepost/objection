@@ -191,7 +191,7 @@ class AndroidPatcher(BasePlatformPatcher):
             'installation': 'apt install adb (Kali Linux); brew install adb (macOS)'
         },
         'jarsigner': {
-            'installation': 'apt install default-jre (Linux); brew cask install java (macOS)'
+            'installation': 'apt install default-jdk (Linux); brew cask install java (macOS)'
         },
         'apktool': {
             'installation': 'apt install apktool (Kali Linux)'
