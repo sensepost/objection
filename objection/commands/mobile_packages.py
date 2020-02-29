@@ -88,7 +88,7 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
 def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup: bool = True,
                       enable_debug: bool = True, gadget_version: str = None, skip_resources: bool = False,
                       network_security_config: bool = False, target_class: str = None,
-                      use_aapt2: bool = False) -> None:
+                      use_aapt2: bool = False, gadget_config: str = None, script_source: str = None) -> None:
     """
         Patches an Android APK by extracting, patching SMALI, repackaging
         and signing a new APK.
@@ -103,6 +103,8 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
         :param network_security_config:
         :param target_class:
         :param use_aapt2:
+        :param gadget_config:
+        :param script_source:
 
         :return:
     """
@@ -173,7 +175,10 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
         patcher.add_network_security_config()
 
     patcher.inject_load_library(target_class=target_class)
-    patcher.add_gadget_to_apk(architecture, android_gadget.get_frida_library_path())
+    patcher.add_gadget_to_apk(architecture, android_gadget.get_frida_library_path(), gadget_config)
+
+    if script_source:
+        shutil.copyfile(script_source, os.path.join(patcher.apk_temp_directory, 'lib', architecture, 'libfrida-gadget.script.so'))
 
     # if we are required to pause, do that.
     if pause:
