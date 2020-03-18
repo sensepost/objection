@@ -301,7 +301,7 @@ def device_type():
 @click.option('--pause', '-p', is_flag=True, help='Pause the patcher before rebuilding the IPA.',
               show_default=True)
 def patchipa(source: str, gadget_version: str, codesign_signature: str, provision_file: str, binary_name: str,
-             skip_cleanup: bool, pause: bool) -> None:
+             skip_cleanup: bool, pause: bool, unzip_unicode: bool) -> None:
     """
         Patch an IPA with the FridaGadget dylib.
     """
