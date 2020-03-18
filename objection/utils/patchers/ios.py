@@ -267,6 +267,7 @@ class IosPatcher(BasePlatformPatcher):
         shutil.copyfile(ipa_source, self.temp_file)
 
         if (unzip_unicode):
+            print("\n\n测试\n\n")
             # this works for IPA which contains unicode characters
             with zipfile.ZipFile(self.temp_file, 'r') as ipa:
                 for info in ipa.infolist():
