@@ -23,6 +23,7 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
         :param skip_cleanup:
         :param unzip_unicode:
         :param gadget_version:
+        :param pause:
         :return:
     """
 
@@ -64,7 +65,7 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
         return
 
     patcher.set_provsioning_profile(provision_file=provision_file)
-    patcher.extract_ipa(unzip_unicode,ipa_source=source)
+    patcher.extract_ipa(unzip_unicode, ipa_source=source)
     patcher.set_application_binary(binary=binary_name)
     patcher.patch_and_codesign_binary(
         frida_gadget=ios_gadget.get_gadget_path(), codesign_signature=codesign_signature)
