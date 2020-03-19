@@ -132,6 +132,11 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
     # set the architecture we are interested in
     android_gadget.set_architecture(architecture)
 
+    # check the gadget config flags
+    if script_source and not gadget_config:
+        click.secho('A script source was specified but no gadget configuration was set.', fg='red', bold=True)
+        return
+
     # check if a gadget version was specified. if not, get the latest one.
     if gadget_version is not None:
         github_version = gadget_version
@@ -180,7 +185,9 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
     patcher.add_gadget_to_apk(architecture, android_gadget.get_frida_library_path(), gadget_config)
 
     if script_source:
-        shutil.copyfile(script_source, os.path.join(patcher.apk_temp_directory, 'lib', architecture, 'libfrida-gadget.script.so'))
+        click.secho('Copying over a custom script to use with the gadget config.', fg='green')
+        shutil.copyfile(script_source,
+                        os.path.join(patcher.apk_temp_directory, 'lib', architecture, 'libfrida-gadget.script.so'))
 
     # if we are required to pause, do that.
     if pause:

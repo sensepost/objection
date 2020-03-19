@@ -757,7 +757,9 @@ class AndroidPatcher(BasePlatformPatcher):
 
         click.secho('Copying Frida gadget to libs path...', fg='green', dim=True)
         shutil.copyfile(gadget_source, os.path.join(libs_path, 'libfrida-gadget.so'))
+
         if gadget_config:
+            click.secho('Adding a gadget configuration file...', fg='green')
             shutil.copyfile(gadget_config, os.path.join(libs_path, 'libfrida-gadget.config.so'))
 
     def build_new_apk(self, use_aapt2: bool = False):
@@ -769,13 +771,13 @@ class AndroidPatcher(BasePlatformPatcher):
 
         click.secho('Rebuilding the APK with the frida-gadget loaded...', fg='green', dim=True)
         o = delegator.run(list2cmdline([
-            self.required_commands['apktool']['location'],
-            'build',
-            self.apk_temp_directory,
-        ] + (['--use-aapt2'] if use_aapt2 else []) + [
-            '-o',
-            self.apk_temp_frida_patched
-        ]), timeout=self.command_run_timeout)
+                                           self.required_commands['apktool']['location'],
+                                           'build',
+                                           self.apk_temp_directory,
+                                       ] + (['--use-aapt2'] if use_aapt2 else []) + [
+                                           '-o',
+                                           self.apk_temp_frida_patched
+                                       ]), timeout=self.command_run_timeout)
 
         if len(o.err) > 0:
             click.secho(('Rebuilding the APK may have failed. Read the following '
@@ -795,13 +797,13 @@ class AndroidPatcher(BasePlatformPatcher):
                 for extra_name in extra_names:
                     full_path = os.path.join(meta_inf, extra_name)
                     if os.path.isdir(full_path):
-                        prefix_len = len(full_path) + 1 # trailing '/'
+                        prefix_len = len(full_path) + 1  # trailing '/'
                         for dirpath, _, filenames in os.walk(full_path):
                             for filename in filenames:
                                 src_name = os.path.join(dirpath, filename)
                                 dest_name = 'META-INF/{dirname}/{path}'.format(
-                                        dirname=extra_name,
-                                        path=src_name[prefix_len:].replace(os.sep, '/'))
+                                    dirname=extra_name,
+                                    path=src_name[prefix_len:].replace(os.sep, '/'))
                                 apk.write(src_name, dest_name)
                     else:
                         apk.write(full_path, 'META-INF/' + extra_name)

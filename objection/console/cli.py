@@ -312,11 +312,10 @@ def patchipa(source: str, gadget_version: str, codesign_signature: str, provisio
 
 @cli.command()
 @click.option('--source', '-s', help='The source APK to patch', required=True)
-@click.option('--architecture', '-a', help=('The architecture of the device the patched '
-                                            'APK will run on. This can be determined with '
-                                            '`adb shell getprop ro.product.cpu.abi`. If it '
-                                            'is not specified, this command will try and '
-                                            'determine it automatically.'), required=False)
+@click.option('--architecture', '-a',
+              help=('The architecture of the device the patched APK will run on. '
+                    'This can be determined with `adb shell getprop ro.product.cpu.abi`. '
+                    'If it is not specified, this command will try and determine it automatically.'), required=False)
 @click.option('--gadget-version', '-V', help=('The gadget version to use. If not '
                                               'specified, the latest version will be used.'), default=None)
 @click.option('--pause', '-p', is_flag=True, help='Pause the patcher before rebuilding the APK.',
@@ -324,7 +323,7 @@ def patchipa(source: str, gadget_version: str, codesign_signature: str, provisio
 @click.option('--skip-cleanup', '-k', is_flag=True,
               help='Do not clean temporary files once finished.', show_default=True)
 @click.option('--enable-debug', '-d', is_flag=True,
-              help='Set the android:debuggable flag to true in the application manifiest.', show_default=True)
+              help='Set the android:debuggable flag to true in the application manifest.', show_default=True)
 @click.option('--network-security-config', '-N', is_flag=True, default=False,
               help='Include a network_security_config.xml file allowing for user added CA\'s to be trusted on '
                    'Android 7 and up. This option can not be used with the --skip-resources flag.')
@@ -333,9 +332,12 @@ def patchipa(source: str, gadget_version: str, codesign_signature: str, provisio
 @click.option('--target-class', '-t', help='The target class to patch.', default=None)
 @click.option('--use-aapt2', '-2', is_flag=True, default=False,
               help='Use the aapt2 binary instead of aapt as part of the apktool processing.', show_default=False)
-@click.option('--gadget-config', '-c', default=None, help='The gadget configuration to use.', show_default=False)
+@click.option('--gadget-config', '-c', default=None, help=(
+        'The gadget configuration file to use. '
+        'Refer to https://frida.re/docs/gadget/ for more information.'), show_default=False)
 @click.option('--script-source', '-l', default=None,
-              help='A script file which will be copied to libfrida-gadget.script.so', show_default=False)
+              help=('A script file to use with the the "path" config type. '
+                    'Specify "libfrida-gadget.script.so" as the path'), show_default=False)
 def patchapk(source: str, architecture: str, gadget_version: str, pause: bool, skip_cleanup: bool,
              enable_debug: bool, skip_resources: bool, network_security_config: bool, target_class: str,
              use_aapt2: bool, gadget_config: str, script_source: str) -> None:
