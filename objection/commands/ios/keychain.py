@@ -114,7 +114,7 @@ def dump_raw(args: list = None) -> None:
     click.secho('Note: You may be asked to authenticate using the devices passcode or TouchID')
     click.secho('Dumping the iOS keychain...', dim=True)
     api = state_connection.get_api()
-    keychain = api.ios_keychain_list_raw()
+    api.ios_keychain_list_raw()
 
 
 def clear(args: list = None) -> None:
