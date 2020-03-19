@@ -18,7 +18,7 @@ class TestMobilePackages(unittest.TestCase):
         mock_iospatcher.return_value.are_requirements_met.return_value = True
         mock_iospatcher.return_value.get_patched_ipa_path.return_value = '/foo/ipa'
 
-        with capture(patch_ios_ipa, 'test.ipa', '00-11', '/foo', '', False) as o:
+        with capture(patch_ios_ipa, 'test.ipa', '00-11', '/foo', '', False, False) as o:
             output = o
 
         expected_output = """Using latest Github gadget version: 1.0
