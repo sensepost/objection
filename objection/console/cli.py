@@ -333,9 +333,12 @@ def patchipa(source: str, gadget_version: str, codesign_signature: str, provisio
 @click.option('--target-class', '-t', help='The target class to patch.', default=None)
 @click.option('--use-aapt2', '-2', is_flag=True, default=False,
               help='Use the aapt2 binary instead of aapt as part of the apktool processing.', show_default=False)
+@click.option('--gadget-config', '-c', default=None, help='The gadget configuration to use.', show_default=False)
+@click.option('--script-source', '-l', default=None,
+              help='A script file which will be copied to libfrida-gadget.script.so', show_default=False)
 def patchapk(source: str, architecture: str, gadget_version: str, pause: bool, skip_cleanup: bool,
              enable_debug: bool, skip_resources: bool, network_security_config: bool, target_class: str,
-             use_aapt2: bool) -> None:
+             use_aapt2: bool, gadget_config: str, script_source: str) -> None:
     """
         Patch an APK with the frida-gadget.so.
     """

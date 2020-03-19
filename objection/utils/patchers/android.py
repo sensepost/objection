@@ -737,13 +737,14 @@ class AndroidPatcher(BasePlatformPatcher):
         with open(activity_path, 'w') as f:
             f.write(''.join(patched_smali))
 
-    def add_gadget_to_apk(self, architecture: str, gadget_source: str):
+    def add_gadget_to_apk(self, architecture: str, gadget_source: str, gadget_config: str):
         """
             Copies a frida gadget for a specific architecture to
             an extracted APK's lib path.
 
             :param architecture:
             :param gadget_source:
+            :param gadget_config:
             :return:
         """
 
@@ -756,6 +757,8 @@ class AndroidPatcher(BasePlatformPatcher):
 
         click.secho('Copying Frida gadget to libs path...', fg='green', dim=True)
         shutil.copyfile(gadget_source, os.path.join(libs_path, 'libfrida-gadget.so'))
+        if gadget_config:
+            shutil.copyfile(gadget_config, os.path.join(libs_path, 'libfrida-gadget.config.so'))
 
     def build_new_apk(self, use_aapt2: bool = False):
         """
