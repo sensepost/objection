@@ -32,6 +32,13 @@ export namespace sslpinning {
       const x509TrustManager: X509TrustManager = Java.use("javax.net.ssl.X509TrustManager");
       const sSLContext: SSLContext = Java.use("javax.net.ssl.SSLContext");
 
+      // Some 'anti-frida' detections will scan /proc/<pid>/maps.
+      // Rename the tempFileNaming prefix as this could end up in maps.
+      // https://github.com/frida/frida-java-bridge/blob/8b3790f7489ff5be7b19ddaccf5149d4e7738460/lib/class-factory.js#L94
+      if (Java.classFactory.tempFileNaming.prefix == 'frida') {
+        Java.classFactory.tempFileNaming.prefix = 'onetwothree';
+      }
+
       // Implement a new TrustManager
       // ref: https://gist.github.com/oleavr/3ca67a173ff7d207c6b8c3b0ca65a9d8
       const TrustManager: X509TrustManager = Java.registerClass({
