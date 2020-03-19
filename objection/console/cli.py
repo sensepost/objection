@@ -300,8 +300,9 @@ def device_type():
               help='Do not clean temporary files once finished.', show_default=True)
 @click.option('--pause', '-p', is_flag=True, help='Pause the patcher before rebuilding the IPA.',
               show_default=True)
+@click.option('--unzip-unicode', '-z',  is_flag=True, help='Unzip IPA containing Unicode characters.')
 def patchipa(source: str, gadget_version: str, codesign_signature: str, provision_file: str, binary_name: str,
-             skip_cleanup: bool, pause: bool) -> None:
+             skip_cleanup: bool, pause: bool, unzip_unicode: bool) -> None:
     """
         Patch an IPA with the FridaGadget dylib.
     """
