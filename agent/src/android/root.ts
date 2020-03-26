@@ -23,12 +23,10 @@ export namespace root {
 
   const testKeysCheck = (success: boolean, ident: string): any => {
     return wrapJavaPerform(() => {
-      const javaString: JavaString = Java.use("java.lang.String");
-      const StringContains = javaString.contains;
-
-      StringContains.implementation = function(check: string) {
-        if (check !== "test-keys") {
-          return this.apply(this, arguments);
+      const JavaString: JavaString = Java.use("java.lang.String");
+      JavaString.contains.implementation = function (name) {
+        if (name !== "test-keys") {
+          return this.contains.call(this, name);
         }
 
         if (success) {
@@ -40,17 +38,16 @@ export namespace root {
         }
       };
 
-      return StringContains;
+      return JavaString;
     });
   };
 
   const execSuCheck = (success: boolean, ident: string): any => {
     return wrapJavaPerform(() => {
-      const runtime: Runtime = Java.use("java.lang.Runtime");
+      const JavaRuntime: Runtime = Java.use("java.lang.Runtime");
       const iOException: IOException = Java.use("java.io.IOException");
-      const RuntimeExec = runtime.exec.overload("java.lang.String");
 
-      RuntimeExec.implementation = function(command: string) {
+      JavaRuntime.exec.overload("java.lang.String").implementation = function (command: string) {
         if (command.endsWith("su")) {
           if (success) {
             send(c.blackBright(`[${ident}] `) + `Check for 'su' using command exec detected, allowing.`);
@@ -62,19 +59,17 @@ export namespace root {
         }
 
         // call the original method
-        return this.apply(this, arguments);
+        return this.exec.overload("java.lang.String").call(this, command);
       };
 
-      return RuntimeExec;
+      return JavaRuntime;
     });
   };
 
   const fileExistsCheck = (success: boolean, ident: string): any => {
     return wrapJavaPerform(() => {
-      const javaFile: File = Java.use("java.io.File");
-      const FileExists = javaFile.exists;
-
-      FileExists.implementation = function(command: string) {
+      const JavaFile: File = Java.use("java.io.File");
+      JavaFile.exists.implementation = function () {
         const filename = this.getAbsolutePath();
         if (commonPaths.indexOf(filename) >= 0) {
           if (success) {
@@ -93,10 +88,10 @@ export namespace root {
         }
 
         // call the original method
-        return this.apply(this, arguments);
+        return this.exists.call(this);
       };
 
-      return FileExists;
+      return JavaFile;
     });
   };
 
