@@ -236,6 +236,8 @@ class AndroidPatcher(BasePlatformPatcher):
         # ensure we have at least apktool MIN_VERSION
         if parse_version(o) < parse_version(min_version):
             click.secho('apktool version should be at least ' + min_version, fg='red', bold=True)
+            click.secho('Please see the following URL for more information: '
+                        'https://github.com/sensepost/objection/wiki/Apktool-Upgrades', fg='yellow')
             return False
 
         # run clean-frameworks-dir
