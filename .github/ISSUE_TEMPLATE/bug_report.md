@@ -1,14 +1,16 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: ''
-labels: ''
+title: "[bug] Bug Description Here"
+labels: freshissue
 assignees: ''
 
 ---
 
 **Describe the bug**
 A clear and concise description of what the bug is.
+
+WARNING: Ignoring this template and not completing the fields could result in your issue simply being closed.
 
 **To Reproduce**
 Steps to reproduce the behavior:
