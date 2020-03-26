@@ -8,6 +8,7 @@ import tempfile
 import xml.etree.ElementTree as ElementTree
 import zipfile
 from subprocess import list2cmdline
+from pkg_resources import parse_version
 
 import click
 import delegator
@@ -214,6 +215,43 @@ class AndroidPatcher(BasePlatformPatcher):
         self.keystore = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../assets', 'objection.jks')
         self.netsec_config = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../assets',
                                           'network_security_config.xml')
+
+    def is_apktool_ready(self) -> bool:
+        """
+            Check if apktool is ready for use.
+
+            :return:bool
+        """
+
+        min_version = '2.4.1'   # the version of apktool we require
+
+        o = delegator.run(list2cmdline([
+            self.required_commands['apktool']['location'],
+            '-version',
+        ]), timeout=self.command_run_timeout).out.strip()
+
+        if len(o) == 0:
+            click.secho('Unable to determine apktool version. Is it installed')
+            return False
+
+        click.secho('Detected apktool version as: ' + o, dim=True)
+
+        # ensure we have at least apktool MIN_VERSION
+        if parse_version(o) < parse_version(min_version):
+            click.secho('apktool version should be at least ' + min_version, fg='red', bold=True)
+            return False
+
+        # run clean-frameworks-dir
+        click.secho('Running apktool empty-framework-dir...', dim=True)
+        o = delegator.run(list2cmdline([
+            self.required_commands['apktool']['location'],
+            'empty-framework-dir',
+        ]), timeout=self.command_run_timeout).out.strip()
+
+        if len(o) > 0:
+            click.secho(o, fg='yellow', dim=True)
+
+        return True
 
     def set_apk_source(self, source: str):
         """
@@ -770,14 +808,14 @@ class AndroidPatcher(BasePlatformPatcher):
         """
 
         click.secho('Rebuilding the APK with the frida-gadget loaded...', fg='green', dim=True)
-        o = delegator.run(list2cmdline([
-                                           self.required_commands['apktool']['location'],
-                                           'build',
-                                           self.apk_temp_directory,
-                                       ] + (['--use-aapt2'] if use_aapt2 else []) + [
-                                           '-o',
-                                           self.apk_temp_frida_patched
-                                       ]), timeout=self.command_run_timeout)
+        o = delegator.run(
+            list2cmdline([self.required_commands['apktool']['location'],
+                          'build',
+                          self.apk_temp_directory,
+                          ] + (['--use-aapt2'] if use_aapt2 else []) + [
+                             '-o',
+                             self.apk_temp_frida_patched
+                         ]), timeout=self.command_run_timeout)
 
         if len(o.err) > 0:
             click.secho(('Rebuilding the APK may have failed. Read the following '
