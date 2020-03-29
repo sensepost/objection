@@ -2,6 +2,8 @@ import { colors as c } from "../lib/color";
 import { IKeyStoreEntry } from "./lib/interfaces";
 import { wrapJavaPerform } from "./lib/libjava";
 import { KeyStore } from "./lib/types";
+import { IJob } from "../lib/interfaces";
+import { jobs } from "../lib/jobs";
 
 export namespace keystore {
 
@@ -78,4 +80,56 @@ export namespace keystore {
       send(c.blackBright(`Keystore entries cleared`));
     });
   };
+
+  // keystore watch methods
+
+  // Watch for KeyStore.load();
+  // TODO: Store the keystores themselves maybe?
+  const keystoreLoad = (ident: string): any | undefined => {
+    return wrapJavaPerform(() => {
+      const ks: KeyStore = Java.use("java.security.KeyStore");
+      const ksLoad = ks.load.overload("java.io.InputStream", "[C");
+      send(c.blackBright(`[${ident}] Watching Keystore.load("java.io.InputStream", "[C")`));
+
+      ksLoad.implementation = function (stream, password) {
+        send(c.blackBright(`[${ident}] `) +
+          `Keystore.load(${c.greenBright(stream)}, ${c.redBright(password || `null`)}) ` +
+          `called, loading a ${c.cyanBright(this.getType())} keystore.`);
+        return this.load(stream, password);
+      }
+    });
+  };
+
+  // Watch for Keystore.getKey().
+  // TODO: Extract more information, like the key itself maybe?
+  const keystoreGetKey = (ident: string): any | undefined => {
+    return wrapJavaPerform(() => {
+      const ks: KeyStore = Java.use("java.security.KeyStore");
+      const ksGetKey = ks.getKey.overload("java.lang.String", "[C");
+      send(c.blackBright(`[${ident}] Watching Keystore.getKey("java.lang.String", "[C")`));
+
+      ksGetKey.implementation = function (alias, password) {
+        const key = this.getKey(alias, password);
+        send(c.blackBright(`[${ident}] `) +
+          `Keystore.getKey(${c.greenBright(alias)}, ${c.redBright(password || `null`)}) ` +
+          `called, returning a ${c.greenBright(key.$className)} instance.`);
+        return key;
+      }
+      return ksGetKey;
+    });
+  }
+
+  // Android KeyStore watcher.
+  // Many, many more methods can be added here..
+  export const watchKeystore = (): void => {
+    const job: IJob = {
+      identifier: jobs.identifier(),
+      implementations: [],
+      type: "android-keystore-watch",
+    };
+
+    job.implementations.push(keystoreLoad(job.identifier));
+    job.implementations.push(keystoreGetKey(job.identifier));
+    jobs.add(job);
+  }
 }

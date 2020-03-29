@@ -32,3 +32,15 @@ def clear(args: list = None) -> None:
 
     api = state_connection.get_api()
     api.android_keystore_clear()
+
+
+def watch(args: list = None) -> None:
+    """
+        Watches usage of the Android KeyStore
+
+        :param args:
+        :return:
+    """
+
+    api = state_connection.get_api()
+    api.android_keystore_watch()
