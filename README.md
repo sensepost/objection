@@ -26,12 +26,6 @@ Installation is simply a matter of `pip3 install objection`. This will give you 
 
 For more detailed update and installation instructions, please refer to the wiki page [here](https://github.com/sensepost/objection/wiki/Installation).
 
-## sample usage
-
-A sample session, where `objection` version 0.1 is used to explore the applications environment. Newer versions have the REPL prompt set to the current applications name, however usage has remained the same.
-
-[![asciicast](https://asciinema.org/a/8O6fjDHOdVKgPYeqITHXPp6HV.png)](https://asciinema.org/a/8O6fjDHOdVKgPYeqITHXPp6HV)
-
 ## license
 
 `objection` is licensed under a [GNU General Public v3 License](https://www.gnu.org/licenses/gpl-3.0.en.html). Permissions beyond the scope of this license may be available at [http://sensepost.com/contact/](http://sensepost.com/contact/).
