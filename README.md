@@ -22,8 +22,7 @@ Screenshots are available in the [wiki](https://github.com/sensepost/objection/w
 
 ## installation
 
-Installation is simply a matter of `pip3 install objection`. This will give you the `objection` command.\
-Update via `pip3 install --upgrade objection`
+Installation is simply a matter of `pip3 install objection`. This will give you the `objection` command. You can update an existing `objection` installation with `pip3 install --upgrade objection`.
 
 For more detailed update and installation instructions, please refer to the wiki page [here](https://github.com/sensepost/objection/wiki/Installation).
 
