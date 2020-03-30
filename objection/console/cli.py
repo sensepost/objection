@@ -301,8 +301,13 @@ def device_type():
 @click.option('--pause', '-p', is_flag=True, help='Pause the patcher before rebuilding the IPA.',
               show_default=True)
 @click.option('--unzip-unicode', '-z', is_flag=True, help='Unzip IPA containing Unicode characters.')
+@click.option('--gadget-config', '-C', default=None, help=(
+        'The gadget configuration file to use. '
+        'Refer to https://frida.re/docs/gadget/ for more information.'), show_default=False)
+@click.option('--script-source', '-l', default=None, help=(
+        'A script file to use with the the "path" config type.'), show_default=False)
 def patchipa(source: str, gadget_version: str, codesign_signature: str, provision_file: str, binary_name: str,
-             skip_cleanup: bool, pause: bool, unzip_unicode: bool) -> None:
+             skip_cleanup: bool, pause: bool, unzip_unicode: bool, gadget_config: str, script_source: str) -> None:
     """
         Patch an IPA with the FridaGadget dylib.
     """
