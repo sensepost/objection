@@ -227,6 +227,10 @@ class AndroidPatcher(BasePlatformPatcher):
             '-version',
         ]), timeout=self.command_run_timeout).out.strip()
 
+        # windows / delegator weirdness...
+        if 'Press any key to continue . . .' in o:
+            o = o.split('\n')[0]
+
         if len(o) == 0:
             click.secho('Unable to determine apktool version. Is it installed')
             return False
