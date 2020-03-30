@@ -11,7 +11,8 @@ from ..utils.patchers.ios import IosGadget, IosPatcher
 
 
 def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, binary_name: str,
-                  skip_cleanup: bool, unzip_unicode: bool, gadget_version: str = None, pause: bool = False) -> None:
+                  skip_cleanup: bool, unzip_unicode: bool, gadget_version: str = None,
+                  pause: bool = False, gadget_config: str = None, script_source: str = None) -> None:
     """
         Patches an iOS IPA by extracting, injecting the Frida dylib,
         codesigning the dylib and app executable and rezipping the IPA.
@@ -24,6 +25,8 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
         :param unzip_unicode:
         :param gadget_version:
         :param pause:
+        :param gadget_config:
+        :param script_source:
         :return:
     """
 
@@ -68,7 +71,11 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
     patcher.extract_ipa(unzip_unicode, ipa_source=source)
     patcher.set_application_binary(binary=binary_name)
     patcher.patch_and_codesign_binary(
-        frida_gadget=ios_gadget.get_gadget_path(), codesign_signature=codesign_signature)
+        frida_gadget=ios_gadget.get_gadget_path(), codesign_signature=codesign_signature, gadget_config=gadget_config)
+
+    if script_source:
+        click.secho('Copying over a custom script to use with the gadget config.', fg='green')
+        shutil.copyfile(script_source, os.path.join(patcher.app_folder, 'Frameworks', script_source))
 
     # give a chance to make any last minute modifications if needed
     if pause:
@@ -192,7 +199,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
     if script_source:
         click.secho('Copying over a custom script to use with the gadget config.', fg='green')
         shutil.copyfile(script_source,
-                        os.path.join(patcher.apk_temp_directory, 'lib', architecture, 'libfrida-gadget.script.so'))
+                        os.path.join(patcher.apk_temp_directory, 'Frameworks', architecture, 'libfrida-gadget.script.so'))
 
     # if we are required to pause, do that.
     if pause:
