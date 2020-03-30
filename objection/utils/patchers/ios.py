@@ -316,7 +316,7 @@ class IosPatcher(BasePlatformPatcher):
 
         self.app_binary = os.path.join(self.app_folder, info_plist['CFBundleExecutable'])
 
-    def patch_and_codesign_binary(self, frida_gadget: str, codesign_signature: str) -> None:
+    def patch_and_codesign_binary(self, frida_gadget: str, codesign_signature: str, gadget_config: str) -> None:
         """
             Patches an iOS binary to load a Frida gadget on startup.
 
@@ -325,6 +325,7 @@ class IosPatcher(BasePlatformPatcher):
 
             :param frida_gadget:
             :param codesign_signature:
+            :param gadget_config:
             :return:
         """
 
@@ -341,6 +342,9 @@ class IosPatcher(BasePlatformPatcher):
 
         # copy the frida gadget to the applications Frameworks directory
         shutil.copyfile(frida_gadget, os.path.join(self.app_folder, 'Frameworks', 'FridaGadget.dylib'))
+        if gadget_config:
+            click.secho('Copying Gadget Config to Frameworks path...', fg='green', dim=True)
+            shutil.copyfile(gadget_config, os.path.join(self.app_folder, 'Frameworks', 'FridaGadget.config'))
 
         # patch the app binary
         load_library_output = delegator.run(list2cmdline(
