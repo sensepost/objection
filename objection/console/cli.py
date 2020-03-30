@@ -305,7 +305,8 @@ def device_type():
         'The gadget configuration file to use. '
         'Refer to https://frida.re/docs/gadget/ for more information.'), show_default=False)
 @click.option('--script-source', '-l', default=None, help=(
-        'A script file to use with the the "path" config type.'), show_default=False)
+        'A script file to use with the the "path" config type. '
+        'Remember that use the name of this file in your "path". It will be next to the config.'), show_default=False)
 def patchipa(source: str, gadget_version: str, codesign_signature: str, provision_file: str, binary_name: str,
              skip_cleanup: bool, pause: bool, unzip_unicode: bool, gadget_config: str, script_source: str) -> None:
     """
@@ -342,7 +343,7 @@ def patchipa(source: str, gadget_version: str, codesign_signature: str, provisio
         'Refer to https://frida.re/docs/gadget/ for more information.'), show_default=False)
 @click.option('--script-source', '-l', default=None,
               help=('A script file to use with the the "path" config type. '
-                    'Specify "libfrida-gadget.script.so" as the path'), show_default=False)
+                    'Specify "libfrida-gadget.script.so" as the "path" in your config.'), show_default=False)
 def patchapk(source: str, architecture: str, gadget_version: str, pause: bool, skip_cleanup: bool,
              enable_debug: bool, skip_resources: bool, network_security_config: bool, target_class: str,
              use_aapt2: bool, gadget_config: str, script_source: str) -> None:
