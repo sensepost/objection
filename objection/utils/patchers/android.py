@@ -446,6 +446,40 @@ class AndroidPatcher(BasePlatformPatcher):
         xml.write(os.path.join(self.apk_temp_directory, 'AndroidManifest.xml'),
                   encoding='utf-8', xml_declaration=True)
 
+    def extractNativeLibs_patch(self):
+        """
+            Check the AndroidManifest.xml file for extractNativeLibs="false"
+            if it exists, change it to extractNativeLibs="true".
+
+            Since AndroidStudio 2.1 this flag is set as false by default.
+            This breaks it when installing the .apk to the device.
+
+            :return:
+        """
+        xml = self._get_android_manifest()
+        root = xml.getroot()
+
+        application_tag = root.findall('application')
+
+        # ensure that we got the application tag
+        if len(application_tag) <= 0:
+            message = 'Could not find the application tag in the AndroidManifest.xml'
+            click.secho(message, fg='red', bold=True)
+            raise Exception(message)
+
+        application_tag = application_tag[0]
+
+        #Check if the flag is present and set to false
+        if '{http://schemas.android.com/apk/res/android}extractNativeLibs' in application_tag.attrib \
+                and application_tag.attrib['{http://schemas.android.com/apk/res/android}extractNativeLibs'] == 'false':
+            #click.secho('Application has the extractNativeLibs flag set to False', fg='red')
+            #Set the flag to true
+            application_tag.attrib['{http://schemas.android.com/apk/res/android}extractNativeLibs'] = 'true'
+            click.secho('Setting extractNativeLibs to true...', dim=True)
+            xml.write(os.path.join(self.apk_temp_directory, 'AndroidManifest.xml'),
+                  encoding='utf-8', xml_declaration=True)
+            return
+
     def flip_debug_flag_to_true(self):
         """
             Set the android:debuggable flag to true in the
