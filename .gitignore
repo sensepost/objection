@@ -59,8 +59,6 @@ settings.ini
 python/
 .idea/
 .DS_Store
-agent/package-lock.json
-package-lock.json
 
 # Ignore the compiled agent.
 objection/agent.js
