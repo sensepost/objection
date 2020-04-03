@@ -344,11 +344,11 @@ def patchipa(source: str, gadget_version: str, codesign_signature: str, provisio
 @click.option('--script-source', '-l', default=None,
               help=('A script file to use with the the "path" config type. '
                     'Specify "libfrida-gadget.script.so" as the "path" in your config.'), show_default=False)
-@click.option('--nativelibs', '-n', is_flag=True, default=False, 
+@click.option('--ignorenativelibs', '-n', is_flag=True, default=False, 
               help=('Do not change the extractNativeLibs flag in the AndroidManifest.xml.'), show_default=False)
 def patchapk(source: str, architecture: str, gadget_version: str, pause: bool, skip_cleanup: bool,
              enable_debug: bool, skip_resources: bool, network_security_config: bool, target_class: str,
-             use_aapt2: bool, gadget_config: str, script_source: str, nativelibs: bool) -> None:
+             use_aapt2: bool, gadget_config: str, script_source: str, native_libs: bool) -> None:
     """
         Patch an APK with the frida-gadget.so.
     """

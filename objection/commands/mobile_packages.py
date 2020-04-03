@@ -188,7 +188,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
     patcher.inject_internet_permission(skip_resources=skip_resources)
 
     if not nativelibs:
-        patcher.extractNativeLibs_patch()
+        patcher.extract_native_libs_patch()
 
     if enable_debug:
         patcher.flip_debug_flag_to_true()

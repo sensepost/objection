@@ -446,7 +446,7 @@ class AndroidPatcher(BasePlatformPatcher):
         xml.write(os.path.join(self.apk_temp_directory, 'AndroidManifest.xml'),
                   encoding='utf-8', xml_declaration=True)
 
-    def extractNativeLibs_patch(self):
+    def extract_native_libs_patch(self):
         """
             Check the AndroidManifest.xml file for extractNativeLibs="false"
             if it exists, change it to extractNativeLibs="true".
@@ -472,7 +472,6 @@ class AndroidPatcher(BasePlatformPatcher):
         #Check if the flag is present and set to false
         if '{http://schemas.android.com/apk/res/android}extractNativeLibs' in application_tag.attrib \
                 and application_tag.attrib['{http://schemas.android.com/apk/res/android}extractNativeLibs'] == 'false':
-            #click.secho('Application has the extractNativeLibs flag set to False', fg='red')
             #Set the flag to true
             application_tag.attrib['{http://schemas.android.com/apk/res/android}extractNativeLibs'] = 'true'
             click.secho('Setting extractNativeLibs to true...', dim=True)
