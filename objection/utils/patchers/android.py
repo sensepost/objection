@@ -469,14 +469,14 @@ class AndroidPatcher(BasePlatformPatcher):
 
         application_tag = application_tag[0]
 
-        #Check if the flag is present and set to false
+        # Check if the flag is present and set to false
         if '{http://schemas.android.com/apk/res/android}extractNativeLibs' in application_tag.attrib \
                 and application_tag.attrib['{http://schemas.android.com/apk/res/android}extractNativeLibs'] == 'false':
-            #Set the flag to true
+            # Set the flag to true
             application_tag.attrib['{http://schemas.android.com/apk/res/android}extractNativeLibs'] = 'true'
             click.secho('Setting extractNativeLibs to true...', dim=True)
             xml.write(os.path.join(self.apk_temp_directory, 'AndroidManifest.xml'),
-                  encoding='utf-8', xml_declaration=True)
+                      encoding='utf-8', xml_declaration=True)
             return
 
     def flip_debug_flag_to_true(self):
