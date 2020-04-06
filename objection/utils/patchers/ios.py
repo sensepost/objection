@@ -5,7 +5,6 @@ import plistlib
 import shutil
 import tempfile
 import zipfile
-from subprocess import list2cmdline
 
 import click
 import delegator
@@ -220,7 +219,7 @@ class IosPatcher(BasePlatformPatcher):
             _, decoded_location = tempfile.mkstemp('decoded_provision')
 
             # Decode the mobile provision using macOS's security cms tool
-            delegator.run(list2cmdline(
+            delegator.run(self.list2cmdline(
                 [
                     self.required_commands['security']['location'],
                     'cms',
@@ -347,7 +346,7 @@ class IosPatcher(BasePlatformPatcher):
             shutil.copyfile(gadget_config, os.path.join(self.app_folder, 'Frameworks', 'FridaGadget.config'))
 
         # patch the app binary
-        load_library_output = delegator.run(list2cmdline(
+        load_library_output = delegator.run(self.list2cmdline(
             [
                 self.required_commands['insert_dylib']['location'],
                 '--strip-codesig',
@@ -375,7 +374,7 @@ class IosPatcher(BasePlatformPatcher):
                     fg='green')
         for dylib in dylibs_to_sign:
             click.secho('Code signing: {0}'.format(os.path.basename(dylib)), dim=True)
-            delegator.run(list2cmdline([
+            delegator.run(self.list2cmdline([
                 self.required_commands['codesign']['location'],
                 '-f',
                 '-v',
@@ -414,7 +413,7 @@ class IosPatcher(BasePlatformPatcher):
         self.patched_codesigned_ipa_path = os.path.join(self.temp_directory, os.path.basename(
             '{0}-frida-codesigned.ipa'.format(os.path.splitext(original_name)[0])))
 
-        ipa_codesign = delegator.run(list2cmdline(
+        ipa_codesign = delegator.run(self.list2cmdline(
             [
                 self.required_commands['applesign']['location'],
                 '-i',

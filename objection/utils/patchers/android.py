@@ -1,10 +1,8 @@
 import lzma
 import os
-import shlex
 import shutil
 import tempfile
 import xml.etree.ElementTree as ElementTree
-from subprocess import list2cmdline
 from pkg_resources import parse_version
 
 import click
@@ -222,7 +220,7 @@ class AndroidPatcher(BasePlatformPatcher):
 
         min_version = '2.4.1'  # the version of apktool we require
 
-        o = delegator.run(list2cmdline([
+        o = delegator.run(self.list2cmdline([
             self.required_commands['apktool']['location'],
             '-version',
         ]), timeout=self.command_run_timeout).out.strip()
@@ -246,7 +244,7 @@ class AndroidPatcher(BasePlatformPatcher):
 
         # run clean-frameworks-dir
         click.secho('Running apktool empty-framework-dir...', dim=True)
-        o = delegator.run(list2cmdline([
+        o = delegator.run(self.list2cmdline([
             self.required_commands['apktool']['location'],
             'empty-framework-dir',
         ]), timeout=self.command_run_timeout).out.strip()
@@ -267,7 +265,7 @@ class AndroidPatcher(BasePlatformPatcher):
         if not os.path.exists(source):
             raise Exception('Source {0} not found.'.format(source))
 
-        self.apk_source = shlex.quote(source)
+        self.apk_source = source
 
         return self
 
@@ -291,7 +289,7 @@ class AndroidPatcher(BasePlatformPatcher):
         """
 
         if not self.aapt:
-            o = delegator.run(list2cmdline([
+            o = delegator.run(self.list2cmdline([
                 self.required_commands['aapt']['location'],
                 'dump',
                 'badging',
@@ -394,7 +392,7 @@ class AndroidPatcher(BasePlatformPatcher):
 
         click.secho('Unpacking {0}'.format(self.apk_source), dim=True)
 
-        o = delegator.run(list2cmdline([
+        o = delegator.run(self.list2cmdline([
             self.required_commands['apktool']['location'],
             'decode',
             '-f',
@@ -845,7 +843,7 @@ class AndroidPatcher(BasePlatformPatcher):
 
         click.secho('Rebuilding the APK with the frida-gadget loaded...', fg='green', dim=True)
         o = delegator.run(
-            list2cmdline([self.required_commands['apktool']['location'],
+            self.list2cmdline([self.required_commands['apktool']['location'],
                           'build',
                           self.apk_temp_directory,
                           ] + (['--use-aapt2'] if use_aapt2 else []) + [
@@ -869,7 +867,7 @@ class AndroidPatcher(BasePlatformPatcher):
 
         click.secho('Performing zipalign', dim=True)
 
-        o = delegator.run(list2cmdline([
+        o = delegator.run(self.list2cmdline([
             self.required_commands['zipalign']['location'],
             '-p',
             '4',
@@ -897,7 +895,7 @@ class AndroidPatcher(BasePlatformPatcher):
 
         click.secho('Signing new APK.', dim=True)
 
-        o = delegator.run(list2cmdline([
+        o = delegator.run(self.list2cmdline([
             self.required_commands['jarsigner']['location'],
             '-sigalg',
             'SHA1withRSA',
