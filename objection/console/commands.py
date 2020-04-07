@@ -514,7 +514,7 @@ COMMANDS = {
                     },
                     'add': {
                         'meta': 'Add an entry to the iOS keychain',
-                        'flags': ['--key', '--data'],
+                        'flags': ['--account', '--service', '--data'],
                         'exec': keychain.add
                     }
                 }

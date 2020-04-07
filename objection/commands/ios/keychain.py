@@ -30,17 +30,19 @@ def _should_do_smart_decode(args: list) -> bool:
     return len(args) > 0 and '--smart' in args
 
 
-def _has_minimum_flags_to_add_item(args: list) -> bool:
+def _data_flag_has_identifier(args: list) -> bool:
     """
-        Ensure that all of the flags are present for a keychain
-        entry item. At the same time, ensure that each flag has a value.
+        Checks that if the data flag is specified, an identifier
+        is also passed.
 
         :param args:
         :return:
     """
 
-    return all(i in args for i in ['--key', '--data']) and len([
-        x for x in args if '--' not in x]) == len([x for x in args if '--' in x])
+    if '--data' in args:
+        return any(x in args for x in ['--service', '--account'])
+
+    return True
 
 
 def _get_flag_value(args: list, flag: str) -> str:
@@ -52,7 +54,7 @@ def _get_flag_value(args: list, flag: str) -> str:
         :return:
     """
 
-    return args[args.index(flag) + 1]
+    return args[args.index(flag) + 1] if flag in args else None
 
 
 def dump(args: list = None) -> None:
@@ -138,25 +140,28 @@ def clear(args: list = None) -> None:
 
 def add(args: list) -> None:
     """
-        Adds a new keychain entry to the keychain
+        Adds a new kSecClassGenericPassword keychain entry to the keychain
 
         :param args:
         :return:
     """
 
-    if not _has_minimum_flags_to_add_item(args):
-        click.secho('Usage: ios keychain add --key <key name> --data <entry data>', bold=True)
+    if not _data_flag_has_identifier(args):
+        click.secho('When specifying the --data flag, either --account or '
+                    '--server should also be added', fg='red')
         return
 
-    key = _get_flag_value(args, '--key')
-    value = _get_flag_value(args, '--data')
+    account = _get_flag_value(args, '--account')
+    service = _get_flag_value(args, '--service')
+    data = _get_flag_value(args, '--data')
 
     click.secho('Adding a new entry to the iOS keychain...', dim=True)
-    click.secho('Key:       {0}'.format(key), dim=True)
-    click.secho('Value:     {0}'.format(value), dim=True)
+    click.secho('Account:  {0}'.format(account), dim=True)
+    click.secho('Service:  {0}'.format(service), dim=True)
+    click.secho('Data:     {0}'.format(data), dim=True)
 
     api = state_connection.get_api()
-    if api.ios_keychain_add(key, value):
+    if api.ios_keychain_add(account, service, data):
         click.secho('Successfully added the keychain item', fg='green')
         return
 

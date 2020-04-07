@@ -161,19 +161,26 @@ export namespace ioskeychain {
   };
 
   // add a string entry to the keychain
-  export const add = (key: string, data: string): boolean => {
-    // Convert the key and data to NSData
-    const dataString: NSStringType = NSString.stringWithString_(data).dataUsingEncoding_(NSUTF8StringEncoding);
-    const dataKey: NSStringType = NSString.stringWithString_(key).dataUsingEncoding_(NSUTF8StringEncoding);
-    const itemDict: NSMutableDictionaryType = NSMutableDictionary.alloc().init();
+  export const add = (account: string, service: string, data: string): boolean => {
 
+    // prepare the dictionary for SecItemAdd()
+    const itemDict: NSMutableDictionaryType = NSMutableDictionary.alloc().init();
     itemDict.setObject_forKey_(kSec.kSecClassGenericPassword, kSec.kSecClass);
-    itemDict.setObject_forKey_(dataKey, kSec.kSecAttrService);
-    itemDict.setObject_forKey_(dataString, kSec.kSecValueData);
+
+    [
+      { "type": "account", "value": account, "ksec": kSec.kSecAttrAccount },
+      { "type": "service", "value": service, "ksec": kSec.kSecAttrService },
+      { "type": "data", "value": data, "ksec": kSec.kSecValueData }
+    ].forEach(e => {
+      if (e.value == null) return;
+      const v: NSStringType = NSString.stringWithString_(e.value)
+        .dataUsingEncoding_(NSUTF8StringEncoding);
+
+      itemDict.setObject_forKey_(v, e.ksec);
+    });
 
     // Add the keychain entry
     const result: any = libObjc.SecItemAdd(itemDict, NULL);
-
     return result.isNull();
   };
 

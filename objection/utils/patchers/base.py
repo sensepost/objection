@@ -12,6 +12,7 @@ from .github import Github
 objection_path = os.path.join(os.path.expanduser('~'), '.objection')
 gadget_versions = os.path.join(objection_path, 'gadget_versions')
 
+
 def list2posix_cmdline(seq):
     """
         Translate a sequence of arguments into a command line
@@ -20,7 +21,7 @@ def list2posix_cmdline(seq):
         Implemented using shlex.quote because 
         subprocess.list2cmdline doesn't work with POSIX
     """
-        
+
     return ' '.join(map(shlex.quote, seq))
 
 
@@ -116,7 +117,7 @@ class BasePlatformPatcher(object):
             self.list2cmdline = list2cmdline
         else:
             self.list2cmdline = list2posix_cmdline
-    
+
     def _check_commands(self) -> bool:
         """
             Check if the shell commands in required_commands are

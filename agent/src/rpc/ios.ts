@@ -83,7 +83,8 @@ export const ios = {
   iosBundlesGetFrameworks: (): IFramework[] => bundles.getBundles(BundleType.NSBundleFramework),
 
   // ios keychain
-  iosKeychainAdd: (key: string, data: string): boolean => ioskeychain.add(key, data),
+  iosKeychainAdd: (account: string, service: string, data: string): boolean => 
+    ioskeychain.add(account, service, data),
   iosKeychainEmpty: (): void => ioskeychain.empty(),
   iosKeychainList: (smartDecode): IKeychainItem[] => ioskeychain.list(smartDecode),
   iosKeychainListRaw: (): void => ioskeychain.listRaw(),
