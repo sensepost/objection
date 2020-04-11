@@ -32,7 +32,7 @@ def simple(args: list) -> None:
     """
 
     if len(args) <= 0:
-        click.secho('Usage: andriod hooking generate simple <class name>', bold=True)
+        click.secho('Usage: android hooking generate simple <class name>', bold=True)
         return
 
     classname = args[0]
