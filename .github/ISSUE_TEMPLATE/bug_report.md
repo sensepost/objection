@@ -7,15 +7,24 @@ assignees: ''
 
 ---
 
+- Please, fill in all of the sections in this template.
+- Please read each section carefully. Each has a description of what information will help.
+- Windows support is limited. There is a good chance that a pull request would help!
+- The more information you give, the better.
+- Remove this section when you are done.
+
 **Describe the bug**
 A clear and concise description of what the bug is.
-
-WARNING: Ignoring this template and not completing the fields could result in your issue simply being closed.
 
 **To Reproduce**
 Steps to reproduce the behavior:
 1. Run command '...'
 2. Run command '...'
+
+**Similar issues**
+Please link the issues in this repository that is similar to yours.
+
+For example: #358, #229 etc.
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.
@@ -32,6 +41,9 @@ objection --debug explore
  - OS: [e.g. iOS8.1]
  - Frida Version [e.g. 22]
 - Objection Version [e.g. 1.6.2]
+
+**Application**
+If possible, please attach the target application where you can reproduce this bug to the issue.
 
 **Additional context**
 Add any other context about the problem here.
