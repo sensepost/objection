@@ -10,6 +10,6 @@ If the --include-backtrace flag is provided, a full stack trace that
 lead to the methods invocation will also be dumped.
 
 Examples:
-   ios hooking watch method "+[KeychainDataManager update:forKey:]
+   ios hooking watch method "+[KeychainDataManager update:forKey:]"
    ios hooking watch method "-[PinnedNSURLSessionStarwarsApi getJsonResponseFrom:onSuccess:onFailure:]" --include-backtrace
-   ios hooking watch method "+[KeychainDataManager update:forKey:] --dump-args --dump-return
+   ios hooking watch method "+[KeychainDataManager update:forKey:]" --dump-args --dump-return
