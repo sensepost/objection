@@ -69,6 +69,11 @@ COMMANDS = {
         'exec': frida_commands.load_background
     },
 
+    'ping': {
+        'meta': 'Ping the injected agent',
+        'exec': frida_commands.ping
+    },
+
     # file manager commands
 
     'cd': {
