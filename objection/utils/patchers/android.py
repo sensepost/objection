@@ -337,26 +337,23 @@ class AndroidPatcher(BasePlatformPatcher):
         manifest = self._get_android_manifest()
         root = manifest.getroot()
 
-        # grab all of the activity-alias tags
-        for alias in root.findall('./application/activity-alias'):
+        # grab activity tags with a LAUNCHER category
+        launcher_activities = (activity for activity in root.iterfind('./application/activity')
+                               if activity.find('./intent-filter/category[@{http://schemas.android.com/apk/res/android}name=\'android.intent.category.LAUNCHER\']') is not None)
 
-            # Take not of the current activity
-            current_activity = alias.get('{http://schemas.android.com/apk/res/android}targetActivity')
-            categories = alias.findall('./intent-filter/category')
+        launcher_activity = next(launcher_activities, None)
 
-            # make sure we have categories for this alias
-            if categories is None:
-                continue
+        if launcher_activity is not None:
+            return launcher_activity.get('{http://schemas.android.com/apk/res/android}name')
 
-            for category in categories:
+        # grab activity-alias tags with a LAUNCHER category
+        launcher_aliases = (alias for alias in root.iterfind('./application/activity-alias')
+                            if alias.find('./intent-filter/category[@{http://schemas.android.com/apk/res/android}name=\'android.intent.category.LAUNCHER\']') is not None)
 
-                # check if the name of this category is that of LAUNCHER
-                # its possible to have multiples, but once we determine one
-                # that fits we can just return and move on
-                category_name = category.get('{http://schemas.android.com/apk/res/android}name')
+        launcher_alias = next(launcher_aliases, None)
 
-                if category_name == 'android.intent.category.LAUNCHER':
-                    return current_activity
+        if launcher_alias is not None:
+            return launcher_alias.get('{http://schemas.android.com/apk/res/android}targetActivity')
 
         # getting here means we were unable to determine what the launchable
         # activity is
