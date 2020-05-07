@@ -90,22 +90,28 @@ export namespace hooking {
       name: undefined,
     };
 
-    // handle the resolvers error it may throw if the selector format
-    // is off.
+    // handle the resolvers error it may throw if the selector format is off.
     try {
       // select the first match
-      matchedMethod = resolver.enumerateMatches(selector)[0];
+      const ressolved = resolver.enumerateMatches(selector);
+      if (ressolved.length <= 0) {
+        send(`${c.red(`Error:`)} No matches for selector ${c.redBright(`${selector}`)}. ` +
+          `Double check the name, or try "ios hooking list class_methods" first.`);
+        return;
+      }
+
+      // not sure if this will ever be the case... but lets log it
+      // anyways
+      if (ressolved.length > 1) {
+        send(`${c.yellow(`Warning:`)} More than one result for selector ${c.redBright(`${selector}`)}!`);
+      }
+
+      matchedMethod = ressolved[0];
     } catch (error) {
       send(
-        `${c.red(`Error!`)} Unable to find address for selector ${c.redBright(`${selector}`)}! ` +
+        `${c.red(`Error:`)} Unable to find address for selector ${c.redBright(`${selector}`)}! ` +
         `The error was:\n` + c.red(error),
       );
-      return;
-    }
-
-    // no match? then just leave.
-    if (!matchedMethod.address) {
-      send(`${c.red(`Error!`)} Unable to find address for selector ${c.redBright(`${selector}`)}!`);
       return;
     }
 
@@ -122,7 +128,7 @@ export namespace hooking {
 
     const watchInvocation: InvocationListener = Interceptor.attach(matchedMethod.address, {
       // tslint:disable-next-line:object-literal-shorthand
-      onEnter: function(args) {
+      onEnter: function (args) {
         // how many arguments do we have in this selector?
         const argumentCount: number = (selector.match(/:/g) || []).length;
         const receiver = new ObjC.Object(args[0]);
