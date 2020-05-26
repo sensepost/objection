@@ -4,6 +4,7 @@ import shutil
 import tempfile
 import xml.etree.ElementTree as ElementTree
 from pkg_resources import parse_version
+import re
 
 import click
 import delegator
@@ -325,20 +326,14 @@ class AndroidPatcher(BasePlatformPatcher):
             :return:
         """
 
-        activity = ''
-        aapt = self._get_appt_output().split('\n')
+        activities = (match.groups()[0] for match in re.finditer(r"^launchable-activity: name='([^']+)'", self._get_appt_output(), re.MULTILINE))
+        activity = next(activities, None)
 
-        for line in aapt:
-            if 'launchable-activity' in line:
-                # ['launchable-activity: name=', 'com.app.activity', '  label=', 'bob']
-                activity = line.split('\'')[1]
-
-        # If we got the activity using aapt, great, return that.
-        if activity != '':
+        # If we got the activity using aapt, great, return that
+        if activity is not None:
             return activity
-
+        
         # if we dont have the activity yet, check out activity aliases
-
         click.secho(('Unable to determine the launchable activity using aapt, trying '
                      'to manually parse the AndroidManifest for activity aliases...'), dim=True, fg='yellow')
 
