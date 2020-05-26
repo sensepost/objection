@@ -363,6 +363,11 @@ def patchapk(source: str, architecture: str, gadget_version: str, pause: bool, s
         click.secho('The --enable-debug flag is incompatible with the --skip-resources flag.', fg='red')
         return
 
+    # ensure we decode resources if we do not have the --ignore-nativelibs flag.
+    if not ignore_nativelibs and skip_resources:
+        click.secho('The --ignore-nativelibs flag is required with the --skip-resources flag.', fg='red')
+        return
+
     patch_android_apk(**locals())
 
 
