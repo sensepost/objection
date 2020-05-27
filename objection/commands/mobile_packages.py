@@ -203,7 +203,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
     if script_source:
         click.secho('Copying over a custom script to use with the gadget config.', fg='green')
         shutil.copyfile(script_source,
-                        os.path.join(patcher.apk_temp_directory, 'Frameworks', architecture,
+                        os.path.join(patcher.apk_temp_directory, 'lib', architecture,
                                      'libfrida-gadget.script.so'))
 
     # if we are required to pause, do that.
