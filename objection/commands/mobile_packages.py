@@ -174,13 +174,13 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
 
     patcher = AndroidPatcher(skip_cleanup=skip_cleanup, skip_resources=skip_resources)
 
+    # ensure that we have all of the commandline requirements
+    if not patcher.are_requirements_met():
+        return
+    
     # ensure we have the latest apk-tool and run the
     if not patcher.is_apktool_ready():
         click.secho('apktool is not ready for use', fg='red', bold=True)
-        return
-
-    # ensure that we have all of the commandline requirements
-    if not patcher.are_requirements_met():
         return
 
     # work on patching the APK
