@@ -1,6 +1,6 @@
 import logging
 import os
-from multiprocessing.pool import ThreadPool
+from multiprocessing import Process
 
 import click
 
@@ -54,4 +54,4 @@ real_secho = click.secho
 click.secho = new_secho
 
 # kick off a background process to check the version of objection
-ThreadPool(processes=1).apply_async(check_version)
+Process(target=check_version).start()
