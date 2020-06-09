@@ -172,21 +172,21 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
 
     click.secho('Patcher will be using Gadget version: {0}'.format(github_version), fg='green')
 
-    patcher = AndroidPatcher(skip_cleanup=skip_cleanup)
+    patcher = AndroidPatcher(skip_cleanup=skip_cleanup, skip_resources=skip_resources)
 
+    # ensure that we have all of the commandline requirements
+    if not patcher.are_requirements_met():
+        return
+    
     # ensure we have the latest apk-tool and run the
     if not patcher.is_apktool_ready():
         click.secho('apktool is not ready for use', fg='red', bold=True)
         return
 
-    # ensure that we have all of the commandline requirements
-    if not patcher.are_requirements_met():
-        return
-
     # work on patching the APK
     patcher.set_apk_source(source=source)
-    patcher.unpack_apk(skip_resources=skip_resources)
-    patcher.inject_internet_permission(skip_resources=skip_resources)
+    patcher.unpack_apk()
+    patcher.inject_internet_permission()
 
     if not ignore_nativelibs:
         patcher.extract_native_libs_patch()
@@ -203,7 +203,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
     if script_source:
         click.secho('Copying over a custom script to use with the gadget config.', fg='green')
         shutil.copyfile(script_source,
-                        os.path.join(patcher.apk_temp_directory, 'Frameworks', architecture,
+                        os.path.join(patcher.apk_temp_directory, 'lib', architecture,
                                      'libfrida-gadget.script.so'))
 
     # if we are required to pause, do that.

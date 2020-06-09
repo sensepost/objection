@@ -5,6 +5,7 @@ import tempfile
 import xml.etree.ElementTree as ElementTree
 from pkg_resources import parse_version
 import contextlib
+import re
 
 import click
 import delegator
@@ -198,7 +199,7 @@ class AndroidPatcher(BasePlatformPatcher):
         }
     }
 
-    def __init__(self, skip_cleanup: bool = False):
+    def __init__(self, skip_cleanup: bool = False, skip_resources: bool = False):
         super(AndroidPatcher, self).__init__()
 
         self.apk_source = None
@@ -207,6 +208,7 @@ class AndroidPatcher(BasePlatformPatcher):
         self.apk_temp_frida_patched_aligned = self.apk_temp_directory + '.aligned.objection.apk'
         self.aapt = None
         self.skip_cleanup = skip_cleanup
+        self.skip_resources = skip_resources
 
         self.keystore = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../assets', 'objection.jks')
         self.netsec_config = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../assets',
@@ -279,6 +281,12 @@ class AndroidPatcher(BasePlatformPatcher):
             :return:
         """
 
+        # error if --skip-resources was used because the manifest is encoded
+        if self.skip_resources is True:
+            click.secho('Cannot manually parse the AndroidManifest.xml when --skip-resources '
+                        'is set, remove this and try again.', fg='red')
+            raise Exception('Cannot --skip-resources when trying to manually parse the AndroidManifest.xml')
+
         # use the android namespace
         ElementTree.register_namespace('android', 'http://schemas.android.com/apk/res/android')
 
@@ -319,20 +327,14 @@ class AndroidPatcher(BasePlatformPatcher):
             :return:
         """
 
-        activity = ''
-        aapt = self._get_appt_output().split('\n')
+        activities = (match.groups()[0] for match in re.finditer(r"^launchable-activity: name='([^']+)'", self._get_appt_output(), re.MULTILINE))
+        activity = next(activities, None)
 
-        for line in aapt:
-            if 'launchable-activity' in line:
-                # ['launchable-activity: name=', 'com.app.activity', '  label=', 'bob']
-                activity = line.split('\'')[1]
-
-        # If we got the activity using aapt, great, return that.
-        if activity != '':
+        # If we got the activity using aapt, great, return that
+        if activity is not None:
             return activity
-
+        
         # if we dont have the activity yet, check out activity aliases
-
         click.secho(('Unable to determine the launchable activity using aapt, trying '
                      'to manually parse the AndroidManifest for activity aliases...'), dim=True, fg='yellow')
 
@@ -384,11 +386,9 @@ class AndroidPatcher(BasePlatformPatcher):
 
         return self.apk_temp_directory
 
-    def unpack_apk(self, skip_resources: bool = False):
+    def unpack_apk(self):
         """
             Unpack an APK with apktool.
-
-            :type skip_resources: bool
 
             :return:
         """
@@ -399,7 +399,7 @@ class AndroidPatcher(BasePlatformPatcher):
             self.required_commands['apktool']['location'],
             'decode',
             '-f',
-            '-r' if skip_resources else '',
+            '-r' if self.skip_resources else '',
             '-o',
             self.apk_temp_directory,
             self.apk_source
@@ -409,7 +409,7 @@ class AndroidPatcher(BasePlatformPatcher):
             click.secho('An error may have occurred while extracting the APK.', fg='red')
             click.secho(o.err, fg='red')
 
-    def inject_internet_permission(self, skip_resources: bool = False):
+    def inject_internet_permission(self):
         """
             Checks the status of the source APK to see if it
             has the INTERNET permission. If not, the manifest file
@@ -425,13 +425,8 @@ class AndroidPatcher(BasePlatformPatcher):
             click.secho('App already has android.permission.INTERNET', fg='green')
             return
 
-        # if not, error if --skip-resources was used because the manifest is encoded
-        elif skip_resources is True:
-            click.secho('Cannot patch an APK for Internet permission when --skip-resources '
-                        'is set, remove this and try again.', fg='red')
-            raise Exception('Cannot --skip-resources with no Internet permission')
-
         # if not, we need to inject an element with it
+        click.secho('App does not have android.permission.INTERNET, attempting to patch the AndroidManifest.xml...', dim=True, fg='yellow')
         xml = self._get_android_manifest()
         root = xml.getroot()
 

@@ -4,8 +4,6 @@ import { getNSFileManager } from "./lib/helpers";
 import { IIosFilePath, IIosFileSystem } from "./lib/interfaces";
 import { NSDictionary, NSFileManager, NSString as NSStringType } from "./lib/types";
 
-const { NSString } = ObjC.classes;
-
 export namespace iosfilesystem {
 
   // a resolved nsfilemanager instance
@@ -29,7 +27,7 @@ export namespace iosfilesystem {
     // }
 
     const fm: NSFileManager = getFileManager();
-    const p: NSStringType = NSString.stringWithString_(path);
+    const p: NSStringType = ObjC.classes.NSString.stringWithString_(path);
 
     return fm.fileExistsAtPath_(p);
   };
@@ -41,7 +39,7 @@ export namespace iosfilesystem {
     // NSLog(@"%d / readable?", [fm isReadableFileAtPath:@"/"]);
 
     const fm: NSFileManager = getFileManager();
-    const p: NSStringType = NSString.stringWithString_(path);
+    const p: NSStringType = ObjC.classes.NSString.stringWithString_(path);
 
     return fm.isReadableFileAtPath_(p);
   };
@@ -53,7 +51,7 @@ export namespace iosfilesystem {
     // NSLog(@"%d / readable?", [fm isReadableFileAtPath:@"/"]);
 
     const fm: NSFileManager = getFileManager();
-    const p: NSStringType = NSString.stringWithString_(path);
+    const p: NSStringType = ObjC.classes.NSString.stringWithString_(path);
 
     return fm.isWritableFileAtPath_(p);
   };
@@ -124,7 +122,7 @@ export namespace iosfilesystem {
     // }
 
     const fm: NSFileManager = getFileManager();
-    const p: NSStringType = NSString.stringWithString_(path);
+    const p: NSStringType = ObjC.classes.NSString.stringWithString_(path);
 
     const response: IIosFileSystem = {
       files: {},
@@ -154,7 +152,7 @@ export namespace iosfilesystem {
 
       // generate a full path to the file
       const filePath: string = [path, "/", file].join("");
-      const currentFilePath: NSStringType = NSString.stringWithString_(filePath);
+      const currentFilePath: NSStringType = ObjC.classes.NSString.stringWithString_(filePath);
 
       // check read / write
       pathFileData.readable = fm.isReadableFileAtPath_(currentFilePath);

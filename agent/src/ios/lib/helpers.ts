@@ -1,8 +1,6 @@
 import { NSUTF8StringEncoding } from "./constants";
 import { NSBundle, NSDictionary, NSFileManager, NSString as NSStringType } from "./types";
 
-const NSString = ObjC.classes.NSString;
-
 // Attempt to unarchive data. Returning a string of `` indicates that the
 // unarchiving failed.
 export const unArchiveDataAndGetString = (data: ObjC.Object | any): string => {
@@ -104,7 +102,7 @@ export const bytesToUTF8 = (data: any): string => {
     return data.toString();
   }
 
-  const s: NSStringType = NSString.alloc().initWithBytes_length_encoding_(
+  const s: NSStringType = ObjC.classes.NSString.alloc().initWithBytes_length_encoding_(
     data.bytes(), data.length(), NSUTF8StringEncoding);
 
   if (s) {
