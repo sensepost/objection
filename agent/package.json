@@ -28,15 +28,15 @@
   },
   "homepage": "https://github.com/sensepost/objection#readme",
   "dependencies": {
-    "frida-java-bridge": "^3.6.12",
-    "frida-objc-bridge": "^4.1.7",
+    "frida-java-bridge": "^3",
+    "frida-objc-bridge": "^5",
     "frida-screenshot": "^3",
     "macho": "^1"
   },
   "devDependencies": {
-    "@types/frida-gum": "^15.3.0",
-    "@types/node": "^13.13.9",
+    "@types/frida-gum": "^15",
+    "@types/node": "^14",
     "frida-compile": "^9",
-    "tslint": "^6.1.2"
+    "tslint": "^6"
   }
 }
