@@ -1,0 +1,14 @@
+Command: android heap search instances
+
+Usage: android heap search instances <class>
+
+Search for and print live instances of a specific Java class, specified by
+a fully qualified class name. Output is the result of an attempt at getting
+a string value for a discovered object which would typically contain
+property values for the object. Hashcodes in the list could be used for
+other heap interactions.
+
+Examples:
+   android heap search instances java.net.Socket
+   android heap search instances java.io.File
+
