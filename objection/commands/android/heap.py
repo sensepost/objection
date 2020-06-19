@@ -9,17 +9,6 @@ from tabulate import tabulate
 from objection.state.connection import state_connection
 
 
-def _fresh_flag(args) -> bool:
-    """
-        Check if --fresh is in args
-
-        :param args:
-        :return:
-    """
-
-    return len(args) > 0 and '--fresh' in args
-
-
 def _should_ignore_methods_with_arguments(args) -> bool:
     """
         Check if the --without-arguments flag exists
@@ -51,23 +40,23 @@ def instances(args: list) -> None:
     """
 
     if len(args) < 1:
-        click.secho('Usage: android heap print_instances <class> (eg: com.example.test)', bold=True)
+        click.secho('Usage: android heap search instances <class> (eg: com.example.test)', bold=True)
         return
 
     target_class = args[0]
 
     api = state_connection.get_api()
-    instance_results = api.android_heap_get_live_class_instances(target_class, _fresh_flag(args))
+    instance_results = api.android_heap_get_live_class_instances(target_class)
 
     if len(instance_results) <= 0:
         return
 
     click.secho(tabulate(
         [[
-            entry['handleString'],
-            entry['className'],
-            entry['asString'],
-        ] for entry in instance_results], headers=['Handle', 'Class', 'toString()'],
+            entry['hashcode'],
+            entry['classname'],
+            entry['tostring'],
+        ] for entry in instance_results], headers=['Hashcode', 'Class', 'toString()'],
     ))
 
 
@@ -80,10 +69,10 @@ def methods(args: list) -> None:
     """
 
     if len(args) < 1:
-        click.secho('Usage: android heap print methods <handle> (eg: 0x100b96)', bold=True)
+        click.secho('Usage: android heap print methods <hashcode> (eg: 24688232)', bold=True)
         return
 
-    target_handle = args[0]
+    target_handle = int(args[0])
 
     api = state_connection.get_api()
     method_results = api.android_heap_print_methods(target_handle)
@@ -92,7 +81,6 @@ def methods(args: list) -> None:
     # we assume methods that end with braces don't need arguments
     if _should_ignore_methods_with_arguments(args):
         method_results[1] = list(filter(lambda x: '()' in x, method_results[1]))
-        # method_results[1] = list(filter(lambda x: x.endswith('()'), method_results[1]))
 
     click.secho(tabulate(
         [[
@@ -111,10 +99,10 @@ def execute(args: list) -> None:
     """
 
     if len(args) < 1:
-        click.secho('Usage: android heap execute method <handle> <method> (eg: 0x100b96)', bold=True)
+        click.secho('Usage: android heap execute method <hashcode> <method> (eg: 24688232)', bold=True)
         return
 
-    target_handle = args[0]
+    target_handle = int(args[0])
     method = args[1]
 
     api = state_connection.get_api()
@@ -136,10 +124,10 @@ def fields(args: list) -> None:
     """
 
     if len(args) < 1:
-        click.secho('Usage: android heap print fields <handle> (eg: 0x100b96)', bold=True)
+        click.secho('Usage: android heap print fields <hashcode> (eg: 24688232)', bold=True)
         return
 
-    target_handle = args[0]
+    target_handle = int(args[0])
 
     api = state_connection.get_api()
     field_results = api.android_heap_print_fields(target_handle)
@@ -161,15 +149,15 @@ def evaluate(args: list) -> None:
     """
 
     if len(args) < 1:
-        click.secho('Usage: android heap execute js <handle> (eg: 0x100b96)', bold=True)
+        click.secho('Usage: android heap execute js <hashcode> (eg: 24688232)', bold=True)
         return
 
-    target_handle = args[0]
+    target_handle = int(args[0])
 
     js = prompt(
-        click.secho('(The handle at `{handle}` will be available as the `clazz` variable.)'.format(
-                        handle=target_handle
-                    ), dim=True),
+        click.secho('(The hashcode at `{handle}` will be available as the `clazz` variable.)'.format(
+            handle=target_handle
+        ), dim=True),
         multiline=True, lexer=PygmentsLexer(JavascriptLexer),
         bottom_toolbar='JavaScript edit mode. [ESC] and then [ENTER] to accept. [CTRL] + C to cancel.').strip()
 

@@ -379,7 +379,6 @@ COMMANDS = {
                         'commands': {
                             'instances': {
                                 'meta': 'Search for live instances of a particular class',
-                                'flags': ['--fresh'],
                                 'exec': android_heap.instances
 
                             }
