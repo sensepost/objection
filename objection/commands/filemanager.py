@@ -114,6 +114,21 @@ def cd(args: list) -> None:
             click.secho('Invalid path: `{0}`'.format(proposed_path), fg='red')
 
 
+def path_exists(path: str) -> bool:
+    """
+        Checks if a path exists on remote device.
+
+        :param path:
+        :return:
+    """
+
+    if device_state.device_type == Ios:
+        return _path_exists_ios(path)
+
+    if device_state.device_type == Android:
+        return _path_exists_android(path)
+
+
 def _path_exists_ios(path: str) -> bool:
     """
         Checks an iOS device if a path exists.
