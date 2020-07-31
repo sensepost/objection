@@ -27,10 +27,14 @@ export interface IHeapClassDictionary {
 }
 
 export interface IHeapObject {
-    asString: string;
-    className: string;
-    handle: Java.Wrapper;
-    handleString: string;
+    hashcode: number;
+    instance: Java.Wrapper;
+}
+
+export interface IHeapNormalised {
+    hashcode: number;
+    classname: string;
+    tostring: string;
 }
 
 export interface IJavaField {

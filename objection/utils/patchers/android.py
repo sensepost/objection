@@ -1,13 +1,10 @@
-import itertools
 import lzma
 import os
-import re
-import shlex
 import shutil
 import tempfile
 import xml.etree.ElementTree as ElementTree
-import zipfile
-from subprocess import list2cmdline
+from pkg_resources import parse_version
+import re
 
 import click
 import delegator
@@ -191,7 +188,7 @@ class AndroidPatcher(BasePlatformPatcher):
             'installation': 'apt install adb (Kali Linux); brew install adb (macOS)'
         },
         'jarsigner': {
-            'installation': 'apt install default-jre (Linux); brew cask install java (macOS)'
+            'installation': 'apt install default-jdk (Linux); brew cask install java (macOS)'
         },
         'apktool': {
             'installation': 'apt install apktool (Kali Linux)'
@@ -201,7 +198,7 @@ class AndroidPatcher(BasePlatformPatcher):
         }
     }
 
-    def __init__(self, skip_cleanup: bool = False):
+    def __init__(self, skip_cleanup: bool = False, skip_resources: bool = False):
         super(AndroidPatcher, self).__init__()
 
         self.apk_source = None
@@ -210,10 +207,56 @@ class AndroidPatcher(BasePlatformPatcher):
         self.apk_temp_frida_patched_aligned = self.apk_temp_directory + '.aligned.objection.apk'
         self.aapt = None
         self.skip_cleanup = skip_cleanup
+        self.skip_resources = skip_resources
 
         self.keystore = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../assets', 'objection.jks')
         self.netsec_config = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../assets',
                                           'network_security_config.xml')
+
+    def is_apktool_ready(self) -> bool:
+        """
+            Check if apktool is ready for use.
+
+            :return:bool
+        """
+
+        min_version = '2.4.1'  # the version of apktool we require
+
+        o = delegator.run(self.list2cmdline([
+            self.required_commands['apktool']['location'],
+            '-version',
+        ]), timeout=self.command_run_timeout).out.strip()
+
+        # On windows we get this 'Press any key to continue' thing,
+        # localized to the the current language. Assume that the version
+        # string we want is always the first line.
+        if len(o.split('\n')) > 1:
+            o = o.split('\n')[0]
+
+        if len(o) == 0:
+            click.secho('Unable to determine apktool version. Is it installed')
+            return False
+
+        click.secho('Detected apktool version as: ' + o, dim=True)
+
+        # ensure we have at least apktool MIN_VERSION
+        if parse_version(o) < parse_version(min_version):
+            click.secho('apktool version should be at least ' + min_version, fg='red', bold=True)
+            click.secho('Please see the following URL for more information: '
+                        'https://github.com/sensepost/objection/wiki/Apktool-Upgrades', fg='yellow')
+            return False
+
+        # run clean-frameworks-dir
+        click.secho('Running apktool empty-framework-dir...', dim=True)
+        o = delegator.run(self.list2cmdline([
+            self.required_commands['apktool']['location'],
+            'empty-framework-dir',
+        ]), timeout=self.command_run_timeout).out.strip()
+
+        if len(o) > 0:
+            click.secho(o, fg='yellow', dim=True)
+
+        return True
 
     def set_apk_source(self, source: str):
         """
@@ -226,7 +269,7 @@ class AndroidPatcher(BasePlatformPatcher):
         if not os.path.exists(source):
             raise Exception('Source {0} not found.'.format(source))
 
-        self.apk_source = shlex.quote(source)
+        self.apk_source = source
 
         return self
 
@@ -236,6 +279,12 @@ class AndroidPatcher(BasePlatformPatcher):
 
             :return:
         """
+
+        # error if --skip-resources was used because the manifest is encoded
+        if self.skip_resources is True:
+            click.secho('Cannot manually parse the AndroidManifest.xml when --skip-resources '
+                        'is set, remove this and try again.', fg='red')
+            raise Exception('Cannot --skip-resources when trying to manually parse the AndroidManifest.xml')
 
         # use the android namespace
         ElementTree.register_namespace('android', 'http://schemas.android.com/apk/res/android')
@@ -250,7 +299,7 @@ class AndroidPatcher(BasePlatformPatcher):
         """
 
         if not self.aapt:
-            o = delegator.run(list2cmdline([
+            o = delegator.run(self.list2cmdline([
                 self.required_commands['aapt']['location'],
                 'dump',
                 'badging',
@@ -277,20 +326,14 @@ class AndroidPatcher(BasePlatformPatcher):
             :return:
         """
 
-        activity = ''
-        aapt = self._get_appt_output().split('\n')
+        activities = (match.groups()[0] for match in re.finditer(r"^launchable-activity: name='([^']+)'", self._get_appt_output(), re.MULTILINE))
+        activity = next(activities, None)
 
-        for line in aapt:
-            if 'launchable-activity' in line:
-                # ['launchable-activity: name=', 'com.app.activity', '  label=', 'bob']
-                activity = line.split('\'')[1]
-
-        # If we got the activity using aapt, great, return that.
-        if activity != '':
+        # If we got the activity using aapt, great, return that
+        if activity is not None:
             return activity
-
+        
         # if we dont have the activity yet, check out activity aliases
-
         click.secho(('Unable to determine the launchable activity using aapt, trying '
                      'to manually parse the AndroidManifest for activity aliases...'), dim=True, fg='yellow')
 
@@ -342,22 +385,20 @@ class AndroidPatcher(BasePlatformPatcher):
 
         return self.apk_temp_directory
 
-    def unpack_apk(self, skip_resources: bool = False):
+    def unpack_apk(self):
         """
             Unpack an APK with apktool.
-
-            :type skip_resources: bool
 
             :return:
         """
 
         click.secho('Unpacking {0}'.format(self.apk_source), dim=True)
 
-        o = delegator.run(list2cmdline([
+        o = delegator.run(self.list2cmdline([
             self.required_commands['apktool']['location'],
             'decode',
             '-f',
-            '-r' if skip_resources else '',
+            '-r' if self.skip_resources else '',
             '-o',
             self.apk_temp_directory,
             self.apk_source
@@ -367,7 +408,7 @@ class AndroidPatcher(BasePlatformPatcher):
             click.secho('An error may have occurred while extracting the APK.', fg='red')
             click.secho(o.err, fg='red')
 
-    def inject_internet_permission(self, skip_resources: bool = False):
+    def inject_internet_permission(self):
         """
             Checks the status of the source APK to see if it
             has the INTERNET permission. If not, the manifest file
@@ -383,13 +424,8 @@ class AndroidPatcher(BasePlatformPatcher):
             click.secho('App already has android.permission.INTERNET', fg='green')
             return
 
-        # if not, error if --skip-resources was used because the manifest is encoded
-        elif skip_resources is True:
-            click.secho('Cannot patch an APK for Internet permission when --skip-resources '
-                        'is set, remove this and try again.', fg='red')
-            raise Exception('Cannot --skip-resources with no Internet permission')
-
         # if not, we need to inject an element with it
+        click.secho('App does not have android.permission.INTERNET, attempting to patch the AndroidManifest.xml...', dim=True, fg='yellow')
         xml = self._get_android_manifest()
         root = xml.getroot()
 
@@ -404,6 +440,39 @@ class AndroidPatcher(BasePlatformPatcher):
 
         xml.write(os.path.join(self.apk_temp_directory, 'AndroidManifest.xml'),
                   encoding='utf-8', xml_declaration=True)
+
+    def extract_native_libs_patch(self):
+        """
+            Check the AndroidManifest.xml file for extractNativeLibs="false"
+            if it exists, change it to extractNativeLibs="true".
+
+            Since AndroidStudio 2.1 this flag is set as false by default.
+            This breaks it when installing the .apk to the device.
+
+            :return:
+        """
+        xml = self._get_android_manifest()
+        root = xml.getroot()
+
+        application_tag = root.findall('application')
+
+        # ensure that we got the application tag
+        if len(application_tag) <= 0:
+            message = 'Could not find the application tag in the AndroidManifest.xml'
+            click.secho(message, fg='red', bold=True)
+            raise Exception(message)
+
+        application_tag = application_tag[0]
+
+        # Check if the flag is present and set to false
+        if '{http://schemas.android.com/apk/res/android}extractNativeLibs' in application_tag.attrib \
+                and application_tag.attrib['{http://schemas.android.com/apk/res/android}extractNativeLibs'] == 'false':
+            # Set the flag to true
+            application_tag.attrib['{http://schemas.android.com/apk/res/android}extractNativeLibs'] = 'true'
+            click.secho('Setting extractNativeLibs to true...', dim=True)
+            xml.write(os.path.join(self.apk_temp_directory, 'AndroidManifest.xml'),
+                      encoding='utf-8', xml_declaration=True)
+            return
 
     def flip_debug_flag_to_true(self):
         """
@@ -737,13 +806,14 @@ class AndroidPatcher(BasePlatformPatcher):
         with open(activity_path, 'w') as f:
             f.write(''.join(patched_smali))
 
-    def add_gadget_to_apk(self, architecture: str, gadget_source: str):
+    def add_gadget_to_apk(self, architecture: str, gadget_source: str, gadget_config: str):
         """
             Copies a frida gadget for a specific architecture to
             an extracted APK's lib path.
 
             :param architecture:
             :param gadget_source:
+            :param gadget_config:
             :return:
         """
 
@@ -757,6 +827,10 @@ class AndroidPatcher(BasePlatformPatcher):
         click.secho('Copying Frida gadget to libs path...', fg='green', dim=True)
         shutil.copyfile(gadget_source, os.path.join(libs_path, 'libfrida-gadget.so'))
 
+        if gadget_config:
+            click.secho('Adding a gadget configuration file...', fg='green')
+            shutil.copyfile(gadget_config, os.path.join(libs_path, 'libfrida-gadget.config.so'))
+
     def build_new_apk(self, use_aapt2: bool = False):
         """
             Build a new .apk with the frida-gadget patched in.
@@ -765,43 +839,21 @@ class AndroidPatcher(BasePlatformPatcher):
         """
 
         click.secho('Rebuilding the APK with the frida-gadget loaded...', fg='green', dim=True)
-        o = delegator.run(list2cmdline([
-            self.required_commands['apktool']['location'],
-            'build',
-            self.apk_temp_directory,
-        ] + (['--use-aapt2'] if use_aapt2 else []) + [
-            '-o',
-            self.apk_temp_frida_patched
-        ]), timeout=self.command_run_timeout)
+        o = delegator.run(
+            self.list2cmdline([self.required_commands['apktool']['location'],
+                          'build',
+                          self.apk_temp_directory,
+                          ] + (['--use-aapt2'] if use_aapt2 else []) + [
+                             '-o',
+                             self.apk_temp_frida_patched
+                         ]), timeout=self.command_run_timeout)
 
         if len(o.err) > 0:
             click.secho(('Rebuilding the APK may have failed. Read the following '
                          'output to determine if apktool actually had an error: \n'), fg='red')
             click.secho(o.err, fg='red')
 
-        self._copy_meta_inf()
         click.secho('Built new APK with injected loadLibrary and frida-gadget', fg='green')
-
-    def _copy_meta_inf(self):
-        meta_inf = os.path.join(self.apk_temp_directory, 'original', 'META-INF')
-        standard_files = re.compile(r'^(?:[A-Z0-9_-]+\.(?:RSA|SF)|MANIFEST\.MF)$')
-        extra_names = list(itertools.filterfalse(standard_files.match, os.listdir(meta_inf)))
-        if extra_names:
-            click.secho('Appending {0} extra entries in META-INF to the APK...'.format(len(extra_names)))
-            with zipfile.ZipFile(self.apk_temp_frida_patched, 'a', zipfile.ZIP_DEFLATED) as apk:
-                for extra_name in extra_names:
-                    full_path = os.path.join(meta_inf, extra_name)
-                    if os.path.isdir(full_path):
-                        prefix_len = len(full_path) + 1 # trailing '/'
-                        for dirpath, _, filenames in os.walk(full_path):
-                            for filename in filenames:
-                                src_name = os.path.join(dirpath, filename)
-                                dest_name = 'META-INF/{dirname}/{path}'.format(
-                                        dirname=extra_name,
-                                        path=src_name[prefix_len:].replace(os.sep, '/'))
-                                apk.write(src_name, dest_name)
-                    else:
-                        apk.write(full_path, 'META-INF/' + extra_name)
 
     def zipalign_apk(self):
         """
@@ -812,7 +864,7 @@ class AndroidPatcher(BasePlatformPatcher):
 
         click.secho('Performing zipalign', dim=True)
 
-        o = delegator.run(list2cmdline([
+        o = delegator.run(self.list2cmdline([
             self.required_commands['zipalign']['location'],
             '-p',
             '4',
@@ -840,7 +892,7 @@ class AndroidPatcher(BasePlatformPatcher):
 
         click.secho('Signing new APK.', dim=True)
 
-        o = delegator.run(list2cmdline([
+        o = delegator.run(self.list2cmdline([
             self.required_commands['jarsigner']['location'],
             '-sigalg',
             'SHA1withRSA',

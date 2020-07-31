@@ -114,6 +114,7 @@ export namespace userinterface {
 
               // Change the success response from the OS to true
               success = true;
+              error = null;
             }
 
             // and run the original block

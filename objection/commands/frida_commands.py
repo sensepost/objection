@@ -40,6 +40,21 @@ def frida_environment(args: list = None) -> None:
     ]))
 
 
+def ping(args: list = None) -> None:
+    """
+        Pings the agent.
+
+        :param args:
+        :return:
+    """
+
+    agent = state_connection.get_api()
+    if agent.ping():
+        click.secho('The agent responds ok!', fg='green')
+    else:
+        click.secho('The agent did not respond ok!', fg='red')
+
+
 def load_background(args: list = None) -> None:
     """
         Loads a Frida script and runs it in the background.

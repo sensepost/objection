@@ -132,7 +132,7 @@ def watch_class_method(args: list) -> None:
         return
 
     fully_qualified_class = args[0]
-    overload_filter = args[1].replace(' ', '') if '--' not in args[1] else None
+    overload_filter = args[1].replace(' ', '') if (len(args) > 1 and '--' not in args[1]) else None
 
     api = state_connection.get_api()
     api.android_hooking_watch_method(fully_qualified_class,

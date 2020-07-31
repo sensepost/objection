@@ -2,7 +2,7 @@ import unittest
 from unittest import mock
 
 from objection.commands.ios.keychain import _should_output_json, dump, dump_raw, clear, add, \
-    _has_minimum_flags_to_add_item, _get_flag_value, _should_do_smart_decode
+    _data_flag_has_identifier, _get_flag_value, _should_do_smart_decode
 from ...helpers import capture
 
 
@@ -28,13 +28,18 @@ class TestKeychain(unittest.TestCase):
 
         self.assertEqual(output, 'Usage: ios keychain dump (--json <local destination>)\n')
 
-    def test_has_minimum_flags_to_add_item_returns_true(self):
-        result = _has_minimum_flags_to_add_item(['--key', 'test_key', '--data', 'test_data'])
+    def test_data_flag_check_ignored_without_data_flag(self):
+        result = _data_flag_has_identifier(['--key', 'test_key'])
 
         self.assertTrue(result)
 
-    def test_has_minumum_flags_to_add_item_returns_false(self):
-        result = _has_minimum_flags_to_add_item(['--key', 'test_key'])
+    def test_data_flag_is_checked_when_flag_is_specified(self):
+        result = _data_flag_has_identifier(['--key', 'test_key', '--data', 'foo'])
+
+        self.assertFalse(result)
+
+    def test_data_flag_is_checked_when_only_data_flag_is_specified_without_key(self):
+        result = _data_flag_has_identifier(['--data', 'foo'])
 
         self.assertFalse(result)
 
@@ -132,28 +137,34 @@ Dumped keychain to: foo.json
         self.assertEqual(output, 'Clearing the keychain...\nKeychain cleared\n')
         self.assertTrue(mock_api.return_value.ios_keychain_empty.called)
 
-    def test_adds_item_validates_arguments(self):
-        with capture(add, ['--key', 'test_key']) as o:
+    def test_adds_item_validates_data_key_to_need_identifier(self):
+        with capture(add, ['--data', 'test_data']) as o:
             output = o
 
-        self.assertEqual(output, 'Usage: ios keychain add --key <key name> --data <entry data>\n')
+        self.assertEqual(output, 'When specifying the --data flag, either --account or --server should also be added\n')
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_adds_item_successfully(self, mock_api):
         mock_api.return_value.keychain_add.return_value = True
 
-        with capture(add, ['--key', 'test_key', '--data', 'test_data']) as o:
+        with capture(add, ['--account', 'test_key', '--data', 'test_data']) as o:
             output = o
 
-        self.assertEqual(output, 'Adding a new entry to the iOS keychain...\nKey:       test_key\n'
-                                 'Value:     test_data\nSuccessfully added the keychain item\n')
+        self.assertEqual(output, """Adding a new entry to the iOS keychain...
+Account:  test_key
+Service:  None
+Data:     test_data
+Successfully added the keychain item\n""")
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_adds_item_with_failure(self, mock_api):
         mock_api.return_value.ios_keychain_add.return_value = False
 
-        with capture(add, ['--key', 'test_key', '--data', 'test_data']) as o:
+        with capture(add, ['--service', 'test_key', '--data', 'test_data']) as o:
             output = o
 
-        self.assertEqual(output, 'Adding a new entry to the iOS keychain...\nKey:       test_key\n'
-                                 'Value:     test_data\nFailed to add the keychain item\n')
+        self.assertEqual(output, """Adding a new entry to the iOS keychain...
+Account:  None
+Service:  test_key
+Data:     test_data
+Failed to add the keychain item\n""")

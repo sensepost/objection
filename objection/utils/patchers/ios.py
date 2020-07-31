@@ -5,7 +5,6 @@ import plistlib
 import shutil
 import tempfile
 import zipfile
-from subprocess import list2cmdline
 
 import click
 import delegator
@@ -220,7 +219,7 @@ class IosPatcher(BasePlatformPatcher):
             _, decoded_location = tempfile.mkstemp('decoded_provision')
 
             # Decode the mobile provision using macOS's security cms tool
-            delegator.run(list2cmdline(
+            delegator.run(self.list2cmdline(
                 [
                     self.required_commands['security']['location'],
                     'cms',
@@ -255,21 +254,28 @@ class IosPatcher(BasePlatformPatcher):
         click.secho('Found a valid provisioning profile', fg='green', bold=True)
         self.provision_file = sorted(expirations, key=expirations.get, reverse=True)[0]
 
-    def extract_ipa(self, ipa_source: str) -> None:
+    def extract_ipa(self, unzip_unicode, ipa_source: str) -> None:
         """
             Extracts a source IPA into the temporary directories.
 
             :param ipa_source:
+            :param unzip_unicode:
             :return:
         """
 
-        # copy the orignal ipa to the temp directory.
+        # copy the original ipa to the temp directory.
         shutil.copyfile(ipa_source, self.temp_file)
 
-        # extract the IPA this should result in a 'Payload' directory
-        ipa = zipfile.ZipFile(self.temp_file, 'r')
-        ipa.extractall(self.temp_directory)
-        ipa.close()
+        if unzip_unicode:
+            with zipfile.ZipFile(self.temp_file, 'r') as ipa:
+                for info in ipa.infolist():
+                    info.filename = info.filename.encode('cp437').decode('utf-8')
+                    ipa.extract(info, self.temp_directory)
+        else:
+            # extract the IPA this should result in a 'Payload' directory
+            ipa = zipfile.ZipFile(self.temp_file, 'r')
+            ipa.extractall(self.temp_directory)
+            ipa.close()
 
         # check what is in the Payload directory
         self.payload_directory = os.listdir(os.path.join(self.temp_directory, 'Payload'))
@@ -309,7 +315,7 @@ class IosPatcher(BasePlatformPatcher):
 
         self.app_binary = os.path.join(self.app_folder, info_plist['CFBundleExecutable'])
 
-    def patch_and_codesign_binary(self, frida_gadget: str, codesign_signature: str) -> None:
+    def patch_and_codesign_binary(self, frida_gadget: str, codesign_signature: str, gadget_config: str) -> None:
         """
             Patches an iOS binary to load a Frida gadget on startup.
 
@@ -318,6 +324,7 @@ class IosPatcher(BasePlatformPatcher):
 
             :param frida_gadget:
             :param codesign_signature:
+            :param gadget_config:
             :return:
         """
 
@@ -334,9 +341,12 @@ class IosPatcher(BasePlatformPatcher):
 
         # copy the frida gadget to the applications Frameworks directory
         shutil.copyfile(frida_gadget, os.path.join(self.app_folder, 'Frameworks', 'FridaGadget.dylib'))
+        if gadget_config:
+            click.secho('Copying Gadget Config to Frameworks path...', fg='green', dim=True)
+            shutil.copyfile(gadget_config, os.path.join(self.app_folder, 'Frameworks', 'FridaGadget.config'))
 
         # patch the app binary
-        load_library_output = delegator.run(list2cmdline(
+        load_library_output = delegator.run(self.list2cmdline(
             [
                 self.required_commands['insert_dylib']['location'],
                 '--strip-codesig',
@@ -364,7 +374,7 @@ class IosPatcher(BasePlatformPatcher):
                     fg='green')
         for dylib in dylibs_to_sign:
             click.secho('Code signing: {0}'.format(os.path.basename(dylib)), dim=True)
-            delegator.run(list2cmdline([
+            delegator.run(self.list2cmdline([
                 self.required_commands['codesign']['location'],
                 '-f',
                 '-v',
@@ -403,7 +413,7 @@ class IosPatcher(BasePlatformPatcher):
         self.patched_codesigned_ipa_path = os.path.join(self.temp_directory, os.path.basename(
             '{0}-frida-codesigned.ipa'.format(os.path.splitext(original_name)[0])))
 
-        ipa_codesign = delegator.run(list2cmdline(
+        ipa_codesign = delegator.run(self.list2cmdline(
             [
                 self.required_commands['applesign']['location'],
                 '-i',

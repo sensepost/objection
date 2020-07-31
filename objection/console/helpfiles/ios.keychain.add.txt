@@ -1,6 +1,6 @@
 Command: ios keychain add
 
-Usage: ios keychain add --key <key name> --data <entry data>
+Usage: ios keychain add --account <account> --service <service> --data <entry data>
 
 Adds a new entry to the iOS keychain using SecItemAdd.
 
@@ -8,4 +8,5 @@ The new keychain entry class would be kSecClassGenericPassword with no extra
 kSecAttrAccessControl set.
 
 Examples:
-   ios keychain add --key token --data 1122-33344-55122-55512
+   ios keychain add --account token --data 1122-33344-55122-55512
+   ios keychain add --service foo --data bar

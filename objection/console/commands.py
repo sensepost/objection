@@ -69,6 +69,11 @@ COMMANDS = {
         'exec': frida_commands.load_background
     },
 
+    'ping': {
+        'meta': 'Ping the injected agent',
+        'exec': frida_commands.ping
+    },
+
     # file manager commands
 
     'cd': {
@@ -374,7 +379,6 @@ COMMANDS = {
                         'commands': {
                             'instances': {
                                 'meta': 'Search for live instances of a particular class',
-                                'flags': ['--fresh'],
                                 'exec': android_heap.instances
 
                             }
@@ -415,6 +419,10 @@ COMMANDS = {
                     'clear': {
                         'meta': 'Clears the Android KeyStore',
                         'exec': keystore.clear
+                    },
+                    'watch': {
+                        'meta': 'Watches usage of the Android keystore',
+                        'exec': keystore.watch
                     }
                 }
             },
@@ -510,7 +518,7 @@ COMMANDS = {
                     },
                     'add': {
                         'meta': 'Add an entry to the iOS keychain',
-                        'flags': ['--key', '--data'],
+                        'flags': ['--account', '--service', '--data'],
                         'exec': keychain.add
                     }
                 }
@@ -624,6 +632,7 @@ COMMANDS = {
                     },
                     'evaluate': {
                         'meta': 'Evaluate JavaScript on objects on the iOS heap',
+                        'flags': ['--inline'],
                         'exec': ios_heap.evaluate
                     }
                 }

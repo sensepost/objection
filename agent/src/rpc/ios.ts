@@ -12,7 +12,7 @@ import {
   IBinaryModuleDictionary, ICredential, IFramework,
   IHeapObject, IIosCookie, IIosFileSystem, IKeychainItem,
 } from "../ios/lib/interfaces";
-import { NSDictionary, NSUserDefaults } from "../ios/lib/types";
+import { NSUserDefaults } from "../ios/lib/types";
 import { nsuserdefaults } from "../ios/nsuserdefaults";
 import { pasteboard } from "../ios/pasteboard";
 import { sslpinning } from "../ios/pinning";
@@ -83,7 +83,8 @@ export const ios = {
   iosBundlesGetFrameworks: (): IFramework[] => bundles.getBundles(BundleType.NSBundleFramework),
 
   // ios keychain
-  iosKeychainAdd: (key: string, data: string): boolean => ioskeychain.add(key, data),
+  iosKeychainAdd: (account: string, service: string, data: string): boolean => 
+    ioskeychain.add(account, service, data),
   iosKeychainEmpty: (): void => ioskeychain.empty(),
   iosKeychainList: (smartDecode): IKeychainItem[] => ioskeychain.list(smartDecode),
   iosKeychainListRaw: (): void => ioskeychain.listRaw(),

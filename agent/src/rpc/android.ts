@@ -44,13 +44,12 @@ export const android = {
     hooking.watchMethod(fqClazz, filterOverload, dargs, dbt, dret),
 
   // android heap methods
-  androidHeapEvaluateHandleMethod: (handle: string, js: string): Promise<void> => heap.evaluate(handle, js),
-  androidHeapExecuteHandleMethod: (handle: string, method: string, returnString: boolean): Promise<string | null> =>
+  androidHeapEvaluateHandleMethod: (handle: number, js: string): Promise<void> => heap.evaluate(handle, js),
+  androidHeapExecuteHandleMethod: (handle: number, method: string, returnString: boolean): Promise<string | null> =>
     heap.execute(handle, method, returnString),
-  androidHeapGetLiveClassInstances: (clazz: string, fresh: boolean): Promise<IHeapObject[]> =>
-    heap.getInstances(clazz, fresh),
-  androidHeapPrintFields: (handle: string): Promise<IJavaField[]> => heap.fields(handle),
-  androidHeapPrintMethods: (handle: string): Promise<string[]> => heap.methods(handle),
+  androidHeapGetLiveClassInstances: (clazz: string): Promise<IHeapObject[]> => heap.getInstances(clazz),
+  androidHeapPrintFields: (handle: number): Promise<IJavaField[]> => heap.fields(handle),
+  androidHeapPrintMethods: (handle: number): Promise<string[]> => heap.methods(handle),
 
   // android intents
   androidIntentStartActivity: (activityClass: string): Promise<void> => intent.startActivity(activityClass),
@@ -59,6 +58,7 @@ export const android = {
   // android keystore
   androidKeystoreClear: () => keystore.clear(),
   androidKeystoreList: (): Promise<IKeyStoreEntry[]> => keystore.list(),
+  androidKeystoreWatch: (): void => keystore.watchKeystore(),
 
   // android ssl pinning
   androidSslPinningDisable: (quiet: boolean) => sslpinning.disable(quiet),

@@ -3,12 +3,26 @@ import os
 import shutil
 
 import click
+import shlex
+from subprocess import list2cmdline
 
 from .github import Github
 
 # default paths
 objection_path = os.path.join(os.path.expanduser('~'), '.objection')
 gadget_versions = os.path.join(objection_path, 'gadget_versions')
+
+
+def list2posix_cmdline(seq):
+    """
+        Translate a sequence of arguments into a command line
+        string.
+
+        Implemented using shlex.quote because 
+        subprocess.list2cmdline doesn't work with POSIX
+    """
+
+    return ' '.join(map(shlex.quote, seq))
 
 
 class BasePlatformGadget(object):
@@ -98,6 +112,11 @@ class BasePlatformPatcher(object):
         # check dependencies
         self.have_all_commands = self._check_commands()
         self.command_run_timeout = 60 * 5
+
+        if os.name == 'nt':
+            self.list2cmdline = list2cmdline
+        else:
+            self.list2cmdline = list2posix_cmdline
 
     def _check_commands(self) -> bool:
         """

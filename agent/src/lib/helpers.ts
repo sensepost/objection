@@ -28,7 +28,7 @@ export const hexStringToBytes = (str: string): Uint8Array => {
 export const qsend = (quiet: boolean, message: any): void => {
   if (quiet === false) {
     send(message);
-   }
+  }
 };
 
 // a small helper method to use util to dump

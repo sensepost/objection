@@ -11,7 +11,8 @@ from ..utils.patchers.ios import IosGadget, IosPatcher
 
 
 def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, binary_name: str,
-                  skip_cleanup: bool, gadget_version: str = None, pause: bool = False) -> None:
+                  skip_cleanup: bool, unzip_unicode: bool, gadget_version: str = None,
+                  pause: bool = False, gadget_config: str = None, script_source: str = None) -> None:
     """
         Patches an iOS IPA by extracting, injecting the Frida dylib,
         codesigning the dylib and app executable and rezipping the IPA.
@@ -21,7 +22,11 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
         :param provision_file:
         :param binary_name:
         :param skip_cleanup:
+        :param unzip_unicode:
         :param gadget_version:
+        :param pause:
+        :param gadget_config:
+        :param script_source:
         :return:
     """
 
@@ -63,10 +68,14 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
         return
 
     patcher.set_provsioning_profile(provision_file=provision_file)
-    patcher.extract_ipa(ipa_source=source)
+    patcher.extract_ipa(unzip_unicode, ipa_source=source)
     patcher.set_application_binary(binary=binary_name)
     patcher.patch_and_codesign_binary(
-        frida_gadget=ios_gadget.get_gadget_path(), codesign_signature=codesign_signature)
+        frida_gadget=ios_gadget.get_gadget_path(), codesign_signature=codesign_signature, gadget_config=gadget_config)
+
+    if script_source:
+        click.secho('Copying over a custom script to use with the gadget config.', fg='green')
+        shutil.copyfile(script_source, os.path.join(patcher.app_folder, 'Frameworks', script_source))
 
     # give a chance to make any last minute modifications if needed
     if pause:
@@ -88,7 +97,8 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
 def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup: bool = True,
                       enable_debug: bool = True, gadget_version: str = None, skip_resources: bool = False,
                       network_security_config: bool = False, target_class: str = None,
-                      use_aapt2: bool = False) -> None:
+                      use_aapt2: bool = False, gadget_config: str = None, script_source: str = None,
+                      ignore_nativelibs: bool = True) -> None:
     """
         Patches an Android APK by extracting, patching SMALI, repackaging
         and signing a new APK.
@@ -103,6 +113,8 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
         :param network_security_config:
         :param target_class:
         :param use_aapt2:
+        :param gadget_config:
+        :param script_source:
 
         :return:
     """
@@ -127,6 +139,11 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
 
     # set the architecture we are interested in
     android_gadget.set_architecture(architecture)
+
+    # check the gadget config flags
+    if script_source and not gadget_config:
+        click.secho('A script source was specified but no gadget configuration was set.', fg='red', bold=True)
+        return
 
     # check if a gadget version was specified. if not, get the latest one.
     if gadget_version is not None:
@@ -155,16 +172,24 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
 
     click.secho('Patcher will be using Gadget version: {0}'.format(github_version), fg='green')
 
-    patcher = AndroidPatcher(skip_cleanup=skip_cleanup)
+    patcher = AndroidPatcher(skip_cleanup=skip_cleanup, skip_resources=skip_resources)
 
     # ensure that we have all of the commandline requirements
     if not patcher.are_requirements_met():
         return
+    
+    # ensure we have the latest apk-tool and run the
+    if not patcher.is_apktool_ready():
+        click.secho('apktool is not ready for use', fg='red', bold=True)
+        return
 
     # work on patching the APK
     patcher.set_apk_source(source=source)
-    patcher.unpack_apk(skip_resources=skip_resources)
-    patcher.inject_internet_permission(skip_resources=skip_resources)
+    patcher.unpack_apk()
+    patcher.inject_internet_permission()
+
+    if not ignore_nativelibs:
+        patcher.extract_native_libs_patch()
 
     if enable_debug:
         patcher.flip_debug_flag_to_true()
@@ -173,7 +198,13 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
         patcher.add_network_security_config()
 
     patcher.inject_load_library(target_class=target_class)
-    patcher.add_gadget_to_apk(architecture, android_gadget.get_frida_library_path())
+    patcher.add_gadget_to_apk(architecture, android_gadget.get_frida_library_path(), gadget_config)
+
+    if script_source:
+        click.secho('Copying over a custom script to use with the gadget config.', fg='green')
+        shutil.copyfile(script_source,
+                        os.path.join(patcher.apk_temp_directory, 'lib', architecture,
+                                     'libfrida-gadget.script.so'))
 
     # if we are required to pause, do that.
     if pause:

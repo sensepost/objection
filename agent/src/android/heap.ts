@@ -1,20 +1,18 @@
 import { colors as c } from "../lib/color";
-import { IHeapClassDictionary, IHeapObject, IJavaField } from "./lib/interfaces";
+import { IHeapClassDictionary, IHeapObject, IJavaField, IHeapNormalised } from "./lib/interfaces";
 import { wrapJavaPerform } from "./lib/libjava";
 
 export namespace heap {
 
-  // matches contains handles to methods, populated
-  // by getInstances().
   export let handles: IHeapClassDictionary = {};
 
-  const getInstance = (handle: string): Java.Wrapper | null => {
+  const getInstance = (hashcode: number): Java.Wrapper | null => {
     const matches: IHeapObject[] = [];
 
     // Search for this handle, and push the results to matches
     Object.keys(handles).forEach((clazz) => {
       handles[clazz].filter((heapObject) => {
-        if (heapObject.handleString === handle) {
+        if (heapObject.hashcode === hashcode) {
           matches.push(heapObject);
         }
       });
@@ -25,50 +23,51 @@ export namespace heap {
     }
 
     if (matches.length > 0) {
-      c.log(`${c.blackBright(`Handle ` + handle + ` is to class `)}${c.greenBright(matches[0].className)}`);
-      return matches[0].handle;
+      wrapJavaPerform(() => {
+        c.log(`${c.blackBright(`Handle ` + hashcode + ` is to class `)}
+        ${c.greenBright(matches[0].instance.$className)}`);
+      });
+      return matches[0].instance;
     }
 
-    c.log(`${c.yellowBright(`Warning:`)} Could not find a known handle for ${handle}. ` +
+    c.log(`${c.yellowBright(`Warning:`)} Could not find a known handle for ${hashcode}. ` +
       `Try searching class instances first.`);
 
     return null;
   };
 
-  export const getInstances = (clazz: string, fresh: boolean = false): Promise<IHeapObject[]> => {
+  export const getInstances = (clazz: string): Promise<any[]> => {
     return wrapJavaPerform(() => {
 
-      if (handles.hasOwnProperty(clazz) && handles[clazz].length > 0 && !fresh) {
-        c.log(c.blackBright(`Using exsiting matches for ${clazz}. Use --fresh flag for new instances.`));
-        return handles[clazz];
-      }
-
-      // A fresh search should be done! Clean up first
       handles[clazz] = [];
 
       // tslint:disable:only-arrow-functions
       // tslint:disable:object-literal-shorthand
       // tslint:disable:no-empty
       Java.choose(clazz, {
-        onComplete: function() {
+        onComplete: function () {
           c.log(`Class instance enumeration complete for ${c.green(clazz)}`);
         },
-        onMatch: function(instance) {
+        onMatch: function (instance) {
           handles[clazz].push({
-            asString: instance.toString(),
-            className: instance.$className,
-            handle: instance,
-            handleString: instance.$handle.toString(),
+            instance: instance,
+            hashcode: instance.hashCode(),
           });
         },
       });
       // tslint:enable
 
-      return handles[clazz];
+      return handles[clazz].map((h): IHeapNormalised => {
+        return {
+          hashcode: h.hashcode,
+          classname: clazz,
+          tostring: h.instance.toString(),
+        }
+      });
     });
   };
 
-  export const methods = (handle: string): Promise<string[]> => {
+  export const methods = (handle: number): Promise<string[]> => {
     return wrapJavaPerform(() => {
       const clazz: Java.Wrapper = getInstance(handle);
       if (clazz == null) {
@@ -81,7 +80,7 @@ export namespace heap {
     });
   };
 
-  export const execute = (handle: string, method: string, returnString: boolean = false): Promise<string | null> => {
+  export const execute = (handle: number, method: string, returnString: boolean = false): Promise<string | null> => {
     return wrapJavaPerform(() => {
       const clazz: Java.Wrapper = getInstance(handle);
 
@@ -100,7 +99,7 @@ export namespace heap {
     });
   };
 
-  export const fields = (handle: string): Promise<IJavaField[]> => {
+  export const fields = (handle: number): Promise<IJavaField[]> => {
     return wrapJavaPerform(() => {
       const clazz: Java.Wrapper = getInstance(handle);
 
@@ -128,7 +127,7 @@ export namespace heap {
     });
   };
 
-  export const evaluate = (handle: string, js: string): Promise<void> => {
+  export const evaluate = (handle: number, js: string): Promise<void> => {
     return wrapJavaPerform(() => {
       const clazz: Java.Wrapper = getInstance(handle);
 

@@ -12,8 +12,6 @@ import {
   NSString as NSStringType,
 } from "./lib/types";
 
-const { NSMutableDictionary, NSString } = ObjC.classes;
-
 // keychain item times to query for
 const itemClasses = [
   kSec.kSecClassKey,
@@ -64,7 +62,7 @@ export namespace ioskeychain {
     const kCFBooleanTrue = ObjC.classes.__NSCFBoolean.numberWithBool_(true);
 
     // the base query dictionary to use for the keychain lookups
-    const searchDictionary: NSMutableDictionaryType = NSMutableDictionary.alloc().init();
+    const searchDictionary: NSMutableDictionaryType = ObjC.classes.NSMutableDictionary.alloc().init();
     searchDictionary.setObject_forKey_(kCFBooleanTrue, kSec.kSecReturnAttributes);
     searchDictionary.setObject_forKey_(kCFBooleanTrue, kSec.kSecReturnData);
     searchDictionary.setObject_forKey_(kCFBooleanTrue, kSec.kSecReturnRef);
@@ -151,7 +149,7 @@ export namespace ioskeychain {
 
   // clean out the keychain
   export const empty = (): void => {
-    const searchDictionary: NSMutableDictionaryType = NSMutableDictionary.alloc().init();
+    const searchDictionary: NSMutableDictionaryType = ObjC.classes.NSMutableDictionary.alloc().init();
     itemClasses.forEach((clazz) => {
 
       // set the class-type we are querying for now & delete
@@ -161,19 +159,26 @@ export namespace ioskeychain {
   };
 
   // add a string entry to the keychain
-  export const add = (key: string, data: string): boolean => {
-    // Convert the key and data to NSData
-    const dataString: NSStringType = NSString.stringWithString_(data).dataUsingEncoding_(NSUTF8StringEncoding);
-    const dataKey: NSStringType = NSString.stringWithString_(key).dataUsingEncoding_(NSUTF8StringEncoding);
-    const itemDict: NSMutableDictionaryType = NSMutableDictionary.alloc().init();
+  export const add = (account: string, service: string, data: string): boolean => {
 
+    // prepare the dictionary for SecItemAdd()
+    const itemDict: NSMutableDictionaryType = ObjC.classes.NSMutableDictionary.alloc().init();
     itemDict.setObject_forKey_(kSec.kSecClassGenericPassword, kSec.kSecClass);
-    itemDict.setObject_forKey_(dataKey, kSec.kSecAttrService);
-    itemDict.setObject_forKey_(dataString, kSec.kSecValueData);
+
+    [
+      { "type": "account", "value": account, "ksec": kSec.kSecAttrAccount },
+      { "type": "service", "value": service, "ksec": kSec.kSecAttrService },
+      { "type": "data", "value": data, "ksec": kSec.kSecValueData }
+    ].forEach(e => {
+      if (e.value == null) return;
+      const v: NSStringType = ObjC.classes.NSString.stringWithString_(e.value)
+        .dataUsingEncoding_(NSUTF8StringEncoding);
+
+      itemDict.setObject_forKey_(v, e.ksec);
+    });
 
     // Add the keychain entry
     const result: any = libObjc.SecItemAdd(itemDict, NULL);
-
     return result.isNull();
   };
 

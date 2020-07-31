@@ -42,6 +42,17 @@ def _should_return_as_string(args) -> bool:
     return len(args) > 0 and '--return-string' in args
 
 
+def _should_interpret_inline_js(args) -> bool:
+    """
+        Check if we have the --inline flag
+
+        :param args:
+        :return:
+    """
+
+    return len(args) > 0 and '--inline' in args
+
+
 def instances(args: list) -> None:
     """
         Asks the agent to print the currently live instances of a particular class
@@ -173,19 +184,30 @@ def evaluate(args: list) -> None:
     """
 
     if len(args) < 1:
-        click.secho('Usage: ios heap execute js <pointer> (eg: 0x600001130660)', bold=True)
+        click.secho('Usage: ios heap execute js <pointer> (eg: 0x600001130660) ' +
+                    '(optional: --inline) (optional: <JavaScript source>)', bold=True)
         return
 
     target_pointer = args[0]
 
-    js = prompt(
-        click.secho('(The pointer at `{pointer}` will be available as the `ptr` variable.)n'.format(
-            pointer=target_pointer
-        ), dim=True),
-        multiline=True, lexer=PygmentsLexer(JavascriptLexer),
-        bottom_toolbar='JavaScript edit mode. [ESC] and then [ENTER] to accept. [CTRL] + C to cancel.').strip()
+    # adding the --inline flag would trigger reading the line contents
+    # as JavaScript sources
+    if _should_interpret_inline_js(args):
+        args.remove('--inline')
+        js = ''.join(args[1:])
 
-    click.secho('JavaScript capture complete. Evaluating...', dim=True)
+        click.secho('Reading inline JavaScript for evaluation...', dim=True)
+        click.secho('{}\n'.format(js), fg='green', dim=True)
+
+    else:
+        js = prompt(
+            click.secho('(The pointer at `{pointer}` will be available as the `ptr` variable.)n'.format(
+                pointer=target_pointer
+            ), dim=True),
+            multiline=True, lexer=PygmentsLexer(JavascriptLexer),
+            bottom_toolbar='JavaScript edit mode. [ESC] and then [ENTER] to accept. [CTRL] + C to cancel.').strip()
+
+        click.secho('JavaScript capture complete. Evaluating...', dim=True)
 
     api = state_connection.get_api()
     api.ios_heap_evaluate_js(target_pointer, js)
