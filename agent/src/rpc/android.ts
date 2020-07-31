@@ -19,6 +19,7 @@ export const android = {
   androidShellExec: (cmd: string): Promise<IExecutedCommand> => androidshell.execute(cmd),
 
   // android filesystem
+  androidFilePwd: () => androidfilesystem.pwd(),
   androidFileCwd: () => androidfilesystem.pwd(),
   androidFileDelete: (path: string) => androidfilesystem.deleteFile(path),
   androidFileDownload: (path: string) => androidfilesystem.readFile(path),
