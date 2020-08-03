@@ -1,6 +1,6 @@
 import logging
 import os
-from multiprocessing import Process
+import threading
 
 import click
 
@@ -53,5 +53,5 @@ logger.setLevel(logging.DEBUG)
 real_secho = click.secho
 click.secho = new_secho
 
-# kick off a background process to check the version of objection
-Process(target=check_version).start()
+# kick off a background thread to check the version of objection
+threading.Thread(target=check_version).start()
