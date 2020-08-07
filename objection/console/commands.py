@@ -11,16 +11,17 @@ from ..commands import sqlite
 from ..commands import ui
 from ..commands.android import clipboard
 from ..commands.android import command
+from ..commands.android import generate as android_generate
 from ..commands.android import heap as android_heap
 from ..commands.android import hooking as android_hooking
 from ..commands.android import intents
 from ..commands.android import keystore
 from ..commands.android import pinning as android_pinning
 from ..commands.android import root
-from ..commands.android import generate as android_generate
 from ..commands.ios import binary
 from ..commands.ios import bundles
 from ..commands.ios import cookies
+from ..commands.ios import generate as ios_generate
 from ..commands.ios import heap as ios_heap
 from ..commands.ios import hooking as ios_hooking
 from ..commands.ios import jailbreak
@@ -30,7 +31,6 @@ from ..commands.ios import nsuserdefaults
 from ..commands.ios import pasteboard
 from ..commands.ios import pinning as ios_pinning
 from ..commands.ios import plist
-from ..commands.ios import generate as ios_generate
 from ..utils.helpers import list_current_jobs
 
 # commands are defined with their name being the key, then optionally
@@ -107,13 +107,8 @@ COMMANDS = {
     },
 
     'pwd': {
-        'meta': 'Work with the current directory',
-        'commands': {
-            'print': {
-                'meta': 'Print the current working directory on the device',
-                'exec': filemanager.pwd_print
-            },
-        },
+        'meta': 'Print the current working directory on the device',
+        'exec': filemanager.pwd_print,
     },
 
     'file': {
