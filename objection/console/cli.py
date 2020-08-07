@@ -7,10 +7,10 @@ import frida
 
 from .repl import Repl
 from ..__init__ import __version__
-from ..api.app import create_app as create_api_app
 from ..commands.device import get_device_info
 from ..commands.mobile_packages import patch_ios_ipa, patch_android_apk
 from ..commands.plugin_manager import load_plugin
+from ..state.api import api_state
 from ..state.app import app_state
 from ..state.connection import state_connection
 from ..utils.agent import Agent
@@ -86,7 +86,7 @@ def api():
     click.secho('Starting API server on {host}:{port}'.format(
         host=app_state.api_host, port=app_state.api_port), fg='yellow', bold=True)
 
-    create_api_app().run(host=app_state.api_host, port=app_state.api_port, debug=app_state.debug)
+    api_state.start(app_state.api_host, app_state.api_port, app_state.debug)
 
 
 @cli.command()
@@ -190,8 +190,7 @@ def explore(startup_command: str, quiet: bool, file_commands, startup_script: cl
                 :return:
             """
 
-            a = create_api_app()
-            a.run(host=app_state.api_host, port=app_state.api_port)
+            api_state.start(app_state.api_host, app_state.api_port)
 
         click.secho('Starting API server on {host}:{port}'.format(
             host=app_state.api_host, port=app_state.api_port), fg='yellow', bold=True)

@@ -1,10 +1,12 @@
 import os
+from abc import ABC
 
 from objection.state.connection import state_connection
 from objection.utils.helpers import debug_print
+from ..state.api import api_state
 
 
-class Plugin(object):
+class Plugin(ABC):
     """ Plugin object to extend for development of custom functionality """
 
     def __init__(self, plugin_file: str, namespace: str, implementation: dict):
@@ -34,12 +36,13 @@ class Plugin(object):
         self.api = None
 
         self._prepare_source()
+        self._append_to_api()
 
     def _prepare_source(self):
         """
             Prepares the self.script_src attribute based on a few rules.
 
-            If the scritp source is already set, simply return as there is
+            If the script source is already set, simply return as there is
                 nothing for us to do.
             If the script path is set, read that and populate the script_src
                 attribute.
@@ -96,3 +99,23 @@ class Plugin(object):
 
         self.script.load()
         self.api = self.script.exports
+
+    def _append_to_api(self):
+        """
+            If the http_api() function is defined in the child class, take
+            it's return (it should always return a flask.Blueprint) and append
+            it to the existing blueprints in objections core API.
+
+            The ApiState class will handle the loading and starting of the API
+            with them included.
+
+            :return:
+        """
+
+        if not hasattr(self, 'http_api'):
+            return
+
+        if not callable(getattr(self, 'http_api')):
+            raise Exception('The http_api property must be a function returning a Flask Blueprint')
+
+        api_state.append_api_blueprint(getattr(self, 'http_api')())
