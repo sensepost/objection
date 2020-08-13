@@ -8,8 +8,9 @@ import { jobs } from "../lib/jobs";
 // an OS upgrade, some filesystem artifacts may still exist, causing some
 // of the typical checks to incorrectly detect the jailbreak status!
 
-// Hook NSFileManager calls and check if it is to a common path.
-// TODO: Hook fopen too.
+// Hook NSFileManager and fopen calls and check if it is to a common path.
+// Hook canOpenURL for Cydia deep link.
+
 const jailbreakPaths = [
   "/Applications/Cydia.app",
   "/Applications/FakeCarrier.app",
@@ -109,6 +110,127 @@ export namespace iosjailbreak {
     );
   };
 
+
+  // toggles replies to fopen: for the paths in jailbreakPaths
+  const fopen = (success: boolean, ident: string): InvocationListener => {
+
+    return Interceptor.attach(
+      Module.findExportByName(null, "fopen"), {
+        onEnter(args) {
+
+          this.is_common_path = false;
+
+          // Extract the path
+          this.path = Memory.readCString(ptr(args[0]));
+
+          // check if the looked up path is in the list of common_paths
+          if (jailbreakPaths.indexOf(this.path) >= 0) {
+
+            // Mark this path as one that should have its response
+            // modified if needed.
+            this.is_common_path = true;
+          }
+        },
+        onLeave(retval) {
+
+          // stop if we dont care about the path
+          if (!this.is_common_path) {
+            return;
+          }
+
+          // depending on the desired state, we flip retval
+          switch (success) {
+            case (true):
+              // ignore successful lookups
+              if (!retval.isNull()) {
+                return;
+              }
+              send(
+                c.blackBright(`[${ident}] `) + `fopen: check for ` +
+                c.green(this.path) + ` failed with: ` +
+                c.red(retval.toString()) + `, marking it as successful.`,
+              );
+
+              retval.replace(new NativePointer(0x01));
+              break;
+
+            case (false):
+              // ignore failed lookups
+              if (retval.isNull()) {
+                return;
+              }
+              send(
+                c.blackBright(`[${ident}] `) + `fopen: check for ` +
+                c.green(this.path) + ` was successful with: ` +
+                c.red(retval.toString()) + `, marking it as failed.`,
+              );
+
+              retval.replace(new NativePointer(0x00));
+              break;
+          }
+        },
+      },
+    );
+  };
+
+  // toggles replies to canOpenURL for Cydia
+  const canOpenURL = (success: boolean, ident: string): InvocationListener => {
+
+    return Interceptor.attach(
+      ObjC.classes.UIApplication["- canOpenURL:"].implementation, {
+        onEnter(args) {
+
+          this.is_flagged = false;
+
+          // Extract the path
+          this.path = ObjC.Object(args[2]).toString();
+
+          if (this.path.startsWith('cydia') || path.startsWith('Cydia')) {
+            this.is_flagged = true;
+          }
+        },
+        onLeave(retval) {
+
+          if (!this.is_flagged) {
+            return;
+          }
+
+          // depending on the desired state, we flip retval
+          switch (success) {
+            case (true):
+              // ignore successful lookups
+              if (!retval.isNull()) {
+                return;
+              }
+              send(
+                c.blackBright(`[${ident}] `) + `canOpenURL: check for ` +
+                c.green(this.path) + ` failed with: ` +
+                c.red(retval.toString()) + `, marking it as successful.`,
+              );
+
+              retval.replace(new NativePointer(0x01));
+              break;
+
+            case (false):
+              // ignore failed
+              if (retval.isNull()) {
+                return;
+              }
+              send(
+                c.blackBright(`[${ident}] `) + `canOpenURL: check for ` +
+                c.green(this.path) + ` was successful with: ` +
+                c.red(retval.toString()) + `, marking it as failed.`,
+              );
+
+              retval.replace(new NativePointer(0x00));
+              break;
+          }
+        },
+      },
+    );
+  };
+
+
   const libSystemBFork = (success: boolean, ident: string): InvocationListener => {
     // Hook fork() in libSystem.B.dylib and return 0
     // TODO: Hook vfork
@@ -165,6 +287,8 @@ export namespace iosjailbreak {
 
     job.invocations.push(fileExistsAtPath(false, job.identifier));
     job.invocations.push(libSystemBFork(false, job.identifier));
+    job.invocations.push(fopen(false, job.identifier));
+    job.invocations.push(canOpenURL(false, job.identifier));
 
     jobs.add(job);
   };
@@ -178,6 +302,8 @@ export namespace iosjailbreak {
 
     job.invocations.push(fileExistsAtPath(true, job.identifier));
     job.invocations.push(libSystemBFork(true, job.identifier));
+    job.invocations.push(fopen(true, job.identifier));
+    job.invocations.push(canOpenURL(true, job.identifier));
 
     jobs.add(job);
   };
