@@ -95,6 +95,5 @@ def check_version() -> None:
             # there is good chance an installation does not have internet, so cache
             # the current version as the latest to not be annoying about updates
             update_version_cache(__version__)
-            pass
 
     notify_newer_version()
