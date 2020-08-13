@@ -121,7 +121,7 @@ export namespace iosjailbreak {
           this.is_common_path = false;
 
           // Extract the path
-          this.path = Memory.readCString(ptr(args[0]));
+          this.path = args[0].readCString();
 
           // check if the looked up path is in the list of common_paths
           if (jailbreakPaths.indexOf(this.path) >= 0) {
@@ -183,9 +183,9 @@ export namespace iosjailbreak {
           this.is_flagged = false;
 
           // Extract the path
-          this.path = ObjC.Object(args[2]).toString();
+          this.path = new ObjC.Object(args[2]).toString();
 
-          if (this.path.startsWith('cydia') || path.startsWith('Cydia')) {
+          if (this.path.startsWith('cydia') || this.path.startsWith('Cydia')) {
             this.is_flagged = true;
           }
         },
