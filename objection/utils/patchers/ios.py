@@ -393,7 +393,7 @@ class IosPatcher(BasePlatformPatcher):
         click.secho('Codesigning {0} .appex\'s with signature {1}'.format(len(appex_to_sign), codesign_signature),
                     fg='green')
         for appex in appex_to_sign:
-            click.secho('Code signing: {0}'.format(os.path.basename(dylib)), dim=True)
+            click.secho('Code signing: {0}'.format(os.path.basename(appex)), dim=True)
             delegator.run(self.list2cmdline([
                 self.required_commands['codesign']['location'],
                 '-f',
