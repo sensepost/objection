@@ -383,9 +383,8 @@ class IosPatcher(BasePlatformPatcher):
                 dylib])
             )
         
-        # get the paths of all of the .appex files in this applications
-        # bundle. we will have to codesign all of them and not just the
-        # frida gadget
+        # get the paths of all of the .appex plugins in this applications
+        # bundle. We will have to codesign all of them.
         appex_to_sign = [
             os.path.join(dp, f) for dp, dn, fn in os.walk(self.app_folder) for f in fn if f.endswith('.appex')]
 
