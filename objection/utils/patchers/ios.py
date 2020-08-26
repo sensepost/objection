@@ -382,6 +382,26 @@ class IosPatcher(BasePlatformPatcher):
                 codesign_signature,
                 dylib])
             )
+        
+        # get the paths of all of the .appex files in this applications
+        # bundle. we will have to codesign all of them and not just the
+        # frida gadget
+        appex_to_sign = [
+            os.path.join(dp, f) for dp, dn, fn in os.walk(self.app_folder) for f in fn if f.endswith('.appex')]
+
+        # codesign the appex plugins in this bundle
+        click.secho('Codesigning {0} .appex\'s with signature {1}'.format(len(appex_to_sign), codesign_signature),
+                    fg='green')
+        for appex in appex_to_sign:
+            click.secho('Code signing: {0}'.format(os.path.basename(dylib)), dim=True)
+            delegator.run(self.list2cmdline([
+                self.required_commands['codesign']['location'],
+                '-f',
+                '-v',
+                '-s',
+                codesign_signature,
+                appex])
+            )
 
     def archive_and_codesign(self, original_name: str, codesign_signature: str) -> None:
         """
