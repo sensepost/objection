@@ -120,6 +120,48 @@ export namespace sslpinning {
     });
   };
 
+  const okHttp3CertificatePinnerCheckOkHttp = (ident: string): any | undefined => {
+    // -- Sample Java
+    //
+    // Example used to test this bypass.
+    //
+    // String hostname = "swapi.co";
+    // CertificatePinner certificatePinner = new CertificatePinner.Builder()
+    //         .add(hostname, "sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
+    //         .build();
+    // OkHttpClient client = new OkHttpClient.Builder()
+    //         .certificatePinner(certificatePinner)
+    //         .build();
+    // Request request = new Request.Builder()
+    //         .url("https://swapi.co/api/people/1")
+    //         .build();
+    // Response response = client.newCall(request).execute();
+    return wrapJavaPerform(() => {
+      try {
+        const certificatePinner: CertificatePinner = Java.use("okhttp3.CertificatePinner");
+        send(c.blackBright(`Found okhttp3.CertificatePinner, overriding CertificatePinner.check$okhttp()`));
+
+        const CertificatePinnerCheckOkHttp = certificatePinner.check$okhttp.overload("java.lang.String", "u15");
+
+        // tslint:disable-next-line:only-arrow-functions
+        CertificatePinnerCheckOkHttp.implementation = function() {
+          qsend(quiet,
+            c.blackBright(`[${ident}] `) + `Called check$okhttp ` +
+            c.green(`OkHTTP 3.x CertificatePinner.check$okhttp()`) +
+            `, not throwing an exception.`,
+          );
+        };
+
+        return CertificatePinnerCheckOkHttp;
+
+      } catch (err) {
+        if (err.message.indexOf("ClassNotFoundException") === 0) {
+          throw new Error(err);
+        }
+      }
+    });
+  };
+
   const appceleratorTitaniumPinningTrustManager = (ident: string): any | undefined => {
     return wrapJavaPerform(() => {
       try {
@@ -276,6 +318,7 @@ export namespace sslpinning {
 
     job.implementations.push(sslContextEmptyTrustManager(job.identifier));
     job.implementations.push(okHttp3CertificatePinnerCheck(job.identifier));
+    job.implementations.push(okHttp3CertificatePinnerCheckOkHttp(job.identifier));
     job.implementations.push(appceleratorTitaniumPinningTrustManager(job.identifier));
     job.implementations.push(trustManagerImplVerifyChainCheck(job.identifier));
     job.implementations.push(trustManagerImplCheckTrustedRecursiveCheck(job.identifier));
