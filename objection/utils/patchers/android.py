@@ -198,7 +198,7 @@ class AndroidPatcher(BasePlatformPatcher):
         }
     }
 
-    def __init__(self, skip_cleanup: bool = False, skip_resources: bool = False):
+    def __init__(self, skip_cleanup: bool = False, skip_resources: bool = False, manifest: str = None):
         super(AndroidPatcher, self).__init__()
 
         self.apk_source = None
@@ -208,6 +208,7 @@ class AndroidPatcher(BasePlatformPatcher):
         self.aapt = None
         self.skip_cleanup = skip_cleanup
         self.skip_resources = skip_resources
+        self.manifest = manifest
 
         self.keystore = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../assets', 'objection.jks')
         self.netsec_config = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../assets',
@@ -281,15 +282,17 @@ class AndroidPatcher(BasePlatformPatcher):
         """
 
         # error if --skip-resources was used because the manifest is encoded
-        if self.skip_resources is True:
+        if self.skip_resources is True and self.manifest is None:
             click.secho('Cannot manually parse the AndroidManifest.xml when --skip-resources '
-                        'is set, remove this and try again.', fg='red')
+                        'is set, remove this and try again, or manually specify manifest with --manifest.', fg='red')
             raise Exception('Cannot --skip-resources when trying to manually parse the AndroidManifest.xml')
 
         # use the android namespace
         ElementTree.register_namespace('android', 'http://schemas.android.com/apk/res/android')
-
-        return ElementTree.parse(os.path.join(self.apk_temp_directory, 'AndroidManifest.xml'))
+        if self.manifest is not None:
+            return ElementTree.parse(self.manifest)
+        else:
+            return ElementTree.parse(os.path.join(self.apk_temp_directory, 'AndroidManifest.xml'))
 
     def _get_appt_output(self):
         """
