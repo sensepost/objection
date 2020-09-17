@@ -70,6 +70,7 @@ export const android = {
 
   // android scanner declarations
   androidGetFbDatabase: () => scanner.getfbdatabase(),
+  androidGetApiKeys: () => scanner.getapikeys(),
 
   // android user interface
   androidUiScreenshot: () => userinterface.screenshot(),

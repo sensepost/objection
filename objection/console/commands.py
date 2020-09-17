@@ -285,6 +285,10 @@ COMMANDS = {
                         'meta': 'Scan for leaking firebase DBs',
                         'exec': android_scanner.firebase
                     },
+                    'apikeys' : {
+                        'meta': 'Scan for Firebase Cloud Messaging Keys',
+                        'exec': android_scanner.apikeys
+                    }
                 },
             },
             'hooking': {
