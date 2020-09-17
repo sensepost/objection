@@ -18,6 +18,7 @@ from ..commands.android import intents
 from ..commands.android import keystore
 from ..commands.android import pinning as android_pinning
 from ..commands.android import root
+from ..commands.android import scanner as android_scanner
 from ..commands.ios import binary
 from ..commands.ios import bundles
 from ..commands.ios import cookies
@@ -276,6 +277,15 @@ COMMANDS = {
             'shell_exec': {
                 'meta': 'Execute a shell command',
                 'exec': command.execute
+            },
+            'scanner': {
+                'meta': 'Command used to invoke the scanner',
+                'commands': {
+                    'firebase': {
+                        'meta': 'Scan for leaking firebase DBs',
+                        'exec': android_scanner.firebase
+                    },
+                },
             },
             'hooking': {
                 'meta': 'Commands used for hooking methods in Android',
