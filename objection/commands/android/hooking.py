@@ -67,6 +67,24 @@ def show_android_classes(args: list = None) -> None:
     click.secho('\nFound {0} classes'.format(len(classes)), bold=True)
 
 
+def show_android_class_loaders(args: list = None) -> None:
+    """
+        Show the currently registered class loaders.
+
+        :param args:
+        :return:
+    """
+
+    api = state_connection.get_api()
+    loaders = api.android_hooking_get_class_loaders()
+
+    # print the enumerated classes
+    for loader in sorted(loaders):
+        click.secho('* {0}'.format(loader))
+
+    click.secho('\nFound {0} class loaders'.format(len(loaders)), bold=True)
+
+
 def show_android_class_methods(args: list = None) -> None:
     """
         Shows the methods available on an Android class.

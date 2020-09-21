@@ -32,6 +32,7 @@ export const android = {
   // android hooking
   androidHookingGetClassMethods: (className: string): Promise<string[]> => hooking.getClassMethods(className),
   androidHookingGetClasses: (): Promise<string[]> => hooking.getClasses(),
+  androidHookingGetClassLoaders: (): Promise<string[]> => hooking.getClassLoaders(),
   androidHookingGetCurrentActivity: (): Promise<ICurrentActivityFragment> => hooking.getCurrentActivity(),
   androidHookingListActivities: (): Promise<string[]> => hooking.getActivities(),
   androidHookingListBroadcastReceivers: (): Promise<string[]> => hooking.getBroadcastReceivers(),

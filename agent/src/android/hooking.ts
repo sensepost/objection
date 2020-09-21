@@ -25,6 +25,23 @@ export namespace hooking {
     });
   };
 
+  export const getClassLoaders = (): Promise<string[]> => {
+    return wrapJavaPerform(() => {
+      let loaders: string[] = [];
+      Java.enumerateClassLoaders({
+        onMatch: function(l) {
+          if (l == null) {
+            return
+          }
+          loaders.push(l.toString());
+        },
+        onComplete: function() { }
+      });
+
+      return loaders;
+    });
+  }
+
   export const getClassMethods = (className: string): Promise<string[]> => {
     return wrapJavaPerform(() => {
 
