@@ -176,7 +176,7 @@ export namespace hooking {
           if (dargs && calleeArgTypes.length > 0) {
             const argValues: string[] = [];
             for (const h of arguments) {
-              argValues.push(JSON.stringify(h || "(none)"));
+              argValues.push((h || "(none)").toString());
             }
 
             send(
@@ -190,7 +190,7 @@ export namespace hooking {
 
           // dump the return value
           if (dret) {
-            const retValStr: string = JSON.stringify(retVal || "(none)");
+            const retValStr: string = (retVal || "(none)").toString();
             send(c.blackBright(`[${job.identifier}] `) + `Return Value: ${c.red(retValStr)}`);
           }
 
