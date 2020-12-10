@@ -339,6 +339,7 @@ export namespace ioscrypto {
   export const monitor = (): void => {
     // if we already have a job registered then return
     if (jobs.hasIdent(cryptoidentifier)) {
+      send(`${c.greenBright("Job already registered")}: ${c.blueBright(cryptoidentifier)}`)
       return
     }
 
