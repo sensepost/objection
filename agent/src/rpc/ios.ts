@@ -5,6 +5,7 @@ import { credentialstorage } from "../ios/credentialstorage";
 import { iosfilesystem } from "../ios/filesystem";
 import { heap } from "../ios/heap";
 import { hooking } from "../ios/hooking";
+import { ioscrypto } from "../ios/crypto";
 import { iosjailbreak } from "../ios/jailbreak";
 import { ioskeychain } from "../ios/keychain";
 import { BundleType } from "../ios/lib/constants";
@@ -58,6 +59,10 @@ export const ios = {
   iosHookingWatchClass: (clazz: string, parents: boolean): void => hooking.watchClass(clazz, parents),
   iosHookingWatchMethod: (selector: string, dargs: boolean, dbt: boolean, dret: boolean): void =>
     hooking.watchMethod(selector, dargs, dbt, dret),
+
+  // ios crypto monitoring
+  iosCryptoDisable: (): void => ioscrypto.disable(),
+  iosCryptoMonitor: (): void => ioscrypto.monitor(),
 
   // jailbreak detection
   iosJailbreakDisable: (): void => iosjailbreak.disable(),

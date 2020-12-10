@@ -31,9 +31,29 @@ export const qsend = (quiet: boolean, message: any): void => {
   }
 };
 
+// send a preformated dict
+export const fsend = (ident: string, hook: string, message: any): void => {
+  send(
+    c.blackBright(`[${ident}] `) +
+    c.magenta(`[${hook}]`) +
+    printArgs(message)
+  )
+  // send(header + printArgs(message));
+};
+
 // a small helper method to use util to dump
 export const debugDump = (o: any, depth: number = 2): void => {
   c.log(c.blackBright("\n[start debugDump]"));
   c.log(util.inspect(o, true, depth, true));
   c.log(c.blackBright("[end debugDump]\n"));
 };
+
+// a small helper method to format JSON nicely before printing
+function printArgs(args: JSON) : string {
+  var printableString : string = " (\n"
+  for (var  arg in args) {
+      printableString += `  ${c.blue(arg)} : ${args[arg]}\n`;
+  }
+  printableString += ")" 
+  return printableString
+}
