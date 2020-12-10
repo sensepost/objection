@@ -264,8 +264,6 @@ export namespace ioscrypto {
 
         // args[2]  Length of data to process.
         this.dataInLength = args[2].toInt32()
-        this.cccryptorupdate.dataInLength = this.dataInLength
-
         // args[3]  Result is written here. Allocated by caller. 
         //	  		  Encryption and decryption can be performed
         //				  "in-place", with the same buffer used for 
@@ -274,7 +272,6 @@ export namespace ioscrypto {
 
         // args[4]  The size of the dataOut buffer in bytes.
         this.dataOutAvailable = args[4].toInt32()
-        this.cccryptorupdate.dataOutAvailable = this.dataOutAvailable
 
         const dataIn = arrayBufferToHex(dataInPtr.readByteArray(this.dataInLength))
         this.cccryptorupdate.dataIn = op ? dataIn : hexToString(dataIn)
@@ -284,11 +281,10 @@ export namespace ioscrypto {
         // if the messsage is longer than 1 block then we need to 
         // remember everything before the final block
         if (this.dataInLength > blocksize) {
-          dataOutBytes = arrayBufferToHex(this.dataOutPtr.readByteArray(this.dataOutAvailable)).split("00")[0]
-
           // TODO: There is sometimes padding added to the end of this message
           // someone please fix this in a pull request. it is super hacky.
-          this.cccryptorupdate.dataOut = dataOutBytes.split("000000")[0]
+          dataOutBytes = arrayBufferToHex(this.dataOutPtr.readByteArray(this.dataOutAvailable)).split("000000")[0]
+          this.cccryptorupdate.dataOut = dataOutBytes
         }
 
         fsend(ident, hook, this.cccryptorupdate)
