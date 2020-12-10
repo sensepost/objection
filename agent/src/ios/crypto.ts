@@ -319,7 +319,9 @@ export namespace ioscrypto {
         
         // append the final block the any previous blocks that might exist
         dataOutBytes += arrayBufferToHex(this.dataOutPtr.readByteArray(this.dataOutAvailable))
-        this.cccryptorfinal.dataOut = dataOutBytes
+        this.cccryptorfinal.dataOut = this.op ? hexToString(dataOutBytes) : dataOutBytes
+
+        // this.cccryptorfinal.dataOut = dataOutBytes
 
         fsend(ident, hook, this.cccryptorfinal)
       }
