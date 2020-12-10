@@ -257,7 +257,6 @@ export namespace ioscrypto {
         this.cccryptorupdate = {}
 
         // reset for the next operation. 
-        // someone please have a more elegant solution to this problem
         dataOutBytes = ""
 
         // args[1]  Data to process, length dataInLength bytes.
@@ -285,12 +284,11 @@ export namespace ioscrypto {
         // if the messsage is longer than 1 block then we need to 
         // remember everything before the final block
         if (this.dataInLength > blocksize) {
+          dataOutBytes = arrayBufferToHex(this.dataOutPtr.readByteArray(this.dataOutAvailable)).split("00")[0]
 
           // TODO: There is sometimes padding added to the end of this message
-          // someone please try to fix this in a pull request ;)
-          // it is super hacky.
-          dataOutBytes = arrayBufferToHex(this.dataOutPtr.readByteArray(this.dataOutAvailable)).split("00")[0]
-          this.cccryptorupdate.dataOut = dataOutBytes.split("00")[0]
+          // someone please fix this in a pull request. it is super hacky.
+          this.cccryptorupdate.dataOut = dataOutBytes.split("000000")[0]
         }
 
         fsend(ident, hook, this.cccryptorupdate)
