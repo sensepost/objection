@@ -50,10 +50,10 @@ export const debugDump = (o: any, depth: number = 2): void => {
 
 // a small helper method to format JSON nicely before printing
 function printArgs(args: JSON) : string {
-  var printableString : string = " (\n"
-  for (var  arg in args) {
+  let printableString : string = " (\n"
+  for (const arg in args) {
       printableString += `  ${c.blue(arg)} : ${args[arg]}\n`;
   }
-  printableString += ")" 
+  printableString += ")"
   return printableString
 }
