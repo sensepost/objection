@@ -11,6 +11,7 @@ from ..commands import sqlite
 from ..commands import ui
 from ..commands.android import clipboard
 from ..commands.android import command
+from ..commands.android import general
 from ..commands.android import generate as android_generate
 from ..commands.android import heap as android_heap
 from ..commands.android import hooking as android_hooking
@@ -275,6 +276,10 @@ COMMANDS = {
     'android': {
         'meta': 'Commands specific to Android',
         'commands': {
+            'deoptimize': {
+                'meta': 'Force the VM to execute everything in the interpreter',
+                'exec': general.deoptimise
+            },
             'shell_exec': {
                 'meta': 'Execute a shell command',
                 'exec': command.execute
