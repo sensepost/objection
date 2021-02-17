@@ -1,5 +1,6 @@
 import click
 import frida
+import fnmatch
 
 from objection.state.connection import state_connection
 from objection.utils.helpers import clean_argument_flags
@@ -126,7 +127,13 @@ def watch_class(args: list) -> None:
     target_class = args[0]
 
     api = state_connection.get_api()
-    api.android_hooking_watch_class(target_class)
+
+    if '*' in target_class:
+        classes = api.android_hooking_get_classes()
+        for class_name in fnmatch.filter(classes, target_class):
+            api.android_hooking_watch_class(class_name)
+    else:
+        api.android_hooking_watch_class(target_class)
 
 
 def watch_class_method(args: list) -> None:
