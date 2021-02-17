@@ -189,13 +189,13 @@ class AndroidPatcher(BasePlatformPatcher):
             'installation': 'apt install adb (Kali Linux); brew install adb (macOS)'
         },
         'apksigner': {
-            'apksigner': 'apt install apksigner (Kali Linux)'
+            'installation': 'apt install apksigner (Kali Linux)'
         },
         'apktool': {
             'installation': 'apt install apktool (Kali Linux)'
         },
         'zipalign': {
-            'installation': 'apt install zipalign'
+            'installation': 'apt install zipalign (Kali Linux)'
         }
     }
 
