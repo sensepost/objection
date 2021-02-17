@@ -1,15 +1,15 @@
+import contextlib
 import lzma
 import os
+import re
 import shutil
 import tempfile
 import xml.etree.ElementTree as ElementTree
-from pkg_resources import parse_version
-import contextlib
-import re
 
 import click
 import delegator
 import requests
+from pkg_resources import parse_version
 
 from .base import BasePlatformGadget, BasePlatformPatcher, objection_path
 from .github import Github
@@ -285,7 +285,7 @@ class AndroidPatcher(BasePlatformPatcher):
         # error if --skip-resources was used because the manifest is encoded
         if self.skip_resources is True and self.manifest is None:
             click.secho('Cannot manually parse the AndroidManifest.xml when --skip-resources '
-                        'is set, remove this and try again, or manually specify manifest with --manifest.', fg='red')
+                        'is set, remove this and try again, or manually specify a manifest with --manifest.', fg='red')
             raise Exception('Cannot --skip-resources when trying to manually parse the AndroidManifest.xml')
 
         # use the android namespace
@@ -330,13 +330,14 @@ class AndroidPatcher(BasePlatformPatcher):
             :return:
         """
 
-        activities = (match.groups()[0] for match in re.finditer(r"^launchable-activity: name='([^']+)'", self._get_appt_output(), re.MULTILINE))
+        activities = (match.groups()[0] for match in
+                      re.finditer(r"^launchable-activity: name='([^']+)'", self._get_appt_output(), re.MULTILINE))
         activity = next(activities, None)
 
         # If we got the activity using aapt, great, return that
         if activity is not None:
             return activity
-        
+
         # if we dont have the activity yet, check out activity aliases
         click.secho(('Unable to determine the launchable activity using aapt, trying '
                      'to manually parse the AndroidManifest for activity aliases...'), dim=True, fg='yellow')
@@ -429,7 +430,8 @@ class AndroidPatcher(BasePlatformPatcher):
             return
 
         # if not, we need to inject an element with it
-        click.secho('App does not have android.permission.INTERNET, attempting to patch the AndroidManifest.xml...', dim=True, fg='yellow')
+        click.secho('App does not have android.permission.INTERNET, attempting to patch the AndroidManifest.xml...',
+                    dim=True, fg='yellow')
         xml = self._get_android_manifest()
         root = xml.getroot()
 
@@ -845,12 +847,12 @@ class AndroidPatcher(BasePlatformPatcher):
         click.secho('Rebuilding the APK with the frida-gadget loaded...', fg='green', dim=True)
         o = delegator.run(
             self.list2cmdline([self.required_commands['apktool']['location'],
-                          'build',
-                          self.apk_temp_directory,
-                          ] + (['--use-aapt2'] if use_aapt2 else []) + [
-                             '-o',
-                             self.apk_temp_frida_patched
-                         ]), timeout=self.command_run_timeout)
+                               'build',
+                               self.apk_temp_directory,
+                               ] + (['--use-aapt2'] if use_aapt2 else []) + [
+                                  '-o',
+                                  self.apk_temp_frida_patched
+                              ]), timeout=self.command_run_timeout)
 
         if len(o.err) > 0:
             click.secho(('Rebuilding the APK may have failed. Read the following '
@@ -931,10 +933,10 @@ class AndroidPatcher(BasePlatformPatcher):
         try:
 
             shutil.rmtree(self.apk_temp_directory, ignore_errors=True)
-            
+
             with contextlib.suppress(FileNotFoundError):
                 os.remove(self.apk_temp_frida_patched)
-            
+
             with contextlib.suppress(FileNotFoundError):
                 os.remove(self.apk_temp_frida_patched_aligned)
 

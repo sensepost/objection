@@ -66,10 +66,10 @@ def connect(args: list) -> None:
 
     db_location = args[0]
     _, local_path = tempfile.mkstemp('.sqlite')
-    use_shm = False # does Shared Memory temp file exist ? 
-    use_wal = False # does Write-Ahead-Log temp file exist ? 
-    use_jnl = False # does Journal temp file exist ?
-    write_back_tmp_sqlite = False # if enabled temporary DB files are re-uploaded, this has not been testes
+    use_shm = False  # does Shared Memory temp file exist ?
+    use_wal = False  # does Write-Ahead-Log temp file exist ?
+    use_jnl = False  # does Journal temp file exist ?
+    write_back_tmp_sqlite = False  # if enabled temporary DB files are re-uploaded, this has not been testes
 
     # update the full remote path for future syncs
     full_remote_file = db_location \
@@ -130,4 +130,3 @@ def connect(args: list) -> None:
         cleanup(local_path + '-wal')
     if use_jnl:
         cleanup(local_path + '-journal')
-
