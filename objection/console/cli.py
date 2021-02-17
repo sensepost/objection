@@ -115,6 +115,9 @@ def explore(startup_command: str, quiet: bool, file_commands, startup_script: cl
     except (frida.ServerNotRunningError, frida.NotSupportedError) as e:
         click.secho('Unable to connect to the frida server: {error}'.format(error=str(e)), fg='red')
         return
+    except frida.ProtocolError as e:
+        click.secho('Unable to connect to the frida server: {error}'.format(error=str(e)), fg='red')
+        return
 
     # set the frida agent
     state_connection.set_agent(agent=agent)
