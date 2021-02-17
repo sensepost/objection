@@ -1,0 +1,15 @@
+Command: ios crypto monitor
+
+Usage: ios crypto monitor
+
+Hooks CommonCrypto to output information about cryptographic operation. Works best for AES with PKCS7 Padding.
+Currently the following hooks are supported: 
+ - SecRandomCopyBytes
+ - CCKeyDerivationPBKDF
+ - CCCrypt
+ - CCCryptorCreate
+ - CCCryptorUpdate
+ - CCCryptorFinal
+
+Examples:
+   ios crypto monitor
