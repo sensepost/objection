@@ -8,7 +8,7 @@ import frida
 from .repl import Repl
 from ..__init__ import __version__
 from ..commands.device import get_device_info
-from ..commands.mobile_packages import patch_ios_ipa, patch_android_apk
+from ..commands.mobile_packages import patch_ios_ipa, patch_android_apk, sign_android_apk
 from ..commands.plugin_manager import load_plugin
 from ..state.api import api_state
 from ..state.app import app_state
@@ -369,6 +369,16 @@ def patchapk(source: str, architecture: str, gadget_version: str, pause: bool, s
 
     patch_android_apk(**locals())
 
+@cli.command()
+@click.argument('sources', nargs=-1, type=click.Path(exists=True), required=True)
+@click.option('--skip-cleanup', '-k', is_flag=True,
+              help='Do not clean temporary files once finished.', show_default=True)
+def signapk(sources, skip_cleanup: bool) -> None:
+    """
+        Zipalign and sign an APK with the objection key.
+    """
+    for source in sources:
+        sign_android_apk(source, skip_cleanup)
 
 if __name__ == '__main__':
     cli()

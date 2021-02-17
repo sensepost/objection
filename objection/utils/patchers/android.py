@@ -4,6 +4,7 @@ import shutil
 import tempfile
 import xml.etree.ElementTree as ElementTree
 from pkg_resources import parse_version
+import contextlib
 import re
 
 import click
@@ -187,8 +188,8 @@ class AndroidPatcher(BasePlatformPatcher):
         'adb': {
             'installation': 'apt install adb (Kali Linux); brew install adb (macOS)'
         },
-        'jarsigner': {
-            'installation': 'apt install default-jdk (Linux); brew cask install java (macOS)'
+        'apksigner': {
+            'apksigner': 'apt install apksigner (Kali Linux)'
         },
         'apktool': {
             'installation': 'apt install apktool (Kali Linux)'
@@ -868,7 +869,7 @@ class AndroidPatcher(BasePlatformPatcher):
             self.required_commands['zipalign']['location'],
             '-p',
             '4',
-            self.apk_temp_frida_patched,
+            self.apk_temp_frida_patched if os.path.exists(self.apk_temp_frida_patched) else self.apk_source,
             self.apk_temp_frida_patched_aligned
         ]))
 
@@ -893,22 +894,18 @@ class AndroidPatcher(BasePlatformPatcher):
         click.secho('Signing new APK.', dim=True)
 
         o = delegator.run(self.list2cmdline([
-            self.required_commands['jarsigner']['location'],
-            '-sigalg',
-            'SHA1withRSA',
-            '-digestalg',
-            'SHA1',
-            '-tsa',
-            'http://timestamp.digicert.com',
-            '-storepass',
-            'basil-joule-bug',
-            '-keystore',
+            self.required_commands['apksigner']['location'],
+            'sign',
+            '--ks',
             self.keystore,
-            self.apk_temp_frida_patched,
-            'objection'
+            '--ks-pass',
+            'pass:basil-joule-bug',
+            '--ks-key-alias',
+            'objection',
+            self.apk_temp_frida_patched_aligned
         ]))
 
-        if len(o.err) > 0 or 'jar signed' not in o.out:
+        if len(o.err) > 0:
             click.secho('Signing the new APK may have failed.', fg='red')
             click.secho(o.out, fg='yellow')
             click.secho(o.err, fg='red')
@@ -931,8 +928,12 @@ class AndroidPatcher(BasePlatformPatcher):
         try:
 
             shutil.rmtree(self.apk_temp_directory, ignore_errors=True)
-            os.remove(self.apk_temp_frida_patched)
-            os.remove(self.apk_temp_frida_patched_aligned)
+            
+            with contextlib.suppress(FileNotFoundError):
+                os.remove(self.apk_temp_frida_patched)
+            
+            with contextlib.suppress(FileNotFoundError):
+                os.remove(self.apk_temp_frida_patched_aligned)
 
         except Exception as err:
             click.secho('Failed to cleanup with error: {0}'.format(err), fg='red', dim=True)
