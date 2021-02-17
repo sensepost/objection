@@ -1,6 +1,6 @@
-Command: ios crypto monitor
+Command: ios monitor crypto monitor
 
-Usage: ios crypto monitor
+Usage: ios monitor crypto monitor
 
 Hooks CommonCrypto to output information about cryptographic operation. Works best for AES with PKCS7 Padding.
 Currently the following hooks are supported: 
@@ -12,4 +12,4 @@ Currently the following hooks are supported:
  - CCCryptorFinal
 
 Examples:
-   ios crypto monitor
+   ios monitor crypto monitor

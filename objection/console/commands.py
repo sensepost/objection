@@ -21,12 +21,12 @@ from ..commands.android import root
 from ..commands.ios import binary
 from ..commands.ios import bundles
 from ..commands.ios import cookies
-from ..commands.ios import crypto as ios_crypto
 from ..commands.ios import generate as ios_generate
 from ..commands.ios import heap as ios_heap
 from ..commands.ios import hooking as ios_hooking
 from ..commands.ios import jailbreak
 from ..commands.ios import keychain
+from ..commands.ios import monitor as ios_crypto
 from ..commands.ios import nsurlcredentialstorage
 from ..commands.ios import nsuserdefaults
 from ..commands.ios import pasteboard
@@ -738,20 +738,26 @@ COMMANDS = {
                     },
                 }
             },
-            'crypto': {
-                'meta': 'Hooks for working with monitoring iOS CommonCrypto usage',
+            'monitor': {
+                'meta': 'Commands to work with ios function monitoring',
                 'commands': {
-                    'disable': {
-                        'meta': 'Disable CommonCrypto monitor',
-                        'exec': ios_crypto.ios_disable
-                    },
-                    'monitor': {
-                        'meta': 'Monitor CommonCrypto operations',
-                        'exec': ios_crypto.ios_monitor
-                    }
+                    'crypto': {
+                        'meta': 'Hooks for working with monitoring iOS CommonCrypto usage',
+                        'commands': {
+                            'disable': {
+                                'meta': 'Disable CommonCrypto monitor',
+                                'exec': ios_crypto.crypto_disable
+                            },
+                            'monitor': {
+                                'meta': 'Monitor CommonCrypto operations',
+                                'exec': ios_crypto.crypto_enable
+                            }
 
-                }
-            }
+                        }
+                    }
+                },
+            },
+
         }
     },
 

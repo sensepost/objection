@@ -1,4 +1,3 @@
-import { debug } from "console";
 import { colors as c } from "../lib/color";
 import { fsend } from "../lib/helpers";
 import { IJob } from "../lib/interfaces";

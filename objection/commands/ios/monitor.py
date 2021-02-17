@@ -1,6 +1,7 @@
 from objection.state.connection import state_connection
 
-def ios_disable(args: list = None) -> None:
+
+def crypto_disable(args: list = None) -> None:
     """
         Attempts to disable ios crypto monitoring.
 
@@ -9,10 +10,10 @@ def ios_disable(args: list = None) -> None:
     """
 
     api = state_connection.get_api()
-    api.ios_crypto_disable()
+    api.ios_monitor_crypto_disable()
 
 
-def ios_monitor(args: list = None) -> None:
+def crypto_enable(args: list = None) -> None:
     """
         Attempts to enable ios crypto monitoring.
 
@@ -21,4 +22,4 @@ def ios_monitor(args: list = None) -> None:
     """
 
     api = state_connection.get_api()
-    api.ios_crypto_monitor()
+    api.ios_monitor_crypto_enable()
