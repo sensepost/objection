@@ -17,6 +17,7 @@ from ..commands.android import hooking as android_hooking
 from ..commands.android import intents
 from ..commands.android import keystore
 from ..commands.android import pinning as android_pinning
+from ..commands.android import proxy as android_proxy
 from ..commands.android import root
 from ..commands.ios import binary
 from ..commands.ios import bundles
@@ -468,6 +469,15 @@ COMMANDS = {
                         'meta': 'Attempt to disable SSL pinning in various Java libraries/classes',
                         'flags': ['--quiet'],
                         'exec': android_pinning.android_disable
+                    }
+                }
+            },
+            'proxy': {
+                'meta': 'Commands to work with a proxy for the application',
+                'commands': {
+                    'set': {
+                        'meta': 'Set a proxy for the application',
+                        'exec': android_proxy.android_proxy_set
                     }
                 }
             },
