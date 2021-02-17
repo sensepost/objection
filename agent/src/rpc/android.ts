@@ -10,6 +10,7 @@ import { sslpinning } from "../android/pinning";
 import { root } from "../android/root";
 import { androidshell } from "../android/shell";
 import { userinterface } from "../android/userinterface";
+import { scanner } from "../android/scanner";
 
 export const android = {
   // android clipboard
@@ -67,6 +68,10 @@ export const android = {
   // android root detection
   androidRootDetectionDisable: () => root.disable(),
   androidRootDetectionEnable: () => root.enable(),
+
+  // android scanner declarations
+  androidGetFbDatabase: () => scanner.getfbdatabase(),
+  androidGetApiKeys: () => scanner.getapikeys(),
 
   // android user interface
   androidUiScreenshot: () => userinterface.screenshot(),
