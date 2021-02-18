@@ -6,7 +6,7 @@ export namespace jobs {
   // a record of all of the jobs in the current process
   let currentJobs: IJob[] = [];
 
-  export const identifier = (): string => Math.random().toString(36).substring(2, 15);
+  export const identifier = (): string => Math.random().toString(36).substring(2, 8);
   export const all = (): IJob[] => currentJobs;
 
   export const add = (jobData: IJob): void => {

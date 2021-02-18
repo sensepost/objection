@@ -241,7 +241,7 @@ Fragment: bar
         with capture(search_class, ['com.foo.bar']) as o:
             output = o
 
-        self.assertEqual(output, '\nFound 0 classes\n')
+        self.assertEqual(output, 'Note that Java classes are only loaded when they are used, so if the expected class has not been found, it might not have been loaded yet.\n\nFound 0 classes\n')
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_search_class(self, mock_api):
@@ -253,7 +253,8 @@ Fragment: bar
         with capture(search_class, ['com.foo.bar']) as o:
             output = o
 
-        expected_output = """com.foo.bar
+        expected_output = """Note that Java classes are only loaded when they are used, so if the expected class has not been found, it might not have been loaded yet.
+com.foo.bar
 com.foo.bar.baz
 
 Found 2 classes
@@ -279,7 +280,8 @@ Found 2 classes
         with capture(search_methods, ['hteeteepee']) as o:
             output = o
 
-        expected_output = """Warning, searching all classes may take some time and in some cases, crash the target application.
+        expected_output = """Note that Java classes are only loaded when they are used, so if the expected class has not been found, it might not have been loaded yet.
+Warning, searching all classes may take some time and in some cases, crash the target application.
 Found 0 classes, searching methods (this may take some time)...
 
 Found 0 methods
@@ -295,7 +297,8 @@ Found 0 methods
         with capture(search_methods, ['hteeteepee', 'com.foo']) as o:
             output = o
 
-        expected_output = """Found 0 classes, searching methods (this may take some time)...
+        expected_output = """Note that Java classes are only loaded when they are used, so if the expected class has not been found, it might not have been loaded yet.
+Found 0 classes, searching methods (this may take some time)...
 Filtering classes with com.foo
 
 Found 0 methods
@@ -315,7 +318,8 @@ Found 0 methods
         with capture(search_methods, ['hteeteepee']) as o:
             output = o
 
-        expected_output = """Warning, searching all classes may take some time and in some cases, crash the target application.
+        expected_output = """Note that Java classes are only loaded when they are used, so if the expected class has not been found, it might not have been loaded yet.
+Warning, searching all classes may take some time and in some cases, crash the target application.
 Found 1 classes, searching methods (this may take some time)...
 invoke_hteeteepee_method
 
@@ -338,7 +342,8 @@ Found 1 methods
         with capture(search_methods, ['hteeteepee', 'com.test']) as o:
             output = o
 
-        expected_output = """Found 2 classes, searching methods (this may take some time)...
+        expected_output = """Note that Java classes are only loaded when they are used, so if the expected class has not been found, it might not have been loaded yet.
+Found 2 classes, searching methods (this may take some time)...
 Filtering classes with com.test
 invoke_hteeteepee_method
 

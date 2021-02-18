@@ -8,7 +8,7 @@ import frida
 from .repl import Repl
 from ..__init__ import __version__
 from ..commands.device import get_device_info
-from ..commands.mobile_packages import patch_ios_ipa, patch_android_apk
+from ..commands.mobile_packages import patch_ios_ipa, patch_android_apk, sign_android_apk
 from ..commands.plugin_manager import load_plugin
 from ..state.api import api_state
 from ..state.app import app_state
@@ -112,7 +112,7 @@ def explore(startup_command: str, quiet: bool, file_commands, startup_script: cl
 
     try:
         agent.inject()
-    except (frida.ServerNotRunningError, frida.NotSupportedError) as e:
+    except (frida.ServerNotRunningError, frida.NotSupportedError, frida.ProtocolError) as e:
         click.secho('Unable to connect to the frida server: {error}'.format(error=str(e)), fg='red')
         return
 
@@ -344,10 +344,11 @@ def patchipa(source: str, gadget_version: str, codesign_signature: str, provisio
               help=('A script file to use with the the "path" config type. '
                     'Specify "libfrida-gadget.script.so" as the "path" in your config.'), show_default=False)
 @click.option('--ignore-nativelibs', '-n', is_flag=True, default=False,
-              help=('Do not change the extractNativeLibs flag in the AndroidManifest.xml.'), show_default=False)
+              help='Do not change the extractNativeLibs flag in the AndroidManifest.xml.', show_default=False)
+@click.option('--manifest', '-m', help='A decoded AndroidManifest.xml file to read.', default=None)
 def patchapk(source: str, architecture: str, gadget_version: str, pause: bool, skip_cleanup: bool,
              enable_debug: bool, skip_resources: bool, network_security_config: bool, target_class: str,
-             use_aapt2: bool, gadget_config: str, script_source: str, ignore_nativelibs: bool) -> None:
+             use_aapt2: bool, gadget_config: str, script_source: str, ignore_nativelibs: bool, manifest: str) -> None:
     """
         Patch an APK with the frida-gadget.so.
     """
@@ -368,6 +369,18 @@ def patchapk(source: str, architecture: str, gadget_version: str, pause: bool, s
         return
 
     patch_android_apk(**locals())
+
+
+@cli.command()
+@click.argument('sources', nargs=-1, type=click.Path(exists=True), required=True)
+@click.option('--skip-cleanup', '-k', is_flag=True,
+              help='Do not clean temporary files once finished.', show_default=True)
+def signapk(sources, skip_cleanup: bool) -> None:
+    """
+        Zipalign and sign an APK with the objection key.
+    """
+    for source in sources:
+        sign_android_apk(source, skip_cleanup)
 
 
 if __name__ == '__main__':

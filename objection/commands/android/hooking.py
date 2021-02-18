@@ -1,5 +1,6 @@
 import click
 import frida
+import fnmatch
 
 from objection.state.connection import state_connection
 from objection.utils.helpers import clean_argument_flags
@@ -51,7 +52,9 @@ def _should_dump_return_value(args: list) -> bool:
 
 def show_android_classes(args: list = None) -> None:
     """
-        Show the currently loaded classes.
+        Show the currently loaded classes. 
+        Note that Java classes are only loaded when they are used, 
+        so not all classes may be present.
 
         :param args:
         :return:
@@ -126,7 +129,13 @@ def watch_class(args: list) -> None:
     target_class = args[0]
 
     api = state_connection.get_api()
-    api.android_hooking_watch_class(target_class)
+
+    if '*' in target_class:
+        classes = api.android_hooking_get_classes()
+        for class_name in fnmatch.filter(classes, target_class):
+            api.android_hooking_watch_class(class_name)
+    else:
+        api.android_hooking_watch_class(target_class)
 
 
 def watch_class_method(args: list) -> None:
@@ -262,7 +271,9 @@ def set_method_return_value(args: list = None) -> None:
 
 def search_class(args: list) -> None:
     """
-        Searches the current Android application for a class.
+        Searches the currently loaded classes for a class.
+        Note that Java classes are only loaded when they are used, 
+        so if you don't get results, the class might not have been used yet.
 
         :param args:
         :return:
@@ -271,6 +282,9 @@ def search_class(args: list) -> None:
     if len(clean_argument_flags(args)) < 1:
         click.secho('Usage: android hooking search classes <name>', bold=True)
         return
+
+    click.secho('Note that Java classes are only loaded when they are used,' 
+        ' so if the expected class has not been found, it might not have been loaded yet.', fg='yellow')
 
     search = args[0]
     found = 0
@@ -303,6 +317,9 @@ def search_methods(args: list) -> None:
     search = args[0]
     class_filter = args[1] if len(clean_argument_flags(args)) > 1 else None
     found = 0
+
+    click.secho('Note that Java classes are only loaded when they are used,' 
+        ' so if the expected class has not been found, it might not have been loaded yet.', fg='yellow')
 
     if not class_filter:
         click.secho('Warning, searching all classes may take some time and in some cases, '

@@ -1,14 +1,15 @@
+import contextlib
 import lzma
 import os
+import re
 import shutil
 import tempfile
 import xml.etree.ElementTree as ElementTree
-from pkg_resources import parse_version
-import re
 
 import click
 import delegator
 import requests
+from pkg_resources import parse_version
 
 from .base import BasePlatformGadget, BasePlatformPatcher, objection_path
 from .github import Github
@@ -187,18 +188,18 @@ class AndroidPatcher(BasePlatformPatcher):
         'adb': {
             'installation': 'apt install adb (Kali Linux); brew install adb (macOS)'
         },
-        'jarsigner': {
-            'installation': 'apt install default-jdk (Linux); brew cask install java (macOS)'
+        'apksigner': {
+            'installation': 'apt install apksigner (Kali Linux)'
         },
         'apktool': {
             'installation': 'apt install apktool (Kali Linux)'
         },
         'zipalign': {
-            'installation': 'apt install zipalign'
+            'installation': 'apt install zipalign (Kali Linux)'
         }
     }
 
-    def __init__(self, skip_cleanup: bool = False, skip_resources: bool = False):
+    def __init__(self, skip_cleanup: bool = False, skip_resources: bool = False, manifest: str = None):
         super(AndroidPatcher, self).__init__()
 
         self.apk_source = None
@@ -208,6 +209,7 @@ class AndroidPatcher(BasePlatformPatcher):
         self.aapt = None
         self.skip_cleanup = skip_cleanup
         self.skip_resources = skip_resources
+        self.manifest = manifest
 
         self.keystore = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../assets', 'objection.jks')
         self.netsec_config = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../assets',
@@ -281,15 +283,17 @@ class AndroidPatcher(BasePlatformPatcher):
         """
 
         # error if --skip-resources was used because the manifest is encoded
-        if self.skip_resources is True:
+        if self.skip_resources is True and self.manifest is None:
             click.secho('Cannot manually parse the AndroidManifest.xml when --skip-resources '
-                        'is set, remove this and try again.', fg='red')
+                        'is set, remove this and try again, or manually specify a manifest with --manifest.', fg='red')
             raise Exception('Cannot --skip-resources when trying to manually parse the AndroidManifest.xml')
 
         # use the android namespace
         ElementTree.register_namespace('android', 'http://schemas.android.com/apk/res/android')
-
-        return ElementTree.parse(os.path.join(self.apk_temp_directory, 'AndroidManifest.xml'))
+        if self.manifest is not None:
+            return ElementTree.parse(self.manifest)
+        else:
+            return ElementTree.parse(os.path.join(self.apk_temp_directory, 'AndroidManifest.xml'))
 
     def _get_appt_output(self):
         """
@@ -326,13 +330,14 @@ class AndroidPatcher(BasePlatformPatcher):
             :return:
         """
 
-        activities = (match.groups()[0] for match in re.finditer(r"^launchable-activity: name='([^']+)'", self._get_appt_output(), re.MULTILINE))
+        activities = (match.groups()[0] for match in
+                      re.finditer(r"^launchable-activity: name='([^']+)'", self._get_appt_output(), re.MULTILINE))
         activity = next(activities, None)
 
         # If we got the activity using aapt, great, return that
         if activity is not None:
             return activity
-        
+
         # if we dont have the activity yet, check out activity aliases
         click.secho(('Unable to determine the launchable activity using aapt, trying '
                      'to manually parse the AndroidManifest for activity aliases...'), dim=True, fg='yellow')
@@ -425,7 +430,8 @@ class AndroidPatcher(BasePlatformPatcher):
             return
 
         # if not, we need to inject an element with it
-        click.secho('App does not have android.permission.INTERNET, attempting to patch the AndroidManifest.xml...', dim=True, fg='yellow')
+        click.secho('App does not have android.permission.INTERNET, attempting to patch the AndroidManifest.xml...',
+                    dim=True, fg='yellow')
         xml = self._get_android_manifest()
         root = xml.getroot()
 
@@ -841,12 +847,12 @@ class AndroidPatcher(BasePlatformPatcher):
         click.secho('Rebuilding the APK with the frida-gadget loaded...', fg='green', dim=True)
         o = delegator.run(
             self.list2cmdline([self.required_commands['apktool']['location'],
-                          'build',
-                          self.apk_temp_directory,
-                          ] + (['--use-aapt2'] if use_aapt2 else []) + [
-                             '-o',
-                             self.apk_temp_frida_patched
-                         ]), timeout=self.command_run_timeout)
+                               'build',
+                               self.apk_temp_directory,
+                               ] + (['--use-aapt2'] if use_aapt2 else []) + [
+                                  '-o',
+                                  self.apk_temp_frida_patched
+                              ]), timeout=self.command_run_timeout)
 
         if len(o.err) > 0:
             click.secho(('Rebuilding the APK may have failed. Read the following '
@@ -868,7 +874,7 @@ class AndroidPatcher(BasePlatformPatcher):
             self.required_commands['zipalign']['location'],
             '-p',
             '4',
-            self.apk_temp_frida_patched,
+            self.apk_temp_frida_patched if os.path.exists(self.apk_temp_frida_patched) else self.apk_source,
             self.apk_temp_frida_patched_aligned
         ]))
 
@@ -893,22 +899,18 @@ class AndroidPatcher(BasePlatformPatcher):
         click.secho('Signing new APK.', dim=True)
 
         o = delegator.run(self.list2cmdline([
-            self.required_commands['jarsigner']['location'],
-            '-sigalg',
-            'SHA1withRSA',
-            '-digestalg',
-            'SHA1',
-            '-tsa',
-            'http://timestamp.digicert.com',
-            '-storepass',
-            'basil-joule-bug',
-            '-keystore',
+            self.required_commands['apksigner']['location'],
+            'sign',
+            '--ks',
             self.keystore,
-            self.apk_temp_frida_patched,
-            'objection'
+            '--ks-pass',
+            'pass:basil-joule-bug',
+            '--ks-key-alias',
+            'objection',
+            self.apk_temp_frida_patched_aligned
         ]))
 
-        if len(o.err) > 0 or 'jar signed' not in o.out:
+        if len(o.err) > 0:
             click.secho('Signing the new APK may have failed.', fg='red')
             click.secho(o.out, fg='yellow')
             click.secho(o.err, fg='red')
@@ -931,8 +933,12 @@ class AndroidPatcher(BasePlatformPatcher):
         try:
 
             shutil.rmtree(self.apk_temp_directory, ignore_errors=True)
-            os.remove(self.apk_temp_frida_patched)
-            os.remove(self.apk_temp_frida_patched_aligned)
+
+            with contextlib.suppress(FileNotFoundError):
+                os.remove(self.apk_temp_frida_patched)
+
+            with contextlib.suppress(FileNotFoundError):
+                os.remove(self.apk_temp_frida_patched_aligned)
 
         except Exception as err:
             click.secho('Failed to cleanup with error: {0}'.format(err), fg='red', dim=True)

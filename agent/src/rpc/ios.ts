@@ -61,8 +61,8 @@ export const ios = {
     hooking.watchMethod(selector, dargs, dbt, dret),
 
   // ios crypto monitoring
-  iosCryptoDisable: (): void => ioscrypto.disable(),
-  iosCryptoMonitor: (): void => ioscrypto.monitor(),
+  iosMonitorCryptoDisable: (): void => ioscrypto.disable(),
+  iosMonitorCryptoEnable: (): void => ioscrypto.monitor(),
 
   // jailbreak detection
   iosJailbreakDisable: (): void => iosjailbreak.disable(),

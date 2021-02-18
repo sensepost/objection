@@ -53,5 +53,8 @@ logger.setLevel(logging.DEBUG)
 real_secho = click.secho
 click.secho = new_secho
 
-# kick off a background thread to check the version of objection
-threading.Thread(target=check_version).start()
+try:
+    # kick off a background thread to check the version of objection
+    threading.Thread(target=check_version).start()
+except Exception:
+    pass

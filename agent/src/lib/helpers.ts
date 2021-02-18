@@ -38,7 +38,6 @@ export const fsend = (ident: string, hook: string, message: any): void => {
     c.magenta(`[${hook}]`) +
     printArgs(message)
   )
-  // send(header + printArgs(message));
 };
 
 // a small helper method to use util to dump

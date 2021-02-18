@@ -10,10 +10,15 @@ import { sslpinning } from "../android/pinning";
 import { root } from "../android/root";
 import { androidshell } from "../android/shell";
 import { userinterface } from "../android/userinterface";
+import { proxy } from "../android/proxy";
+import { general } from "../android/general";
 
 export const android = {
   // android clipboard
   androidMonitorClipboard: () => clipboard.monitor(),
+
+  // android general
+  androidDeoptimize: () => general.deoptimize(),
 
   // android command execution
   androidShellExec: (cmd: string): Promise<IExecutedCommand> => androidshell.execute(cmd),
@@ -63,6 +68,9 @@ export const android = {
 
   // android ssl pinning
   androidSslPinningDisable: (quiet: boolean) => sslpinning.disable(quiet),
+
+  // android proxy set/unset
+  androidProxySet: (host: string, port: string): Promise<void> => proxy.set(host, port),
 
   // android root detection
   androidRootDetectionDisable: () => root.disable(),

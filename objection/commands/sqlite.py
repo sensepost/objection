@@ -6,7 +6,7 @@ import click
 import litecli
 from litecli.main import LiteCli
 
-from ..commands.filemanager import download, upload, pwd
+from ..commands.filemanager import download, upload, pwd, path_exists
 
 
 def modify_config(rc):
@@ -66,6 +66,10 @@ def connect(args: list) -> None:
 
     db_location = args[0]
     _, local_path = tempfile.mkstemp('.sqlite')
+    use_shm = False  # does Shared Memory temp file exist ?
+    use_wal = False  # does Write-Ahead-Log temp file exist ?
+    use_jnl = False  # does Journal temp file exist ?
+    write_back_tmp_sqlite = False  # if enabled temporary DB files are re-uploaded, this has not been testes
 
     # update the full remote path for future syncs
     full_remote_file = db_location \
@@ -73,6 +77,18 @@ def connect(args: list) -> None:
 
     click.secho('Caching local copy of database file...', fg='green')
     download([db_location, local_path])
+    if path_exists(full_remote_file + '-shm'):
+        click.secho('... caching local copy of database "shm" file...', fg='green')
+        download([db_location + '-shm', local_path + '-shm'])
+        use_shm = True
+    if path_exists(full_remote_file + '-wal'):
+        click.secho('... caching local copy of database "wal" file...', fg='green')
+        download([db_location + '-wal', local_path + '-wal'])
+        use_wal = True
+    if path_exists(full_remote_file + '-journal'):
+        click.secho('... caching local copy of database "journal" file...', fg='green')
+        download([db_location + '-journal', local_path + '-journal'])
+        use_jnl = True
 
     click.secho('Validating SQLite database format', dim=True)
     with open(local_path, 'rb') as f:
@@ -95,8 +111,22 @@ def connect(args: list) -> None:
     if _should_sync_once_done(args):
         click.secho('Synchronizing changes back...', dim=True)
         upload([local_path, full_remote_file])
+        # re-uploading temp sqlite files has not been tested and thus is disabled by default
+        if write_back_tmp_sqlite:
+            if use_shm:
+                upload([local_path + '-shm', full_remote_file + '-shm'])
+            if use_wal:
+                upload([local_path + '-wal', full_remote_file + '-wal'])
+            if use_jnl:
+                upload([local_path + '-journal', full_remote_file + '-journal'])
     else:
         click.secho('NOT synchronizing changes back to device. Use --sync if you want that.', fg='green')
 
     # maak skoon
     cleanup(local_path)
+    if use_shm:
+        cleanup(local_path + '-shm')
+    if use_wal:
+        cleanup(local_path + '-wal')
+    if use_jnl:
+        cleanup(local_path + '-journal')
