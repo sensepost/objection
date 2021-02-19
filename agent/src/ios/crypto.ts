@@ -323,14 +323,6 @@ export namespace ioscrypto {
     });
   };
 
-  export const disable = (): void => {
-    // if we already have a job registered then kill it
-    if (jobs.hasIdent(cryptoidentifier)) {
-      send(c.red(`Killing `) + `${cryptoidentifier}`);
-      jobs.kill(cryptoidentifier);
-    }
-  };
-
   export const monitor = (): void => {
     // if we already have a job registered then return
     if (jobs.hasIdent(cryptoidentifier)) {

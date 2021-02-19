@@ -23,7 +23,6 @@ from ..commands.android import root
 from ..commands.ios import binary
 from ..commands.ios import bundles
 from ..commands.ios import cookies
-from ..commands.ios import crypto as ios_crypto
 from ..commands.ios import generate as ios_generate
 from ..commands.ios import heap as ios_heap
 from ..commands.ios import hooking as ios_hooking
@@ -758,22 +757,11 @@ COMMANDS = {
                 'meta': 'Commands to work with ios function monitoring',
                 'commands': {
                     'crypto': {
-                        'meta': 'Hooks for working with monitoring iOS CommonCrypto usage',
-                        'commands': {
-                            'disable': {
-                                'meta': 'Disable CommonCrypto monitor',
-                                'exec': ios_crypto.crypto_disable
-                            },
-                            'monitor': {
-                                'meta': 'Monitor CommonCrypto operations',
-                                'exec': ios_crypto.crypto_enable
-                            }
-
-                        }
+                        'meta': 'Monitor CommonCrypto operations',
+                        'exec': ios_crypto.crypto_enable
                     }
                 },
             },
-
         }
     },
 
