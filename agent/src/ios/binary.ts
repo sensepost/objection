@@ -37,7 +37,7 @@ export namespace binary {
         const exe = macho.parse(fb);
 
         parsedModules[a.name] = {
-          arc: imports.has("_objc_release"),
+          arc: imports.has("objc_release"),
           canary: imports.has("__stack_chk_fail"),
           encrypted: isEncrypted(exe.cmds),
           pie: exe.flags.pie ? true : false,
