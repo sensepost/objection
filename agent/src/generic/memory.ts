@@ -40,6 +40,10 @@ export namespace memory {
           });
       }).filter((m) => m.length !== 0);
 
+    if (addresses.length <= 0) {
+      return [];
+    }
+
     return addresses.reduce((a, b) => a.concat(b));
   };
 
