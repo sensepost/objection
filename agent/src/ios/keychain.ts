@@ -67,6 +67,7 @@ export namespace ioskeychain {
     searchDictionary.setObject_forKey_(kCFBooleanTrue, kSec.kSecReturnData);
     searchDictionary.setObject_forKey_(kCFBooleanTrue, kSec.kSecReturnRef);
     searchDictionary.setObject_forKey_(kSec.kSecMatchLimitAll, kSec.kSecMatchLimit);
+    searchDictionary.setObject_forKey_(kSec.kSecAttrSynchronizableAny, kSec.kSecAttrSynchronizable);
 
     // loop each of the keychain class types and extract data
     const itemClassResults: IKeychainData[][] = itemClasses.map((clazz) => {

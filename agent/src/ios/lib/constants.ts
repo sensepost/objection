@@ -28,6 +28,7 @@ export enum kSec {
   kSecAttrAccessControl = "accc",
   kSecAttrGeneric = "gena",
   kSecAttrSynchronizable = "sync",
+  kSecAttrSynchronizableAny = "syna",
   kSecAttrModificationDate = "mdat",
   kSecAttrServer = "srvr",
   kSecAttrDescription = "desc",
