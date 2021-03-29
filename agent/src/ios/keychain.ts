@@ -151,6 +151,7 @@ export namespace ioskeychain {
   // clean out the keychain
   export const empty = (): void => {
     const searchDictionary: NSMutableDictionaryType = ObjC.classes.NSMutableDictionary.alloc().init();
+    searchDictionary.setObject_forKey_(kSec.kSecAttrSynchronizableAny, kSec.kSecAttrSynchronizable);
     itemClasses.forEach((clazz) => {
 
       // set the class-type we are querying for now & delete
