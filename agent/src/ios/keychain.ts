@@ -67,6 +67,7 @@ export namespace ioskeychain {
     searchDictionary.setObject_forKey_(kCFBooleanTrue, kSec.kSecReturnData);
     searchDictionary.setObject_forKey_(kCFBooleanTrue, kSec.kSecReturnRef);
     searchDictionary.setObject_forKey_(kSec.kSecMatchLimitAll, kSec.kSecMatchLimit);
+    searchDictionary.setObject_forKey_(kSec.kSecAttrSynchronizableAny, kSec.kSecAttrSynchronizable);
 
     // loop each of the keychain class types and extract data
     const itemClassResults: IKeychainData[][] = itemClasses.map((clazz) => {
@@ -150,6 +151,7 @@ export namespace ioskeychain {
   // clean out the keychain
   export const empty = (): void => {
     const searchDictionary: NSMutableDictionaryType = ObjC.classes.NSMutableDictionary.alloc().init();
+    searchDictionary.setObject_forKey_(kSec.kSecAttrSynchronizableAny, kSec.kSecAttrSynchronizable);
     itemClasses.forEach((clazz) => {
 
       // set the class-type we are querying for now & delete
