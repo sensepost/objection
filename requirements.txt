@@ -3,6 +3,7 @@ frida-tools>=6.0.0
 prompt_toolkit>=3.0.3,<4.0.0
 click
 tabulate
+semver
 delegator.py
 requests
 flask

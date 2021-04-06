@@ -9,7 +9,7 @@ import xml.etree.ElementTree as ElementTree
 import click
 import delegator
 import requests
-from pkg_resources import parse_version
+import semver
 
 from .base import BasePlatformGadget, BasePlatformPatcher, objection_path
 from .github import Github
@@ -242,7 +242,7 @@ class AndroidPatcher(BasePlatformPatcher):
         click.secho('Detected apktool version as: ' + o, dim=True)
 
         # ensure we have at least apktool MIN_VERSION
-        if parse_version(o) < parse_version(min_version):
+        if semver.compare(o, min_version) < 0:
             click.secho('apktool version should be at least ' + min_version, fg='red', bold=True)
             click.secho('Please see the following URL for more information: '
                         'https://github.com/sensepost/objection/wiki/Apktool-Upgrades', fg='yellow')
