@@ -61,8 +61,9 @@ class TestIosGadget(unittest.TestCase):
 class TestIosPatcher(unittest.TestCase):
     @mock.patch('objection.utils.patchers.ios.IosPatcher.__init__', mock.Mock(return_value=None))
     @mock.patch('objection.utils.patchers.ios.IosPatcher.__del__', mock.Mock(return_value=None))
+    @mock.patch('objection.utils.patchers.ios.click.secho', mock.Mock(return_value=None))
     def test_sets_provisioning_profile(self):
         patcher = IosPatcher()
-        patcher.set_provsioning_profile('profile.mobileprovision')
+        patcher.set_provsioning_profile('profile.mobileprovision', 'com.foo.bar')
 
         self.assertEqual(patcher.provision_file, 'profile.mobileprovision')

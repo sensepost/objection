@@ -12,11 +12,13 @@ from ..utils.patchers.ios import IosGadget, IosPatcher
 
 def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, binary_name: str,
                   skip_cleanup: bool, unzip_unicode: bool, gadget_version: str = None,
-                  pause: bool = False, gadget_config: str = None, script_source: str = None) -> None:
+                  pause: bool = False, gadget_config: str = None, script_source: str = None,
+                  bundle_id: str = None) -> None:
     """
         Patches an iOS IPA by extracting, injecting the Frida dylib,
         codesigning the dylib and app executable and rezipping the IPA.
 
+        :param bundle_id:
         :param source:
         :param codesign_signature:
         :param provision_file:
@@ -67,7 +69,7 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
     if not patcher.are_requirements_met():
         return
 
-    patcher.set_provsioning_profile(provision_file=provision_file)
+    patcher.set_provsioning_profile(provision_file=provision_file, bundle_id=bundle_id)
     patcher.extract_ipa(unzip_unicode, ipa_source=source)
     patcher.set_application_binary(binary=binary_name)
     patcher.patch_and_codesign_binary(

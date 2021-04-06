@@ -306,8 +306,10 @@ def device_type():
 @click.option('--script-source', '-l', default=None, help=(
         'A script file to use with the the "path" config type. '
         'Remember that use the name of this file in your "path". It will be next to the config.'), show_default=False)
+@click.option('--bundle-id', '-b', default=None, help='The bundleid to set when codesigning the IPA')
 def patchipa(source: str, gadget_version: str, codesign_signature: str, provision_file: str, binary_name: str,
-             skip_cleanup: bool, pause: bool, unzip_unicode: bool, gadget_config: str, script_source: str) -> None:
+             skip_cleanup: bool, pause: bool, unzip_unicode: bool, gadget_config: str, script_source: str,
+             bundle_id: str) -> None:
     """
         Patch an IPA with the FridaGadget dylib.
     """

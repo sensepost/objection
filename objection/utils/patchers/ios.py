@@ -158,7 +158,10 @@ class IosPatcher(BasePlatformPatcher):
         },
         'unzip': {
             'installation': 'macOS builtin command'
-        }
+        },
+        'plutil': {
+            'installation': 'macOS builtin command'
+        },
     }
 
     def __init__(self, skip_cleanup: bool = False):
@@ -175,6 +178,7 @@ class IosPatcher(BasePlatformPatcher):
         self.patched_ipa_path = None
         self.patched_codesigned_ipa_path = None
         self.skip_cleanup = skip_cleanup
+        self.bundle_id = None
 
         # temp_file to copy an IPA to
         _, self.temp_file = tempfile.mkstemp(suffix='.ipa')
@@ -185,10 +189,11 @@ class IosPatcher(BasePlatformPatcher):
         # cleanup the temp_directory to work with
         self._cleanup_extracted_data()
 
-    def set_provsioning_profile(self, provision_file: str = None) -> None:
+    def set_provsioning_profile(self, provision_file: str = None, bundle_id: str = None) -> None:
         """
             Sets the provision file to use during patching.
 
+            :param bundle_id:
             :param provision_file:
             :return:
         """
@@ -196,6 +201,13 @@ class IosPatcher(BasePlatformPatcher):
         # have provision file? set it and be done
         if provision_file:
             self.provision_file = provision_file
+
+            if bundle_id:
+                click.secho('Setting bundleid to specified value: {}'.format(bundle_id), dim=True)
+                self.bundle_id = bundle_id
+            else:
+                self._set_bundle_id_from_profile()
+
             return
 
         click.secho('No provision file specified, searching for one...', bold=True)
@@ -219,17 +231,11 @@ class IosPatcher(BasePlatformPatcher):
             _, decoded_location = tempfile.mkstemp('decoded_provision')
 
             # Decode the mobile provision using macOS's security cms tool
-            delegator.run(self.list2cmdline(
-                [
-                    self.required_commands['security']['location'],
-                    'cms',
-                    '-D',
-                    '-i',
-                    pf,
-                    '-o',
-                    decoded_location
-                ]
-            ), timeout=self.command_run_timeout)
+            delegator.run(self.list2cmdline([
+                self.required_commands['security']['location'],
+                'cms', '-D', '-i', pf,
+                '-o', decoded_location
+            ]), timeout=self.command_run_timeout)
 
             # read the expiration date from the profile
             with open(decoded_location, 'rb') as f:
@@ -253,6 +259,12 @@ class IosPatcher(BasePlatformPatcher):
         # the top of the list
         click.secho('Found a valid provisioning profile', fg='green', bold=True)
         self.provision_file = sorted(expirations, key=expirations.get, reverse=True)[0]
+
+        if bundle_id:
+            click.secho('Setting bundleid to specified value: {}'.format(bundle_id), dim=True)
+            self.bundle_id = bundle_id
+        else:
+            self._set_bundle_id_from_profile()
 
     def extract_ipa(self, unzip_unicode, ipa_source: str) -> None:
         """
@@ -346,15 +358,13 @@ class IosPatcher(BasePlatformPatcher):
             shutil.copyfile(gadget_config, os.path.join(self.app_folder, 'Frameworks', 'FridaGadget.config'))
 
         # patch the app binary
-        load_library_output = delegator.run(self.list2cmdline(
-            [
-                self.required_commands['insert_dylib']['location'],
-                '--strip-codesig',
-                '--inplace',
-                '@executable_path/Frameworks/FridaGadget.dylib',
-                self.app_binary
-            ]
-        ), timeout=self.command_run_timeout)
+        load_library_output = delegator.run(self.list2cmdline([
+            self.required_commands['insert_dylib']['location'],
+            '--strip-codesig',
+            '--inplace',
+            '@executable_path/Frameworks/FridaGadget.dylib',
+            self.app_binary
+        ]), timeout=self.command_run_timeout)
 
         # check if the insert_dylib call may have failed
         if 'Added LC_LOAD_DYLIB' not in load_library_output.out:
@@ -380,8 +390,7 @@ class IosPatcher(BasePlatformPatcher):
                 '-v',
                 '-s',
                 codesign_signature,
-                dylib])
-            )
+                dylib]))
 
     def archive_and_codesign(self, original_name: str, codesign_signature: str) -> None:
         """
@@ -413,18 +422,19 @@ class IosPatcher(BasePlatformPatcher):
         self.patched_codesigned_ipa_path = os.path.join(self.temp_directory, os.path.basename(
             '{0}-frida-codesigned.ipa'.format(os.path.splitext(original_name)[0])))
 
-        ipa_codesign = delegator.run(self.list2cmdline(
-            [
-                self.required_commands['applesign']['location'],
-                '-i',
-                codesign_signature,
-                '-m',
-                self.provision_file,
-                '-o',
-                self.patched_codesigned_ipa_path,
-                self.patched_ipa_path
-            ]
-        ), timeout=self.command_run_timeout)
+        ipa_codesign = delegator.run(self.list2cmdline([
+            self.required_commands['applesign']['location'],
+            '--identity',
+            codesign_signature,
+            '--mobileprovision',
+            self.provision_file,
+            '--bundleid',
+            self.bundle_id,
+            '--clone-entitlements',
+            '--output',
+            self.patched_codesigned_ipa_path,
+            self.patched_ipa_path
+        ]), timeout=self.command_run_timeout)
 
         click.secho(ipa_codesign.err, dim=True)
 
@@ -436,6 +446,49 @@ class IosPatcher(BasePlatformPatcher):
         """
 
         return self.patched_codesigned_ipa_path
+
+    def _set_bundle_id_from_profile(self):
+        """
+            Extracts and sets a bundle id from a decoded mobileprovision
+
+            :return:
+        """
+
+        if not self.provision_file:
+            click.secho('Provisioning profile not set. Skipping bundleid extraction', dim=True)
+            return
+
+        _, decoded_location = tempfile.mkstemp('decoded_provision')
+
+        # Decode the mobile provision using macOS's security cms tool
+        delegator.run(self.list2cmdline([
+            self.required_commands['security']['location'],
+            'cms', '-D', '-i', self.provision_file,
+            '-o', decoded_location
+        ]), timeout=self.command_run_timeout)
+
+        # https://stackoverflow.com/a/66820375
+        # security cms -D -i your.mobileprovision | plutil -extract
+        #   Entitlements.application-identifier xml1 -o - - | grep string |
+        #   sed 's/^<string>[^\.]*\.\(.*\)<\/string>$/\1/g'
+        c = delegator.run(self.list2cmdline([
+            'cat', decoded_location
+        ]), timeout=self.command_run_timeout).pipe(self.list2cmdline([
+            self.required_commands['plutil']['location'],
+            '-extract', 'Entitlements.application-identifier', 'xml1', '-o', '-', '-'
+        ]), timeout=self.command_run_timeout).pipe(self.list2cmdline([
+            'grep', 'string'
+        ]), timeout=self.command_run_timeout).pipe(self.list2cmdline([
+            'sed', r's/^<string>[^\.]*\.\(.*\)<\/string>$/\1/g'
+        ]), timeout=self.command_run_timeout)
+
+        if len(c.out) > 0:
+            self.bundle_id = c.out.strip()
+
+        click.secho('Mobile provision bundle identifier is: {}'.format(self.bundle_id), dim=True)
+
+        # cleanup the temp path
+        os.remove(decoded_location)
 
     def _cleanup_extracted_data(self) -> None:
         """
