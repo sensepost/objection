@@ -1,6 +1,7 @@
+import fnmatch
+
 import click
 import frida
-import fnmatch
 
 from objection.state.connection import state_connection
 from objection.utils.helpers import clean_argument_flags
@@ -283,8 +284,8 @@ def search_class(args: list) -> None:
         click.secho('Usage: android hooking search classes <name>', bold=True)
         return
 
-    click.secho('Note that Java classes are only loaded when they are used,' 
-        ' so if the expected class has not been found, it might not have been loaded yet.', fg='yellow')
+    click.secho('Note that Java classes are only loaded when they are used,'
+                ' so if the expected class has not been found, it might not have been loaded yet.', fg='yellow')
 
     search = args[0]
     found = 0
@@ -318,8 +319,8 @@ def search_methods(args: list) -> None:
     class_filter = args[1] if len(clean_argument_flags(args)) > 1 else None
     found = 0
 
-    click.secho('Note that Java classes are only loaded when they are used,' 
-        ' so if the expected class has not been found, it might not have been loaded yet.', fg='yellow')
+    click.secho('Note that Java classes are only loaded when they are used,'
+                ' so if the expected class has not been found, it might not have been loaded yet.', fg='yellow')
 
     if not class_filter:
         click.secho('Warning, searching all classes may take some time and in some cases, '

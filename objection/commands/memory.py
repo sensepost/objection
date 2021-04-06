@@ -1,5 +1,5 @@
-import os
 import json
+import os
 
 import click
 from tabulate import tabulate

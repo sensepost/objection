@@ -40,7 +40,7 @@ class ObjCHookManager {
   validMethod(method) {
     if (!this.available_methods.includes(method)) {
       return false;
-    } 
+    }
     return true;
   }
 
@@ -52,11 +52,11 @@ class ObjCHookManager {
       return true;
     } else {
       return false;
-    }; 
+    };
   }
 
   hook(m, enter = null, leave = null) {
-    if (!this.validMethod(m)) { 
+    if (!this.validMethod(m)) {
       this.print(`Method ${m} is not valid for this class.`);
       return;
     }
@@ -80,11 +80,11 @@ class ObjCHookManager {
       },
     });
 
-    this.hooking.push({method: m, listener: l});
+    this.hooking.push({ method: m, listener: l });
   }
 
   unhook(method) {
-    if (!this.validMethod(method)) { 
+    if (!this.validMethod(method)) {
       this.print(`Method ${method} is not valid for this class.`);
       return;
     }

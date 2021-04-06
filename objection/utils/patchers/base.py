@@ -1,10 +1,10 @@
 import json
 import os
+import shlex
 import shutil
+from subprocess import list2cmdline
 
 import click
-import shlex
-from subprocess import list2cmdline
 
 from .github import Github
 

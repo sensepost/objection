@@ -12,7 +12,7 @@ class Android(Device):
 
 class Ios(Device):
     """ Represents iOS specific configurations. """
-   
+
     name = 'ios'
     path_seperator = '/'
 

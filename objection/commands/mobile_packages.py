@@ -180,7 +180,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
     # ensure that we have all of the commandline requirements
     if not patcher.are_requirements_met():
         return
-    
+
     # ensure we have the latest apk-tool and run the
     if not patcher.is_apktool_ready():
         click.secho('apktool is not ready for use', fg='red', bold=True)
@@ -228,6 +228,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
     click.secho(
         'Copying final apk from {0} to {1} in current directory...'.format(patcher.get_patched_apk_path(), destination))
     shutil.copyfile(patcher.get_patched_apk_path(), os.path.join(os.path.abspath('.'), destination))
+
 
 def sign_android_apk(source: str, skip_cleanup: bool = True) -> None:
     """
