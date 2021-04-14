@@ -19,6 +19,18 @@ def entries(args: list = None) -> None:
     click.secho(tabulate(output, headers=['Alias', 'Key', 'Certificate']))
 
 
+def listDetails(args: list = None) -> None:
+    """
+        Lists details of all items in Android KeyStore
+
+        :param args:
+        :return:
+    """
+    click.secho('List details of all items in Android KeyStore...', dim=True)
+    api = state_connection.get_api()
+    ks = api.android_keystore_list_details()
+
+
 def clear(args: list = None) -> None:
     """
         Clears out an Android KeyStore
