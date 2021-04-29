@@ -106,11 +106,11 @@ export namespace root {
           `JailMonkeyModule.getConstants() called, returning false for all keys.`
         );
         const hm = JavaHashMap.$new();
-        hm.put("isJailBroken", false_object);
-        hm.put("hookDetected", false_object);
-        hm.put("canMockLocation", false_object);
-        hm.put("isOnExternalStorage", false_object);
-        hm.put("AdbEnabled", false_object);
+        hm.put("isJailBroken", JavaFalseObject);
+        hm.put("hookDetected", JavaFalseObject);
+        hm.put("canMockLocation", JavaFalseObject);
+        hm.put("isOnExternalStorage", JavaFalseObject);
+        hm.put("AdbEnabled", JavaFalseObject);
         return hm;
       };
       return JavaJailMonkeyModule;
