@@ -279,7 +279,9 @@ export namespace iosjailbreak {
   };
 
   const jailMonkeyBypass = (success: boolean, ident: string): InvocationListener => {
-    return Interceptor.attach(ObjC.classes.JailMonkey["- isJailBroken"].implementation, {
+    const JailMonkeyClass = ObjC.classes.JailMonkey;
+    if(JailMonkeyClass === undefined) { return null; }
+    return Interceptor.attach(JailMonkeyClass["- isJailBroken"].implementation, {
       onLeave(retval) {
         send(
           c.blackBright(`[${ident}] `) + `JailMonkey.isJailBroken called, returning false.`
