@@ -278,6 +278,17 @@ export namespace iosjailbreak {
     });
   };
 
+  const jailMonkeyBypass = (success: boolean, ident: string): InvocationListener => {
+    return Interceptor.attach(ObjC.classes.JailMonkey["- isJailBroken"].implementation, {
+      onLeave(retval) {
+        send(
+          c.blackBright(`[${ident}] `) + `JailMonkey.isJailBroken called, returning false.`
+        );
+        retval.replace(new NativePointer(0x00));
+      }
+    });
+  };
+
   export const disable = (): void => {
     const job: IJob = {
       identifier: jobs.identifier(),
@@ -289,6 +300,7 @@ export namespace iosjailbreak {
     job.invocations.push(libSystemBFork(false, job.identifier));
     job.invocations.push(fopen(false, job.identifier));
     job.invocations.push(canOpenURL(false, job.identifier));
+    job.invocations.push(jailMonkeyBypass(false, job.identifier));
 
     jobs.add(job);
   };
@@ -304,6 +316,7 @@ export namespace iosjailbreak {
     job.invocations.push(libSystemBFork(true, job.identifier));
     job.invocations.push(fopen(true, job.identifier));
     job.invocations.push(canOpenURL(true, job.identifier));
+    job.invocations.push(jailMonkeyBypass(true, job.identifier));
 
     jobs.add(job);
   };
