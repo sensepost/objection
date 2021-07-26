@@ -32,7 +32,8 @@
     "frida-objc-bridge": "^6",
     "frida-screenshot": "^3",
     "lodash": "^4",
-    "macho": "^1"
+    "macho": "^1",
+    "npm": "^7.20.1"
   },
   "devDependencies": {
     "@types/frida-gum": "^16",
