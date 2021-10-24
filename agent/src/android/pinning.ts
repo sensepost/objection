@@ -64,7 +64,7 @@ export namespace sslpinning {
         "[Ljavax.net.ssl.KeyManager;", "[Ljavax.net.ssl.TrustManager;", "java.security.SecureRandom");
 
       // Override the init method, specifying our new TrustManager
-      SSLContextInit.implementation = function(keyManager, trustManager, secureRandom) {
+      SSLContextInit.implementation = function (keyManager, trustManager, secureRandom) {
         qsend(quiet,
           c.blackBright(`[${ident}] `) + `Called ` +
           c.green(`SSLContext.init()`) +
@@ -102,7 +102,7 @@ export namespace sslpinning {
         const CertificatePinnerCheck = certificatePinner.check.overload("java.lang.String", "java.util.List");
 
         // tslint:disable-next-line:only-arrow-functions
-        CertificatePinnerCheck.implementation = function() {
+        CertificatePinnerCheck.implementation = function () {
           qsend(quiet,
             c.blackBright(`[${ident}] `) + `Called ` +
             c.green(`OkHTTP 3.x CertificatePinner.check()`) +
@@ -113,8 +113,8 @@ export namespace sslpinning {
         return CertificatePinnerCheck;
 
       } catch (err) {
-        if (err.message.indexOf("ClassNotFoundException") === 0) {
-          throw new Error(err);
+        if ((err as Error).message.indexOf("ClassNotFoundException") === 0) {
+          throw err;
         }
       }
     });
@@ -144,7 +144,7 @@ export namespace sslpinning {
         const CertificatePinnerCheckOkHttp = certificatePinner.check$okhttp.overload("java.lang.String", "u15");
 
         // tslint:disable-next-line:only-arrow-functions
-        CertificatePinnerCheckOkHttp.implementation = function() {
+        CertificatePinnerCheckOkHttp.implementation = function () {
           qsend(quiet,
             c.blackBright(`[${ident}] `) + `Called check$okhttp ` +
             c.green(`OkHTTP 3.x CertificatePinner.check$okhttp()`) +
@@ -155,8 +155,8 @@ export namespace sslpinning {
         return CertificatePinnerCheckOkHttp;
 
       } catch (err) {
-        if (err.message.indexOf("ClassNotFoundException") === 0) {
-          throw new Error(err);
+        if ((err as Error).message.indexOf("ClassNotFoundException") === 0) {
+          throw err;
         }
       }
     });
@@ -174,7 +174,7 @@ export namespace sslpinning {
         const PinningTrustManagerCheckServerTrusted = pinningTrustManager.checkServerTrusted;
 
         // tslint:disable-next-line:only-arrow-functions
-        PinningTrustManagerCheckServerTrusted.implementation = function() {
+        PinningTrustManagerCheckServerTrusted.implementation = function () {
           qsend(quiet,
             c.blackBright(`[${ident}] `) + `Called ` +
             c.green(`PinningTrustManager.checkServerTrusted()`) +
@@ -185,8 +185,8 @@ export namespace sslpinning {
         return PinningTrustManagerCheckServerTrusted;
 
       } catch (err) {
-        if (err.message.indexOf("ClassNotFoundException") === 0) {
-          throw new Error(err);
+        if ((err as Error).message.indexOf("ClassNotFoundException") === 0) {
+          throw err;
         }
       }
     });
@@ -212,8 +212,8 @@ export namespace sslpinning {
         //  platform/src/main/java/org/conscrypt/TrustManagerImpl.java#L650
         const TrustManagerImplverifyChain = trustManagerImpl.verifyChain;
         // tslint:disable-next-line:only-arrow-functions
-        TrustManagerImplverifyChain.implementation = function(untrustedChain, trustAnchorChain,
-                                                              host, clientAuth, ocspData, tlsSctData) {
+        TrustManagerImplverifyChain.implementation = function (untrustedChain, trustAnchorChain,
+          host, clientAuth, ocspData, tlsSctData) {
           qsend(quiet,
             c.blackBright(`[${ident}] `) + `Called (Android 7+) ` +
             c.green(`TrustManagerImpl.verifyChain()`) + `, not throwing an exception.`,
@@ -226,8 +226,8 @@ export namespace sslpinning {
         return TrustManagerImplverifyChain;
 
       } catch (err) {
-        if (err.message.indexOf("ClassNotFoundException") === 0) {
-          throw new Error(err);
+        if ((err as Error).message.indexOf("ClassNotFoundException") === 0) {
+          throw err;
         }
       }
     });
@@ -250,8 +250,8 @@ export namespace sslpinning {
         //  platform/java/org/conscrypt/TrustManagerImpl.java#391
         const TrustManagerImplcheckTrustedRecursive = trustManagerImpl.checkTrustedRecursive;
         // tslint:disable-next-line:only-arrow-functions
-        TrustManagerImplcheckTrustedRecursive.implementation = function(certs, host, clientAuth, untrustedChain,
-                                                                        trustAnchorChain, used) {
+        TrustManagerImplcheckTrustedRecursive.implementation = function (certs, host, clientAuth, untrustedChain,
+          trustAnchorChain, used) {
           qsend(quiet,
             c.blackBright(`[${ident}] `) + `Called (Android 7+) ` +
             c.green(`TrustManagerImpl.checkTrustedRecursive()`) + `, not throwing an exception.`,
@@ -264,8 +264,8 @@ export namespace sslpinning {
         return TrustManagerImplcheckTrustedRecursive;
 
       } catch (err) {
-        if (err.message.indexOf("ClassNotFoundException") === 0) {
-          throw new Error(err);
+        if ((err as Error).message.indexOf("ClassNotFoundException") === 0) {
+          throw err;
         }
       }
     });
@@ -285,7 +285,7 @@ export namespace sslpinning {
         SSLCertificateCheckerExecute.overload(
           "java.lang.String", "org.json.JSONArray", "org.apache.cordova.CallbackContext").implementation =
           // tslint:disable-next-line:only-arrow-functions
-          function(str, jsonArray, callBackContext) {
+          function (str, jsonArray, callBackContext) {
             qsend(quiet,
               c.blackBright(`[${ident}] `) + `Called ` +
               c.green(`SSLCertificateChecker.execute()`) +
@@ -296,8 +296,8 @@ export namespace sslpinning {
           };
 
       } catch (err) {
-        if (err.message.indexOf("ClassNotFoundException") === 0) {
-          throw new Error(err);
+        if ((err as Error).message.indexOf("ClassNotFoundException") === 0) {
+          throw err;
         }
       }
     });
