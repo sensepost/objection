@@ -174,7 +174,7 @@ class Agent(object):
             :return:
         """
 
-        if not Path(self.agent_path).exists():
+        if not self.agent_path.exists():
             raise Exception('Unable to locate Objection agent sources at: {location}. '
                             'If this is a development install, check the wiki for more '
                             'information on building the agent.'.format(location=self.agent_path))

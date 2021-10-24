@@ -1,5 +1,5 @@
-import os
 import unittest
+from pathlib import Path
 from unittest import mock
 
 from objection.utils.agent import Agent
@@ -8,9 +8,8 @@ from objection.utils.agent import Agent
 class TestAgent(unittest.TestCase):
 
     def setUp(self):
-        agent_path = os.path.abspath(
-            os.path.join(os.path.abspath(os.path.dirname(__file__)), '../../objection', 'agent.js'))
-        if not os.path.exists(agent_path):
+        agent_path = Path(__file__).parent.parent.parent / 'objection' / 'agent.js'
+        if not agent_path.exists():
             self.skipTest('Compiled agent not available')
 
     @mock.patch('objection.utils.agent.app_state')
@@ -34,10 +33,8 @@ class TestAgent(unittest.TestCase):
         self.assertTrue('rpc.exports' in source)
         self.assertTrue('application/json;charset=utf-8;base64' in source.split(':')[-1])
 
-    @mock.patch('objection.utils.agent.os')
-    def test_agent_fails_to_load_throws_error(self, mock_os):
-        mock_os.path.exists.return_value = False
-
+    def test_agent_fails_to_load_throws_error(self):
         with self.assertRaises(Exception) as _:
             agent = Agent()
-            agent._get_agent_source()
+            with mock.patch(agent, 'exists', False):
+                agent._get_agent_source()
