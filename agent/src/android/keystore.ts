@@ -1,7 +1,15 @@
 import { colors as c } from "../lib/color";
-import { IKeyStoreDetail, IKeyStoreEntry } from "./lib/interfaces";
+import {
+  IKeyStoreDetail,
+  IKeyStoreEntry
+} from "./lib/interfaces";
 import { wrapJavaPerform } from "./lib/libjava";
-import { KeyFactory, KeyInfo, KeyStore, SecretKeyFactory } from "./lib/types";
+import {
+  KeyFactory,
+  KeyInfo,
+  KeyStore,
+  SecretKeyFactory
+} from "./lib/types";
 import { IJob } from "../lib/interfaces";
 import { jobs } from "../lib/jobs";
 

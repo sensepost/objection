@@ -1,6 +1,11 @@
 import { IExecutedCommand } from "./lib/interfaces";
 import { wrapJavaPerform } from "./lib/libjava";
-import { BufferedReader, InputStreamReader, Runtime, StringBuilder } from "./lib/types";
+import {
+  BufferedReader,
+  InputStreamReader,
+  Runtime,
+  StringBuilder
+} from "./lib/types";
 
 export namespace androidshell {
 

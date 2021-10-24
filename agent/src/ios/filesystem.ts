@@ -1,8 +1,15 @@
 import * as fs from "fs";
 import { hexStringToBytes } from "../lib/helpers";
 import { getNSFileManager } from "./lib/helpers";
-import { IIosFilePath, IIosFileSystem } from "./lib/interfaces";
-import { NSDictionary, NSFileManager, NSString as NSStringType } from "./lib/types";
+import {
+  IIosFilePath,
+  IIosFileSystem
+} from "./lib/interfaces";
+import {
+  NSDictionary,
+  NSFileManager,
+  NSString as NSStringType
+} from "./lib/types";
 
 export namespace iosfilesystem {
 

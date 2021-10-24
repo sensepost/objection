@@ -68,8 +68,6 @@ def detail(args: list = None) -> None:
         'Validity Start', 'Origin', 'Purposes', 'Sig Paddings', 'Sec Hardware'
     ]))
 
-    # print(ks)
-
 
 def clear(args: list = None) -> None:
     """

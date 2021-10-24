@@ -2,9 +2,19 @@
 // application.
 import { colors as c } from "../lib/color";
 import { reverseEnumLookup } from "../lib/helpers";
-import { kSec, NSUTF8StringEncoding } from "./lib/constants";
-import { bytesToHexString, bytesToUTF8, smartDataToString } from "./lib/helpers";
-import { IKeychainData, IKeychainItem } from "./lib/interfaces";
+import {
+  kSec,
+  NSUTF8StringEncoding
+} from "./lib/constants";
+import {
+  bytesToHexString,
+  bytesToUTF8,
+  smartDataToString
+} from "./lib/helpers";
+import {
+  IKeychainData,
+  IKeychainItem
+} from "./lib/interfaces";
 import { libObjc } from "./lib/libobjc";
 import {
   NSDictionary,

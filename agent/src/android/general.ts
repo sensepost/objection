@@ -1,4 +1,4 @@
-import { wrapJavaPerform } from "./lib/libjava"
+import { wrapJavaPerform } from "./lib/libjava";
 
 export namespace general {
 
@@ -6,6 +6,6 @@ export namespace general {
     return wrapJavaPerform(() => {
       Java.deoptimizeEverything();
     });
-  }
+  };
 
 }

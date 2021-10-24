@@ -1,5 +1,9 @@
 import { ICredential } from "./lib/interfaces";
-import { NSArray, NSData, NSURLCredentialStorage } from "./lib/types";
+import {
+  NSArray,
+  NSData,
+  NSURLCredentialStorage
+} from "./lib/types";
 
 export namespace credentialstorage {
 

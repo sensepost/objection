@@ -2,9 +2,19 @@ import { colors as c } from "../lib/color";
 import { IJob } from "../lib/interfaces";
 import { jobs } from "../lib/jobs";
 import { ICurrentActivityFragment } from "./lib/interfaces";
-import { getApplicationContext, R, wrapJavaPerform } from "./lib/libjava";
 import {
-  Activity, ActivityClientRecord, ActivityThread, ArrayMap, JavaClass, PackageManager, Throwable,
+  getApplicationContext,
+  R,
+  wrapJavaPerform
+} from "./lib/libjava";
+import {
+  Activity,
+  ActivityClientRecord,
+  ActivityThread,
+  ArrayMap,
+  JavaClass,
+  PackageManager,
+  Throwable,
 } from "./lib/types";
 
 export namespace hooking {
@@ -29,18 +39,18 @@ export namespace hooking {
     return wrapJavaPerform(() => {
       let loaders: string[] = [];
       Java.enumerateClassLoaders({
-        onMatch: function(l) {
+        onMatch: function (l) {
           if (l == null) {
-            return
+            return;
           }
           loaders.push(l.toString());
         },
-        onComplete: function() { }
+        onComplete: function () { }
       });
 
       return loaders;
     });
-  }
+  };
 
   export const getClassMethods = (className: string): Promise<string[]> => {
     return wrapJavaPerform(() => {
@@ -97,7 +107,7 @@ export namespace hooking {
 
           // replace the implementation of this method
           // tslint:disable-next-line:only-arrow-functions
-          m.implementation = function() {
+          m.implementation = function () {
             send(
               c.blackBright(`[${job.identifier}] `) +
               `Called ${c.green(clazz)}.${c.greenBright(m.methodName)}(${c.red(calleeArgTypes.join(", "))})`,
@@ -158,7 +168,7 @@ export namespace hooking {
 
         // replace the implementation of this method
         // tslint:disable-next-line:only-arrow-functions
-        m.implementation = function() {
+        m.implementation = function () {
           send(
             c.blackBright(`[${job.identifier}] `) +
             `Called ${c.green(clazz)}.${c.greenBright(m.methodName)}(${c.red(calleeArgTypes.join(", "))})`,
@@ -348,7 +358,7 @@ export namespace hooking {
         send(`Hooking ${c.green(clazz)}.${c.greenBright(method)}(${c.red(calleeArgTypes.join(", "))})`);
 
         // tslint:disable-next-line:only-arrow-functions
-        m.implementation = function() {
+        m.implementation = function () {
           let retVal = m.apply(this, arguments);
 
           // Override retval if needed

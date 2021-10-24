@@ -4,8 +4,16 @@ import { heap } from "../android/heap";
 import { hooking } from "../android/hooking";
 import { intent } from "../android/intent";
 import { keystore } from "../android/keystore";
-import { IHeapObject, IJavaField } from "../android/lib/interfaces";
-import { ICurrentActivityFragment, IExecutedCommand, IKeyStoreEntry } from "../android/lib/interfaces";
+import {
+  IHeapObject,
+  IJavaField,
+  IKeyStoreDetail
+} from "../android/lib/interfaces";
+import {
+  ICurrentActivityFragment,
+  IExecutedCommand,
+  IKeyStoreEntry
+} from "../android/lib/interfaces";
 import { sslpinning } from "../android/pinning";
 import { root } from "../android/root";
 import { androidshell } from "../android/shell";
@@ -64,7 +72,7 @@ export const android = {
   // android keystore
   androidKeystoreClear: () => keystore.clear(),
   androidKeystoreList: (): Promise<IKeyStoreEntry[]> => keystore.list(),
-  androidKeystoreDetail: () => keystore.detail(),
+  androidKeystoreDetail: (): Promise<IKeyStoreDetail[]> => keystore.detail(),
   androidKeystoreWatch: (): void => keystore.watchKeystore(),
 
   // android ssl pinning

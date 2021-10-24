@@ -2,7 +2,12 @@ import { colors as c } from "../lib/color";
 import { IJob } from "../lib/interfaces";
 import { jobs } from "../lib/jobs";
 import { wrapJavaPerform } from "./lib/libjava";
-import { File, IOException, JavaString, Runtime } from "./lib/types";
+import {
+  File,
+  IOException,
+  JavaString,
+  Runtime
+} from "./lib/types";
 
 export namespace root {
   const commonPaths = [

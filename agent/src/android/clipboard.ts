@@ -1,5 +1,8 @@
 import { colors as c } from "../lib/color";
-import { getApplicationContext, wrapJavaPerform } from "./lib/libjava";
+import {
+  getApplicationContext,
+  wrapJavaPerform
+} from "./lib/libjava";
 import { ClipboardManager } from "./lib/types";
 
 export namespace clipboard {
@@ -41,7 +44,7 @@ export namespace clipboard {
 
         // If the data is the same, just stop.
         if (data === currentString) {
-         return;
+          return;
         }
 
         // Update the data with the new string and report back.

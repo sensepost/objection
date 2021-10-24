@@ -37,7 +37,7 @@ export const fsend = (ident: string, hook: string, message: any): void => {
     c.blackBright(`[${ident}] `) +
     c.magenta(`[${hook}]`) +
     printArgs(message)
-  )
+  );
 };
 
 // a small helper method to use util to dump
@@ -48,11 +48,11 @@ export const debugDump = (o: any, depth: number = 2): void => {
 };
 
 // a small helper method to format JSON nicely before printing
-function printArgs(args: JSON) : string {
-  let printableString : string = " (\n"
+function printArgs(args: JSON): string {
+  let printableString: string = " (\n";
   for (const arg in args) {
-      printableString += `  ${c.blue(arg)} : ${args[arg]}\n`;
+    printableString += `  ${c.blue(arg)} : ${args[arg]}\n`;
   }
-  printableString += ")"
-  return printableString
+  printableString += ")";
+  return printableString;
 }

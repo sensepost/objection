@@ -1,4 +1,7 @@
-import { NSDictionary, NSUserDefaults } from "./lib/types";
+import {
+  NSDictionary,
+  NSUserDefaults
+} from "./lib/types";
 
 export namespace nsuserdefaults {
 

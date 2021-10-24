@@ -4,8 +4,13 @@ import { IJob } from "../lib/interfaces";
 import { jobs } from "../lib/jobs";
 import { wrapJavaPerform } from "./lib/libjava";
 import {
-  ArrayList, CertificatePinner, PinningTrustManager, SSLCertificateChecker,
-  SSLContext, TrustManagerImpl, X509TrustManager,
+  ArrayList,
+  CertificatePinner,
+  PinningTrustManager,
+  SSLCertificateChecker,
+  SSLContext,
+  TrustManagerImpl,
+  X509TrustManager,
 } from "./lib/types";
 
 export namespace sslpinning {

@@ -662,6 +662,7 @@ class AndroidPatcher(BasePlatformPatcher):
             :param start:
             :return:
         """
+
         pos = start
         in_annotation = False
         while pos + 1 < len(smali):
