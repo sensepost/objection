@@ -1,7 +1,7 @@
 import { colors as c } from "../lib/color";
-import { IKeyStoreEntry } from "./lib/interfaces";
+import { IKeyStoreDetail, IKeyStoreEntry } from "./lib/interfaces";
 import { wrapJavaPerform } from "./lib/libjava";
-import { KeyStore } from "./lib/types";
+import { KeyFactory, KeyInfo, KeyStore, SecretKeyFactory } from "./lib/types";
 import { IJob } from "../lib/interfaces";
 import { jobs } from "../lib/jobs";
 
@@ -48,72 +48,93 @@ export namespace keystore {
     });
   };
 
-  //https://labs.f-secure.com/blog/how-secure-is-your-android-keystore-authentication
-  //https://github.com/FSecureLABS/android-keystore-audit
-  function KeystoreInfo(keyAlias) {
-    let result: any = {};
+  // Dump detailed information about keystore entries per alias.
+  //
+  // Refs:
+  //  https://labs.f-secure.com/blog/how-secure-is-your-android-keystore-authentication
+  //  https://github.com/FSecureLABS/android-keystore-audit
+  export const detail = (): Promise<IKeyStoreDetail[]> => {
 
-    Java.perform(function () {
-      var keyStoreCls = Java.use('java.security.KeyStore');
-      var keyFactoryCls = Java.use('java.security.KeyFactory');
-      var keyInfoCls = Java.use('android.security.keystore.KeyInfo');
-      var keySecretKeyFactoryCls = Java.use('javax.crypto.SecretKeyFactory');
-      var keyFactoryObj = null;
+    // helper function to extract  keystore alias information
+    const keystore_info = (alias): IKeyStoreDetail => {
+      const r: IKeyStoreDetail = {};
 
-      var keyStoreObj = keyStoreCls.getInstance('AndroidKeyStore');
-      keyStoreObj.load(null);
-      var key = keyStoreObj.getKey(keyAlias, null);
-      if (key == null) {
-        console.log('key does not exist');
-        return null;
-      }
-      try {
-        keyFactoryObj = keyFactoryCls.getInstance(key.getAlgorithm(), 'AndroidKeyStore');
-      } catch (err) {
-        keyFactoryObj = keySecretKeyFactoryCls.getInstance(key.getAlgorithm(), 'AndroidKeyStore');
-      }
-      var keyInfo = keyFactoryObj.getKeySpec(key, keyInfoCls.class);
-      result.keyAlgorithm = key.getAlgorithm();
-      result.keySize = keyInfoCls['getKeySize'].call(keyInfo);
-      result.blockModes = keyInfoCls['getBlockModes'].call(keyInfo);
-      result.digests = keyInfoCls['getDigests'].call(keyInfo);
-      result.encryptionPaddings = keyInfoCls['getEncryptionPaddings'].call(keyInfo);
-      result.keyValidityForConsumptionEnd = keyInfoCls['getKeyValidityForConsumptionEnd'].call(keyInfo);
-      if (result.keyValidityForConsumptionEnd != null) result.keyValidityForConsumptionEnd = result.keyValidityForConsumptionEnd.toString();
-      result.keyValidityForOriginationEnd = keyInfoCls['getKeyValidityForOriginationEnd'].call(keyInfo);
-      if (result.keyValidityForOriginationEnd != null) result.keyValidityForOriginationEnd = result.keyValidityForOriginationEnd.toString();
-      result.keyValidityStart = keyInfoCls['getKeyValidityStart'].call(keyInfo);
-      if (result.keyValidityStart != null) result.keyValidityStart = result.keyValidityStart.toString();
-      result.keystoreAlias = keyInfoCls['getKeystoreAlias'].call(keyInfo);
-      result.origin = keyInfoCls['getOrigin'].call(keyInfo);
-      result.purposes = keyInfoCls['getPurposes'].call(keyInfo);
-      result.signaturePaddings = keyInfoCls['getSignaturePaddings'].call(keyInfo);
-      result.userAuthenticationValidityDurationSeconds = keyInfoCls['getUserAuthenticationValidityDurationSeconds'].call(keyInfo);
-      result.isInsideSecureHardware = keyInfoCls['isInsideSecureHardware'].call(keyInfo);
-      result.isInvalidatedByBiometricEnrollment = keyInfoCls['isInvalidatedByBiometricEnrollment'].call(keyInfo);
-      try { result.isTrustedUserPresenceRequired = keyInfoCls['isTrustedUserPresenceRequired'].call(keyInfo); } catch (err) { }
-      result.isUserAuthenticationRequired = keyInfoCls['isUserAuthenticationRequired'].call(keyInfo);
-      result.isUserAuthenticationRequirementEnforcedBySecureHardware = keyInfoCls['isUserAuthenticationRequirementEnforcedBySecureHardware'].call(keyInfo);
-      result.isUserAuthenticationValidWhileOnBody = keyInfoCls['isUserAuthenticationValidWhileOnBody'].call(keyInfo);
-      try { result.isUserConfirmationRequired = keyInfoCls['isUserConfirmationRequired'].call(keyInfo); } catch (err) { }
-     });
-    return result;
-  }
-  export const listDetails = () => {
-    return wrapJavaPerform(() => {
+      wrapJavaPerform(() => {
+        // java class handles
+        const keyStore: KeyStore = Java.use('java.security.KeyStore');
+        const keyFactory: KeyFactory = Java.use('java.security.KeyFactory');
+        const keyInfo: KeyInfo = Java.use('android.security.keystore.KeyInfo');
+        const keySecretKeyFactory: SecretKeyFactory = Java.use('javax.crypto.SecretKeyFactory');
+
+        // load the keystore entry
+        const keyStoreObj = keyStore.getInstance('AndroidKeyStore');
+        keyStoreObj.load(null);
+        const key = keyStoreObj.getKey(alias, null);
+        if (key == null) return null;
+
+        let keySpec = null;
+        try {
+          keySpec = keyFactory.getInstance(key.getAlgorithm(), 'AndroidKeyStore')
+            .getKeySpec(key, keyInfo.class);
+        } catch (err) {
+          keySpec = keySecretKeyFactory.getInstance(key.getAlgorithm(), 'AndroidKeyStore')
+            .getKeySpec(key, keyInfo.class);
+        }
+
+        // set result fields
+        r.keyAlgorithm = key.getAlgorithm();
+        r.keySize = keyInfo['getKeySize'].call(keySpec);
+        r.blockModes = keyInfo['getBlockModes'].call(keySpec);
+        r.digests = keyInfo['getDigests'].call(keySpec);
+        r.encryptionPaddings = keyInfo['getEncryptionPaddings'].call(keySpec);
+        r.keyValidityForConsumptionEnd = keyInfo['getKeyValidityForConsumptionEnd'].call(keySpec);
+        r.keyValidityForOriginationEnd = keyInfo['getKeyValidityForOriginationEnd'].call(keySpec);
+        r.keyValidityStart = keyInfo['getKeyValidityStart'].call(keySpec);
+        r.keystoreAlias = keyInfo['getKeystoreAlias'].call(keySpec);
+        r.origin = keyInfo['getOrigin'].call(keySpec);
+        r.purposes = keyInfo['getPurposes'].call(keySpec);
+        r.signaturePaddings = keyInfo['getSignaturePaddings'].call(keySpec);
+        r.userAuthenticationValidityDurationSeconds = keyInfo['getUserAuthenticationValidityDurationSeconds'].call(keySpec);
+        r.isInsideSecureHardware = keyInfo['isInsideSecureHardware'].call(keySpec);
+        r.isInvalidatedByBiometricEnrollment = keyInfo['isInvalidatedByBiometricEnrollment'].call(keySpec);
+        r.isUserAuthenticationRequired = keyInfo['isUserAuthenticationRequired'].call(keySpec);
+        r.isUserAuthenticationRequirementEnforcedBySecureHardware = keyInfo['isUserAuthenticationRequirementEnforcedBySecureHardware'].call(keySpec);
+        r.isUserAuthenticationValidWhileOnBody = keyInfo['isUserAuthenticationValidWhileOnBody'].call(keySpec);
+
+        // "crashy" calls that's ok if they fail
+        try {
+          r.isTrustedUserPresenceRequired = keyInfo['isTrustedUserPresenceRequired'].call(keySpec);
+        } catch (err) { }
+        try {
+          r.isUserConfirmationRequired = keyInfo['isUserConfirmationRequired'].call(keySpec);
+        } catch (err) { }
+
+        // translate some values to string representation if they are not empty
+        if (r.keyValidityForConsumptionEnd != null)
+          r.keyValidityForConsumptionEnd = r.keyValidityForConsumptionEnd.toString();
+        if (r.keyValidityForOriginationEnd != null)
+          r.keyValidityForOriginationEnd = r.keyValidityForOriginationEnd.toString();
+        if (r.keyValidityStart != null)
+          r.keyValidityStart = r.keyValidityStart.toString();
+      });
+
+      return r;
+    };
+
+    return wrapJavaPerform((): IKeyStoreDetail[] => {
       const keyStore: KeyStore = Java.use("java.security.KeyStore");
       const ks: KeyStore = keyStore.getInstance("AndroidKeyStore");
       ks.load(null, null);
+
       const aliases = ks.aliases();
-      
+      const info: IKeyStoreDetail[] = [];
+
       while (aliases.hasMoreElements()) {
-          var alias = aliases.nextElement()
-          var keystoreInfo = KeystoreInfo(alias.toString())
-          
-          c.log(alias)
-          c.log(JSON.stringify(keystoreInfo, null, 4))
-          c.log("\n")
-      }      
+        var a = aliases.nextElement();
+        info.push(keystore_info(a.toString()));
+      }
+
+      return info;
     });
   };
 
@@ -165,7 +186,7 @@ export namespace keystore {
           `Keystore.load(${c.greenBright(stream)}, ${c.redBright(password || `null`)}) ` +
           `called, loading a ${c.cyanBright(this.getType())} keystore.`);
         return this.load(stream, password);
-      }
+      };
     });
   };
 
@@ -183,10 +204,10 @@ export namespace keystore {
           `Keystore.getKey(${c.greenBright(alias)}, ${c.redBright(password || `null`)}) ` +
           `called, returning a ${c.greenBright(key.$className)} instance.`);
         return key;
-      }
+      };
       return ksGetKey;
     });
-  }
+  };
 
   // Android KeyStore watcher.
   // Many, many more methods can be added here..
@@ -200,5 +221,5 @@ export namespace keystore {
     job.implementations.push(keystoreLoad(job.identifier));
     job.implementations.push(keystoreGetKey(job.identifier));
     jobs.add(job);
-  }
+  };
 }

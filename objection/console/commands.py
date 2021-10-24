@@ -422,9 +422,10 @@ COMMANDS = {
                         'meta': 'Lists entries in the Android KeyStore',
                         'exec': keystore.entries
                     },
-                    'listDetails': {
-                        'meta': 'Lists details of all items in Android KeyStore',
-                        'exec': keystore.listDetails
+                    'detail': {
+                        'meta': 'Lists details for all items in the Android KeyStore',
+                        'flags': ['--json'],
+                        'exec': keystore.detail
                     },
                     'clear': {
                         'meta': 'Clears the Android KeyStore',

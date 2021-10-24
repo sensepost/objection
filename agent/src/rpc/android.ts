@@ -46,7 +46,7 @@ export const android = {
     hooking.setReturnValue(fqClazz, filterOverload, ret),
   androidHookingWatchClass: (clazz: string): Promise<void> => hooking.watchClass(clazz),
   androidHookingWatchMethod: (fqClazz: string, filterOverload: string | null, dargs: boolean,
-                              dbt: boolean, dret: boolean): Promise<void> =>
+    dbt: boolean, dret: boolean): Promise<void> =>
     hooking.watchMethod(fqClazz, filterOverload, dargs, dbt, dret),
 
   // android heap methods
@@ -64,7 +64,7 @@ export const android = {
   // android keystore
   androidKeystoreClear: () => keystore.clear(),
   androidKeystoreList: (): Promise<IKeyStoreEntry[]> => keystore.list(),
-  androidKeystoreListDetails: () => keystore.listDetails(),
+  androidKeystoreDetail: () => keystore.detail(),
   androidKeystoreWatch: (): void => keystore.watchKeystore(),
 
   // android ssl pinning
