@@ -246,7 +246,7 @@ def run(hook_debug: bool, command: tuple) -> None:
 @cli.command()
 def version() -> None:
     """
-        Prints the current version and exists.
+        Prints the current version and exits.
     """
 
     click.secho('objection: {0}'.format(__version__))
