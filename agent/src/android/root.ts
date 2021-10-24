@@ -95,6 +95,28 @@ export namespace root {
     });
   };
 
+  const jailMonkeyBypass = (success: boolean, ident: string): any => {
+    return wrapJavaPerform(() => {
+      const JavaJailMonkeyModule = Java.use("com.gantix.JailMonkey.JailMonkeyModule");
+      const JavaHashMap = Java.use("java.util.HashMap");
+      const JavaFalseObject = Java.use("java.lang.Boolean").FALSE.value;
+      JavaJailMonkeyModule.getConstants.implementation = function() {
+        send(
+          c.blackBright(`[${ident}] `) +
+          `JailMonkeyModule.getConstants() called, returning false for all keys.`
+        );
+        const hm = JavaHashMap.$new();
+        hm.put("isJailBroken", JavaFalseObject);
+        hm.put("hookDetected", JavaFalseObject);
+        hm.put("canMockLocation", JavaFalseObject);
+        hm.put("isOnExternalStorage", JavaFalseObject);
+        hm.put("AdbEnabled", JavaFalseObject);
+        return hm;
+      };
+      return JavaJailMonkeyModule;
+    });
+  };
+
   export const disable = (): void => {
     const job: IJob = {
       identifier: jobs.identifier(),
@@ -105,6 +127,7 @@ export namespace root {
     job.implementations.push(testKeysCheck(false, job.identifier));
     job.implementations.push(execSuCheck(false, job.identifier));
     job.implementations.push(fileExistsCheck(false, job.identifier));
+    job.implementations.push(jailMonkeyBypass(false, job.identifier));
     jobs.add(job);
   };
 
@@ -118,6 +141,7 @@ export namespace root {
     job.implementations.push(testKeysCheck(true, job.identifier));
     job.implementations.push(execSuCheck(true, job.identifier));
     job.implementations.push(fileExistsCheck(true, job.identifier));
+    job.implementations.push(jailMonkeyBypass(true, job.identifier));
     jobs.add(job);
   };
 }
