@@ -1,7 +1,7 @@
 import atexit
 import json
-import os
 from pprint import pprint
+from pathlib import Path
 
 import click
 import frida
@@ -21,9 +21,7 @@ class Agent(object):
             Initialises a new Agent instance to run the Frida agent.
         """
 
-        # Compiled frida agent path
-        self.agent_path = os.path.abspath(
-            os.path.join(os.path.abspath(os.path.dirname(__file__)), '../', 'agent.js'))
+        self.agent_path = Path(__file__).parent.parent / 'agent.js'
         debug_print('Agent path is: {path}'.format(path=self.agent_path))
 
         self.session = None
@@ -176,7 +174,7 @@ class Agent(object):
             :return:
         """
 
-        if not os.path.exists(self.agent_path):
+        if not Path(self.agent_path).exists():
             raise Exception('Unable to locate Objection agent sources at: {location}. '
                             'If this is a development install, check the wiki for more '
                             'information on building the agent.'.format(location=self.agent_path))
