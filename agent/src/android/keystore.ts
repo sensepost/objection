@@ -48,6 +48,75 @@ export namespace keystore {
     });
   };
 
+  //https://labs.f-secure.com/blog/how-secure-is-your-android-keystore-authentication
+  //https://github.com/FSecureLABS/android-keystore-audit
+  function KeystoreInfo(keyAlias) {
+    let result: any = {};
+
+    Java.perform(function () {
+      var keyStoreCls = Java.use('java.security.KeyStore');
+      var keyFactoryCls = Java.use('java.security.KeyFactory');
+      var keyInfoCls = Java.use('android.security.keystore.KeyInfo');
+      var keySecretKeyFactoryCls = Java.use('javax.crypto.SecretKeyFactory');
+      var keyFactoryObj = null;
+
+      var keyStoreObj = keyStoreCls.getInstance('AndroidKeyStore');
+      keyStoreObj.load(null);
+      var key = keyStoreObj.getKey(keyAlias, null);
+      if (key == null) {
+        console.log('key does not exist');
+        return null;
+      }
+      try {
+        keyFactoryObj = keyFactoryCls.getInstance(key.getAlgorithm(), 'AndroidKeyStore');
+      } catch (err) {
+        keyFactoryObj = keySecretKeyFactoryCls.getInstance(key.getAlgorithm(), 'AndroidKeyStore');
+      }
+      var keyInfo = keyFactoryObj.getKeySpec(key, keyInfoCls.class);
+      result.keyAlgorithm = key.getAlgorithm();
+      result.keySize = keyInfoCls['getKeySize'].call(keyInfo);
+      result.blockModes = keyInfoCls['getBlockModes'].call(keyInfo);
+      result.digests = keyInfoCls['getDigests'].call(keyInfo);
+      result.encryptionPaddings = keyInfoCls['getEncryptionPaddings'].call(keyInfo);
+      result.keyValidityForConsumptionEnd = keyInfoCls['getKeyValidityForConsumptionEnd'].call(keyInfo);
+      if (result.keyValidityForConsumptionEnd != null) result.keyValidityForConsumptionEnd = result.keyValidityForConsumptionEnd.toString();
+      result.keyValidityForOriginationEnd = keyInfoCls['getKeyValidityForOriginationEnd'].call(keyInfo);
+      if (result.keyValidityForOriginationEnd != null) result.keyValidityForOriginationEnd = result.keyValidityForOriginationEnd.toString();
+      result.keyValidityStart = keyInfoCls['getKeyValidityStart'].call(keyInfo);
+      if (result.keyValidityStart != null) result.keyValidityStart = result.keyValidityStart.toString();
+      result.keystoreAlias = keyInfoCls['getKeystoreAlias'].call(keyInfo);
+      result.origin = keyInfoCls['getOrigin'].call(keyInfo);
+      result.purposes = keyInfoCls['getPurposes'].call(keyInfo);
+      result.signaturePaddings = keyInfoCls['getSignaturePaddings'].call(keyInfo);
+      result.userAuthenticationValidityDurationSeconds = keyInfoCls['getUserAuthenticationValidityDurationSeconds'].call(keyInfo);
+      result.isInsideSecureHardware = keyInfoCls['isInsideSecureHardware'].call(keyInfo);
+      result.isInvalidatedByBiometricEnrollment = keyInfoCls['isInvalidatedByBiometricEnrollment'].call(keyInfo);
+      try { result.isTrustedUserPresenceRequired = keyInfoCls['isTrustedUserPresenceRequired'].call(keyInfo); } catch (err) { }
+      result.isUserAuthenticationRequired = keyInfoCls['isUserAuthenticationRequired'].call(keyInfo);
+      result.isUserAuthenticationRequirementEnforcedBySecureHardware = keyInfoCls['isUserAuthenticationRequirementEnforcedBySecureHardware'].call(keyInfo);
+      result.isUserAuthenticationValidWhileOnBody = keyInfoCls['isUserAuthenticationValidWhileOnBody'].call(keyInfo);
+      try { result.isUserConfirmationRequired = keyInfoCls['isUserConfirmationRequired'].call(keyInfo); } catch (err) { }
+     });
+    return result;
+  }
+  export const listDetails = () => {
+    return wrapJavaPerform(() => {
+      const keyStore: KeyStore = Java.use("java.security.KeyStore");
+      const ks: KeyStore = keyStore.getInstance("AndroidKeyStore");
+      ks.load(null, null);
+      const aliases = ks.aliases();
+      
+      while (aliases.hasMoreElements()) {
+          var alias = aliases.nextElement()
+          var keystoreInfo = KeystoreInfo(alias.toString())
+          
+          c.log(alias)
+          c.log(JSON.stringify(keystoreInfo, null, 4))
+          c.log("\n")
+      }      
+    });
+  };
+
   // Delete all entries in the Android Keystore
   //
   // Ref: https://developer.android.com/reference/java/security/KeyStore.html#deleteEntry(java.lang.String)
