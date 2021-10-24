@@ -649,6 +649,44 @@ class AndroidPatcher(BasePlatformPatcher):
 
         return end_of_method
 
+    @staticmethod
+    def _determine_first_inject_point_of_smali_method_from_line(smali: list, start: int) -> int:
+        """
+            Determines the first line in a smali method where we can inject code.
+            This is the line after any .locals or .annotations
+
+            This method is also aware of a methods that 'returns' and will
+            return the line before that too.
+
+            :param smali:
+            :param start:
+            :return:
+        """
+        pos = start
+        in_annotation = False
+        while pos + 1 < len(smali):
+            pos = pos + 1
+            line = smali[pos].strip()
+
+            # skip empty lines
+            if not line:
+                continue
+
+            # skip locals
+            if line.startswith(".locals "):
+                continue
+
+            # skip annotations
+            if in_annotation or line.startswith(".annotation "):
+                in_annotation = True
+                continue
+
+            if line.startswith(".end annotation"):
+                in_annotation = False
+                continue
+
+            return pos - 1
+
     def _patch_smali_with_load_library(self, smali_lines: list, inject_marker: int) -> list:
         """
             Patches a list of smali lines with the appropriate
@@ -687,12 +725,12 @@ class AndroidPatcher(BasePlatformPatcher):
         if 'clinit' in smali_lines[inject_marker]:
             click.secho('Injecting into an existing constructor', fg='yellow')
 
-            end_of_constructor = self._determine_end_of_smali_method_from_line(smali_lines, inject_marker)
-            click.secho('Injecting loadLibrary call at line: {0}'.format(end_of_constructor), dim=True, fg='green')
+            inject_point = self._determine_first_inject_point_of_smali_method_from_line(smali_lines, inject_marker)
+            click.secho('Injecting loadLibrary call at line: {0}'.format(inject_point), dim=True, fg='green')
 
             patched_smali = \
-                smali_lines[:end_of_constructor] + partial_load_library.splitlines(keepends=True) + \
-                smali_lines[end_of_constructor:]
+                smali_lines[:inject_point] + partial_load_library.splitlines(keepends=True) + \
+                smali_lines[inject_point:]
 
         else:
 
