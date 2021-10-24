@@ -1,4 +1,4 @@
-name: tests
+name: Run Tests
 on:
   push:
     branches: [ master ]
@@ -21,9 +21,8 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
-      - run: python my_script.py
 
-      # Runs a set of commands using the runners shell
+      # Runs test suite
       - name: Run the test suite
         run: |
           pip3 install -r requirements.txt
