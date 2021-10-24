@@ -95,24 +95,29 @@ export namespace root {
     });
   };
 
+  // ref: https://www.ayrx.me/gantix-jailmonkey-root-detection-bypass/
   const jailMonkeyBypass = (success: boolean, ident: string): any => {
     return wrapJavaPerform(() => {
       const JavaJailMonkeyModule = Java.use("com.gantix.JailMonkey.JailMonkeyModule");
       const JavaHashMap = Java.use("java.util.HashMap");
       const JavaFalseObject = Java.use("java.lang.Boolean").FALSE.value;
-      JavaJailMonkeyModule.getConstants.implementation = function() {
+
+      JavaJailMonkeyModule.getConstants.implementation = function () {
         send(
           c.blackBright(`[${ident}] `) +
           `JailMonkeyModule.getConstants() called, returning false for all keys.`
         );
+
         const hm = JavaHashMap.$new();
         hm.put("isJailBroken", JavaFalseObject);
         hm.put("hookDetected", JavaFalseObject);
         hm.put("canMockLocation", JavaFalseObject);
         hm.put("isOnExternalStorage", JavaFalseObject);
         hm.put("AdbEnabled", JavaFalseObject);
+
         return hm;
       };
+
       return JavaJailMonkeyModule;
     });
   };

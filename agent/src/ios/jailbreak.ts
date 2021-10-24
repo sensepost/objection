@@ -51,62 +51,62 @@ export namespace iosjailbreak {
 
     return Interceptor.attach(
       ObjC.classes.NSFileManager["- fileExistsAtPath:"].implementation, {
-        onEnter(args) {
+      onEnter(args) {
 
-          // Use a marker to check onExit if we need to manipulate
-          // the response.
-          this.is_common_path = false;
+        // Use a marker to check onExit if we need to manipulate
+        // the response.
+        this.is_common_path = false;
 
-          // Extract the path
-          this.path = new ObjC.Object(args[2]).toString();
+        // Extract the path
+        this.path = new ObjC.Object(args[2]).toString();
 
-          // check if the looked up path is in the list of common_paths
-          if (jailbreakPaths.indexOf(this.path) >= 0) {
+        // check if the looked up path is in the list of common_paths
+        if (jailbreakPaths.indexOf(this.path) >= 0) {
 
-            // Mark this path as one that should have its response
-            // modified if needed.
-            this.is_common_path = true;
-          }
-        },
-        onLeave(retval) {
-
-          // stop if we dont care about the path
-          if (!this.is_common_path) {
-            return;
-          }
-
-          // depending on the desired state, we flip retval
-          switch (success) {
-            case (true):
-              // ignore successful lookups
-              if (!retval.isNull()) {
-                return;
-              }
-              send(
-                c.blackBright(`[${ident}] `) + `fileExistsAtPath: check for ` +
-                c.green(this.path) + ` failed with: ` +
-                c.red(retval.toString()) + `, marking it as successful.`,
-              );
-
-              retval.replace(new NativePointer(0x01));
-              break;
-
-            case (false):
-              // ignore failed lookups
-              if (retval.isNull()) {
-                return;
-              }
-              send(
-                c.blackBright(`[${ident}] `) + `fileExistsAtPath: check for ` +
-                c.green(this.path) + ` was successful with: ` +
-                c.red(retval.toString()) + `, marking it as failed.`,
-              );
-
-              retval.replace(new NativePointer(0x00));
-              break;
-          }
-        },
+          // Mark this path as one that should have its response
+          // modified if needed.
+          this.is_common_path = true;
+        }
       },
+      onLeave(retval) {
+
+        // stop if we dont care about the path
+        if (!this.is_common_path) {
+          return;
+        }
+
+        // depending on the desired state, we flip retval
+        switch (success) {
+          case (true):
+            // ignore successful lookups
+            if (!retval.isNull()) {
+              return;
+            }
+            send(
+              c.blackBright(`[${ident}] `) + `fileExistsAtPath: check for ` +
+              c.green(this.path) + ` failed with: ` +
+              c.red(retval.toString()) + `, marking it as successful.`,
+            );
+
+            retval.replace(new NativePointer(0x01));
+            break;
+
+          case (false):
+            // ignore failed lookups
+            if (retval.isNull()) {
+              return;
+            }
+            send(
+              c.blackBright(`[${ident}] `) + `fileExistsAtPath: check for ` +
+              c.green(this.path) + ` was successful with: ` +
+              c.red(retval.toString()) + `, marking it as failed.`,
+            );
+
+            retval.replace(new NativePointer(0x00));
+            break;
+        }
+      },
+    },
     );
   };
 
@@ -116,60 +116,60 @@ export namespace iosjailbreak {
 
     return Interceptor.attach(
       Module.findExportByName(null, "fopen"), {
-        onEnter(args) {
+      onEnter(args) {
 
-          this.is_common_path = false;
+        this.is_common_path = false;
 
-          // Extract the path
-          this.path = args[0].readCString();
+        // Extract the path
+        this.path = args[0].readCString();
 
-          // check if the looked up path is in the list of common_paths
-          if (jailbreakPaths.indexOf(this.path) >= 0) {
+        // check if the looked up path is in the list of common_paths
+        if (jailbreakPaths.indexOf(this.path) >= 0) {
 
-            // Mark this path as one that should have its response
-            // modified if needed.
-            this.is_common_path = true;
-          }
-        },
-        onLeave(retval) {
-
-          // stop if we dont care about the path
-          if (!this.is_common_path) {
-            return;
-          }
-
-          // depending on the desired state, we flip retval
-          switch (success) {
-            case (true):
-              // ignore successful lookups
-              if (!retval.isNull()) {
-                return;
-              }
-              send(
-                c.blackBright(`[${ident}] `) + `fopen: check for ` +
-                c.green(this.path) + ` failed with: ` +
-                c.red(retval.toString()) + `, marking it as successful.`,
-              );
-
-              retval.replace(new NativePointer(0x01));
-              break;
-
-            case (false):
-              // ignore failed lookups
-              if (retval.isNull()) {
-                return;
-              }
-              send(
-                c.blackBright(`[${ident}] `) + `fopen: check for ` +
-                c.green(this.path) + ` was successful with: ` +
-                c.red(retval.toString()) + `, marking it as failed.`,
-              );
-
-              retval.replace(new NativePointer(0x00));
-              break;
-          }
-        },
+          // Mark this path as one that should have its response
+          // modified if needed.
+          this.is_common_path = true;
+        }
       },
+      onLeave(retval) {
+
+        // stop if we dont care about the path
+        if (!this.is_common_path) {
+          return;
+        }
+
+        // depending on the desired state, we flip retval
+        switch (success) {
+          case (true):
+            // ignore successful lookups
+            if (!retval.isNull()) {
+              return;
+            }
+            send(
+              c.blackBright(`[${ident}] `) + `fopen: check for ` +
+              c.green(this.path) + ` failed with: ` +
+              c.red(retval.toString()) + `, marking it as successful.`,
+            );
+
+            retval.replace(new NativePointer(0x01));
+            break;
+
+          case (false):
+            // ignore failed lookups
+            if (retval.isNull()) {
+              return;
+            }
+            send(
+              c.blackBright(`[${ident}] `) + `fopen: check for ` +
+              c.green(this.path) + ` was successful with: ` +
+              c.red(retval.toString()) + `, marking it as failed.`,
+            );
+
+            retval.replace(new NativePointer(0x00));
+            break;
+        }
+      },
+    },
     );
   };
 
@@ -178,55 +178,55 @@ export namespace iosjailbreak {
 
     return Interceptor.attach(
       ObjC.classes.UIApplication["- canOpenURL:"].implementation, {
-        onEnter(args) {
+      onEnter(args) {
 
-          this.is_flagged = false;
+        this.is_flagged = false;
 
-          // Extract the path
-          this.path = new ObjC.Object(args[2]).toString();
+        // Extract the path
+        this.path = new ObjC.Object(args[2]).toString();
 
-          if (this.path.startsWith('cydia') || this.path.startsWith('Cydia')) {
-            this.is_flagged = true;
-          }
-        },
-        onLeave(retval) {
-
-          if (!this.is_flagged) {
-            return;
-          }
-
-          // depending on the desired state, we flip retval
-          switch (success) {
-            case (true):
-              // ignore successful lookups
-              if (!retval.isNull()) {
-                return;
-              }
-              send(
-                c.blackBright(`[${ident}] `) + `canOpenURL: check for ` +
-                c.green(this.path) + ` failed with: ` +
-                c.red(retval.toString()) + `, marking it as successful.`,
-              );
-
-              retval.replace(new NativePointer(0x01));
-              break;
-
-            case (false):
-              // ignore failed
-              if (retval.isNull()) {
-                return;
-              }
-              send(
-                c.blackBright(`[${ident}] `) + `canOpenURL: check for ` +
-                c.green(this.path) + ` was successful with: ` +
-                c.red(retval.toString()) + `, marking it as failed.`,
-              );
-
-              retval.replace(new NativePointer(0x00));
-              break;
-          }
-        },
+        if (this.path.startsWith('cydia') || this.path.startsWith('Cydia')) {
+          this.is_flagged = true;
+        }
       },
+      onLeave(retval) {
+
+        if (!this.is_flagged) {
+          return;
+        }
+
+        // depending on the desired state, we flip retval
+        switch (success) {
+          case (true):
+            // ignore successful lookups
+            if (!retval.isNull()) {
+              return;
+            }
+            send(
+              c.blackBright(`[${ident}] `) + `canOpenURL: check for ` +
+              c.green(this.path) + ` failed with: ` +
+              c.red(retval.toString()) + `, marking it as successful.`,
+            );
+
+            retval.replace(new NativePointer(0x01));
+            break;
+
+          case (false):
+            // ignore failed
+            if (retval.isNull()) {
+              return;
+            }
+            send(
+              c.blackBright(`[${ident}] `) + `canOpenURL: check for ` +
+              c.green(this.path) + ` was successful with: ` +
+              c.red(retval.toString()) + `, marking it as failed.`,
+            );
+
+            retval.replace(new NativePointer(0x00));
+            break;
+        }
+      },
+    },
     );
   };
 
@@ -278,9 +278,11 @@ export namespace iosjailbreak {
     });
   };
 
+  // ref: https://www.ayrx.me/gantix-jailmonkey-root-detection-bypass/
   const jailMonkeyBypass = (success: boolean, ident: string): InvocationListener => {
     const JailMonkeyClass = ObjC.classes.JailMonkey;
-    if(JailMonkeyClass === undefined) { return null; }
+    if (JailMonkeyClass === undefined) return null;
+
     return Interceptor.attach(JailMonkeyClass["- isJailBroken"].implementation, {
       onLeave(retval) {
         send(
