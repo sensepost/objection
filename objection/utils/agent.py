@@ -1,74 +1,47 @@
+import argparse
 import atexit
 import json
-from pprint import pprint
+import sys
+from dataclasses import dataclass
 from pathlib import Path
+from pprint import pprint
 
 import click
 import frida
-from frida.core import ScriptExports
 
+from objection.state.app import app_state
+from objection.state.connection import state_connection
+from objection.state.device import device_state, Ios, Android
 from objection.state.jobs import job_manager_state
-from ..state.app import app_state
-from ..state.connection import state_connection
-from ..utils.helpers import debug_print
+from objection.utils.helpers import debug_print
 
 
-class Agent(object):
-    """ Class to manage the lifecycle of the Frida agent. """
+@dataclass
+class AgentConfig(object):
+    """ Default configuration for an Agent instance """
 
-    def __init__(self):
-        """
-            Initialises a new Agent instance to run the Frida agent.
-        """
+    name: str
+    host: str = None
+    port: int = None
+    device_type: str = 'usb'
+    device_id: str = None
+    foremost: bool = False
+    spawn: bool = False
+    pause: bool = True
+    debugger: bool = False
 
-        self.agent_path = Path(__file__).parent.parent / 'agent.js'
-        debug_print('Agent path is: {path}'.format(path=self.agent_path))
 
-        self.session = None
-        self.script = None
+class OutputHandlers(object):
+    """ Output handlers for an Agent instance """
 
-        self.device = None
-        self.spawned_pid = None
-        self.resumed = False
+    def device_output(self):
+        pass
 
-        atexit.register(self.cleanup)
-
-    @staticmethod
-    def on_message(message: dict, data):
-        """
-            The callback to run when a message is received from the agent.
-
-            :param message:
-            :param data:
-
-            :return:
-        """
-
-        try:
-
-            # log the hook response if needed
-            if app_state.should_debug():
-                click.secho('- [incoming message] ' + '-' * 18, dim=True)
-                click.secho(json.dumps(message, indent=2, sort_keys=True), dim=True)
-                click.secho('- [./incoming message] ' + '-' * 16, dim=True)
-
-            # process the response
-            if message and 'payload' in message:
-                if len(message['payload']) > 0:
-                    if isinstance(message['payload'], dict):
-                        click.secho('(agent) ' + json.dumps(message['payload']))
-                    elif isinstance(message['payload'], str):
-                        click.secho('(agent) ' + message['payload'])
-                    else:
-                        click.secho('Dumping unknown agent message', fg='yellow')
-                        pprint(message['payload'])
-
-        except Exception as e:
-            click.secho('Failed to process an incoming message from agent: {0}'.format(e), fg='red', bold=True)
-            raise e
+    def device_lost(self):
+        pass
 
     @staticmethod
-    def on_detach(message: str, crash):
+    def session_on_detached(message: str, crash):
         """
             The callback to run for the detach signal
 
@@ -102,70 +75,69 @@ class Agent(object):
             raise e
 
     @staticmethod
-    def _get_device() -> frida.core.Device:
+    def script_on_message(message: dict, data):
         """
-            Attempt to get a handle on a device.
+            The callback to run when a message is received from the agent.
+
+            :param message:
+            :param data:
 
             :return:
         """
 
-        if state_connection.get_comms_type() == state_connection.TYPE_USB:
-
-            if state_connection.device_serial:
-                device = frida.get_device(state_connection.device_serial)
-                click.secho('Using USB device `{n}`'.format(n=device.name), bold=True)
-
-                return device
-
-            else:
-                device = frida.get_usb_device(5)
-                click.secho('Using USB device `{n}`'.format(n=device.name), bold=True)
-
-                return device
-
-        if state_connection.get_comms_type() == state_connection.TYPE_REMOTE:
-            device = frida.get_device_manager().add_remote_device('{host}:{port}'.format(
-                host=state_connection.host, port=state_connection.port))
-            click.secho('Using networked device @`{n}`'.format(n=device.name), bold=True)
-
-            return device
-
-        raise Exception('Failed to find a device to attach to!')
-
-    def get_session(self) -> frida.core.Session:
-        """
-            Attempt to get a Frida session on a device.
-        """
-
-        if self.session:
-            return self.session
-
-        self.device = self._get_device()
-
-        # try and get the target process.
         try:
+            # log the hook response if needed
+            if app_state.should_debug():
+                click.secho('- [incoming message] ' + '-' * 18, dim=True)
+                click.secho(json.dumps(message, indent=2, sort_keys=True), dim=True)
+                click.secho('- [./incoming message] ' + '-' * 16, dim=True)
 
-            debug_print('Attempting to attach to process: `{process}`'.format(
-                process=state_connection.gadget_name))
-            self.session = self.device.attach(state_connection.gadget_name)
-            debug_print('Process attached!')
-            self.resumed = True
+            # process the response
+            if message and 'payload' in message:
+                if len(message['payload']) > 0:
+                    if isinstance(message['payload'], dict):
+                        click.secho('(agent) ' + json.dumps(message['payload']))
+                    elif isinstance(message['payload'], str):
+                        click.secho('(agent) ' + message['payload'])
+                    else:
+                        click.secho('Dumping unknown agent message', fg='yellow')
+                        pprint(message['payload'])
 
-            self.session.on('detached', self.on_detach)
+        except Exception as e:
+            click.secho('Failed to process an incoming message from agent: {0}'.format(e), fg='red', bold=True)
+            raise e
 
-            return self.session
 
-        except frida.ProcessNotFoundError:
-            debug_print('Unable to find process: `{process}`, attempting spawn'.format(
-                process=state_connection.gadget_name))
+class Agent(object):
+    """ Class to manage the lifecycle of the objection Frida agent """
 
-        # TODO: Handle the fact that gadget mode can't spawn
+    agent_path: Path = None
+    c: AgentConfig
 
-        self.spawned_pid = self.device.spawn(state_connection.gadget_name)
-        debug_print('PID `{pid}` spawned, attaching...'.format(pid=self.spawned_pid))
+    handlers: OutputHandlers
 
-        self.session = self.device.attach(self.spawned_pid)
-        return self.session
+    device: frida.core.Device = None
+    session: frida.core.Session = None
+    script: frida.core.Script = None
+
+    pid: int = None
+    resumed: bool = True
+
+    def __init__(self, config: AgentConfig):
+        """ initialises the agent class """
+
+        self.agent_path = Path(__file__).parent.parent / 'agent.js'
+        if not self.agent_path.exists():
+            raise Exception(f'Unable to locate Objection agent sources at: {self.agent_path}. '
+                            'If this is a development install, check the wiki for more '
+                            'information on building the agent.')
+        debug_print('Agent path is: {path}'.format(path=self.agent_path))
+
+        self.config = config
+        debug_print(f'agent config: {self.config}')
+        self.handlers = OutputHandlers()
+
+        atexit.register(self.teardown)
 
     def _get_agent_source(self) -> str:
         """
@@ -174,139 +146,223 @@ class Agent(object):
             :return:
         """
 
-        if not self.agent_path.exists():
-            raise Exception('Unable to locate Objection agent sources at: {location}. '
-                            'If this is a development install, check the wiki for more '
-                            'information on building the agent.'.format(location=self.agent_path))
-
         with open(self.agent_path, 'r', encoding='utf-8') as f:
-            agent = f.readlines()
+            src = f.readlines()
 
-        # If we are not in debug mode, strip the source map
-        if not app_state.should_debug():
-            agent = agent[:-1]
+        return ''.join([str(x) for x in src])
 
-        return ''.join([str(x) for x in agent])
-
-    def inject(self):
+    def set_device(self):
         """
-            Injects the Objection Agent.
+            Set's the target device to work with.
 
             :return:
         """
 
-        debug_print('Injecting agent...')
+        if self.config.device_id is not None:
+            self.device = frida.get_device(self.config.device_id)
 
-        session = self.get_session()
-        self.script = session.create_script(source=self._get_agent_source())
-        self.script.on('message', self.on_message)
+        elif (self.config.host is not None) or (self.config.device_type == 'remote'):
+            if self.config.host is None:
+                self.device = frida.get_remote_device()
+            else:
+                host = self.config.host
+                port = self.config.port
+                self.device = frida.get_device_manager() \
+                    .add_remote_device(f'{host}:{port}' if host is not None else f'127.0.0.1:{port}')
+
+        elif self.config.device_type is not None:
+            for dev in frida.enumerate_devices():
+                if dev.type == self.config.device_type:
+                    self.device = dev
+        else:
+            self.device = frida.get_local_device()
+
+        # surely we have a device by now?
+        if self.device is None:
+            raise Exception('Unable to find a device')
+
+        self.device.on('output', self.handlers.device_output)
+        self.device.on('lost', self.handlers.device_lost)
+
+        debug_print(f'device determined as: {self.device}')
+
+    def set_target_pid(self):
+        """
+            Set's the PID we should attach to. This method will spawn the
+            target if needed. The resumed value is also toggled here.
+
+            Defaults:
+                resumed: bool = True
+
+            :return:
+        """
+
+        if (self.config.name is None) and (not self.config.foremost):
+            raise Exception('Need a target name to spawn/attach to')
+
+        if self.config.foremost:
+            try:
+                app = self.device.get_frontmost_application()
+            except Exception as e:
+                raise Exception(f'Could not get foremost application on {self.device.name}: {e}')
+
+            if app is None:
+                raise Exception(f'No foremost application on {self.device.name}')
+
+            self.pid = app.pid
+            # update the global state for the prompt etc.
+            state_connection.name = app.identifier
+
+        elif self.config.spawn:
+            self.pid = self.device.spawn(self.config.name)
+            self.resumed = False
+        else:
+            # check if the name is actually an integer. this way we can
+            # assume we got the target PID already
+            try:
+                self.pid = int(self.config.name)
+            except ValueError:
+                pass
+
+            if self.pid is None:
+                # last resort, maybe we have a process name
+                self.pid = self.device.get_process(self.config.name).pid
+
+        debug_print(f'process PID determined as {self.pid}')
+
+    def attach(self):
+        """
+            Attaches to an enumerated PID, injecting the objection agent.
+
+            :return:
+        """
+
+        if self.pid is None:
+            raise Exception('A PID needs to be set before attach()')
+
+        self.session = self.device.attach(self.pid)
+        self.session.on('detached', self.handlers.session_on_detached)
+
+        if self.config.debugger:
+            self.session.enable_debugger()
+
+        self.script = self.session.create_script(source=self._get_agent_source())
+        self.script.on('message', self.handlers.script_on_message)
         self.script.load()
 
-        if not self.resumed:
-            debug_print('Resuming PID `{pid}`'.format(pid=self.spawned_pid))
-            self.device.resume(self.spawned_pid)
-
-        # ping the agent
-        if not self.exports().ping():
-            click.secho('Failed to ping the agent', fg='red')
-            raise Exception('Failed to communicate with agent')
-
-        click.secho('Agent injected and responds ok!', fg='green', dim=True)
-
-        return self
-
-    def single(self, source: str, unload=True) -> list:
+    def attach_script(self, source):
         """
-            Executes a single adhoc script, capturing the output and returning it.
+            Attaches an arbitrary script session.
 
-            :param source:
-            :param unload:
-            :return:
-        """
-
-        message_buffer = []
-
-        def on_message(message: str, data):
-            """
-                Simple message buffer helper.
-
-                :param message:
-                :param data:
-                :return:
-            """
-
-            message_buffer.append(message)
-
-        session = self.get_session()
-        script = session.create_script(source=source)
-        script.on('message', on_message)
-        script.load()
-
-        if not self.resumed:
-            debug_print('Resuming PID `{pid}`'.format(pid=self.spawned_pid))
-            self.device.resume(self.spawned_pid)
-
-        if unload:
-            script.unload()
-
-        return message_buffer
-
-    def background(self, source: str):
-        """
-            Executes an artibrary Frida script in the background, using the
-            default on_message handler for incoming messages from the script.
+            # TODO: Implement some script management so we could unload these later.
 
             :param source:
             :return:
         """
 
-        debug_print('Loading a background script')
-
-        session = self.get_session()
+        session = self.device.attach(self.pid)
         script = session.create_script(source=source)
-        script.on('message', self.on_message)
+        script.on('message', self.handlers.script_on_message)
         script.load()
 
-        if not self.resumed:
-            debug_print('Resuming PID `{pid}`'.format(pid=self.spawned_pid))
-            self.device.resume(self.spawned_pid)
-
-        debug_print('Background script loaded')
-
-    def exports(self) -> frida.core.ScriptExports:
+    def update_device_state(self):
         """
-            Get the exports of the agent.
+            Updates the device_state. Useful in other parts where we
+            need platform specific decisions.
 
             :return:
         """
+
+        params = self.device.query_system_parameters()
+
+        # set os platform
+        if params['os']['id'] == 'ios':
+            device_state.set_platform(Ios)
+        elif params['os']['id'] == 'android':
+            device_state.set_platform(Android)
+
+        # set os version
+        device_state.set_version(params['os']['version'])
+
+    def resume(self):
+        """
+            Resume the target pid.
+
+            :return:
+        """
+
+        if self.resumed:
+            return
+
+        if not self.pid:
+            raise Exception('Cannot resume without self.pid')
+
+        self.device.resume(self.pid)
+        self.resumed = True
+
+    def exports(self):
+        """
+            Returns the RPC exports exposed by the Frida agent
+
+            :return:
+        """
+
+        if not self.script:
+            raise Exception('Need a script created before reading exports()')
 
         return self.script.exports
 
-    def unload(self) -> None:
+    def run(self):
         """
-            Run cleanup routines on an agent.
+            Run the Agent by getting a device, setting the target pid and attaching.
+            If we should skip pausing, also resume the process.
 
             :return:
         """
 
-        if self.script:
-            debug_print('Calling unload()')
-            self.script.unload()
+        self.set_device()
+        self.set_target_pid()
+        self.attach()
 
-    def cleanup(self) -> None:
-        """
-            Cleanup an Agent
+        # internal state
+        self.update_device_state()
 
-            :return:
-        """
+        if not self.config.pause:
+            debug_print('asked to run without pausing, so resuming in run()')
+            self.resume()
 
+    def teardown(self):
         try:
-
             if self.script:
                 click.secho('Asking jobs to stop...', dim=True)
                 job_manager_state.cleanup()
                 click.secho('Unloading objection agent...', dim=True)
-                self.unload()
-
+                self.script.unload()
         except frida.InvalidOperationError as e:
-            click.secho('Unable to run cleanups: {error}'.format(error=str(e)), fg='yellow', dim=True)
+            click.secho(f'Unable to run cleanups: {e}', fg='yellow', dim=True)
+
+
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('name', help='target app to attach/spawn. needs to be bundle '
+                                     'identifier for spawn')
+    parser.add_argument('--no-spawn', dest='no_spawn', default=True, action='store_false',
+                        help='do not try and spawn the target app')
+    parser.add_argument('--no-pause', dest='no_pause', default=True, action='store_false',
+                        help='resume the app after spawning')
+    parser.add_argument('--debug', default=False, action='store_true', help='print debug logging')
+    args = parser.parse_args()
+
+    if args.name is None:
+        print('error: need a target app to attach/spawn')
+        sys.exit(1)
+
+    if args.debug:
+        app_state.debug = True
+
+    c = AgentConfig(name=args.name, spawn=args.no_spawn, pause=args.no_pause)
+    a = Agent(config=c)
+    a.run()
+
+    print(a.exports().env_frida())

@@ -77,7 +77,7 @@ For more information, please refer to the objection wiki at: https://github.com/
         self.assertEqual(output, expected_output)
 
     def test_warns_about_operating_system_versions(self):
-        device_state.device_type = Ios
+        device_state.platform = Ios
         with capture(warn_about_older_operating_systems) as o:
             output = o
 

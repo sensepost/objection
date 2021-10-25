@@ -24,7 +24,7 @@ def cat(args: list = None) -> None:
 
     if not os.path.isabs(plist):
         pwd = filemanager.pwd()
-        plist = device_state.device_type.path_seperator.join([pwd, plist])
+        plist = device_state.platform.path_separator.join([pwd, plist])
 
     api = state_connection.get_api()
     plist_data = api.ios_plist_read(plist)

@@ -1,21 +1,38 @@
-import os
 import threading
 import time
+from pathlib import Path
 
 import click
-import frida
 
+from objection.commands.plugin_manager import load_plugin
+from objection.utils.agent import Agent, AgentConfig
+from objection.utils.helpers import debug_print, warn_about_older_operating_systems
 from .repl import Repl
 from ..__init__ import __version__
-from ..commands.device import get_device_info
 from ..commands.mobile_packages import patch_ios_ipa, patch_android_apk, sign_android_apk
-from ..commands.plugin_manager import load_plugin
 from ..state.api import api_state
 from ..state.app import app_state
 from ..state.connection import state_connection
-from ..utils.agent import Agent
-from ..utils.helpers import normalize_gadget_name, print_frida_connection_help, warn_about_older_operating_systems, \
-    debug_print
+
+
+def get_agent() -> Agent:
+    """ get_agent bootstraps an agent instance """
+
+    agent = Agent(AgentConfig(
+        name=state_connection.name,
+        host=state_connection.host,
+        port=state_connection.port,
+        device_type=state_connection.device_type,
+        device_id=state_connection.device_id,
+        spawn=state_connection.spawn,
+        foremost=state_connection.foremost,
+        debugger=state_connection.debugger,
+        pause=not state_connection.no_pause
+    ))
+
+    agent.run()
+
+    return agent
 
 
 # Start the Click command group
@@ -26,13 +43,17 @@ from ..utils.helpers import normalize_gadget_name, print_frida_connection_help, 
 @click.option('--port', '-p', required=False, default=27042, show_default=True)
 @click.option('--api-host', '-ah', default='127.0.0.1', show_default=True)
 @click.option('--api-port', '-ap', required=False, default=8888, show_default=True)
-@click.option('--gadget', '-g', required=False, default='Gadget',
-              help='Name of the Frida Gadget/Process to connect to.', show_default=True)
+@click.option('--name', '-n', required=False,
+              help='Name or bundle identifier to attach to.', show_default=True)
 @click.option('--serial', '-S', required=False, default=None, help='A device serial to connect to.')
 @click.option('--debug', '-d', required=False, default=False, is_flag=True,
-              help='Enable debug mode with verbose output. (Includes agent source map in stack traces)')
+              help='Enable debug mode with verbose output.')
+@click.option('--spawn', '-s', required=False, is_flag=True, help='Spawn the target.')
+@click.option('--no-pause', '-p', required=False, is_flag=True, help='Resume the target immediately.')
+@click.option('--foremost', '-f', required=False, is_flag=True, help='Use the current foremost application.')
+@click.option('--debugger', required=False, default=False, is_flag=True, help='Enable the Chrome debug port.')
 def cli(network: bool, host: str, port: int, api_host: str, api_port: int,
-        gadget: str, serial: str, debug: bool) -> None:
+        name: str, serial: str, debug: bool, spawn: bool, no_pause: bool, foremost: bool, debugger: bool) -> None:
     """
         \b
              _   _         _   _
@@ -43,28 +64,28 @@ def cli(network: bool, host: str, port: int, api_host: str, api_port: int,
         \b
              Runtime Mobile Exploration
                 by: @leonjza from @sensepost
-
-        By default, communications will happen over USB, unless the --network
-        option is provided.
     """
 
     if debug:
         app_state.debug = debug
 
-    # disable the usb comms if network is chosen.
     if network:
         state_connection.use_network()
         state_connection.host = host
         state_connection.port = port
 
     if serial:
-        state_connection.device_serial = serial
+        state_connection.device_id = serial
 
     # set api parameters
     app_state.api_host = api_host
     app_state.api_port = api_port
 
-    state_connection.gadget_name = normalize_gadget_name(gadget_name=gadget)
+    state_connection.name = name
+    state_connection.spawn = spawn
+    state_connection.no_pause = no_pause
+    state_connection.foremost = foremost
+    state_connection.debugger = debugger
 
 
 @cli.command()
@@ -73,27 +94,18 @@ def api():
         Start the objection API server in headless mode.
     """
 
-    agent = Agent()
-
-    try:
-        agent.inject()
-    except frida.ServerNotRunningError as e:
-        click.secho('Unable to connect to the frida server: {error}'.format(error=str(e)), fg='red')
-        return
-
+    agent = get_agent()
     state_connection.set_agent(agent=agent)
 
-    click.secho('Starting API server on {host}:{port}'.format(
-        host=app_state.api_host, port=app_state.api_port), fg='yellow', bold=True)
-
+    click.secho(f'Starting API server on {app_state.api_host}:{app_state.api_port}', fg='yellow', bold=True)
     api_state.start(app_state.api_host, app_state.api_port, app_state.debug)
 
 
 @cli.command()
+@click.option('--plugin-folder', '-P', required=False, default=None, help='The folder to load plugins from.')
+@click.option('--quiet', '-q', required=False, default=False, is_flag=True)
 @click.option('--startup-command', '-s', required=False, multiple=True,
               help='A command to run before the repl polls the device for information.')
-@click.option('--quiet', '-q', required=False, default=False, is_flag=True,
-              help='Do not display the objection logo on startup.')
 @click.option('--file-commands', '-c', required=False, type=click.File('r'),
               help=('A file containing objection commands, separated by a '
                     'newline, that will run before the repl polls the device for information.'))
@@ -101,109 +113,67 @@ def api():
               help='A script to import and run before the repl polls the device for information.')
 @click.option('--enable-api', '-a', required=False, default=False, is_flag=True,
               help='Start the objection API server.')
-@click.option('--plugin-folder', '-P', required=False, default=None, help='The folder to load plugins from.')
-def explore(startup_command: str, quiet: bool, file_commands, startup_script: click.File, enable_api: bool,
-            plugin_folder: str) -> None:
+def start(plugin_folder: str, quiet: bool, startup_command: str, file_commands, startup_script: click.File,
+          enable_api: bool) -> None:
     """
-        Start the objection exploration REPL.
+        Start a new session
     """
 
-    agent = Agent()
-
-    try:
-        agent.inject()
-    except (frida.ServerNotRunningError, frida.NotSupportedError, frida.ProtocolError) as e:
-        click.secho('Unable to connect to the frida server: {error}'.format(error=str(e)), fg='red')
-        return
-
-    # set the frida agent
-    state_connection.set_agent(agent=agent)
+    agent = get_agent()
+    state_connection.set_agent(agent)
 
     # load plugins
     if plugin_folder:
-        folder = os.path.abspath(plugin_folder)
-        debug_print('[plugin] Plugins path is: {0}'.format(folder))
-
-        for p in os.scandir(folder):
-            # skip files and hidden directories
+        folder = Path(plugin_folder).resolve()
+        debug_print(f'[plugin] Plugins path is: {folder}')
+        for p in folder.iterdir():
             if p.is_file() or p.name.startswith('.'):
-                debug_print('[plugin] Skipping {0}'.format(p.name))
+                debug_print(f'[plugin] Skipping {p.name}')
                 continue
 
-            debug_print('[plugin] Attempting to load plugin at {0}'.format(p.path))
-            load_plugin([p.path])
+            debug_print(f'[plugin] Attempting to load plugin at {p}')
+            load_plugin([p])
 
-    # start the main REPL
-    r = Repl()
+    repl = Repl()
 
-    # if we have a command to run, do that first before
-    # the call to get_device_info().
+    if startup_script:
+        click.secho(f'Importing and running startup script at: {startup_script}', dim=True)
+        agent.attach_script(startup_script.read())
+
     if startup_command:
         for command in startup_command:
-            click.secho('Running a startup command... {0}'.format(command), dim=True)
-            r.run_command(command)
+            click.secho(f'Running a startup command... {command}', dim=True)
+            repl.run_command(command)
 
-    # If we have a script, import and run that asap
-    if startup_script:
-        click.secho('Importing and running startup script at: {location}'.format(location=startup_script), dim=True)
-        response = agent.single(startup_script.read())
-        print(response)
-
-    try:
-
-        # poll the device for information. this method also sets
-        # the device type internally in state.device
-        device_info = get_device_info()
-
-    except (frida.TimedOutError, frida.ServerNotRunningError,
-            frida.ProcessNotFoundError, frida.NotSupportedError) as e:
-
-        click.secho('Could not connect with error: {0}'.format(str(e)), fg='red')
-        print_frida_connection_help()
-
-        return
-
-    # process commands from a resource file
     if file_commands:
         click.secho('Running commands from file...', bold=True)
         for command in file_commands.readlines():
 
-            # clean up newlines
             command = command.strip()
-
-            # do nothing for empty lines
             if command == '':
                 continue
 
             # run the command using the instantiated repl
-            click.secho('Running: \'{0}\':\n'.format(command), dim=True)
-            r.run_command(command)
+            click.secho(f'Running: \'{command}\':\n', dim=True)
+            repl.run_command(command)
 
     warn_about_older_operating_systems()
 
     # start the api server
     if enable_api:
         def api_thread():
-            """
-                Small method to run Flash non-blocking
-
-                :return:
-            """
-
+            """ Small method to run Flask non-blocking """
             api_state.start(app_state.api_host, app_state.api_port)
 
-        click.secho('Starting API server on {host}:{port}'.format(
-            host=app_state.api_host, port=app_state.api_port), fg='yellow', bold=True)
-
+        click.secho(f'Starting API server on {app_state.api_host}:{app_state.api_port}', fg='yellow', bold=True)
         thread = threading.Thread(target=api_thread)
         thread.daemon = True
         thread.start()
 
         time.sleep(2)
 
-    # run the REPL and wait for more commands
-    r.set_prompt_tokens(device_info)
-    r.start_repl(quiet=quiet)
+    # drop into the repl
+    repl.run(quiet=quiet)
 
 
 @cli.command()
@@ -222,19 +192,8 @@ def run(hook_debug: bool, command: tuple) -> None:
     # specify if hooks should be debugged
     app_state.debug_hooks = hook_debug
 
-    # Inject the agent
-    agent = Agent()
-    agent.inject()
+    agent = get_agent()
     state_connection.set_agent(agent=agent)
-
-    try:
-
-        click.secho('Determining environment...', dim=True)
-        get_device_info()
-
-    except (frida.TimedOutError, frida.ServerNotRunningError) as e:
-        click.secho('Error: {0}'.format(e), fg='red')
-        return
 
     command = ' '.join(command)
 
@@ -250,40 +209,6 @@ def version() -> None:
     """
 
     click.secho('objection: {0}'.format(__version__))
-
-
-@cli.command()
-def device_type():
-    """
-        Get information about an attached device.
-    """
-
-    try:
-
-        # Inject the agent
-        agent = Agent()
-        agent.inject()
-        state_connection.set_agent(agent=agent)
-
-        device_name, system_name, model, system_version = get_device_info()
-
-    except frida.ProcessNotFoundError as e:
-
-        click.secho('Could not connect with error: {0}'.format(str(e)), fg='red')
-        print_frida_connection_help()
-
-        return
-
-    if state_connection.get_comms_type() == state_connection.TYPE_USB:
-        click.secho('Connection: USB')
-
-    elif state_connection.get_comms_type() == state_connection.TYPE_REMOTE:
-        click.secho('Connection: Network')
-
-    click.secho('Name: {0}'.format(device_name))
-    click.secho('System: {0}'.format(system_name))
-    click.secho('Model: {0}'.format(model))
-    click.secho('Version: {0}'.format(system_version))
 
 
 @cli.command()

@@ -67,6 +67,11 @@ COMMANDS = {
         'exec': None,  # handled in the Repl class itself
     },
 
+    'resume': {
+        'meta': 'Resume the attached process',
+        'exec': None
+    },
+
     'import': {
         'meta': 'Import fridascript from a full path and run it',
         'exec': frida_commands.load_background

@@ -96,26 +96,6 @@ def get_tokens(text: str) -> list:
     return tokens
 
 
-def normalize_gadget_name(gadget_name: str):
-    """
-        Takes a string input and converts it into an integer
-        if possible. This helps the attach() process in the Frida
-        API determine if it should be attaching to a process name or a PID.
-
-        :param gadget_name:
-        :return:
-    """
-
-    try:
-
-        gadget_name = int(gadget_name)
-
-    except ValueError:
-        pass
-
-    return gadget_name
-
-
 def clean_argument_flags(args: list) -> list:
     """
         Returns a list of arguments with flags removed.
@@ -174,17 +154,17 @@ def warn_about_older_operating_systems() -> None:
     ios_supported = '9'
 
     # android & ios version warnings
-    if device_state.device_type == Android and (
-            parse_version(device_state.os_version) < parse_version(android_supported)):
+    if device_state.platform == Android and (
+            parse_version(device_state.version) < parse_version(android_supported)):
         click.secho('Warning: You appear to be running Android {0} which may result in '
                     'some hooks failing.\nIt is recommended to use at least an Android '
-                    'version {1} device with objection.'.format(device_state.os_version, android_supported),
+                    'version {1} device with objection.'.format(device_state.version, android_supported),
                     fg='yellow')
 
     # android & ios version warnings
-    if device_state.device_type == Ios and (
-            parse_version(device_state.os_version) < parse_version(ios_supported)):
+    if device_state.platform == Ios and (
+            parse_version(device_state.version) < parse_version(ios_supported)):
         click.secho('Warning: You appear to be running iOS {0} which may result in '
                     'some hooks failing.\nIt is recommended to use at least an iOS '
-                    'version {1} device with objection.'.format(device_state.os_version, ios_supported),
+                    'version {1} device with objection.'.format(device_state.version, ios_supported),
                     fg='yellow')

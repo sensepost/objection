@@ -87,15 +87,13 @@ class Plugin(ABC):
         if not self.agent:
             self.agent = state_connection.get_agent()
 
-        if not self.session:
-            self.session = self.agent.get_session()
-
-        if not self.script:
-            self.script = self.session.create_script(source=self.script_src)
+        self.session = self.agent.device.attach(self.agent.pid)
+        self.script = self.session.create_script(source=self.script_src)
 
         # check for a custom message handler, otherwise fallback
         # to the default objection handler
-        self.script.on('message', self.on_message_handler if self.on_message_handler else self.agent.on_message)
+        self.script.on('message',
+                       self.on_message_handler if self.on_message_handler else self.agent.handlers.script_on_message)
 
         self.script.load()
         self.api = self.script.exports

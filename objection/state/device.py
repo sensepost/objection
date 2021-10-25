@@ -7,27 +7,44 @@ class Android(Device):
     """ Represents Android specific configurations. """
 
     name = 'android'
-    path_seperator = '/'
+    path_separator = '/'
 
 
 class Ios(Device):
     """ Represents iOS specific configurations. """
 
     name = 'ios'
-    path_seperator = '/'
+    path_separator = '/'
 
 
 class DeviceState(object):
     """ A class representing the state of a device and its runtime. """
 
-    def __init__(self) -> None:
-        self.device = None
-        self.frida_version = None
-        self.os_version = None
+    platform: Device
+    version: str
+
+    def set_version(self, v: str):
+        """
+            Set the running OS version
+
+            :param v:
+            :return:
+        """
+
+        self.version = v
+
+    def set_platform(self, t: Device):
+        """
+            Set's the device type
+
+            :param t:
+            :return:
+        """
+
+        self.platform = t
 
     def __repr__(self) -> str:
-        return '<Type: {0} Frida Version:{1} OS Version: {2}>'.format(self.device, self.frida_version,
-                                                                      self.os_version)
+        return f'<Type: {self.platform} >'
 
 
 device_state = DeviceState()

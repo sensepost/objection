@@ -171,7 +171,7 @@ class TestRepl(unittest.TestCase):
         self.repl.session = MagicMock(name='session')
         self.repl.session.prompt.return_value = 'exit'
 
-        with capture(self.repl.start_repl, False) as o:
+        with capture(self.repl.run, False) as o:
             output = o
 
         expected_output = ("""
@@ -193,7 +193,7 @@ Exiting...\n""".format(__version__))
         self.repl.session = MagicMock(name='session')
         self.repl.session.prompt.return_value = 'exit'
 
-        with capture(self.repl.start_repl, True) as o:
+        with capture(self.repl.run, True) as o:
             output = o
 
         expected_output = 'Exiting...\n'

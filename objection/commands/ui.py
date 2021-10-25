@@ -18,10 +18,10 @@ def alert(args: list = None) -> None:
     else:
         message = args[0]
 
-    if device_state.device_type == Ios:
+    if device_state.platform == Ios:
         _alert_ios(message)
 
-    if device_state.device_type == Android:
+    if device_state.platform == Android:
         pass
 
 
