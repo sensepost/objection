@@ -384,7 +384,12 @@ def _should_dump_json(args: list) -> Optional[str]:
 
 
 
-def enumerate(args: str) -> None:
+def _should_print_only_classes(args: list) -> bool:
+   return '--only-classes' in args
+
+
+
+def enumerate(args: list) -> None:
     """
         Enumerates the current Android application for classes and methods.
 
@@ -395,17 +400,27 @@ def enumerate(args: str) -> None:
         click.secho('Usage: android hooking enumerate \'<class>!<method>\'', bold=True)
         return
 
+    shouldDumpJSON = _should_dump_json(args)
+    shouldPrintOnlyClasses = _should_print_only_classes(args)
     api = state_connection.get_api()
     results = api.android_hooking_enumerate(args[0])
+
+    # Only get overloads if this flag is specified, otherwise just enumerating can be kind of slow
+    if shouldDumpJSON:
+        for result in results:
+            for _class in result['classes']:
+                _class['overloads'] = api.android_hooking_get_class_methods_overloads(_class['name'])
 
     if not _should_be_quiet(args):
         for result in results:
             for _class in result['classes']:
                 print(_class['name'])
-                for method in _class['methods']:
-                    print(f'\t{method}')
+                if not shouldPrintOnlyClasses:
+                    for method in _class['methods']:
+                        print(f'\t{method}')
 
-    targetFile = _should_dump_json(args)
-    if targetFile is not None:
+
+    targetFile = shouldDumpJSON
+    if targetFile:
         with open(targetFile, 'w') as fd:
             fd.write(json.dumps(results))

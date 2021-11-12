@@ -383,7 +383,7 @@ COMMANDS = {
                     'enumerate': {
                         'meta': 'Enumerate Java classes and methods',
                         'exec': android_hooking.enumerate,
-                        'flags': ['--quiet', '--json']
+                        'flags': ['--quiet', '--json', '--only-classes']
                     }
                 },
             },
