@@ -19,6 +19,7 @@ import {
 
 export namespace hooking {
 
+  import EnumerateMethodsMatchGroup = Java.EnumerateMethodsMatchGroup;
   const splitClassMethod = (fqClazz: string): string[] => {
     // split a fully qualified class name, assuming the last period denotes the method
     const methodSeperatorIndex: number = fqClazz.lastIndexOf(".");
@@ -37,19 +38,27 @@ export namespace hooking {
 
   export const getClassLoaders = (): Promise<string[]> => {
     return wrapJavaPerform(() => {
-      let loaders: string[] = [];
+      const loaders: string[] = [];
       Java.enumerateClassLoaders({
-        onMatch: function (l) {
+        onMatch (l) {
           if (l == null) {
             return;
           }
           loaders.push(l.toString());
         },
-        onComplete: function () { }
+        onComplete () { }
       });
 
       return loaders;
     });
+  };
+
+
+  export const enumerate = (query: string): Promise<EnumerateMethodsMatchGroup[]> => {
+    return wrapJavaPerform(() => {
+          return Java.enumerateMethods(query);
+        }
+    );
   };
 
   export const getClassMethods = (className: string): Promise<string[]> => {

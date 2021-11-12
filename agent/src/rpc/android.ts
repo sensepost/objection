@@ -20,6 +20,7 @@ import { androidshell } from "../android/shell";
 import { userinterface } from "../android/userinterface";
 import { proxy } from "../android/proxy";
 import { general } from "../android/general";
+import EnumerateMethodsMatchGroup = Java.EnumerateMethodsMatchGroup;
 
 export const android = {
   // android clipboard
@@ -56,6 +57,7 @@ export const android = {
   androidHookingWatchMethod: (fqClazz: string, filterOverload: string | null, dargs: boolean,
     dbt: boolean, dret: boolean): Promise<void> =>
     hooking.watchMethod(fqClazz, filterOverload, dargs, dbt, dret),
+  androidHookingEnumerate: (query: string): Promise<EnumerateMethodsMatchGroup[]> => hooking.enumerate(query),
 
   // android heap methods
   androidHeapEvaluateHandleMethod: (handle: number, js: string): Promise<void> => heap.evaluate(handle, js),
