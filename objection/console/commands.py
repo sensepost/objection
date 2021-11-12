@@ -396,14 +396,14 @@ COMMANDS = {
                         }
                     },
                     'print': {
-                        'meta': 'Print information about objects on the iOS heap',
+                        'meta': 'Print information about objects on the heap',
                         'commands': {
                             'fields': {
                                 'meta': 'Print instance fields for a Java object handle',
                                 'exec': android_heap.fields
                             },
                             'methods': {
-                                'meta': 'Print instance methods for an Android handle',
+                                'meta': 'Print instance methods for a Java object handle',
                                 'flags': ['--without-arguments'],
                                 'exec': android_heap.methods
                             }
