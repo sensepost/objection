@@ -379,6 +379,11 @@ COMMANDS = {
                                 'exec': android_generate.simple
                             }
                         }
+                    },
+                    'enumerate': {
+                        'meta': 'Enumerate Java classes and methods',
+                        'exec': android_hooking.enumerate,
+                        'flags': ['--quiet', '--json']
                     }
                 },
             },

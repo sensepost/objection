@@ -1,11 +1,13 @@
 import fnmatch
+import json
 
 import click
 import frida
 
+from typing import Optional
+
 from objection.state.connection import state_connection
 from objection.utils.helpers import clean_argument_flags
-
 
 def _string_is_true(s: str) -> bool:
     """
@@ -356,3 +358,54 @@ def search_methods(args: list) -> None:
             click.secho('Ignoring error and continuing search...', dim=True)
 
     click.secho('\nFound {0} methods'.format(found), bold=True)
+
+
+
+def _should_be_quiet(args: list) -> bool:
+    return '--quiet' in args
+
+
+
+def _should_dump_json(args: list) -> Optional[str]:
+    target = None
+    for i in range(len(args)):
+        if args[i] == '--json':
+            target = i + 1
+        i = i + 1
+
+    if target is None:
+        return None
+    elif target < len(args):
+        return args[target]
+    else:
+        click.secho('Please specify a target file', bold=True)
+
+    return None
+
+
+
+def enumerate(args: str) -> None:
+    """
+        Enumerates the current Android application for classes and methods.
+
+        :param query:
+        :return:
+    """
+    if len(clean_argument_flags(args)) <= 0:
+        click.secho('Usage: android hooking enumerate \'<class>!<method>\'', bold=True)
+        return
+
+    api = state_connection.get_api()
+    results = api.android_hooking_enumerate(args[0])
+
+    if not _should_be_quiet(args):
+        for result in results:
+            for _class in result['classes']:
+                print(_class['name'])
+                for method in _class['methods']:
+                    print(f'\t{method}')
+
+    targetFile = _should_dump_json(args)
+    if targetFile is not None:
+        with open(targetFile, 'w') as fd:
+            fd.write(json.dumps(results))
