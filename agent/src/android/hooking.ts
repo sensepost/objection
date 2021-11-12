@@ -20,6 +20,7 @@ import {
 export namespace hooking {
 
   import EnumerateMethodsMatchGroup = Java.EnumerateMethodsMatchGroup;
+  import cast = Java.cast;
   const splitClassMethod = (fqClazz: string): string[] => {
     // split a fully qualified class name, assuming the last period denotes the method
     const methodSeperatorIndex: number = fqClazz.lastIndexOf(".");
@@ -69,6 +70,39 @@ export namespace hooking {
       return clazz.class.getDeclaredMethods().map((method) => {
         return method.toGenericString();
       });
+    });
+  };
+
+
+  export const getClassMethodsOverloads = (className: string): Promise<JSON> => {
+    return wrapJavaPerform(() => {
+      const clazz: JavaClass = Java.use(className);
+      const methods = clazz.class.getDeclaredMethods()
+      const result = {}
+      let hasConstructor = false
+      methods.forEach(method => {
+        // This trims out only the function name and uses that to get the overloads
+        const methodName = (method.toGenericString().split('.').filter(part => part.includes('('))[0].split('(')[0])
+        if (methodName == '$init'){
+            hasConstructor = true
+        }
+        const overloads = clazz[methodName].overloads
+        result[methodName] = {
+            'argTypes': overloads.map(overload => overload.argumentTypes),
+            'returnType': overloads.map(overload => overload.returnType)
+        }
+      })
+        // Finally append the constructor details
+        try{
+            if (clazz.$init !== undefined){
+                result['$init'] = {
+                    'argTypes': clazz.$init.overloads.map(overload => overload.argumentTypes),  // Return type for constructors are always `void`
+                }
+            }
+        }catch {
+            // Some classes don't have constructors, this is a temporary workaround
+        }
+      return result
     });
   };
 
