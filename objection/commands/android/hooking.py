@@ -424,3 +424,4 @@ def enumerate(args: list) -> None:
     if targetFile:
         with open(targetFile, 'w') as fd:
             fd.write(json.dumps(results))
+            click.secho(f'JSON dumped to {shouldDumpJSON}', bold=True)

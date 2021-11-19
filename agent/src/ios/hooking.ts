@@ -20,7 +20,10 @@ export namespace hooking {
 
     return ObjC.classes[className].$ownMethods;
   };
-
+  export const enumerate = (pattern: string): ApiResolverMatch[] => {
+      const resolver = new ApiResolver('objc')
+      return resolver.enumerateMatches(pattern)
+  };
   export const searchMethods = (partial: string): string[] => {
     const results: string[] = []; // the response
 
@@ -35,7 +38,6 @@ export namespace hooking {
 
     return results;
   };
-
   export const watchClass = (clazz: string, parents: boolean): void => {
     const target = ObjC.classes[clazz];
 

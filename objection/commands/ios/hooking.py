@@ -1,3 +1,6 @@
+from typing import Optional
+import json
+
 import click
 
 from objection.state.connection import state_connection
@@ -319,3 +322,75 @@ def search_method(args: list) -> None:
 
     else:
         click.secho('No methods found')
+
+
+def enumerate(args: list) -> None:
+    """
+        Enumerates the current Android application for classes and methods.
+
+        :param query:
+        :return:
+    """
+    if len(clean_argument_flags(args)) <= 0:
+        click.secho('Usage: ios hooking enumerate \'*[CLASS METHOD]\'', bold=True)
+        return
+
+    shouldPrintOnlyClasses = _should_print_only_classes(args)
+    shouldDumpJSON = _should_dump_json(args)
+    shouldBeQuiet = _should_be_quiet(args)
+
+    api = state_connection.get_api()
+    results = api.ios_hooking_enumerate(args[0])
+
+    # Change the JSON we get into a form that matches the Android enumerate call
+    data = {}
+    for func in results:
+        fullname = func['name']
+        startBracket = fullname.find('[') + 1
+        className = fullname[startBracket: fullname.find(' ')]
+        if data.get(className) is not None:
+            data[className].append(fullname)
+        else:
+            data[className] = []
+
+    # Print the matching methods
+    for klass in data.keys():
+        methods = data[klass]
+        if not shouldBeQuiet:
+            print(klass)
+        if not shouldBeQuiet and not shouldPrintOnlyClasses:
+            for method in methods:
+                print(f'\t{method}')
+
+    targetFile = shouldDumpJSON
+    if targetFile:
+        with open(targetFile, 'w') as fd:
+            fd.write(json.dumps(data))
+            click.secho(f'JSON dumped to {shouldDumpJSON}', bold=True)
+
+
+
+def _should_print_only_classes(args: list) -> bool:
+   return '--only-classes' in args
+
+
+
+def _should_dump_json(args: list) -> Optional[str]:
+    target = None
+    for i in range(len(args)):
+        if args[i] == '--json':
+            target = i + 1
+        i = i + 1
+
+    if target is None:
+        return None
+    elif target < len(args):
+        return args[target]
+    else:
+        click.secho('Please specify a target file', bold=True)
+
+    return None
+
+
+def _should_be_quiet(args: list) -> bool:
+    return '--quiet' in args

@@ -732,7 +732,12 @@ COMMANDS = {
                                 'meta': 'Simple hooks for each Class method',
                                 'exec': ios_generate.simple
                             }
-                        }
+                        },
+                },
+                    'enumerate': {
+                        'meta': 'Enumerate ObjC classes and methods',
+                        'exec': ios_hooking.enumerate,
+                        'flags': ['--quiet', '--json', '--only-classes']
                     }
                 }
             },

@@ -64,6 +64,8 @@ export const ios = {
   iosHookingWatchClass: (clazz: string, parents: boolean): void => hooking.watchClass(clazz, parents),
   iosHookingWatchMethod: (selector: string, dargs: boolean, dbt: boolean, dret: boolean): void =>
     hooking.watchMethod(selector, dargs, dbt, dret),
+  iosHookingEnumerate: (pattern: string): ApiResolverMatch[] =>
+      hooking.enumerate(pattern),
 
   // ios crypto monitoring
   iosMonitorCryptoEnable: (): void => ioscrypto.monitor(),

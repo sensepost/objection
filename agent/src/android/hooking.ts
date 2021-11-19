@@ -105,7 +105,7 @@ export namespace hooking {
       return result
     });
   };
-
+  // TODO (cduplooy): Add additional arguments here
   export const watchClass = (clazz: string): Promise<void> => {
     return wrapJavaPerform(() => {
       const clazzInstance: JavaClass = Java.use(clazz);
@@ -150,6 +150,7 @@ export namespace hooking {
 
           // replace the implementation of this method
           // tslint:disable-next-line:only-arrow-functions
+          // TODO: (cduplooy): Add dump-args and dump-return valuie
           m.implementation = function () {
             send(
               c.blackBright(`[${job.identifier}] `) +
