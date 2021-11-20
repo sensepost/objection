@@ -388,7 +388,6 @@ def _should_print_only_classes(args: list) -> bool:
    return '--only-classes' in args
 
 
-
 def enumerate(args: list) -> None:
     """
         Enumerates the current Android application for classes and methods.
@@ -397,11 +396,24 @@ def enumerate(args: list) -> None:
         :return:
     """
     if len(clean_argument_flags(args)) <= 0:
-        click.secho('Usage: android hooking enumerate \'<class>!<method>\'', bold=True)
+        click.secho('Usage: android hooking enumerate \'<class>!<method>\''
+                    '<optional overload> '
+                    '(optional: --dump-args) '
+                    '(optional: --dump-backtrace) '
+                    '(optional: --dump-return)'
+                    '(optional: --json <filename>)'
+                    '(optional: --only-classes)'
+                    '(optional: --quiet)', bold=True)
         return
 
     shouldDumpJSON = _should_dump_json(args)
     shouldPrintOnlyClasses = _should_print_only_classes(args)
+    shouldWatchArgs = _should_dump_args(args)
+    shouldWatchRet= _should_dump_return_value(args)
+    shouldBeQuiet = _should_be_quiet(args)
+    shouldBacktrace = _should_dump_backtrace(args)
+    overload_filter = args[1].replace(' ', '') if (len(args) > 1 and '--' not in args[1]) else None
+
     api = state_connection.get_api()
     results = api.android_hooking_enumerate(args[0])
 
@@ -411,7 +423,21 @@ def enumerate(args: list) -> None:
             for _class in result['classes']:
                 _class['overloads'] = api.android_hooking_get_class_methods_overloads(_class['name'])
 
-    if not _should_be_quiet(args):
+    if shouldWatchArgs or shouldWatchRet:
+        for result in results:
+            for _class in result['classes']:
+                classname = _class['name']
+                methods = _class['methods']
+                for method in methods:
+                    fullyQualifiedMethod = f'{classname}.{method}'
+                    api.android_hooking_watch_method(fullyQualifiedMethod,
+                                                     overload_filter,
+                                                     shouldWatchArgs,
+                                                     shouldBacktrace,
+                                                     shouldWatchRet)
+
+
+    if not shouldBeQuiet:
         for result in results:
             for _class in result['classes']:
                 print(_class['name'])

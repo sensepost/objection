@@ -383,7 +383,7 @@ COMMANDS = {
                     'enumerate': {
                         'meta': 'Enumerate Java classes and methods',
                         'exec': android_hooking.enumerate,
-                        'flags': ['--quiet', '--json', '--only-classes']
+                        'flags': ['--quiet', '--json', '--only-classes', '--dump-args', '--dump-return', '--dump-backtrace']
                     }
                 },
             },
@@ -737,7 +737,7 @@ COMMANDS = {
                     'enumerate': {
                         'meta': 'Enumerate ObjC classes and methods',
                         'exec': ios_hooking.enumerate,
-                        'flags': ['--quiet', '--json', '--only-classes']
+                        'flags': ['--quiet', '--json', '--only-classes', '--dump-args', '--dump-return', '--dump-backtrace']
                     }
                 }
             },

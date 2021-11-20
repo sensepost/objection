@@ -362,6 +362,8 @@ def enumerate(args: list) -> None:
             for method in methods:
                 print(f'\t{method}')
 
+    # TODO: (connordp): If --dump-* is passed; logic!
+
     targetFile = shouldDumpJSON
     if targetFile:
         with open(targetFile, 'w') as fd:
