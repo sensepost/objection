@@ -337,7 +337,10 @@ def enumerate(args: list) -> None:
 
     shouldPrintOnlyClasses = _should_print_only_classes(args)
     shouldDumpJSON = _should_dump_json(args)
+    shouldWatchArgs = _should_dump_args(args)
+    shouldWatchRet = _should_dump_return_value(args)
     shouldBeQuiet = _should_be_quiet(args)
+    shouldBacktrace = _should_dump_backtrace(args)
 
     api = state_connection.get_api()
     results = api.ios_hooking_enumerate(args[0])
@@ -358,9 +361,15 @@ def enumerate(args: list) -> None:
         methods = data[klass]
         if not shouldBeQuiet:
             print(klass)
-        if not shouldBeQuiet and not shouldPrintOnlyClasses:
-            for method in methods:
+        for method in methods:
+            if not shouldBeQuiet and not shouldPrintOnlyClasses:
                 print(f'\t{method}')
+            if shouldBacktrace or shouldWatchRet or shouldWatchArgs:
+                selector = method
+                api.ios_hooking_watch_method(selector,
+                                             _should_dump_args(args),
+                                             _should_dump_backtrace(args),
+                                             _should_dump_return_value(args))
 
     # TODO: (connordp): If --dump-* is passed; logic!
 

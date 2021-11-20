@@ -423,7 +423,7 @@ def enumerate(args: list) -> None:
             for _class in result['classes']:
                 _class['overloads'] = api.android_hooking_get_class_methods_overloads(_class['name'])
 
-    if shouldWatchArgs or shouldWatchRet:
+    if shouldWatchArgs or shouldWatchRet or shouldBacktrace:
         for result in results:
             for _class in result['classes']:
                 classname = _class['name']
