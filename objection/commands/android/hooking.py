@@ -416,12 +416,11 @@ def enumerate(args: list) -> None:
 
     api = state_connection.get_api()
     results = api.android_hooking_enumerate(args[0])
-
     # Only get overloads if this flag is specified, otherwise just enumerating can be kind of slow
     if shouldDumpJSON:
         for result in results:
             for _class in result['classes']:
-                _class['overloads'] = api.android_hooking_get_class_methods_overloads(_class['name'])
+                _class['overloads'] = api.android_hooking_get_class_methods_overloads(_class['name'], _class['methods'])
 
     if shouldWatchArgs or shouldWatchRet or shouldBacktrace:
         for result in results:

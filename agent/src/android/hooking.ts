@@ -74,29 +74,29 @@ export namespace hooking {
   };
 
 
-  export const getClassMethodsOverloads = (className: string): Promise<JSON> => {
+  export const getClassMethodsOverloads = (className: string, methodsAllowList: string[] = []): Promise<JSON> => {
     return wrapJavaPerform(() => {
       const clazz: JavaClass = Java.use(className);
       const methods = clazz.class.getDeclaredMethods()
       const result = {}
-      let hasConstructor = false
       methods.forEach(method => {
         // This trims out only the function name and uses that to get the overloads
         const methodName = (method.toGenericString().split('.').filter(part => part.includes('('))[0].split('(')[0])
-        if (methodName == '$init'){
-            hasConstructor = true
-        }
-        const overloads = clazz[methodName].overloads
-        result[methodName] = {
+        if (methodsAllowList.length === 0 || (methodsAllowList.length > 0 && methodsAllowList.includes(methodName))) {
+          const overloads = clazz[methodName].overloads
+          result[methodName] = {
             'argTypes': overloads.map(overload => overload.argumentTypes),
             'returnType': overloads.map(overload => overload.returnType)
+          }
         }
       })
         // Finally append the constructor details
         try{
             if (clazz.$init !== undefined){
-                result['$init'] = {
+                if (methodsAllowList.length === 0 || (methodsAllowList.length > 0 && methodsAllowList.includes("$init"))){
+                  result["$init"] = {
                     'argTypes': clazz.$init.overloads.map(overload => overload.argumentTypes),  // Return type for constructors are always `void`
+                  }
                 }
             }
         }catch {
