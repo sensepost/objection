@@ -67,6 +67,10 @@ export namespace hooking {
     }
   }
   export const enumerate = (query: string): Promise<EnumerateMethodsMatchGroup[]> => {
+    // If the query is just a classname, strongarm it into a pattern. 
+    if (getPatternType(query) === PatternType.Klass){
+      query = `${query}!*`
+    }
     return wrapJavaPerform(() => {
           return Java.enumerateMethods(query);
         }

@@ -229,95 +229,6 @@ def set_method_return_value(args: list = None) -> None:
                                           retval)
 
 
-def search_class(args: list) -> None:
-    """
-        Searches the currently loaded classes for a class.
-        Note that Java classes are only loaded when they are used, 
-        so if you don't get results, the class might not have been used yet.
-
-        :param args:
-        :return:
-    """
-
-    if len(clean_argument_flags(args)) < 1:
-        click.secho('Usage: android hooking search classes <name>', bold=True)
-        return
-
-    click.secho('Note that Java classes are only loaded when they are used,'
-                ' so if the expected class has not been found, it might not have been loaded yet.', fg='yellow')
-
-    search = args[0]
-    found = 0
-
-    api = state_connection.get_api()
-    classes = api.android_hooking_get_classes()
-
-    # print the enumerated classes
-    for class_name in sorted(classes):
-
-        if search.lower() in class_name.lower():
-            click.secho(class_name)
-            found += 1
-
-    click.secho('\nFound {0} classes'.format(found), bold=True)
-
-
-def search_methods(args: list) -> None:
-    """
-        Searches the current Android application for a class method.
-
-        :param args:
-        :return:
-    """
-
-    if len(clean_argument_flags(args)) < 1:
-        click.secho('Usage: android hooking search methods <name> (optional: <package-filter>)', bold=True)
-        return
-
-    search = args[0]
-    class_filter = args[1] if len(clean_argument_flags(args)) > 1 else None
-    found = 0
-
-    click.secho('Note that Java classes are only loaded when they are used,'
-                ' so if the expected class has not been found, it might not have been loaded yet.', fg='yellow')
-
-    if not class_filter:
-        click.secho('Warning, searching all classes may take some time and in some cases, '
-                    'crash the target application.', fg='yellow')
-        if not click.confirm('Continue?'):
-            return
-
-    api = state_connection.get_api()
-
-    # get the classes we have
-    classes = api.android_hooking_get_classes()
-    click.secho('Found {0} classes, searching methods (this may take some time)...'.format(len(classes)), dim=True)
-    if class_filter:
-        click.secho('Filtering classes with {0}'.format(class_filter), dim=True)
-
-    # loop the classes and check the methods
-    for class_name in sorted(classes):
-        if class_filter and class_filter.lower() not in class_name.lower():
-            continue
-
-        try:
-
-            for method in api.android_hooking_get_class_methods(class_name):
-                # get only the raw method, minus returns, throws and args
-                method = method.split('(')[0].split(' ')[-1]
-                if search.lower() in method.lower():
-                    click.secho(method)
-                    found += 1
-
-        except frida.core.RPCException as e:
-            click.secho('Enumerating methods for class \'{0}\' failed with: {1}'.format(class_name, e), fg='red',
-                        dim=True)
-            click.secho('Ignoring error and continuing search...', dim=True)
-
-    click.secho('\nFound {0} methods'.format(found), bold=True)
-
-
-
 def _should_be_quiet(args: list) -> bool:
     return '--quiet' in args
 
@@ -345,7 +256,7 @@ def _should_print_only_classes(args: list) -> bool:
    return '--only-classes' in args
 
 
-def enumerate(args: list) -> None:
+def search(args: list) -> None:
     """
         Enumerates the current Android application for classes and methods.
 
@@ -353,11 +264,7 @@ def enumerate(args: list) -> None:
         :return:
     """
     if len(clean_argument_flags(args)) <= 0:
-        click.secho('Usage: android hooking enumerate \'<class>!<method>\''
-                    '<optional overload> '
-                    '(optional: --dump-args) '
-                    '(optional: --dump-backtrace) '
-                    '(optional: --dump-return)'
+        click.secho('Usage: android hooking search \'<class>!<method>\''
                     '(optional: --json <filename>)'
                     '(optional: --only-classes)'
                     '(optional: --quiet)', bold=True)
@@ -365,33 +272,20 @@ def enumerate(args: list) -> None:
 
     shouldDumpJSON = _should_dump_json(args)
     shouldPrintOnlyClasses = _should_print_only_classes(args)
-    shouldWatchArgs = _should_dump_args(args)
-    shouldWatchRet= _should_dump_return_value(args)
     shouldBeQuiet = _should_be_quiet(args)
-    shouldBacktrace = _should_dump_backtrace(args)
-    overload_filter = args[1].replace(' ', '') if (len(args) > 1 and '--' not in args[1]) else None
 
     api = state_connection.get_api()
+    resultsJSON = {
+        'meta': {
+            'runtime': 'java'
+        }
+    }
     results = api.android_hooking_enumerate(args[0])
     # Only get overloads if this flag is specified, otherwise just enumerating can be kind of slow
     if shouldDumpJSON:
         for result in results:
             for _class in result['classes']:
                 _class['overloads'] = api.android_hooking_get_class_methods_overloads(_class['name'], _class['methods'])
-
-    if shouldWatchArgs or shouldWatchRet or shouldBacktrace:
-        for result in results:
-            for _class in result['classes']:
-                classname = _class['name']
-                methods = _class['methods']
-                for method in methods:
-                    fullyQualifiedMethod = f'{classname}.{method}'
-                    api.android_hooking_watch_method(fullyQualifiedMethod,
-                                                     overload_filter,
-                                                     shouldWatchArgs,
-                                                     shouldBacktrace,
-                                                     shouldWatchRet)
-
 
     if not shouldBeQuiet:
         for result in results:
@@ -401,9 +295,9 @@ def enumerate(args: list) -> None:
                     for method in _class['methods']:
                         print(f'\t{method}')
 
-
     targetFile = shouldDumpJSON
     if targetFile:
+        resultsJSON['data'] = results
         with open(targetFile, 'w') as fd:
-            fd.write(json.dumps(results))
+            fd.write(json.dumps(resultsJSON))
             click.secho(f'JSON dumped to {shouldDumpJSON}', bold=True)

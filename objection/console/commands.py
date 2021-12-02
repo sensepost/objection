@@ -346,16 +346,8 @@ COMMANDS = {
                     },
                     'search': {
                         'meta': 'Search for various classes and or methods',
-                        'commands': {
-                            'classes': {
-                                'meta': 'Search for Java classes matching a name',
-                                'exec': android_hooking.search_class
-                            },
-                            'methods': {
-                                'meta': 'Search for Java methods matching a name',
-                                'exec': android_hooking.search_methods
-                            }
-                        }
+                        'exec': android_hooking.search,
+                        'flags': ['--json', '--only-classes', '--quiet']
                     },
                     'generate': {
                         'meta': 'Generate Frida hooks for Android',
@@ -369,11 +361,6 @@ COMMANDS = {
                                 'exec': android_generate.simple
                             }
                         }
-                    },
-                    'enumerate': {
-                        'meta': 'Enumerate Java classes and methods',
-                        'exec': android_hooking.enumerate,
-                        'flags': ['--quiet', '--json', '--only-classes', '--dump-args', '--dump-return', '--dump-backtrace']
                     }
                 },
             },
