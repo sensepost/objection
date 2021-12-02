@@ -65,7 +65,7 @@ class ObjCHookManager {
       return;
     }
 
-    this.printVerbose(`Hookig ${m}...`);
+    this.printVerbose(`Hooking ${m}...`);
 
     const l = Interceptor.attach(this.target[m].implementation, {
       onEnter: function (args) {

@@ -87,7 +87,7 @@ class JavaHookManager {
       return;
     }
 
-    this.printVerbose(`Hookig ${m} and all overloads...`);
+    this.printVerbose(`Hooking ${m} and all overloads...`);
 
     var r = [];
     this.target[m].overloads.forEach(overload => {
