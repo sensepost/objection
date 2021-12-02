@@ -323,25 +323,15 @@ COMMANDS = {
                     },
                     'watch': {
                         'meta': 'Watch for Android Java invocations',
-                        'commands': {
-                            'class': {
-                                'meta': 'Watches for invocations of all methods in a class',
-                                'flags': ['--dump-args', '--dump-backtrace', '--dump-return'],
-                                'exec': android_hooking.watch_class,
-                            },
-                            'class_method': {
-                                'meta': 'Watches for invocations of a specific class method',
-                                'flags': ['--dump-args', '--dump-backtrace', '--dump-return'],
-                                'exec': android_hooking.watch_class_method
-                            }
-                        }
+                        'exec': android_hooking.watch
                     },
                     'set': {
                         'meta': 'Set various values',
                         'commands': {
                             'return_value': {
                                 'meta': 'Set a methods return value. Supports only boolean returns.',
-                                'exec': android_hooking.set_method_return_value
+                                'exec': android_hooking.set_method_return_value,
+                                'flags': ['--dump-args', '--dump-return', '--dump-backtrace']
                             }
                         }
                     },

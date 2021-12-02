@@ -21,6 +21,7 @@ export namespace hooking {
 
   import EnumerateMethodsMatchGroup = Java.EnumerateMethodsMatchGroup;
   import cast = Java.cast;
+  import EnumerateMethodsMatchClass = Java.EnumerateMethodsMatchClass;
   const splitClassMethod = (fqClazz: string): string[] => {
     // split a fully qualified class name, assuming the last period denotes the method
     const methodSeperatorIndex: number = fqClazz.lastIndexOf(".");
@@ -54,7 +55,17 @@ export namespace hooking {
     });
   };
 
-
+  enum PatternType {
+    Regex = 'regex',
+    Klass = 'klass',
+  }
+  const getPatternType = (pattern: string): PatternType => {
+    if (pattern.indexOf('!') !== -1) {
+      return PatternType.Regex
+    } else {
+       return PatternType.Klass
+    }
+  }
   export const enumerate = (query: string): Promise<EnumerateMethodsMatchGroup[]> => {
     return wrapJavaPerform(() => {
           return Java.enumerateMethods(query);
@@ -78,7 +89,7 @@ export namespace hooking {
     return wrapJavaPerform(() => {
       const clazz: JavaClass = Java.use(className);
       const methods = clazz.class.getDeclaredMethods()
-      const result = {}
+      const result: any = {}
       methods.forEach(method => {
         // This trims out only the function name and uses that to get the overloads
         const methodName = (method.toGenericString().split('.').filter(part => part.includes('('))[0].split('(')[0])
@@ -94,7 +105,7 @@ export namespace hooking {
         try{
             if (clazz.$init !== undefined){
                 if (methodsAllowList.length === 0 || (methodsAllowList.length > 0 && methodsAllowList.includes("$init"))){
-                  result["$init"] = {
+                  result.$init = {
                     'argTypes': clazz.$init.overloads.map(overload => overload.argumentTypes),  // Return type for constructors are always `void`
                   }
                 }
@@ -105,8 +116,28 @@ export namespace hooking {
       return result
     });
   };
-  // TODO (cduplooy): Add additional arguments here
-  export const watchClass = (clazz: string): Promise<void> => {
+  export const watch = (pattern: string, dargs: boolean, dbt: boolean, dret: boolean): Promise<void> => {
+    const patternType = getPatternType(pattern)
+    if (patternType === PatternType.Klass){
+      return watchClass(pattern, dargs, dbt, dret)
+    } else if (patternType === PatternType.Regex){
+      return new Promise((resolve, reject) => {
+        enumerate(pattern).then((matches: EnumerateMethodsMatchGroup[]) => {
+          matches.forEach((match: EnumerateMethodsMatchGroup) => {
+            match.classes.forEach((klass: EnumerateMethodsMatchClass) => {
+              watchClass(klass.name, dargs, dbt, dret)
+            })
+          })
+          resolve()
+      }).catch((error) => {
+        reject(error)
+      })
+      })
+    } else {
+    // TODO(cduplooy): Unknown pattern type? log a message to inform the user?
+    }
+  }
+  export const watchClass = (clazz: string, dargs: boolean = false, dbt: boolean = false, dret: boolean = false): Promise<void> => {
     return wrapJavaPerform(() => {
       const clazzInstance: JavaClass = Java.use(clazz);
 
@@ -142,28 +173,13 @@ export namespace hooking {
       };
 
       uniqueMethods.forEach((method) => {
-        clazzInstance[method].overloads.forEach((m: any) => {
-
           // get the argument types for this overload
-          const calleeArgTypes: string[] = m.argumentTypes.map((arg) => arg.className);
-          send(`Hooking ${c.green(clazz)}.${c.greenBright(method)}(${c.red(calleeArgTypes.join(", "))})`);
-
-          // replace the implementation of this method
-          // tslint:disable-next-line:only-arrow-functions
-          // TODO: (cduplooy): Add dump-args and dump-return valuie
-          m.implementation = function () {
-            send(
-              c.blackBright(`[${job.identifier}] `) +
-              `Called ${c.green(clazz)}.${c.greenBright(m.methodName)}(${c.red(calleeArgTypes.join(", "))})`,
-            );
-
-            // actually run the intended method
-            return m.apply(this, arguments);
-          };
-
+          send(`Watching ${c.green(clazz)}.${c.greenBright(method)}()`);
+          const fqClazz  = `${clazz}.${method}`;
+          // TODO(cduplooy): Add the filter args, also jobs per invocation of parent command
+          watchMethod(fqClazz, null, dargs, dbt, dret);
           // record this implementation override for the job
-          job.implementations.push(m);
-        });
+          job.implementations.push(fqClazz);
       });
 
       // record the job

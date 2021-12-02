@@ -114,63 +114,20 @@ def show_android_class_methods(args: list = None) -> None:
 
     click.secho('\nFound {0} method(s)'.format(len(methods)), bold=True)
 
-
-def watch_class(args: list) -> None:
-    """
-        Watches for invocations of all methods in an Android
-        Java class. All overloads for methods found are also watched.
-
-        :param args:
-        :return:
-    """
-
+def watch(args: list) -> None:
     if len(clean_argument_flags(args)) < 1:
-        click.secho('Usage: android hooking watch class <class> '
-                    '(eg: com.example.test)', bold=True)
-        return
-
-    target_class = args[0]
-
+        click.secho('Usage: android hooking watch <pattern> '
+                    '(eg: com.example.test, *com.example*!*, com.example.test!toString)'
+                    '(optional: --dump-args) '
+                    '(optional: --dump-backtrace) '
+                    '(optional: --dump-return)'
+                    ,bold=True)
     api = state_connection.get_api()
-
-    if '*' in target_class:
-        classes = api.android_hooking_get_classes()
-        for class_name in fnmatch.filter(classes, target_class):
-            api.android_hooking_watch_class(class_name)
-    else:
-        api.android_hooking_watch_class(target_class)
-
-
-def watch_class_method(args: list) -> None:
-    """
-        Watches for invocations of an Android Java class method.
-        All overloads for the same method are also watched.
-
-        Optionally, this method will dump the watched methods arguments,
-        backtrace as well as return value.
-
-        :param args:
-        :return:
-    """
-
-    if len(clean_argument_flags(args)) < 1:
-        click.secho(('Usage: android hooking watch class_method <fully qualified class method> '
-                     '<optional overload> '
-                     '(optional: --dump-args) '
-                     '(optional: --dump-backtrace) '
-                     '(optional: --dump-return)'), bold=True)
-        return
-
-    fully_qualified_class = args[0]
-    overload_filter = args[1].replace(' ', '') if (len(args) > 1 and '--' not in args[1]) else None
-
-    api = state_connection.get_api()
-    api.android_hooking_watch_method(fully_qualified_class,
-                                     overload_filter,
-                                     _should_dump_args(args),
-                                     _should_dump_backtrace(args),
-                                     _should_dump_return_value(args))
-
+    api.android_hooking_watch(args[0],
+                              _should_dump_args(args),
+                              _should_dump_backtrace(args),
+                              _should_dump_return_value(args)
+                              )
     return
 
 

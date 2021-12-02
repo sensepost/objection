@@ -54,6 +54,8 @@ export const android = {
   androidHookingListServices: (): Promise<string[]> => hooking.getServices(),
   androidHookingSetMethodReturn: (fqClazz: string, filterOverload: string | null, ret: boolean) =>
     hooking.setReturnValue(fqClazz, filterOverload, ret),
+  androidHookingWatch: (pattern: string, watchArgs: boolean, watchBacktrace: boolean, watchRet: boolean): Promise<void> =>
+      hooking.watch(pattern, watchArgs, watchBacktrace, watchRet),
   androidHookingWatchClass: (clazz: string): Promise<void> => hooking.watchClass(clazz),
   androidHookingWatchMethod: (fqClazz: string, filterOverload: string | null, dargs: boolean,
     dbt: boolean, dret: boolean): Promise<void> =>
