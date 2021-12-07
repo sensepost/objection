@@ -333,7 +333,12 @@ def search(args: list) -> None:
         target_file = _get_flag_value('--json', args)
         if target_file:
             with open(target_file, 'w') as fd:
-                fd.write(json.dumps(data))
+                fd.write(json.dumps({
+                    'meta': {
+                        'runtime': 'objc'
+                    },
+                    'classes': data
+                }))
                 click.secho(f'JSON dumped to {target_file}', bold=True)
 
 
