@@ -350,6 +350,10 @@ COMMANDS = {
                         'exec': android_hooking.search,
                         'flags': ['--json', '--only-classes', '--quiet']
                     },
+                    'notify': {
+                        'meta': 'TODO',
+                        'exec': android_hooking.notify
+                    },
                     'generate': {
                         'meta': 'Generate Frida hooks for Android',
                         'commands': {

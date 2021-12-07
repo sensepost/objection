@@ -111,6 +111,19 @@ def show_android_class_methods(args: list = None) -> None:
     click.secho('\nFound {0} method(s)'.format(len(methods)), bold=True)
 
 
+
+
+def notify(args: list) -> None:
+    if len(clean_argument_flags(args)) <= 0:
+        click.secho('Usage: android hooking notify $PATTERN', bold=True)
+        return
+
+
+    pattern = args[0]
+
+    api = state_connection.get_api()
+    api.android_hooking_lazy_watch_for_pattern(pattern)
+
 def watch(args: list) -> None:
     if len(clean_argument_flags(args)) < 1:
         click.secho('Usage: android hooking watch <pattern> '

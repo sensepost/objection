@@ -61,7 +61,8 @@ export const android = {
     dbt: boolean, dret: boolean): Promise<void> =>
     hooking.watchMethod(fqClazz, filterOverload, dargs, dbt, dret),
   androidHookingEnumerate: (query: string): Promise<EnumerateMethodsMatchGroup[]> => hooking.enumerate(query),
-
+  androidHookingLazyWatchForPattern: (query: string): void => hooking.lazyWatchForPattern(query),
+  
   // android heap methods
   androidHeapEvaluateHandleMethod: (handle: number, js: string): Promise<void> => heap.evaluate(handle, js),
   androidHeapExecuteHandleMethod: (handle: number, method: string, returnString: boolean): Promise<string | null> =>

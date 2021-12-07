@@ -66,8 +66,35 @@ export namespace hooking {
       return PatternType.Klass
     }
   }
+  export const lazyWatchForPattern = (query: string): void => {
+    let found = false
+
+    // Check if the pattern is found before starting an interval
+    enumerate(query).then(matches => {
+      if (matches.length > 0) {
+        found = true
+        send(`${c.green("Notify:")} Pattern ${c.green(query)} was matched`)
+      }
+    })
+
+    if (found){
+      return
+    }
+
+    // TODO(cduplooy): Can I stop this timer once the promise is resolved?
+    setInterval(() => {
+      enumerate(query).then(matches => {
+        // Only notify if we haven't before
+        if (found == false && matches.length > 0) {
+          send(`${c.green("Notify:")} Pattern ${c.green(query)} was matched`)
+          found = true
+        }
+      })
+    }, 1000 * 5);
+
+  }
   export const enumerate = (query: string): Promise<EnumerateMethodsMatchGroup[]> => {
-    // If the query is just a classname, strongarm it into a pattern. 
+    // If the query is just a classname, strongarm it into a pattern.
     if (getPatternType(query) === PatternType.Klass) {
       query = `${query}!*`
     }
@@ -81,7 +108,6 @@ export namespace hooking {
     return wrapJavaPerform(() => {
 
       const clazz: JavaClass = Java.use(className);
-
       return clazz.class.getDeclaredMethods().map((method) => {
         return method.toGenericString();
       });
@@ -112,7 +138,7 @@ export namespace hooking {
             'holder': overloads.map(overload => overload.holder),
             'type': overloads.map(overload => overload.type),
           }
-        } Java.enumerateMethods
+        }
       })
       // Finally append the constructor details
       if (clazz.class.getConstructors().length > 0) {

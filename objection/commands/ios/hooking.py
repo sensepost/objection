@@ -209,7 +209,6 @@ def watch(args: list) -> None:
     api = state_connection.get_api()
     api.ios_hooking_watch(pattern, should_watch_args, should_backtrace, should_watch_ret, should_watch_parents)
 
-
 def set_method_return_value(args: list) -> None:
     """
         Make an Objective-C method return a specific boolean
@@ -319,7 +318,7 @@ def search(args: list) -> None:
         if data.get(class_name) is not None:
             data[class_name].append(fullname)
         else:
-            data[class_name] = []
+            data[class_name] = [fullname]
 
     # Print the matching methods
     for klass in data.keys():
