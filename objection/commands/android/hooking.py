@@ -1,13 +1,11 @@
-import fnmatch
 import json
+from typing import Optional
 
 import click
-import frida
-
-from typing import Optional
 
 from objection.state.connection import state_connection
 from objection.utils.helpers import clean_argument_flags
+
 
 def _string_is_true(s: str) -> bool:
     """
@@ -53,13 +51,12 @@ def _should_dump_return_value(args: list) -> bool:
     return '--dump-return' in args
 
 
-def show_android_classes(args: list = None) -> None:
+def show_android_classes() -> None:
     """
         Show the currently loaded classes. 
         Note that Java classes are only loaded when they are used, 
         so not all classes may be present.
 
-        :param args:
         :return:
     """
 
@@ -73,11 +70,10 @@ def show_android_classes(args: list = None) -> None:
     click.secho('\nFound {0} classes'.format(len(classes)), bold=True)
 
 
-def show_android_class_loaders(args: list = None) -> None:
+def show_android_class_loaders() -> None:
     """
         Show the currently registered class loaders.
 
-        :param args:
         :return:
     """
 
@@ -114,14 +110,15 @@ def show_android_class_methods(args: list = None) -> None:
 
     click.secho('\nFound {0} method(s)'.format(len(methods)), bold=True)
 
+
 def watch(args: list) -> None:
     if len(clean_argument_flags(args)) < 1:
         click.secho('Usage: android hooking watch <pattern> '
                     '(eg: com.example.test, *com.example*!*, com.example.test!toString)'
                     '(optional: --dump-args) '
                     '(optional: --dump-backtrace) '
-                    '(optional: --dump-return)'
-                    ,bold=True)
+                    '(optional: --dump-return)',
+                    bold=True)
     api = state_connection.get_api()
     api.android_hooking_watch(args[0],
                               _should_dump_args(args),
@@ -131,11 +128,10 @@ def watch(args: list) -> None:
     return
 
 
-def show_registered_broadcast_receivers(args: list = None) -> None:
+def show_registered_broadcast_receivers() -> None:
     """
         Enumerate all registered BroadcastReceivers
 
-        :param args:
         :return:
     """
 
@@ -148,11 +144,10 @@ def show_registered_broadcast_receivers(args: list = None) -> None:
     click.secho('\nFound {0} classes'.format(len(receivers)), bold=True)
 
 
-def show_registered_services(args: list = None) -> None:
+def show_registered_services() -> None:
     """
         Enumerate all registered Services
 
-        :param args:
         :return:
     """
 
@@ -165,11 +160,10 @@ def show_registered_services(args: list = None) -> None:
     click.secho('\nFound {0} classes'.format(len(services)), bold=True)
 
 
-def show_registered_activities(args: list = None) -> None:
+def show_registered_activities() -> None:
     """
         Enumerate all registered Activities
 
-        :param args:
         :return:
     """
 
@@ -182,11 +176,10 @@ def show_registered_activities(args: list = None) -> None:
     click.secho('\nFound {0} classes'.format(len(activities)), bold=True)
 
 
-def get_current_activity(args: list = None) -> None:
+def get_current_activity() -> None:
     """
         Get the currently active activity
 
-        :param args:
         :return:
     """
 
@@ -233,34 +226,34 @@ def _should_be_quiet(args: list) -> bool:
     return '--quiet' in args
 
 
+def _should_dump_json(args: list) -> bool:
+    return '--json' in args
 
-def _should_dump_json(args: list) -> Optional[str]:
+
+def _get_flag_value(flag:str, args: list) -> Optional[str]:
     target = None
     for i in range(len(args)):
-        if args[i] == '--json':
+        if args[i] == flag:
             target = i + 1
-        i = i + 1
 
     if target is None:
         return None
     elif target < len(args):
         return args[target]
     else:
-        click.secho('Please specify a target file', bold=True)
-
-    return None
-
+        click.secho(f'Could not find specified value for {flag}', bold=True)
+        return None
 
 
 def _should_print_only_classes(args: list) -> bool:
-   return '--only-classes' in args
+    return '--only-classes' in args
 
 
 def search(args: list) -> None:
     """
         Enumerates the current Android application for classes and methods.
 
-        :param query:
+        :param args:
         :return:
     """
     if len(clean_argument_flags(args)) <= 0:
@@ -270,34 +263,35 @@ def search(args: list) -> None:
                     '(optional: --quiet)', bold=True)
         return
 
-    shouldDumpJSON = _should_dump_json(args)
-    shouldPrintOnlyClasses = _should_print_only_classes(args)
-    shouldBeQuiet = _should_be_quiet(args)
+    should_dump_json = _should_dump_json(args)
+    should_print_only_classes = _should_print_only_classes(args)
+    should_be_quiet = _should_be_quiet(args)
 
     api = state_connection.get_api()
-    resultsJSON = {
+    results_json = {
         'meta': {
             'runtime': 'java'
         }
     }
     results = api.android_hooking_enumerate(args[0])
     # Only get overloads if this flag is specified, otherwise just enumerating can be kind of slow
-    if shouldDumpJSON:
+    if should_dump_json:
         for result in results:
             for _class in result['classes']:
                 _class['overloads'] = api.android_hooking_get_class_methods_overloads(_class['name'], _class['methods'])
 
-    if not shouldBeQuiet:
+    if not should_be_quiet:
         for result in results:
             for _class in result['classes']:
                 print(_class['name'])
-                if not shouldPrintOnlyClasses:
+                if not should_print_only_classes:
                     for method in _class['methods']:
                         print(f'\t{method}')
 
-    targetFile = shouldDumpJSON
-    if targetFile:
-        resultsJSON['data'] = results
-        with open(targetFile, 'w') as fd:
-            fd.write(json.dumps(resultsJSON))
-            click.secho(f'JSON dumped to {shouldDumpJSON}', bold=True)
+    if should_dump_json:
+        target_file = _get_flag_value('--json', args)
+        if target_file:
+            results_json['data'] = results
+            with open(target_file, 'w') as fd:
+                fd.write(json.dumps(results_json))
+                click.secho(f'JSON dumped to {target_file}', bold=True)

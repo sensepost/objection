@@ -42,13 +42,13 @@ export namespace hooking {
     return wrapJavaPerform(() => {
       const loaders: string[] = [];
       Java.enumerateClassLoaders({
-        onMatch (l) {
+        onMatch: function (l) {
           if (l == null) {
             return;
           }
           loaders.push(l.toString());
         },
-        onComplete () { }
+        onComplete() { }
       });
 
       return loaders;
@@ -63,17 +63,17 @@ export namespace hooking {
     if (pattern.indexOf('!') !== -1) {
       return PatternType.Regex
     } else {
-       return PatternType.Klass
+      return PatternType.Klass
     }
   }
   export const enumerate = (query: string): Promise<EnumerateMethodsMatchGroup[]> => {
     // If the query is just a classname, strongarm it into a pattern. 
-    if (getPatternType(query) === PatternType.Klass){
+    if (getPatternType(query) === PatternType.Klass) {
       query = `${query}!*`
     }
     return wrapJavaPerform(() => {
-          return Java.enumerateMethods(query);
-        }
+      return Java.enumerateMethods(query);
+    }
     );
   };
 
@@ -87,44 +87,55 @@ export namespace hooking {
       });
     });
   };
-
-
+  // This function takes in a method such as package.class.perform()
+  // and extracts only the method name, ie "perform"
+  const genericMethodNameToMethodOnly = (fullMethodName: string): string => {
+    // Reduces [package, class, perform()] to "perform()"
+    const method = fullMethodName.split('.').filter((part: string) => part.includes('('))[0]
+    // Now extract everything before the first '('
+    return method.substring(0, method.indexOf('('))
+  }
   export const getClassMethodsOverloads = (className: string, methodsAllowList: string[] = []): Promise<JSON> => {
     return wrapJavaPerform(() => {
       const clazz: JavaClass = Java.use(className);
       const methods = clazz.class.getDeclaredMethods()
-      const result: any = {}
-      methods.forEach(method => {
-        // This trims out only the function name and uses that to get the overloads
-        const methodName = (method.toGenericString().split('.').filter(part => part.includes('('))[0].split('(')[0])
+        .map(method => genericMethodNameToMethodOnly(method.toGenericString()))
+      const result: any = {} // TODO(cduplooy): Properly type this.
+      methods.forEach(methodName => {
         if (methodsAllowList.length === 0 || (methodsAllowList.length > 0 && methodsAllowList.includes(methodName))) {
           const overloads = clazz[methodName].overloads
           result[methodName] = {
             'argTypes': overloads.map(overload => overload.argumentTypes),
-            'returnType': overloads.map(overload => overload.returnType)
+            'returnType': overloads.map(overload => overload.returnType),
+            'methodName': overloads.map(overload => overload.methodName),
+            'handle': overloads.map(overload => overload.handle),
+            'holder': overloads.map(overload => overload.holder),
+            'type': overloads.map(overload => overload.type),
+          }
+        } Java.enumerateMethods
+      })
+      // Finally append the constructor details
+      if (clazz.class.getConstructors().length > 0) {
+        if (methodsAllowList.length === 0 || (methodsAllowList.length > 0 && methodsAllowList.includes("$init"))) {
+          const overloads = clazz['$init'].overloads
+          result['$init'] = {
+            'argTypes': overloads.map(overload => overload.argumentTypes),
+            'returnType': overloads.map(overload => overload.returnType),
+            'methodName': overloads.map(overload => overload.methodName),
+            'handle': overloads.map(overload => overload.handle),
+            'holder': overloads.map(overload => overload.holder),
+            'type': overloads.map(overload => overload.type),
           }
         }
-      })
-        // Finally append the constructor details
-        try{
-            if (clazz.$init !== undefined){
-                if (methodsAllowList.length === 0 || (methodsAllowList.length > 0 && methodsAllowList.includes("$init"))){
-                  result.$init = {
-                    'argTypes': clazz.$init.overloads.map(overload => overload.argumentTypes),  // Return type for constructors are always `void`
-                  }
-                }
-            }
-        }catch {
-            // Some classes don't have constructors, this is a temporary workaround
-        }
+      }
       return result
     });
   };
   export const watch = (pattern: string, dargs: boolean, dbt: boolean, dret: boolean): Promise<void> => {
     const patternType = getPatternType(pattern)
-    if (patternType === PatternType.Klass){
+    if (patternType === PatternType.Klass) {
       return watchClass(pattern, dargs, dbt, dret)
-    } else if (patternType === PatternType.Regex){
+    } else if (patternType === PatternType.Regex) {
       return new Promise((resolve, reject) => {
         enumerate(pattern).then((matches: EnumerateMethodsMatchGroup[]) => {
           matches.forEach((match: EnumerateMethodsMatchGroup) => {
@@ -133,12 +144,12 @@ export namespace hooking {
             })
           })
           resolve()
-      }).catch((error) => {
-        reject(error)
-      })
+        }).catch((error) => {
+          reject(error)
+        })
       })
     } else {
-    // TODO(cduplooy): Unknown pattern type? log a message to inform the user?
+      // TODO(cduplooy): Unknown pattern type? log a message to inform the user?
     }
   }
   export const watchClass = (clazz: string, dargs: boolean = false, dbt: boolean = false, dret: boolean = false): Promise<void> => {
@@ -177,13 +188,13 @@ export namespace hooking {
       };
 
       uniqueMethods.forEach((method) => {
-          // get the argument types for this overload
-          send(`Watching ${c.green(clazz)}.${c.greenBright(method)}()`);
-          const fqClazz  = `${clazz}.${method}`;
-          // TODO(cduplooy): Add the filter args, also jobs per invocation of parent command
-          watchMethod(fqClazz, null, dargs, dbt, dret);
-          // record this implementation override for the job
-          job.implementations.push(fqClazz);
+        // get the argument types for this overload
+        send(`Watching ${c.green(clazz)}.${c.greenBright(method)}()`);
+        const fqClazz = `${clazz}.${method}`;
+        // TODO(cduplooy): Add the filter args, also jobs per invocation of parent command
+        watchMethod(fqClazz, null, dargs, dbt, dret);
+        // record this implementation override for the job
+        job.implementations.push(fqClazz);
       });
 
       // record the job

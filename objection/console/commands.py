@@ -323,7 +323,8 @@ COMMANDS = {
                     },
                     'watch': {
                         'meta': 'Watch for Android Java invocations',
-                        'exec': android_hooking.watch
+                        'exec': android_hooking.watch,
+                        'flags': ['--dump-args', '--dump-backtrace', '--dump-return']
                     },
                     'set': {
                         'meta': 'Set various values',
@@ -663,18 +664,8 @@ COMMANDS = {
                     },
                     'watch': {
                         'meta': 'Watch invocations of classes and methods',
-                        'commands': {
-                            'class': {
-                                'meta': 'Hook all methods in a class and report on invocations',
-                                'flags': ['--include-parents'],
-                                'exec': ios_hooking.watch_class
-                            },
-                            'method': {
-                                'meta': 'Hook a specific method and report on invocations',
-                                'flags': ['--dump-args', '--dump-backtrace', '--dump-return'],
-                                'exec': ios_hooking.watch_class_method
-                            }
-                        }
+                        'exec': ios_hooking.watch,
+                        'flags': ['--dump-args', '--dump-backtrace', '--dump-return'],
                     },
                     'set': {
                         'meta': 'Set various values',
@@ -687,16 +678,8 @@ COMMANDS = {
                     },
                     'search': {
                         'meta': 'Search for various classes and or methods',
-                        'commands': {
-                            'classes': {
-                                'meta': 'Search for Objective-C classes matching a name',
-                                'exec': ios_hooking.search_class
-                            },
-                            'methods': {
-                                'meta': 'Search for Objective-C method matching a name',
-                                'exec': ios_hooking.search_method
-                            }
-                        }
+                        'exec': ios_hooking.search,
+                        'flags': ['--json', '--only-classes', '--quiet']
                     },
                     'generate': {
                         'meta': 'Generate Frida hooks for iOS',
@@ -710,11 +693,6 @@ COMMANDS = {
                                 'exec': ios_generate.simple
                             }
                         },
-                },
-                    'enumerate': {
-                        'meta': 'Enumerate ObjC classes and methods',
-                        'exec': ios_hooking.enumerate,
-                        'flags': ['--quiet', '--json', '--only-classes', '--dump-args', '--dump-return', '--dump-backtrace']
                     }
                 }
             },
