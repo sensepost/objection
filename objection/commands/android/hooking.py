@@ -51,7 +51,7 @@ def _should_dump_return_value(args: list) -> bool:
     return '--dump-return' in args
 
 
-def show_android_classes() -> None:
+def show_android_classes(args: list) -> None:
     """
         Show the currently loaded classes. 
         Note that Java classes are only loaded when they are used, 
@@ -70,7 +70,7 @@ def show_android_classes() -> None:
     click.secho('\nFound {0} classes'.format(len(classes)), bold=True)
 
 
-def show_android_class_loaders() -> None:
+def show_android_class_loaders(args: list) -> None:
     """
         Show the currently registered class loaders.
 
@@ -111,18 +111,16 @@ def show_android_class_methods(args: list = None) -> None:
     click.secho('\nFound {0} method(s)'.format(len(methods)), bold=True)
 
 
-
-
 def notify(args: list) -> None:
     if len(clean_argument_flags(args)) <= 0:
         click.secho('Usage: android hooking notify $PATTERN', bold=True)
         return
 
-
     pattern = args[0]
 
     api = state_connection.get_api()
     api.android_hooking_lazy_watch_for_pattern(pattern)
+
 
 def watch(args: list) -> None:
     if len(clean_argument_flags(args)) < 1:
@@ -141,7 +139,7 @@ def watch(args: list) -> None:
     return
 
 
-def show_registered_broadcast_receivers() -> None:
+def show_registered_broadcast_receivers(args: list) -> None:
     """
         Enumerate all registered BroadcastReceivers
 
@@ -157,7 +155,7 @@ def show_registered_broadcast_receivers() -> None:
     click.secho('\nFound {0} classes'.format(len(receivers)), bold=True)
 
 
-def show_registered_services() -> None:
+def show_registered_services(args: list) -> None:
     """
         Enumerate all registered Services
 
@@ -173,7 +171,7 @@ def show_registered_services() -> None:
     click.secho('\nFound {0} classes'.format(len(services)), bold=True)
 
 
-def show_registered_activities() -> None:
+def show_registered_activities(args: list) -> None:
     """
         Enumerate all registered Activities
 
@@ -189,7 +187,7 @@ def show_registered_activities() -> None:
     click.secho('\nFound {0} classes'.format(len(activities)), bold=True)
 
 
-def get_current_activity() -> None:
+def get_current_activity(args: list) -> None:
     """
         Get the currently active activity
 
@@ -243,7 +241,7 @@ def _should_dump_json(args: list) -> bool:
     return '--json' in args
 
 
-def _get_flag_value(flag:str, args: list) -> Optional[str]:
+def _get_flag_value(flag: str, args: list) -> Optional[str]:
     target = None
     for i in range(len(args)):
         if args[i] == flag:
@@ -291,7 +289,19 @@ def search(args: list) -> None:
     if should_dump_json:
         for result in results:
             for _class in result['classes']:
-                _class['overloads'] = api.android_hooking_get_class_methods_overloads(_class['name'], _class['methods'])
+                loader = result['loader']
+                if loader is not None:
+                    # <instance: java.lang.ClassLoader, $className: dalvik.system.PathClassLoader>
+                    # but we only care about the className
+                    # TODO(cduplooy): This can/has to be improved
+                    startIndex = loader.find('$className: ') + 12
+                    startPart = loader[startIndex:]
+                    if startPart.find('>'):
+                        endIndex = startPart.find('>')
+                    else:
+                        endIndex = startPart.find(' ')
+                    loader = startPart[:endIndex]
+                _class['overloads'] = api.android_hooking_get_class_methods_overloads(_class['name'], _class['methods'], loader)
 
     if not should_be_quiet:
         for result in results:

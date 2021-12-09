@@ -1,3 +1,4 @@
+import { rejects } from "assert";
 import { colors as c } from "../lib/color";
 import { IJob } from "../lib/interfaces";
 import { jobs } from "../lib/jobs";
@@ -77,17 +78,16 @@ export namespace hooking {
       }
     })
 
-    if (found){
+    if (found) {
       return
     }
 
-    // TODO(cduplooy): Can I stop this timer once the promise is resolved?
-    setInterval(() => {
+    const interval = setInterval(() => {
       enumerate(query).then(matches => {
         // Only notify if we haven't before
         if (found == false && matches.length > 0) {
           send(`${c.green("Notify:")} Pattern ${c.green(query)} was matched`)
-          found = true
+          clearInterval(interval)
         }
       })
     }, 1000 * 5);
@@ -121,12 +121,73 @@ export namespace hooking {
     // Now extract everything before the first '('
     return method.substring(0, method.indexOf('('))
   }
-  export const getClassMethodsOverloads = (className: string, methodsAllowList: string[] = []): Promise<JSON> => {
+  // This method assumes that it's being called from inside wrapJavaPerform
+  export const getClassHandle = (className: string): JavaClass | null => {
+    let clazz: JavaClass = null
+    const loaders = Java.enumerateClassLoadersSync()
+    let found = false
+    // Try to get a handle using each of the class loaders
+    for (let i = 0; i < loaders.length; i++) {
+      const loader = loaders[i]
+      const factory = Java.ClassFactory.get(loader)
+      try {
+        clazz = factory.use(className)
+        found = true
+        break
+      } catch { }
+    }
+    if (found) {
+      return clazz
+    } else {
+      return null
+    }
+  }
+  // This method assumes that it's being called from inside wrapJavaPerform
+  // It behaves the same as the above, except only uses the specified class
+  // loader
+  export const getClassHandleWithLoaderClassName = (className: string, loaderClassName: any): JavaClass | null => {
+    let clazz: JavaClass = null
+    const loaders = Java.enumerateClassLoadersSync()
+      .filter(loader => loaderClassName === loader.$className)
+
+    if (loaders.length == 0) {
+      return null
+    } else {
+      let found = false
+      // Try to get a handle using each of the class loaders
+      // This is still required because some loaders may have the
+      // same name, so distinguishing between them using this is
+      // incorrect. I'm sure there is a way of finding the correct
+      // one efficiently.
+      for (let i = 0; i < loaders.length; i++) {
+        const loader = loaders[i]
+        const factory = Java.ClassFactory.get(loader)
+        try {
+          clazz = factory.use(className)
+          found = true
+          break
+        } catch { }
+      }
+      if (found) {
+        return clazz
+      } else {
+        return null
+      }
+    }
+  }
+  export const getClassMethodsOverloads = (className: string, methodsAllowList: string[] = [], loader?: string): Promise<JSON> => {
     return wrapJavaPerform(() => {
-      const clazz: JavaClass = Java.use(className);
+      const result: any = {} // TODO(cduplooy): Properly type this.
+      const clazz = loader !== null ? getClassHandleWithLoaderClassName(className, loader) : getClassHandle(className)
+
+      if (clazz === null) {
+        throw new Error("Could not find class!");
+      }
+
+      // TODO(cduplooy): The below line can fail with Error: java.lang.NoClassDefFoundError: Failed resolution of: Landroidx/datastore/core/DataStore;
+      // This seems to involve custom class loaders...
       const methods = clazz.class.getDeclaredMethods()
         .map(method => genericMethodNameToMethodOnly(method.toGenericString()))
-      const result: any = {} // TODO(cduplooy): Properly type this.
       methods.forEach(methodName => {
         if (methodsAllowList.length === 0 || (methodsAllowList.length > 0 && methodsAllowList.includes(methodName))) {
           const overloads = clazz[methodName].overloads
@@ -140,6 +201,7 @@ export namespace hooking {
           }
         }
       })
+
       // Finally append the constructor details
       if (clazz.class.getConstructors().length > 0) {
         if (methodsAllowList.length === 0 || (methodsAllowList.length > 0 && methodsAllowList.includes("$init"))) {
@@ -154,6 +216,7 @@ export namespace hooking {
           }
         }
       }
+
       return result
     });
   };
@@ -166,7 +229,10 @@ export namespace hooking {
         enumerate(pattern).then((matches: EnumerateMethodsMatchGroup[]) => {
           matches.forEach((match: EnumerateMethodsMatchGroup) => {
             match.classes.forEach((klass: EnumerateMethodsMatchClass) => {
-              watchClass(klass.name, dargs, dbt, dret)
+              klass.methods.forEach(method => {
+                // Only watch matched methods
+                watchMethod(`${klass.name}.${method}`, null, dargs, dbt, dret)
+              })
             })
           })
           resolve()
