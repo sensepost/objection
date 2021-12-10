@@ -4,6 +4,7 @@ import { env } from "./rpc/environment";
 import { ios } from "./rpc/ios";
 import { jobs } from "./rpc/jobs";
 import { memory } from "./rpc/memory";
+import { native } from "./rpc/native";
 import { other } from "./rpc/other";
 
 rpc.exports = {
@@ -13,5 +14,6 @@ rpc.exports = {
   ...jobs,
   ...memory,
   ...other,
+  ...native,
   ping: (): boolean => ping(),
 };

@@ -9,6 +9,7 @@ from ..commands import memory
 from ..commands import plugin_manager
 from ..commands import sqlite
 from ..commands import ui
+from ..commands.native import search as native_search
 from ..commands.android import clipboard
 from ..commands.android import command
 from ..commands.android import general
@@ -272,6 +273,18 @@ COMMANDS = {
             'alert': {
                 'meta': 'Show an alert message, optionally specifying the message to show. (Currently crashes iOS)',
                 'exec': ui.alert
+            }
+        }
+    },
+
+    # native commands
+
+    'native': {
+        'meta': 'Commands specific to native modules',
+        'commands': {
+            'search': {
+                'meta': 'Search for native modules',
+                'exec': native_search.search
             }
         }
     },

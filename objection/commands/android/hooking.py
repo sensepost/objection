@@ -237,6 +237,7 @@ def _should_be_quiet(args: list) -> bool:
     return '--quiet' in args
 
 
+
 def _should_dump_json(args: list) -> bool:
     return '--json' in args
 

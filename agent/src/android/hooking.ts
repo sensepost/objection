@@ -1,4 +1,3 @@
-import { rejects } from "assert";
 import { colors as c } from "../lib/color";
 import { IJob } from "../lib/interfaces";
 import { jobs } from "../lib/jobs";
@@ -178,7 +177,7 @@ export namespace hooking {
   export const getClassMethodsOverloads = (className: string, methodsAllowList: string[] = [], loader?: string): Promise<JSON> => {
     return wrapJavaPerform(() => {
       const result: any = {} // TODO(cduplooy): Properly type this.
-      const clazz = loader !== null ? getClassHandleWithLoaderClassName(className, loader) : getClassHandle(className)
+      const clazz = loader !== null ? getClassHandleWithLoaderClassName(className, loader) : Java.use(className)
 
       if (clazz === null) {
         throw new Error("Could not find class!");
