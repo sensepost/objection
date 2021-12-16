@@ -63,9 +63,6 @@ export const ios = {
     hooking.setMethodReturn(selector, returnVal),
   iosHookingWatch: (pattern: string, dargs: boolean, dbt: boolean, dret: boolean, dparents: boolean) =>
     hooking.watch(pattern, dargs, dbt, dret, dparents),
-  iosHookingWatchClass: (clazz: string, parents: boolean): void => hooking.watchClass(clazz, parents),
-  iosHookingWatchMethod: (selector: string, dargs: boolean, dbt: boolean, dret: boolean): void =>
-    hooking.watchMethod(selector, dargs, dbt, dret),
   iosHookingEnumerate: (pattern: string): ApiResolverMatch[] =>
     hooking.enumerate(pattern),
   iosHookingSearch: (pattern: string): ApiResolverMatch[] =>

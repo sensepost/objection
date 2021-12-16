@@ -20,12 +20,18 @@ export namespace hooking {
 
     return ObjC.classes[className].$ownMethods;
   };
-  export const enumerate = (pattern: string): ApiResolverMatch[] => {
+  export const enumerate = (pattern: string, registerJob: boolean = true): ApiResolverMatch[] => {
     const resolver = new ApiResolver('objc')
+    const job: IJob = {
+      identifier: jobs.identifier(),
+      invocations: [],
+      type: `ios-enumerate for: ${pattern}`,
+    };
+    jobs.add(job)
     return resolver.enumerateMatches(pattern)
   };
   export const searchMethods = (partial: string): string[] => {
-    const results: string[] = []; // the response
+    const results: string[] = []; // the response 
 
     Object.keys(ObjC.classes).forEach((clazz: string) => {
       ObjC.classes[clazz].$ownMethods.forEach((method) => {
@@ -38,7 +44,7 @@ export namespace hooking {
 
     return results;
   };
-  export const watchClass = (clazz: string, dargs: boolean = false, dbt: boolean = false, dret: boolean = false, parents: boolean = false): void => {
+  export const watchClass = (clazz: string, job: IJob, dargs: boolean = false, dbt: boolean = false, dret: boolean = false, parents: boolean = false): void => {
     const target = ObjC.classes[clazz];
 
     if (!target) {
@@ -46,20 +52,13 @@ export namespace hooking {
       return;
     }
 
-    // Start a new Job
-    const job: IJob = {
-      identifier: jobs.identifier(),
-      invocations: [],
-      type: `watch-class-methods for: ${clazz}`,
-    };
-
     // with parents as true, include methods from a parent class,
     // otherwise simply hook the target class' own  methods
     (parents ? target.$methods : target.$ownMethods).forEach((method) => {
       // filter and make sure we have a type and name. Looks like some methods can
       // have '' as name... am expecting something like "- isJailBroken"
       const fullMethodName = `${method[0]}[${clazz} ${method.substring(2)}]`
-      watchMethod(fullMethodName, dargs, dbt, dret)
+      watchMethod(fullMethodName, job, dargs, dbt, dret)
     });
 
   };
@@ -73,17 +72,25 @@ export namespace hooking {
     }
   }
   export const watch = (patternOrClass: string, dargs: boolean = false, dbt: boolean = false, dret: boolean = false, watchParents: boolean = false): void => {
+    // Add the job
+    const job: IJob = {
+      identifier: jobs.identifier(),
+      invocations: [],
+      type: `ios-watch for: ${patternOrClass}`,
+    };
+    jobs.add(job)
+
     const isPattern = patternOrClass.includes('[')
     if (isPattern === true) {
-      const matches = enumerate(patternOrClass)
+      const matches = enumerate(patternOrClass, false)
       matches.forEach((match: ApiResolverMatch) => {
-        watchMethod(match.name, dargs, dbt, dret)
+        watchMethod(match.name, job, dargs, dbt, dret)
       })
     } else {
-      watchClass(patternOrClass, dargs, dbt, dret, watchParents)
+      watchClass(patternOrClass, job, dargs, dbt, dret, watchParents)
     }
   }
-  export const watchMethod = (selector: string, dargs: boolean, dbt: boolean, dret: boolean): void => {
+  export const watchMethod = (selector: string, job: IJob, dargs: boolean, dbt: boolean, dret: boolean): void => {
     const resolver = new ApiResolver("objc");
     let matchedMethod = {
       address: undefined,
@@ -114,13 +121,6 @@ export namespace hooking {
       );
       return;
     }
-
-    // Start a new Job
-    const job: IJob = {
-      identifier: jobs.identifier(),
-      invocations: [],
-      type: `watch-method for: ${selector}`,
-    };
 
     // Attach to the discovered match
     // TODO: loop correctly when globbing
@@ -171,10 +171,6 @@ export namespace hooking {
         send(c.blackBright(`[${job.identifier}] `) + `Return Value: ${c.red(retval.toString())}`);
       },
     });
-
-    // register the job
-    job.invocations.push(watchInvocation);
-    jobs.add(job);
   };
 
   export const setMethodReturn = (selector: string, returnValue: boolean): void => {
