@@ -222,15 +222,30 @@ export namespace hooking {
   export const watch = (pattern: string, dargs: boolean, dbt: boolean, dret: boolean): Promise<void> => {
     const patternType = getPatternType(pattern)
     if (patternType === PatternType.Klass) {
-      return watchClass(pattern, dargs, dbt, dret)
+
+      // start a new job container
+      const job: IJob = {
+        identifier: jobs.identifier(),
+        implementations: [],
+        type: `watch-class for: ${pattern}`,
+      };
+      jobs.add(job)
+      return watchClass(pattern, job, dargs, dbt, dret)
     } else if (patternType === PatternType.Regex) {
+      const job: IJob = {
+        identifier: jobs.identifier(),
+        implementations: [],
+        type: `watch-pattern for: ${pattern}`,
+      };
+      jobs.add(job)
+
       return new Promise((resolve, reject) => {
         enumerate(pattern).then((matches: EnumerateMethodsMatchGroup[]) => {
           matches.forEach((match: EnumerateMethodsMatchGroup) => {
             match.classes.forEach((klass: EnumerateMethodsMatchClass) => {
               klass.methods.forEach(method => {
                 // Only watch matched methods
-                watchMethod(`${klass.name}.${method}`, null, dargs, dbt, dret)
+                watchMethod(`${klass.name}.${method}`, job, null, dargs, dbt, dret)
               })
             })
           })
@@ -243,7 +258,7 @@ export namespace hooking {
       // TODO(cduplooy): Unknown pattern type? log a message to inform the user?
     }
   }
-  export const watchClass = (clazz: string, dargs: boolean = false, dbt: boolean = false, dret: boolean = false): Promise<void> => {
+  export const watchClass = (clazz: string, job: IJob, dargs: boolean = false, dbt: boolean = false, dret: boolean = false): Promise<void> => {
     return wrapJavaPerform(() => {
       const clazzInstance: JavaClass = Java.use(clazz);
 
@@ -271,30 +286,17 @@ export namespace hooking {
         return self.indexOf(value) === index;
       });
 
-      // start a new job container
-      const job: IJob = {
-        identifier: jobs.identifier(),
-        implementations: [],
-        type: `watch-class for: ${clazz}`,
-      };
-
       uniqueMethods.forEach((method) => {
         // get the argument types for this overload
         send(`Watching ${c.green(clazz)}.${c.greenBright(method)}()`);
         const fqClazz = `${clazz}.${method}`;
-        // TODO(cduplooy): Add the filter args, also jobs per invocation of parent command
-        watchMethod(fqClazz, null, dargs, dbt, dret);
-        // record this implementation override for the job
-        job.implementations.push(fqClazz);
+        watchMethod(fqClazz, job, null, dargs, dbt, dret);
       });
-
-      // record the job
-      jobs.add(job);
     });
   };
 
   export const watchMethod = (
-    fqClazz: string, filterOverload: string | null, dargs: boolean, dbt: boolean, dret: boolean,
+    fqClazz: string, job: IJob, filterOverload: string | null, dargs: boolean, dbt: boolean, dret: boolean,
   ): Promise<void> => {
     const [clazz, method] = splitClassMethod(fqClazz);
     send(`Attempting to watch class ${c.green(clazz)} and method ${c.green(method)}.`);
@@ -313,13 +315,6 @@ export namespace hooking {
         send(`${c.red("Error:")} Unable to find method ${c.redBright(method)} in class ${c.green(clazz)}`);
         return;
       }
-
-      // start a new job container
-      const job: IJob = {
-        identifier: jobs.identifier(),
-        implementations: [],
-        type: `watch-method for: ${fqClazz}`,
-      };
 
       targetClass[method].overloads.forEach((m: any) => {
         // get the argument types for this overload
@@ -373,13 +368,7 @@ export namespace hooking {
           // also return the captured return value
           return retVal;
         };
-
-        // record this implementation override for the job
-        job.implementations.push(m);
       });
-
-      // register the job
-      jobs.add(job);
     });
   };
 
