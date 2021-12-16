@@ -20,7 +20,10 @@ export namespace hooking {
 
     return ObjC.classes[className].$ownMethods;
   };
-
+  export const enumerate = (pattern: string): ApiResolverMatch[] => {
+    const resolver = new ApiResolver('objc')
+    return resolver.enumerateMatches(pattern)
+  };
   export const searchMethods = (partial: string): string[] => {
     const results: string[] = []; // the response
 
@@ -35,8 +38,7 @@ export namespace hooking {
 
     return results;
   };
-
-  export const watchClass = (clazz: string, parents: boolean): void => {
+  export const watchClass = (clazz: string, dargs: boolean = false, dbt: boolean = false, dret: boolean = false, parents: boolean = false): void => {
     const target = ObjC.classes[clazz];
 
     if (!target) {
@@ -53,36 +55,34 @@ export namespace hooking {
 
     // with parents as true, include methods from a parent class,
     // otherwise simply hook the target class' own  methods
-    const watchInvocations = (parents ? target.$methods : target.$ownMethods).map((method) => {
+    (parents ? target.$methods : target.$ownMethods).forEach((method) => {
       // filter and make sure we have a type and name. Looks like some methods can
       // have '' as name... am expecting something like "- isJailBroken"
-      if (method.split(" ").length !== 2) {
-        send(
-          c.red(`Skipping method `) + `${c.greenBright(`'` + method + `'`)}` +
-          c.red(`, does not match <type> <name> format`));
-        return;
-      }
-
-      send(c.blackBright(`Watching method: ${c.greenBright(method)}`));
-      return Interceptor.attach(target[method].implementation, {
-        onEnter: (args) => {
-          const receiver = new ObjC.Object(args[0]);
-          send(
-            c.blackBright(`[${job.identifier}] `) +
-            `Called: ${c.green(`[${receiver.$className} ${ObjC.selectorAsString(args[1])}]`)} ` +
-            `(Kind: ${c.cyan(receiver.$kind)}) (Super: ${c.cyan(receiver.$superClass.$className)})`,
-          );
-        },
-      });
+      const fullMethodName = `${method[0]}[${clazz} ${method.substring(2)}]`
+      watchMethod(fullMethodName, dargs, dbt, dret)
     });
 
-    // register the job
-    watchInvocations.forEach((invocation) => {
-      job.invocations.push(invocation);
-    });
-    jobs.add(job);
   };
-
+  export const search = (patternOrClass: string): ApiResolverMatch[] => {
+    const isPattern = patternOrClass.includes('[')
+    if (isPattern === false) {
+      // Make a pattern
+      return enumerate(`*[${patternOrClass} *]`)
+    } else {
+      return enumerate(patternOrClass)
+    }
+  }
+  export const watch = (patternOrClass: string, dargs: boolean = false, dbt: boolean = false, dret: boolean = false, watchParents: boolean = false): void => {
+    const isPattern = patternOrClass.includes('[')
+    if (isPattern === true) {
+      const matches = enumerate(patternOrClass)
+      matches.forEach((match: ApiResolverMatch) => {
+        watchMethod(match.name, dargs, dbt, dret)
+      })
+    } else {
+      watchClass(patternOrClass, dargs, dbt, dret, watchParents)
+    }
+  }
   export const watchMethod = (selector: string, dargs: boolean, dbt: boolean, dret: boolean): void => {
     const resolver = new ApiResolver("objc");
     let matchedMethod = {
