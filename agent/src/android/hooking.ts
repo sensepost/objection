@@ -19,6 +19,9 @@ import {
 
 export namespace hooking {
 
+  import EnumerateMethodsMatchGroup = Java.EnumerateMethodsMatchGroup;
+  import cast = Java.cast;
+  import EnumerateMethodsMatchClass = Java.EnumerateMethodsMatchClass;
   const splitClassMethod = (fqClazz: string): string[] => {
     // split a fully qualified class name, assuming the last period denotes the method
     const methodSeperatorIndex: number = fqClazz.lastIndexOf(".");
@@ -37,7 +40,7 @@ export namespace hooking {
 
   export const getClassLoaders = (): Promise<string[]> => {
     return wrapJavaPerform(() => {
-      let loaders: string[] = [];
+      const loaders: string[] = [];
       Java.enumerateClassLoaders({
         onMatch: function (l) {
           if (l == null) {
@@ -45,25 +48,202 @@ export namespace hooking {
           }
           loaders.push(l.toString());
         },
-        onComplete: function () { }
+        onComplete() { }
       });
 
       return loaders;
     });
   };
 
+  enum PatternType {
+    Regex = 'regex',
+    Klass = 'klass',
+  }
+  const getPatternType = (pattern: string): PatternType => {
+    if (pattern.indexOf('!') !== -1) {
+      return PatternType.Regex
+    } else {
+      return PatternType.Klass
+    }
+  }
+  export const lazyWatchForPattern = (query: string): void => {
+    let found = false
+
+    // Check if the pattern is found before starting an interval
+    enumerate(query).then(matches => {
+      if (matches.length > 0) {
+        found = true
+        send(`${c.green("Notify:")} Pattern ${c.green(query)} was matched`)
+      }
+    })
+
+    if (found) {
+      return
+    }
+
+    const interval = setInterval(() => {
+      enumerate(query).then(matches => {
+        // Only notify if we haven't before
+        if (found == false && matches.length > 0) {
+          send(`${c.green("Notify:")} Pattern ${c.green(query)} was matched`)
+          clearInterval(interval)
+        }
+      })
+    }, 1000 * 5);
+
+  }
+  export const enumerate = (query: string): Promise<EnumerateMethodsMatchGroup[]> => {
+    // If the query is just a classname, strongarm it into a pattern.
+    if (getPatternType(query) === PatternType.Klass) {
+      query = `${query}!*`
+    }
+    return wrapJavaPerform(() => {
+      return Java.enumerateMethods(query);
+    }
+    );
+  };
+
   export const getClassMethods = (className: string): Promise<string[]> => {
     return wrapJavaPerform(() => {
 
       const clazz: JavaClass = Java.use(className);
-
       return clazz.class.getDeclaredMethods().map((method) => {
         return method.toGenericString();
       });
     });
   };
+  // This function takes in a method such as package.class.perform()
+  // and extracts only the method name, ie "perform"
+  const genericMethodNameToMethodOnly = (fullMethodName: string): string => {
+    // Reduces [package, class, perform()] to "perform()"
+    const method = fullMethodName.split('.').filter((part: string) => part.includes('('))[0]
+    // Now extract everything before the first '('
+    return method.substring(0, method.indexOf('('))
+  }
+  // This method assumes that it's being called from inside wrapJavaPerform
+  export const getClassHandle = (className: string): JavaClass | null => {
+    let clazz: JavaClass = null
+    const loaders = Java.enumerateClassLoadersSync()
+    let found = false
+    // Try to get a handle using each of the class loaders
+    for (let i = 0; i < loaders.length; i++) {
+      const loader = loaders[i]
+      const factory = Java.ClassFactory.get(loader)
+      try {
+        clazz = factory.use(className)
+        found = true
+        break
+      } catch { }
+    }
+    if (found) {
+      return clazz
+    } else {
+      return null
+    }
+  }
+  // This method assumes that it's being called from inside wrapJavaPerform
+  // It behaves the same as the above, except only uses the specified class
+  // loader
+  export const getClassHandleWithLoaderClassName = (className: string, loaderClassName: any): JavaClass | null => {
+    let clazz: JavaClass = null
+    const loaders = Java.enumerateClassLoadersSync()
+      .filter(loader => loaderClassName === loader.$className)
 
-  export const watchClass = (clazz: string): Promise<void> => {
+    if (loaders.length == 0) {
+      return null
+    } else {
+      let found = false
+      // Try to get a handle using each of the class loaders
+      // This is still required because some loaders may have the
+      // same name, so distinguishing between them using this is
+      // incorrect. I'm sure there is a way of finding the correct
+      // one efficiently.
+      for (let i = 0; i < loaders.length; i++) {
+        const loader = loaders[i]
+        const factory = Java.ClassFactory.get(loader)
+        try {
+          clazz = factory.use(className)
+          found = true
+          break
+        } catch { }
+      }
+      if (found) {
+        return clazz
+      } else {
+        return null
+      }
+    }
+  }
+  export const getClassMethodsOverloads = (className: string, methodsAllowList: string[] = [], loader?: string): Promise<JSON> => {
+    return wrapJavaPerform(() => {
+      const result: any = {} // TODO(cduplooy): Properly type this.
+      const clazz = loader !== null ? getClassHandleWithLoaderClassName(className, loader) : Java.use(className)
+
+      if (clazz === null) {
+        throw new Error("Could not find class!");
+      }
+
+      // TODO(cduplooy): The below line can fail with Error: java.lang.NoClassDefFoundError: Failed resolution of: Landroidx/datastore/core/DataStore;
+      // This seems to involve custom class loaders...
+      const methods = clazz.class.getDeclaredMethods()
+        .map(method => genericMethodNameToMethodOnly(method.toGenericString()))
+      methods.forEach(methodName => {
+        if (methodsAllowList.length === 0 || (methodsAllowList.length > 0 && methodsAllowList.includes(methodName))) {
+          const overloads = clazz[methodName].overloads
+          result[methodName] = {
+            'argTypes': overloads.map(overload => overload.argumentTypes),
+            'returnType': overloads.map(overload => overload.returnType),
+            'methodName': overloads.map(overload => overload.methodName),
+            'handle': overloads.map(overload => overload.handle),
+            'holder': overloads.map(overload => overload.holder),
+            'type': overloads.map(overload => overload.type),
+          }
+        }
+      })
+
+      // Finally append the constructor details
+      if (clazz.class.getConstructors().length > 0) {
+        if (methodsAllowList.length === 0 || (methodsAllowList.length > 0 && methodsAllowList.includes("$init"))) {
+          const overloads = clazz['$init'].overloads
+          result['$init'] = {
+            'argTypes': overloads.map(overload => overload.argumentTypes),
+            'returnType': overloads.map(overload => overload.returnType),
+            'methodName': overloads.map(overload => overload.methodName),
+            'handle': overloads.map(overload => overload.handle),
+            'holder': overloads.map(overload => overload.holder),
+            'type': overloads.map(overload => overload.type),
+          }
+        }
+      }
+
+      return result
+    });
+  };
+  export const watch = (pattern: string, dargs: boolean, dbt: boolean, dret: boolean): Promise<void> => {
+    const patternType = getPatternType(pattern)
+    if (patternType === PatternType.Klass) {
+      return watchClass(pattern, dargs, dbt, dret)
+    } else if (patternType === PatternType.Regex) {
+      return new Promise((resolve, reject) => {
+        enumerate(pattern).then((matches: EnumerateMethodsMatchGroup[]) => {
+          matches.forEach((match: EnumerateMethodsMatchGroup) => {
+            match.classes.forEach((klass: EnumerateMethodsMatchClass) => {
+              klass.methods.forEach(method => {
+                // Only watch matched methods
+                watchMethod(`${klass.name}.${method}`, null, dargs, dbt, dret)
+              })
+            })
+          })
+          resolve()
+        }).catch((error) => {
+          reject(error)
+        })
+      })
+    } else {
+      // TODO(cduplooy): Unknown pattern type? log a message to inform the user?
+    }
+  }
+  export const watchClass = (clazz: string, dargs: boolean = false, dbt: boolean = false, dret: boolean = false): Promise<void> => {
     return wrapJavaPerform(() => {
       const clazzInstance: JavaClass = Java.use(clazz);
 
@@ -99,27 +279,13 @@ export namespace hooking {
       };
 
       uniqueMethods.forEach((method) => {
-        clazzInstance[method].overloads.forEach((m: any) => {
-
-          // get the argument types for this overload
-          const calleeArgTypes: string[] = m.argumentTypes.map((arg) => arg.className);
-          send(`Hooking ${c.green(clazz)}.${c.greenBright(method)}(${c.red(calleeArgTypes.join(", "))})`);
-
-          // replace the implementation of this method
-          // tslint:disable-next-line:only-arrow-functions
-          m.implementation = function () {
-            send(
-              c.blackBright(`[${job.identifier}] `) +
-              `Called ${c.green(clazz)}.${c.greenBright(m.methodName)}(${c.red(calleeArgTypes.join(", "))})`,
-            );
-
-            // actually run the intended method
-            return m.apply(this, arguments);
-          };
-
-          // record this implementation override for the job
-          job.implementations.push(m);
-        });
+        // get the argument types for this overload
+        send(`Watching ${c.green(clazz)}.${c.greenBright(method)}()`);
+        const fqClazz = `${clazz}.${method}`;
+        // TODO(cduplooy): Add the filter args, also jobs per invocation of parent command
+        watchMethod(fqClazz, null, dargs, dbt, dret);
+        // record this implementation override for the job
+        job.implementations.push(fqClazz);
       });
 
       // record the job
