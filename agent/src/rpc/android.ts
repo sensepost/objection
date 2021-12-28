@@ -21,6 +21,9 @@ import { userinterface } from "../android/userinterface";
 import { proxy } from "../android/proxy";
 import { general } from "../android/general";
 import EnumerateMethodsMatchGroup = Java.EnumerateMethodsMatchGroup;
+import {
+  JavaMethodsOverloadsResult
+} from "../android/lib/types";
 
 export const android = {
   // android clipboard
@@ -45,7 +48,7 @@ export const android = {
 
   // android hooking
   androidHookingGetClassMethods: (className: string): Promise<string[]> => hooking.getClassMethods(className),
-  androidHookingGetClassMethodsOverloads: (className: string, methodAllowList: string[] = [], loader? : string): Promise<JSON> => hooking.getClassMethodsOverloads(className, methodAllowList, loader),
+  androidHookingGetClassMethodsOverloads: (className: string, methodAllowList: string[] = [], loader? : string): Promise<JavaMethodsOverloadsResult> => hooking.getClassMethodsOverloads(className, methodAllowList, loader),
   androidHookingGetClasses: (): Promise<string[]> => hooking.getClasses(),
   androidHookingGetClassLoaders: (): Promise<string[]> => hooking.getClassLoaders(),
   androidHookingGetCurrentActivity: (): Promise<ICurrentActivityFragment> => hooking.getCurrentActivity(),

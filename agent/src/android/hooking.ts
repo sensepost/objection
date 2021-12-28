@@ -15,6 +15,7 @@ import {
   JavaClass,
   PackageManager,
   Throwable,
+  JavaMethodsOverloadsResult,
 } from "./lib/types";
 
 export namespace hooking {
@@ -174,9 +175,9 @@ export namespace hooking {
       }
     }
   }
-  export const getClassMethodsOverloads = (className: string, methodsAllowList: string[] = [], loader?: string): Promise<JSON> => {
+  export const getClassMethodsOverloads = (className: string, methodsAllowList: string[] = [], loader?: string): Promise<JavaMethodsOverloadsResult> => {
     return wrapJavaPerform(() => {
-      const result: any = {} // TODO(cduplooy): Properly type this.
+      const result: JavaMethodsOverloadsResult = {}
       const clazz = loader !== null ? getClassHandleWithLoaderClassName(className, loader) : Java.use(className)
 
       if (clazz === null) {
@@ -255,7 +256,7 @@ export namespace hooking {
         })
       })
     } else {
-      // TODO(cduplooy): Unknown pattern type? log a message to inform the user?
+      send('Unknown pattern type')
     }
   }
   export const watchClass = (clazz: string, job: IJob, dargs: boolean = false, dbt: boolean = false, dret: boolean = false): Promise<void> => {

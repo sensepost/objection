@@ -294,14 +294,13 @@ def search(args: list = None) -> None:
                 if loader is not None:
                     # <instance: java.lang.ClassLoader, $className: dalvik.system.PathClassLoader>
                     # but we only care about the className
-                    # TODO(cduplooy): This can/has to be improved
-                    startIndex = loader.find('$className: ') + 12
-                    startPart = loader[startIndex:]
-                    if startPart.find('>'):
-                        endIndex = startPart.find('>')
+                    start_index = loader.find('$className: ') + 12
+                    start_part = loader[start_index:]
+                    if start_part.find('>'):
+                        end_index = start_part.find('>')
                     else:
-                        endIndex = startPart.find(' ')
-                    loader = startPart[:endIndex]
+                        end_index = start_part.find(' ')
+                    loader = start_part[:end_index]
                 _class['overloads'] = api.android_hooking_get_class_methods_overloads(_class['name'], _class['methods'], loader)
 
     if not should_be_quiet:
