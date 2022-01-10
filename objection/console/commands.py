@@ -67,6 +67,11 @@ COMMANDS = {
         'exec': None,  # handled in the Repl class itself
     },
 
+    'resume': {
+        'meta': 'Resume the attached process',
+        'exec': None
+    },
+
     'import': {
         'meta': 'Import fridascript from a full path and run it',
         'exec': frida_commands.load_background
@@ -391,14 +396,14 @@ COMMANDS = {
                         }
                     },
                     'print': {
-                        'meta': 'Print information about objects on the iOS heap',
+                        'meta': 'Print information about objects on the heap',
                         'commands': {
                             'fields': {
                                 'meta': 'Print instance fields for a Java object handle',
                                 'exec': android_heap.fields
                             },
                             'methods': {
-                                'meta': 'Print instance methods for an Android handle',
+                                'meta': 'Print instance methods for a Java object handle',
                                 'flags': ['--without-arguments'],
                                 'exec': android_heap.methods
                             }
@@ -421,6 +426,11 @@ COMMANDS = {
                     'list': {
                         'meta': 'Lists entries in the Android KeyStore',
                         'exec': keystore.entries
+                    },
+                    'detail': {
+                        'meta': 'Lists details for all items in the Android KeyStore',
+                        'flags': ['--json'],
+                        'exec': keystore.detail
                     },
                     'clear': {
                         'meta': 'Clears the Android KeyStore',

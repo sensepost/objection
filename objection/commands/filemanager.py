@@ -67,10 +67,10 @@ def cd(args: list) -> None:
         does_exist = False
 
         # check for existence based on the runtime
-        if device_state.device_type == Ios:
+        if device_state.platform == Ios:
             does_exist = _path_exists_ios(path)
 
-        if device_state.device_type == Android:
+        if device_state.platform == Android:
             does_exist = _path_exists_android(path)
 
         # if we checked with the device that the path exists
@@ -89,16 +89,16 @@ def cd(args: list) -> None:
     # see if its legit.
     else:
 
-        proposed_path = device_state.device_type.path_seperator.join([current_dir, path])
+        proposed_path = device_state.platform.path_separator.join([current_dir, path])
 
         # assume the proposed_path does not exist by default
         does_exist = False
 
         # check for existence based on the runtime
-        if device_state.device_type == Ios:
+        if device_state.platform == Ios:
             does_exist = _path_exists_ios(proposed_path)
 
-        if device_state.device_type == Android:
+        if device_state.platform == Android:
             does_exist = _path_exists_android(proposed_path)
 
         # if we checked with the device that the path exists
@@ -122,10 +122,10 @@ def path_exists(path: str) -> bool:
         :return:
     """
 
-    if device_state.device_type == Ios:
+    if device_state.platform == Ios:
         return _path_exists_ios(path)
 
-    if device_state.device_type == Android:
+    if device_state.platform == Android:
         return _path_exists_android(path)
 
 
@@ -169,10 +169,10 @@ def pwd(args: list = None) -> str:
     if file_manager_state.cwd is not None:
         return file_manager_state.cwd
 
-    if device_state.device_type == Ios:
+    if device_state.platform == Ios:
         return _pwd_ios()
 
-    if device_state.device_type == Android:
+    if device_state.platform == Android:
         return _pwd_android()
 
 
@@ -236,13 +236,13 @@ def ls(args: list) -> None:
     else:
         path = args[0]
         if not os.path.isabs(path):
-            path = device_state.device_type.path_seperator.join([pwd(), path])
+            path = device_state.platform.path_separator.join([pwd(), path])
 
     # based on the runtime, execute the correct ls method.
-    if device_state.device_type == Ios:
+    if device_state.platform == Ios:
         _ls_ios(path)
 
-    if device_state.device_type == Android:
+    if device_state.platform == Android:
         _ls_android(path)
 
 
@@ -393,10 +393,10 @@ def download(args: list) -> None:
     source = args[0]
     destination = args[1] if len(args) > 1 else os.path.basename(source)
 
-    if device_state.device_type == Ios:
+    if device_state.platform == Ios:
         _download_ios(source, destination)
 
-    if device_state.device_type == Android:
+    if device_state.platform == Android:
         _download_android(source, destination)
 
 
@@ -412,7 +412,7 @@ def _download_ios(path: str, destination: str) -> None:
     # if the path we got is not absolute, join it with the
     # current working directory
     if not os.path.isabs(path):
-        path = device_state.device_type.path_seperator.join([pwd(), path])
+        path = device_state.platform.path_separator.join([pwd(), path])
 
     api = state_connection.get_api()
 
@@ -448,7 +448,7 @@ def _download_android(path: str, destination: str) -> None:
     # if the path we got is not absolute, join it with the
     # current working directory
     if not os.path.isabs(path):
-        path = device_state.device_type.path_seperator.join([pwd(), path])
+        path = device_state.platform.path_separator.join([pwd(), path])
 
     api = state_connection.get_api()
 
@@ -488,13 +488,13 @@ def upload(args: list) -> None:
         return
 
     source = args[0]
-    destination = args[1] if len(args) > 1 else device_state.device_type.path_seperator.join(
+    destination = args[1] if len(args) > 1 else device_state.platform.path_separator.join(
         [pwd(), os.path.basename(source)])
 
-    if device_state.device_type == Ios:
+    if device_state.platform == Ios:
         _upload_ios(source, destination)
 
-    if device_state.device_type == Android:
+    if device_state.platform == Android:
         _upload_android(source, destination)
 
 
@@ -508,7 +508,7 @@ def _upload_ios(path: str, destination: str) -> None:
     """
 
     if not os.path.isabs(destination):
-        destination = device_state.device_type.path_seperator.join([pwd(), destination])
+        destination = device_state.platform.path_separator.join([pwd(), destination])
 
     api = state_connection.get_api()
     click.secho('Uploading {0} to {1}'.format(path, destination), fg='green', dim=True)
@@ -543,7 +543,7 @@ def _upload_android(path: str, destination: str) -> None:
     """
 
     if not os.path.isabs(destination):
-        destination = device_state.device_type.path_seperator.join([pwd(), destination])
+        destination = device_state.platform.path_separator.join([pwd(), destination])
 
     api = state_connection.get_api()
     click.secho('Uploading {0} to {1}'.format(path, destination), fg='green', dim=True)
@@ -583,16 +583,16 @@ def rm(args: list) -> None:
     target = args[0]
 
     if not os.path.isabs(target):
-        target = device_state.device_type.path_seperator.join([pwd(), target])
+        target = device_state.platform.path_separator.join([pwd(), target])
 
     if not click.confirm('Really delete {0} ?'.format(target)):
         click.secho('Not deleting {0}'.format(target), dim=True)
         return
 
-    if device_state.device_type == Ios:
+    if device_state.platform == Ios:
         _rm_ios(target)
 
-    if device_state.device_type == Android:
+    if device_state.platform == Android:
         _rm_android(target)
 
 
@@ -662,10 +662,10 @@ def cat(args: list):
     source = args[0]
     _, destination = tempfile.mkstemp('.file')
 
-    if device_state.device_type == Ios:
+    if device_state.platform == Ios:
         _download_ios(source, destination)
 
-    if device_state.device_type == Android:
+    if device_state.platform == Android:
         _download_android(source, destination)
 
     click.secho('====', dim=True)
@@ -768,10 +768,10 @@ def list_folders_in_current_fm_directory() -> dict:
     resp = {}
 
     # get the folders based on the runtime
-    if device_state.device_type == Ios:
+    if device_state.platform == Ios:
         response = _get_short_ios_listing()
 
-    elif device_state.device_type == Android:
+    elif device_state.platform == Android:
         response = _get_short_android_listing()
 
     # looks like we landed in an unknown runtime.
@@ -799,10 +799,10 @@ def list_files_in_current_fm_directory() -> dict:
     resp = {}
 
     # check for existence based on the runtime
-    if device_state.device_type == Ios:
+    if device_state.platform == Ios:
         response = _get_short_ios_listing()
 
-    elif device_state.device_type == Android:
+    elif device_state.platform == Android:
         response = _get_short_android_listing()
 
     # looks like we landed in an unknown runtime.

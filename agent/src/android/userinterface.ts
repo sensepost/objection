@@ -1,8 +1,13 @@
 import { colors as c } from "../lib/color";
 import { wrapJavaPerform } from "./lib/libjava";
 import {
-   Activity, ActivityClientRecord, ActivityThread, Bitmap, ByteArrayOutputStream, CompressFormat,
-  } from "./lib/types";
+  Activity,
+  ActivityClientRecord,
+  ActivityThread,
+  Bitmap,
+  ByteArrayOutputStream,
+  CompressFormat,
+} from "./lib/types";
 
 export namespace userinterface {
 

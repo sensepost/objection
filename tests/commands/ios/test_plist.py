@@ -28,7 +28,7 @@ class TestPlist(unittest.TestCase):
         mock_file_manager.pwd.return_value = '/baz'
         mock_api.return_value.ios_plist_read.return_value = 'foobar'
 
-        device_state.device_type = Ios
+        device_state.platform = Ios
 
         with capture(cat, ['foo']) as o:
             output = o

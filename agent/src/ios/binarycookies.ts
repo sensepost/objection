@@ -1,5 +1,9 @@
 import { IIosCookie } from "./lib/interfaces";
-import { NSArray, NSData, NSHTTPCookieStorage } from "./lib/types";
+import {
+  NSArray,
+  NSData,
+  NSHTTPCookieStorage
+} from "./lib/types";
 
 export namespace binarycookies {
 

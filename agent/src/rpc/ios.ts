@@ -10,8 +10,13 @@ import { iosjailbreak } from "../ios/jailbreak";
 import { ioskeychain } from "../ios/keychain";
 import { BundleType } from "../ios/lib/constants";
 import {
-  IBinaryModuleDictionary, ICredential, IFramework,
-  IHeapObject, IIosCookie, IIosFileSystem, IKeychainItem,
+  IBinaryModuleDictionary,
+  ICredential,
+  IFramework,
+  IHeapObject,
+  IIosCookie,
+  IIosFileSystem,
+  IKeychainItem,
 } from "../ios/lib/interfaces";
 import { NSUserDefaults } from "../ios/lib/types";
 import { nsuserdefaults } from "../ios/nsuserdefaults";

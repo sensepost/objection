@@ -1,5 +1,8 @@
 import { colors as c } from "../lib/color";
-import { getApplicationContext, wrapJavaPerform } from "./lib/libjava";
+import {
+  getApplicationContext,
+  wrapJavaPerform
+} from "./lib/libjava";
 import { Intent } from "./lib/types";
 
 export namespace intent {

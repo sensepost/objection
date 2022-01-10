@@ -1,6 +1,5 @@
 import { wrapJavaPerform } from "./lib/libjava";
 import { colors as c } from "../lib/color";
-import { qsend } from "../lib/helpers";
 
 export namespace proxy {
 
@@ -11,7 +10,7 @@ export namespace proxy {
 
       var System = Java.use("java.lang.System");
 
-      if(System != undefined) {
+      if (System != undefined) {
         send(c.green(`Setting properties for a proxy`));
         System.setProperty("http.proxyHost", proxyHost);
         System.setProperty("http.proxyPort", proxyPort);

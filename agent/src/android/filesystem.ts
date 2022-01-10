@@ -1,8 +1,14 @@
 import * as fs from "fs";
 import { hexStringToBytes } from "../lib/helpers";
 import { IAndroidFilesystem } from "./lib/interfaces";
-import { getApplicationContext, wrapJavaPerform } from "./lib/libjava";
-import { File, JavaClass } from "./lib/types";
+import {
+  getApplicationContext,
+  wrapJavaPerform
+} from "./lib/libjava";
+import {
+  File,
+  JavaClass
+} from "./lib/types";
 
 export namespace androidfilesystem {
 

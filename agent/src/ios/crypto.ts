@@ -2,7 +2,10 @@ import { colors as c } from "../lib/color";
 import { fsend } from "../lib/helpers";
 import { IJob } from "../lib/interfaces";
 import { jobs } from "../lib/jobs";
-import { arrayBufferToHex, hexToString } from "./lib/helpers"
+import {
+  arrayBufferToHex,
+  hexToString
+} from "./lib/helpers";
 
 // Encryption algorithms implemented by this module.
 const CCAlgorithm = {
@@ -211,11 +214,11 @@ export namespace ioscrypto {
         this.cccryptorcreate = {};
 
         // args[0]  Defines the basic operation: kCCEncrypt or kCCDecrypt.
-        op = args[0].toInt32()
+        op = args[0].toInt32();
         this.cccryptorcreate.op = CCOperation[op];
 
         // args[1]  Defines the encryption algorithm.
-        alg = args[1].toInt32()
+        alg = args[1].toInt32();
         this.cccryptorcreate.alg = CCAlgorithm[alg].name;
 
         // args[2]  A word of flags defining options. See discussion for the CCOptions type.
@@ -276,7 +279,7 @@ export namespace ioscrypto {
         this.cccryptorupdate.dataIn = op ? dataIn : hexToString(dataIn);
       },
       onLeave(retval) {
-        const blocksize = CCAlgorithm[alg].blocksize
+        const blocksize = CCAlgorithm[alg].blocksize;
         // if the messsage is longer than 1 block then we need to
         // remember everything before the final block
         if (this.dataInLength > blocksize) {
@@ -292,12 +295,12 @@ export namespace ioscrypto {
   };
 
   const cccryptorfinal = (ident: string): InvocationListener => {
-    const hook = "CCCryptorFinal"
+    const hook = "CCCryptorFinal";
     return Interceptor.attach(
       Module.getExportByName(null, hook), {
       onEnter(args) {
 
-        this.cccryptorfinal = {}
+        this.cccryptorfinal = {};
 
         // args[1]  Result is written here. Allocated by caller.
         // 	  		  Encryption and decryption can be performed
@@ -336,7 +339,7 @@ export namespace ioscrypto {
       type: "ios-crypto-monitor",
     };
 
-    cryptoidentifier = job.identifier
+    cryptoidentifier = job.identifier;
 
     job.invocations.push(secrandomcopybytes(job.identifier));
     job.invocations.push(cckeyderivationpbkdf(job.identifier));

@@ -2,7 +2,7 @@
 //
 // Edit the example below the HookManager class to suit your
 // needs and then run with:
-//  frida -U "App Name" --runtime=v8 -l objchookmanager.js
+//  frida -U "App Name" -l objchookmanager.js
 //
 // Generated using objection:
 //  https://github.com/sensepost/objection

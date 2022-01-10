@@ -1,6 +1,10 @@
 import { BundleType } from "./lib/constants";
 import { IFramework } from "./lib/interfaces";
-import { NSArray, NSBundle, NSDictionary } from "./lib/types";
+import {
+  NSArray,
+  NSBundle,
+  NSDictionary
+} from "./lib/types";
 
 export namespace bundles {
 

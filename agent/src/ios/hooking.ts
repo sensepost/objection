@@ -110,7 +110,7 @@ export namespace hooking {
     } catch (error) {
       send(
         `${c.red(`Error:`)} Unable to find address for selector ${c.redBright(`${selector}`)}! ` +
-        `The error was:\n` + c.red(error),
+        `The error was:\n` + c.red((error as Error).message),
       );
       return;
     }
@@ -195,7 +195,7 @@ export namespace hooking {
     } catch (error) {
       send(
         `${c.red(`Error!`)} Unable to find address for selector ${c.redBright(`${selector}`)}! ` +
-        `The error was:\n` + c.red(error),
+        `The error was:\n` + c.red((error as Error).message),
       );
       return;
     }

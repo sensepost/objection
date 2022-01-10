@@ -1,5 +1,10 @@
 import { colors as c } from "../lib/color";
-import { IHeapClassDictionary, IHeapObject, IJavaField, IHeapNormalised } from "./lib/interfaces";
+import {
+  IHeapClassDictionary,
+  IHeapObject,
+  IJavaField,
+  IHeapNormalised
+} from "./lib/interfaces";
 import { wrapJavaPerform } from "./lib/libjava";
 
 export namespace heap {
@@ -62,7 +67,7 @@ export namespace heap {
           hashcode: h.hashcode,
           classname: clazz,
           tostring: h.instance.toString(),
-        }
+        };
       });
     });
   };

@@ -4,7 +4,6 @@
 
 [![Twitter](https://img.shields.io/badge/twitter-%40leonjza-blue.svg)](https://twitter.com/leonjza)
 [![PyPi](https://badge.fury.io/py/objection.svg)](https://pypi.python.org/pypi/objection)
-[![Travis](https://travis-ci.org/sensepost/objection.svg?branch=master)](https://travis-ci.org/sensepost/objection)
 [![Black Hat Arsenal](https://raw.githubusercontent.com/toolswatch/badges/master/arsenal/europe/2017.svg?sanitize=true)](https://www.blackhat.com/eu-17/arsenal-overview.html)
 [![Black Hat Arsenal](https://raw.githubusercontent.com/toolswatch/badges/master/arsenal/usa/2019.svg?sanitize=true)](https://www.blackhat.com/us-19/arsenal-overview.html)
 

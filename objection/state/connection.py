@@ -1,23 +1,24 @@
 class StateConnection(object):
     """ A class controlling the connection state of a device. """
 
-    TYPE_USB = 0
-    TYPE_REMOTE = 1
-
     def __init__(self) -> None:
         """
             Init a new connection state, defaulting to a USB
             connection.
         """
 
-        self.usb = True
         self.network = False
-        self.host = '127.0.0.1'
-        self.port = 27042
-        self._type = self.TYPE_USB
-        self.device_serial = None
+        self.host = None
+        self.port = None
+        self.device_type = 'usb'
+        self.device_id = None
 
-        self.gadget_name = 'Gadget'
+        self.spawn = False
+        self.no_pause = False
+        self.foremost = False
+        self.debugger = False
+
+        self.name = None
         self.agent = None
         self.api = None
 
@@ -29,8 +30,7 @@ class StateConnection(object):
         """
 
         self.network = False
-        self.usb = True
-        self._type = self.TYPE_USB
+        self.device_type = 'usb'
 
     def use_network(self) -> None:
         """
@@ -40,8 +40,7 @@ class StateConnection(object):
         """
 
         self.network = True
-        self.usb = False
-        self._type = self.TYPE_REMOTE
+        self.device_type = 'remote'
 
     def get_comms_type(self) -> int:
         """
@@ -49,25 +48,6 @@ class StateConnection(object):
 
             :return:
         """
-
-        return self._type
-
-    def get_comms_type_string(self) -> str:
-        """
-            Returns the currently configured connection type as a string.
-
-            :return:
-        """
-
-        t = self.get_comms_type()
-
-        if t == self.TYPE_USB:
-            return 'usb'
-
-        if t == self.TYPE_REMOTE:
-            return 'net'
-
-        return ''
 
     def get_api(self):
         """
@@ -99,7 +79,7 @@ class StateConnection(object):
         return self.agent
 
     def __repr__(self) -> str:
-        return '<State Usb:{0}, Network:{1}, Host:{2}, Port:{3}'.format(self.usb, self.network, self.host, self.port)
+        return f'<State DevSerial: {self.device_id}, Network:{self.network}, Host:{self.host}, Port:{self.port}'
 
 
 state_connection = StateConnection()

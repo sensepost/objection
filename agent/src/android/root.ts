@@ -2,7 +2,12 @@ import { colors as c } from "../lib/color";
 import { IJob } from "../lib/interfaces";
 import { jobs } from "../lib/jobs";
 import { wrapJavaPerform } from "./lib/libjava";
-import { File, IOException, JavaString, Runtime } from "./lib/types";
+import {
+  File,
+  IOException,
+  JavaString,
+  Runtime
+} from "./lib/types";
 
 export namespace root {
   const commonPaths = [
@@ -352,6 +357,31 @@ export namespace root {
         return this.t.call(this);
       };
       return RootBeer;
+
+  // ref: https://www.ayrx.me/gantix-jailmonkey-root-detection-bypass/
+  const jailMonkeyBypass = (success: boolean, ident: string): any => {
+    return wrapJavaPerform(() => {
+      const JavaJailMonkeyModule = Java.use("com.gantix.JailMonkey.JailMonkeyModule");
+      const JavaHashMap = Java.use("java.util.HashMap");
+      const JavaFalseObject = Java.use("java.lang.Boolean").FALSE.value;
+
+      JavaJailMonkeyModule.getConstants.implementation = function () {
+        send(
+          c.blackBright(`[${ident}] `) +
+          `JailMonkeyModule.getConstants() called, returning false for all keys.`
+        );
+
+        const hm = JavaHashMap.$new();
+        hm.put("isJailBroken", JavaFalseObject);
+        hm.put("hookDetected", JavaFalseObject);
+        hm.put("canMockLocation", JavaFalseObject);
+        hm.put("isOnExternalStorage", JavaFalseObject);
+        hm.put("AdbEnabled", JavaFalseObject);
+
+        return hm;
+      };
+
+      return JavaJailMonkeyModule;
     });
   };
 
@@ -365,6 +395,7 @@ export namespace root {
     job.implementations.push(testKeysCheck(false, job.identifier));
     job.implementations.push(execSuCheck(false, job.identifier));
     job.implementations.push(fileExistsCheck(false, job.identifier));
+    job.implementations.push(jailMonkeyBypass(false, job.identifier));
     
     // RootBeer functions
     job.implementations.push(bypassRootBeer_isRooted(false, job.identifier));
@@ -391,6 +422,7 @@ export namespace root {
     job.implementations.push(testKeysCheck(true, job.identifier));
     job.implementations.push(execSuCheck(true, job.identifier));
     job.implementations.push(fileExistsCheck(true, job.identifier));
+    job.implementations.push(jailMonkeyBypass(true, job.identifier));
     
     // RootBeer functions
     job.implementations.push(bypassRootBeer_isRooted(true, job.identifier));
@@ -403,7 +435,7 @@ export namespace root {
     job.implementations.push(bypassRootBeerObfuscatedA(true, job.identifier));
     job.implementations.push(bypassRootBeerObfuscatedB(true, job.identifier));
     job.implementations.push(bypassRootBeerObfuscatedC(true, job.identifier));
-
+    
     jobs.add(job);
   };
 }

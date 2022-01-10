@@ -459,7 +459,7 @@ export namespace sslpinning {
     }
 
     // tslint:disable-next-line:only-arrow-functions variable-name
-    const customVerifyCallback = new NativeCallback(function(ssl, out_alert) {
+    const customVerifyCallback = new NativeCallback(function (ssl, out_alert) {
       qsend(quiet,
         c.blackBright(`[${ident}] `) + `Called ` +
         c.green(`custom SSL context verify callback`) +
@@ -469,7 +469,7 @@ export namespace sslpinning {
     }, "int", ["pointer", "pointer"]);
 
     // tslint:disable-next-line:only-arrow-functions
-    Interceptor.replace(setCustomVerify, new NativeCallback(function(ssl, mode, callback) {
+    Interceptor.replace(setCustomVerify, new NativeCallback(function (ssl, mode, callback) {
       qsend(quiet,
         c.blackBright(`[${ident}] `) + `Called ` +
         c.green(`SSL_CTX_set_custom_verify()`) +
@@ -479,13 +479,13 @@ export namespace sslpinning {
     }, "void", ["pointer", "int", "pointer"]));
 
     // tslint:disable-next-line:only-arrow-functions
-    Interceptor.replace(getPskIdentity, new NativeCallback(function(ssl) {
+    Interceptor.replace(getPskIdentity, new NativeCallback(function (ssl) {
       qsend(quiet,
         c.blackBright(`[${ident}] `) + `Called ` +
         c.green(`SSL_get_psk_identity()`) +
         `, returning "fakePSKidentity".`,
       );
-      return "fakePSKidentity";
+      return Memory.allocUtf8String("fakePSKidentity");
     }, "pointer", ["pointer"]));
   };
 

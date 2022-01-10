@@ -32,7 +32,7 @@ export namespace heap {
           superClass: instance.$superClass.$className,
         };
       } catch (err) {
-        c.log(`Warning: ${c.yellowBright(err)}`);
+        c.log(`Warning: ${c.yellowBright((err as Error).message)}`);
       }
     });
   };
@@ -76,7 +76,7 @@ export namespace heap {
     const i = resolvePointer(pointer);
     c.log(`${c.blackBright(`Executing:`)} ${c.greenBright(`[${i.$className} ${method}]`)}`);
 
-    const result =  i[method]();
+    const result = i[method]();
 
     if (returnString) {
       return result.toString();
