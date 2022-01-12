@@ -6,6 +6,26 @@ import click
 from objection.state.connection import state_connection
 from objection.utils.helpers import clean_argument_flags
 
+def _is_pattern_or_constant(s: str) -> bool:
+    """
+        Check if a provided pattern matches "CLASS!METHOD"
+
+        :param s:
+        :return:
+    """
+
+    # No pattern case
+    if "!" not in s:
+        return True
+
+    # Check if CLASS and METHOD is defined at all
+    parts = s.split('!')
+    if len(parts) != 2:
+        return False
+    elif len(parts[0]) == 0 or len(parts[1]) == 0:
+        return False
+    
+    return True
 
 def _string_is_true(s: str) -> bool:
     """
@@ -116,10 +136,13 @@ def notify(args: list = None) -> None:
         click.secho('Usage: android hooking notify $PATTERN', bold=True)
         return
 
-    pattern = args[0]
+    query = args[0]
+    if not _is_pattern_or_constant(query):
+        click.secho('Incorrect query syntax, please use <CLASS>!<METHOD>', fg='red')
+        return
 
     api = state_connection.get_api()
-    api.android_hooking_lazy_watch_for_pattern(pattern)
+    api.android_hooking_lazy_watch_for_pattern(query)
 
 
 def watch(args: list = None) -> None:
@@ -130,8 +153,15 @@ def watch(args: list = None) -> None:
                     '(optional: --dump-backtrace) '
                     '(optional: --dump-return)',
                     bold=True)
+    
+    query = args[0]
+    if not _is_pattern_or_constant(query):
+        click.secho('Incorrect query syntax, please use <CLASS>!<METHOD>', fg='red')
+        return
+    
     api = state_connection.get_api()
-    api.android_hooking_watch(args[0],
+
+    api.android_hooking_watch(query,
                               _should_dump_args(args),
                               _should_dump_backtrace(args),
                               _should_dump_return_value(args)
@@ -269,7 +299,7 @@ def search(args: list = None) -> None:
         :return:
     """
     if len(clean_argument_flags(args)) <= 0:
-        click.secho('Usage: android hooking search \'<class>!<method>\''
+        click.secho('Usage: android hooking search \'<class>!<method>\n\''
                     '(optional: --json <filename>)'
                     '(optional: --only-classes)'
                     '(optional: --quiet)', bold=True)
@@ -278,6 +308,11 @@ def search(args: list = None) -> None:
     should_dump_json = _should_dump_json(args)
     should_print_only_classes = _should_print_only_classes(args)
     should_be_quiet = _should_be_quiet(args)
+    query = args[0]
+
+    if not _is_pattern_or_constant(query):
+        click.secho('Incorrect query syntax, please use <CLASS>!<METHOD>', fg='red')
+        return
 
     api = state_connection.get_api()
     results_json = {
@@ -285,7 +320,8 @@ def search(args: list = None) -> None:
             'runtime': 'java'
         }
     }
-    results = api.android_hooking_enumerate(args[0])
+
+    results = api.android_hooking_enumerate(query)
     # Only get overloads if this flag is specified, otherwise just enumerating can be kind of slow
     if should_dump_json:
         for result in results:
