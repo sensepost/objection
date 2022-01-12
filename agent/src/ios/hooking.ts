@@ -22,12 +22,15 @@ export namespace hooking {
   };
   export const enumerate = (pattern: string, registerJob: boolean = true): ApiResolverMatch[] => {
     const resolver = new ApiResolver('objc')
-    const job: IJob = {
-      identifier: jobs.identifier(),
-      invocations: [],
-      type: `ios-enumerate for: ${pattern}`,
-    };
-    jobs.add(job)
+    if (registerJob === true){
+      const job: IJob = {
+        identifier: jobs.identifier(),
+        invocations: [],
+        type: `ios-enumerate for: ${pattern}`,
+      };
+      jobs.add(job)
+    }
+
     return resolver.enumerateMatches(pattern)
   };
   export const searchMethods = (partial: string): string[] => {
@@ -62,13 +65,13 @@ export namespace hooking {
     });
 
   };
-  export const search = (patternOrClass: string): ApiResolverMatch[] => {
+  export const search = (patternOrClass: string, registerJob: boolean = false): ApiResolverMatch[] => {
     const isPattern = patternOrClass.includes('[')
     if (isPattern === false) {
       // Make a pattern
-      return enumerate(`*[${patternOrClass} *]`)
+      return enumerate(`*[${patternOrClass} *]`, registerJob)
     } else {
-      return enumerate(patternOrClass)
+      return enumerate(patternOrClass, registerJob)
     }
   }
   export const watch = (patternOrClass: string, dargs: boolean = false, dbt: boolean = false, dret: boolean = false, watchParents: boolean = false): void => {

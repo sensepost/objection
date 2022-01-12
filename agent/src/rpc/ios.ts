@@ -65,8 +65,8 @@ export const ios = {
     hooking.watch(pattern, dargs, dbt, dret, dparents),
   iosHookingEnumerate: (pattern: string): ApiResolverMatch[] =>
     hooking.enumerate(pattern),
-  iosHookingSearch: (pattern: string): ApiResolverMatch[] =>
-    hooking.search(pattern),
+  iosHookingSearch: (pattern: string, registerJob: boolean): ApiResolverMatch[] =>
+    hooking.search(pattern, registerJob),
 
   // ios crypto monitoring
   iosMonitorCryptoEnable: (): void => ioscrypto.monitor(),
