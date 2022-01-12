@@ -308,7 +308,8 @@ def search(args: list) -> None:
     should_dump_json = _should_dump_json(args)
 
     api = state_connection.get_api()
-    results = api.ios_hooking_search(args[0])
+    # False is passed to prevent registering a job, since search should return fairly quickly
+    results = api.ios_hooking_search(args[0], False)
 
     data = {}
     for func in results:
