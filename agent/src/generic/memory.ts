@@ -18,10 +18,11 @@ export namespace memory {
     return Process.enumerateRanges(protection);
   };
 
-  export const dump = (address: string, size: number): ArrayBuffer => {
+  export const dump = (address: string, size: number): Uint8Array => {
     // Originally part of Frida <=11 but got removed in 12.
     // https://github.com/frida/frida-python/commit/72899a4315998289fb171149d62477ba7d1fcb91
-    return new NativePointer(address).readByteArray(size);
+    const buffer = new NativePointer(address).readByteArray(size);
+    return new Uint8Array(buffer);
   };
 
   export const search = (pattern: string, onlyOffsets: boolean = false): string[] => {

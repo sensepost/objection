@@ -1,5 +1,8 @@
 import json
 import os
+import math
+
+from typing import List
 
 import click
 from tabulate import tabulate
@@ -8,6 +11,7 @@ from objection.state.connection import state_connection
 from ..utils.helpers import clean_argument_flags
 from ..utils.helpers import sizeof_fmt, pretty_concat
 
+BLOCK_SIZE = 4096 * 100
 
 def _is_string_input(args: list) -> bool:
     """
@@ -91,7 +95,11 @@ def dump_all(args: list) -> None:
             # changes or the range is reallocated
             try:
                 # grab the (size) bytes starting at the (base_address)
-                dump = api.memory_dump(int(image['base'], 16), image['size'])
+                chunks = _get_chunks(int(image['base'], 16), int(image['size']), BLOCK_SIZE)
+                for chunk in chunks:
+                    # Print some output...
+                    # click.secho(f'\t\t Dumping chunk {chunk[0]}...', fg='green', bold=True)
+                    dump = bytearray(api.memory_dump(chunk[0], chunk[1]))
             except Exception:
                 continue
 
@@ -101,6 +109,21 @@ def dump_all(args: list) -> None:
 
     click.secho('Memory dumped to file: {0}'.format(destination), fg='green')
 
+
+def _get_chunks(addr: int, size: int, block_size: int) -> List:
+  if size > BLOCK_SIZE:
+    block_count = size // BLOCK_SIZE
+    extra_block = size % BLOCK_SIZE
+    ranges = []
+    current_address = addr
+    for i in range(block_count):
+      ranges.append((current_address, BLOCK_SIZE))
+      current_address += BLOCK_SIZE
+    if extra_block != 0:
+      ranges.append((current_address, extra_block))
+    return ranges
+  else:
+    return [(addr, size)]
 
 def dump_from_base(args: list) -> None:
     """
@@ -129,7 +152,15 @@ def dump_from_base(args: list) -> None:
                 fg='green', dim=True)
 
     api = state_connection.get_api()
-    dump = api.memory_dump(int(base_address, 16), int(memory_size))
+
+    # iirc, if you don't cast the return type to a bytearray it uses the sizeof(int) per cell, which is massive
+    dump = bytearray()
+    chunks = _get_chunks(int(base_address, 16), int(memory_size), BLOCK_SIZE)
+    for chunk in chunks:
+        # Print some output...
+        click.secho(f'\t\t Dumping chunk {chunk[0]}...', fg='green', bold=True)
+        dump.extend(bytearray(api.memory_dump(chunk[0], chunk[1])))
+
 
     # append the results to the destination file
     with open(destination, 'wb') as f:
