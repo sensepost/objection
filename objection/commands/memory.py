@@ -11,7 +11,7 @@ from objection.state.connection import state_connection
 from ..utils.helpers import clean_argument_flags
 from ..utils.helpers import sizeof_fmt, pretty_concat
 
-BLOCK_SIZE = 4096 * 100
+BLOCK_SIZE = 40960000
 
 def _is_string_input(args: list) -> bool:
     """
@@ -88,8 +88,9 @@ def dump_all(args: list) -> None:
 
     with click.progressbar(ranges) as bar:
         for image in bar:
+            dump = bytearray()
             bar.label = 'Dumping {0} from base: {1}'.format(sizeof_fmt(image['size']), hex(int(image['base'], 16)))
-
+        
             # catch and exception thrown while dumping.
             # this could for a few reasons like if the protection
             # changes or the range is reallocated
@@ -97,10 +98,9 @@ def dump_all(args: list) -> None:
                 # grab the (size) bytes starting at the (base_address)
                 chunks = _get_chunks(int(image['base'], 16), int(image['size']), BLOCK_SIZE)
                 for chunk in chunks:
-                    # Print some output...
-                    # click.secho(f'\t\t Dumping chunk {chunk[0]}...', fg='green', bold=True)
-                    dump = bytearray(api.memory_dump(chunk[0], chunk[1]))
-            except Exception:
+                    dump.extend(api.memory_dump(chunk[0], chunk[1]))
+                    
+            except Exception as e:
                 continue
 
             # append the results to the destination file
@@ -157,8 +157,6 @@ def dump_from_base(args: list) -> None:
     dump = bytearray()
     chunks = _get_chunks(int(base_address, 16), int(memory_size), BLOCK_SIZE)
     for chunk in chunks:
-        # Print some output...
-        click.secho(f'\t\t Dumping chunk {chunk[0]}...', fg='green', bold=True)
         dump.extend(bytearray(api.memory_dump(chunk[0], chunk[1])))
 
 
