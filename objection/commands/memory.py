@@ -110,7 +110,7 @@ def dump_all(args: list) -> None:
     click.secho('Memory dumped to file: {0}'.format(destination), fg='green')
 
 
-def _get_chunks(addr: int, size: int, block_size: int) -> List:
+def _get_chunks(addr: int, size: int) -> List:
   if size > BLOCK_SIZE:
     block_count = size // BLOCK_SIZE
     extra_block = size % BLOCK_SIZE
