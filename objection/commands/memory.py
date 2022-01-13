@@ -98,7 +98,7 @@ def dump_all(args: list) -> None:
                 # grab the (size) bytes starting at the (base_address)
                 chunks = _get_chunks(int(image['base'], 16), int(image['size']), BLOCK_SIZE)
                 for chunk in chunks:
-                    dump.extend(api.memory_dump(chunk[0], chunk[1]))
+                    dump.extend(bytearray(api.memory_dump(chunk[0], chunk[1])))
                     
             except Exception as e:
                 continue
@@ -110,15 +110,15 @@ def dump_all(args: list) -> None:
     click.secho('Memory dumped to file: {0}'.format(destination), fg='green')
 
 
-def _get_chunks(addr: int, size: int) -> List:
-  if size > BLOCK_SIZE:
-    block_count = size // BLOCK_SIZE
-    extra_block = size % BLOCK_SIZE
+def _get_chunks(addr: int, size: int, block_size: int = BLOCK_SIZE) -> List:
+  if size > block_size:
+    block_count = size // block_size
+    extra_block = size % block_size
     ranges = []
     current_address = addr
     for i in range(block_count):
-      ranges.append((current_address, BLOCK_SIZE))
-      current_address += BLOCK_SIZE
+      ranges.append((current_address, block_size))
+      current_address += block_size
     if extra_block != 0:
       ranges.append((current_address, extra_block))
     return ranges
