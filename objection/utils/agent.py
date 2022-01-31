@@ -29,6 +29,7 @@ class AgentConfig(object):
     spawn: bool = False
     pause: bool = True
     debugger: bool = False
+    uid: int = None
 
 
 class OutputHandlers(object):
@@ -212,9 +213,11 @@ class Agent(object):
             self.pid = app.pid
             # update the global state for the prompt etc.
             state_connection.name = app.identifier
-
         elif self.config.spawn:
-            self.pid = self.device.spawn(self.config.name)
+            if self.config.uid is not None:
+                self.pid = self.device.spawn(self.config.name, uid=int(self.config.uid))
+            else:
+                self.pid = self.device.spawn(self.config.name)
             self.resumed = False
         else:
             # check if the name is actually an integer. this way we can
@@ -239,8 +242,10 @@ class Agent(object):
 
         if self.pid is None:
             raise Exception('A PID needs to be set before attach()')
-
-        self.session = self.device.attach(self.pid)
+        if self.config.uid is None:
+            self.session = self.device.attach(self.pid)
+        else:
+            self.session = self.device.attach(self.pid, uid=self.config.uid)
         self.session.on('detached', self.handlers.session_on_detached)
 
         if self.config.debugger:

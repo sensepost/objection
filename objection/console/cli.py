@@ -17,7 +17,6 @@ from ..state.connection import state_connection
 
 def get_agent() -> Agent:
     """ get_agent bootstraps an agent instance """
-
     agent = Agent(AgentConfig(
         name=state_connection.name,
         host=state_connection.host,
@@ -27,7 +26,8 @@ def get_agent() -> Agent:
         spawn=state_connection.spawn,
         foremost=state_connection.foremost,
         debugger=state_connection.debugger,
-        pause=not state_connection.no_pause
+        pause=not state_connection.no_pause,
+        uid=state_connection.uid
     ))
 
     agent.run()
@@ -52,8 +52,10 @@ def get_agent() -> Agent:
 @click.option('--no-pause', '-p', required=False, is_flag=True, help='Resume the target immediately.')
 @click.option('--foremost', '-f', required=False, is_flag=True, help='Use the current foremost application.')
 @click.option('--debugger', required=False, default=False, is_flag=True, help='Enable the Chrome debug port.')
+@click.option('--uid', required=False, default=None, help='Specify the uid to run as (Android only).')
 def cli(network: bool, host: str, port: int, api_host: str, api_port: int,
-        name: str, serial: str, debug: bool, spawn: bool, no_pause: bool, foremost: bool, debugger: bool) -> None:
+        name: str, serial: str, debug: bool, spawn: bool, no_pause: bool, 
+        foremost: bool, debugger: bool, uid: int) -> None:
     """
         \b
              _   _         _   _
@@ -86,6 +88,7 @@ def cli(network: bool, host: str, port: int, api_host: str, api_port: int,
     state_connection.no_pause = no_pause
     state_connection.foremost = foremost
     state_connection.debugger = debugger
+    state_connection.uid = uid
 
 
 @cli.command()
