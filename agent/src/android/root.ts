@@ -240,6 +240,27 @@ export namespace root {
     });
   };
 
+  const rootBeerCheckSeLinux = (success: boolean, ident: string): any => {
+    return wrapJavaPerform(() => {
+      const Util = Java.use("com.scottyab.rootbeer.util");
+      Util.isSelinuxFlagInEnabled.overload().implementation = function () {
+        if (success) {
+          send(
+            c.blackBright(`[${ident}]`) +
+            `Rootbeer.util->isSelinuxFlagInEnabled() check detected, marking as ${c.green("true")}`,
+          );
+          return true;
+        }
+
+        send(
+          c.blackBright(`[${ident}] `) +
+          `Rootbeer.util->isSelinuxFlagInEnabled() check detected, marking as ${c.green("false")}`,
+        );
+        return false;
+      };
+    });
+  };
+
   const rootBeerNative = (success: boolean, ident: string): any => {
     return wrapJavaPerform(() => {
       const RootBeerNative = Java.use("com.scottyab.rootbeer.RootBeerNative");
@@ -310,6 +331,7 @@ export namespace root {
     job.implementations.push(rootBeerCheckSuExists(false, job.identifier));
     job.implementations.push(rootBeerDetectTestKeys(false, job.identifier));
     job.implementations.push(rootBeerNative(false, job.identifier));
+    job.implementations.push(rootBeerCheckSeLinux(false, job.identifier));
 
     jobs.add(job);
   };
@@ -334,6 +356,7 @@ export namespace root {
     job.implementations.push(rootBeerCheckSuExists(true, job.identifier));
     job.implementations.push(rootBeerDetectTestKeys(true, job.identifier));
     job.implementations.push(rootBeerNative(true, job.identifier));
+    job.implementations.push(rootBeerCheckSeLinux(false, job.identifier));
 
     jobs.add(job);
   };
