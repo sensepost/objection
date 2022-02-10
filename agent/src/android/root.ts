@@ -29,6 +29,7 @@ export namespace root {
   const testKeysCheck = (success: boolean, ident: string): any => {
     return wrapJavaPerform(() => {
       const JavaString: JavaString = Java.use("java.lang.String");
+
       JavaString.contains.implementation = function (name) {
         if (name !== "test-keys") {
           return this.contains.call(this, name);
@@ -100,119 +101,114 @@ export namespace root {
     });
   };
 
-  const bypassRootBeer_isRooted = (success: boolean, ident: string): any => {
+  // RootBeer: https://github.com/scottyab/rootbeer
+
+  const rootBeerIsRooted = (success: boolean, ident: string): any => {
     return wrapJavaPerform(() => {
-      const RootBeer = Java.use("com.scottyab.rootbeer.RootBeer");      
-      RootBeer.isRooted.overload().implementation = function() {
+      const RootBeer = Java.use("com.scottyab.rootbeer.RootBeer");
+      RootBeer.isRooted.overload().implementation = function () {
         if (success) {
-            send(
-              c.blackBright(`[${ident}] `) +
-              `RootBeer->isRooted() check detected, marking as ${c.green("true")}.`,
-            );
-            return true;
+          send(
+            c.blackBright(`[${ident}] `) +
+            `RootBeer->isRooted() check detected, marking as ${c.green("true")}.`,
+          );
+          return true;
         } else {
-            send(
-              c.blackBright(`[${ident}] `) +
-              `RootBeer->isRooted() check detected, marking as ${c.green("false")}.`,
-            );
-            return false;
+          send(
+            c.blackBright(`[${ident}] `) +
+            `RootBeer->isRooted() check detected, marking as ${c.green("false")}.`,
+          );
+          return false;
         }
-        // call the original method
-        return this.isRooted.call(this);
       };
-      return RootBeer;
     });
-  }; 
+  };
 
-  const bypassRootBeer_checkForBinary = (success: boolean, ident: string): any => {
+  const rootBeerCheckForBinary = (success: boolean, ident: string): any => {
     return wrapJavaPerform(() => {
-      const RootBeer = Java.use("com.scottyab.rootbeer.RootBeer");  
-      RootBeer.checkForBinary.overload('java.lang.String').implementation = function() {
+      const RootBeer = Java.use("com.scottyab.rootbeer.RootBeer");
+      RootBeer.checkForBinary.overload('java.lang.String').implementation = function () {
         if (success) {
-            send(
-              c.blackBright(`[${ident}] `) +
-              `RootBeer->checkForBinary() check detected, marking as ${c.green("true")}.`,
-            );
-            return true;
+          send(
+            c.blackBright(`[${ident}] `) +
+            `RootBeer->checkForBinary() check detected, marking as ${c.green("true")}.`,
+          );
+          return true;
         } else {
-            send(
-              c.blackBright(`[${ident}] `) +
-              `RootBeer->checkForBinary() check detected, marking as ${c.green("false")}.`,
-            );
-            return false;
+          send(
+            c.blackBright(`[${ident}] `) +
+            `RootBeer->checkForBinary() check detected, marking as ${c.green("false")}.`,
+          );
+          return false;
         }
-        // call the original method
-        return this.checkForBinary.overload('java.lang.String').call(this);
-
       };
+
       return RootBeer;
     });
   };
 
-  const bypassRootBeer_checkForDangerousProps = (success: boolean, ident: string): any => {
+  const rootBeerCheckForDangerousProps = (success: boolean, ident: string): any => {
     return wrapJavaPerform(() => {
       const RootBeer = Java.use("com.scottyab.rootbeer.RootBeer");
-      RootBeer.checkForDangerousProps.overload().implementation = function() {
+      RootBeer.checkForDangerousProps.overload().implementation = function () {
         if (success) {
-            send(
-              c.blackBright(`[${ident}] `) +
-              `RootBeer->checkForDangerousProps() check detected, marking as ${c.green("true")}.`,
-            );
-            return true;
+          send(
+            c.blackBright(`[${ident}] `) +
+            `RootBeer->checkForDangerousProps() check detected, marking as ${c.green("true")}.`,
+          );
+          return true;
         } else {
-            send(
-              c.blackBright(`[${ident}] `) +
-              `RootBeer->checkForDangerousProps() check detected, marking as ${c.green("false")}.`,
-            );
-            return false;
+          send(
+            c.blackBright(`[${ident}] `) +
+            `RootBeer->checkForDangerousProps() check detected, marking as ${c.green("false")}.`,
+          );
+          return false;
         }
-        // call the original method
-        return this.checkForDangerousProps.call(this);
       };
+
       return RootBeer;
     });
   };
 
-  const bypassRootBeer_detectRootCloakingApps = (success: boolean, ident: string): any => {
+  const rootBeerDetectRootCloakingApps = (success: boolean, ident: string): any => {
     return wrapJavaPerform(() => {
       const RootBeer = Java.use("com.scottyab.rootbeer.RootBeer");
-      RootBeer.detectRootCloakingApps.overload().implementation = function() {
+      RootBeer.detectRootCloakingApps.overload().implementation = function () {
         if (success) {
-            send(
-              c.blackBright(`[${ident}] `) +
-              `RootBeer->detectRootCloakingApps() check detected, marking as ${c.green("true")}.`,
-            );
-            return true;
+          send(
+            c.blackBright(`[${ident}] `) +
+            `RootBeer->detectRootCloakingApps() check detected, marking as ${c.green("true")}.`,
+          );
+          return true;
         } else {
-            send(
-              c.blackBright(`[${ident}] `) +
-              `RootBeer->detectRootCloakingApps() check detected, marking as ${c.green("false")}.`,
-            );
-            return false;
+          send(
+            c.blackBright(`[${ident}] `) +
+            `RootBeer->detectRootCloakingApps() check detected, marking as ${c.green("false")}.`,
+          );
+          return false;
         }
-        // call the original method
-        return this.detectRootCloakingApps.call(this);
       };
+
       return RootBeer;
     });
   };
 
-  const bypassRootBeer_checkSuExists = (success: boolean, ident: string): any => {
+  const rootBeerCheckSuExists = (success: boolean, ident: string): any => {
     return wrapJavaPerform(() => {
       const RootBeer = Java.use("com.scottyab.rootbeer.RootBeer");
-      RootBeer.checkSuExists.overload().implementation = function() {
+      RootBeer.checkSuExists.overload().implementation = function () {
         if (success) {
-            send(
-              c.blackBright(`[${ident}] `) +
-              `RootBeer->checkSuExists() check detected, marking as ${c.green("true")}.`,
-            );
-            return true;
+          send(
+            c.blackBright(`[${ident}] `) +
+            `RootBeer->checkSuExists() check detected, marking as ${c.green("true")}.`,
+          );
+          return true;
         } else {
-            send(
-              c.blackBright(`[${ident}] `) +
-              `RootBeer->checkSuExists() check detected, marking as ${c.green("false")}.`,
-            );
-            return false;
+          send(
+            c.blackBright(`[${ident}] `) +
+            `RootBeer->checkSuExists() check detected, marking as ${c.green("false")}.`,
+          );
+          return false;
         }
         // call the original method
         return this.checkSuExists.call(this);
@@ -220,143 +216,52 @@ export namespace root {
       return RootBeer;
     });
   };
-  
-  const bypassRootBeer_detectTestKeys = (success: boolean, ident: string): any => {
+
+  const rootBeerDetectTestKeys = (success: boolean, ident: string): any => {
     return wrapJavaPerform(() => {
       const RootBeer = Java.use("com.scottyab.rootbeer.RootBeer");
-      RootBeer.detectTestKeys.overload().implementation = function() {
+      RootBeer.detectTestKeys.overload().implementation = function () {
         if (success) {
-            send(
-              c.blackBright(`[${ident}] `) +
-              `RootBeer->detectTestKeys() check detected, marking as ${c.green("true")}.`,
-            );
-            return true;
+          send(
+            c.blackBright(`[${ident}] `) +
+            `RootBeer->detectTestKeys() check detected, marking as ${c.green("true")}.`,
+          );
+          return true;
         } else {
-            send(
-              c.blackBright(`[${ident}] `) +
-              `RootBeer->detectTestKeys() check detected, marking as ${c.green("false")}.`,
-            );
-            return false;
+          send(
+            c.blackBright(`[${ident}] `) +
+            `RootBeer->detectTestKeys() check detected, marking as ${c.green("false")}.`,
+          );
+          return false;
         }
-        // call the original method
-        return this.detectTestKeys.call(this);
       };
+
       return RootBeer;
     });
-  }; 
+  };
 
-  const bypassRootBeerNative = (success: boolean, ident: string): any => {
+  const rootBeerNative = (success: boolean, ident: string): any => {
     return wrapJavaPerform(() => {
       const RootBeerNative = Java.use("com.scottyab.rootbeer.RootBeerNative");
-      RootBeerNative.checkForRoot.overload('[Ljava.lang.Object;').implementation = function() {
+      RootBeerNative.checkForRoot.overload('[Ljava.lang.Object;').implementation = function () {
         if (success) {
-            send(
-              c.blackBright(`[${ident}] `) +
-              `RootBeerNative->checkForRoot() check detected, marking as ${c.green("1")}.`,
-            );
-            return 1;
+          send(
+            c.blackBright(`[${ident}] `) +
+            `RootBeerNative->checkForRoot() check detected, marking as ${c.green("1")}.`,
+          );
+          return 1;
         } else {
-            send(
-              c.blackBright(`[${ident}] `) +
-              `RootBeerNative->checkForRoot() check detected, marking as ${c.green("0")}.`,
-            );
-            return 0;
+          send(
+            c.blackBright(`[${ident}] `) +
+            `RootBeerNative->checkForRoot() check detected, marking as ${c.green("0")}.`,
+          );
+          return 0;
         }
-        // call the original method
-        return this.checkForRoot.overload('[Ljava.lang.Object;').call(this);
       };
+
       return RootBeerNative;
     });
-  }; 
-
-  const bypassRootBeerObfuscatedA = (success: boolean, ident: string): any => {
-    return wrapJavaPerform(() => {
-      /*
-      package com.scottyab.rootbeer;
-      public class d {
-        public boolean s() {
-          return o() || k() || b("su") || b("busybox") || d() || g() || q() || j() || h() || e();
-        }
-      }
-      */
-      const RootBeer = Java.use("com.scottyab.rootbeer.d");      
-      // obfuscated isRootedWithBusyBoxCheck
-      RootBeer.s.overload().implementation = function() {
-        if (success) {
-            send(
-              c.blackBright(`[${ident}] `) +
-              `RootBeer->isRootedWithBusyBoxCheck() check detected, marking as ${c.green("true")}.`,
-            );
-            return true;
-        } else {
-            send(
-              c.blackBright(`[${ident}] `) +
-              `RootBeer->isRootedWithBusyBoxCheck() check detected, marking as ${c.green("false")}.`,
-            );
-            return false;
-        }
-        // call the original method
-        return this.s.call(this);
-      };
-      return RootBeer;
-    });
   };
-
-  const bypassRootBeerObfuscatedB = (success: boolean, ident: string): any => {
-    return wrapJavaPerform(() => {
-      const RootBeer = Java.use("com.scottyab.rootbeer.d");
-      // obfuscated checkForBinary
-      RootBeer.b.overload('java.lang.String').implementation = function() {
-        if (success) {
-            send(
-              c.blackBright(`[${ident}] `) +
-              `RootBeer->checkForBinary() check detected, marking as ${c.green("true")}.`,
-            );
-            return true;
-        } else {
-            send(
-              c.blackBright(`[${ident}] `) +
-              `RootBeer->checkForBinary() check detected, marking as ${c.green("false")}.`,
-            );
-            return false;
-        }
-        // call the original method
-        return this.b.overload('java.lang.String').call(this);
-      };
-      return RootBeer;
-    });
-  };
-
-  const bypassRootBeerObfuscatedC = (success: boolean, ident: string): any => {
-    return wrapJavaPerform(() => {
-      /*
-      package com.scottyab.rootbeer;
-      public class d {
-        public boolean t() {
-          return o() || k() || b("su") || d() || g() || q() || j() || h() || e();
-        }
-      }
-      */
-      const RootBeer = Java.use("com.scottyab.rootbeer.d");
-      // obfuscated isRooted
-      RootBeer.t.overload().implementation = function() {
-        if (success) {
-            send(
-              c.blackBright(`[${ident}] `) +
-              `RootBeer->isRooted() check detected, marking as ${c.green("true")}.`,
-            );
-            return true;
-        } else {
-            send(
-              c.blackBright(`[${ident}] `) +
-              `RootBeer->isRooted() check detected, marking as ${c.green("false")}.`,
-            );
-            return false;
-        }
-        // call the original method
-        return this.t.call(this);
-      };
-      return RootBeer;
 
   // ref: https://www.ayrx.me/gantix-jailmonkey-root-detection-bypass/
   const jailMonkeyBypass = (success: boolean, ident: string): any => {
@@ -396,19 +301,16 @@ export namespace root {
     job.implementations.push(execSuCheck(false, job.identifier));
     job.implementations.push(fileExistsCheck(false, job.identifier));
     job.implementations.push(jailMonkeyBypass(false, job.identifier));
-    
+
     // RootBeer functions
-    job.implementations.push(bypassRootBeer_isRooted(false, job.identifier));
-    job.implementations.push(bypassRootBeer_checkForBinary(false, job.identifier));
-    job.implementations.push(bypassRootBeer_checkForDangerousProps(false, job.identifier));
-    job.implementations.push(bypassRootBeer_detectRootCloakingApps(false, job.identifier));
-    job.implementations.push(bypassRootBeer_checkSuExists(false, job.identifier));
-    job.implementations.push(bypassRootBeer_detectTestKeys(false, job.identifier));
-    job.implementations.push(bypassRootBeerNative(false, job.identifier));
-    job.implementations.push(bypassRootBeerObfuscatedA(false, job.identifier));
-    job.implementations.push(bypassRootBeerObfuscatedB(false, job.identifier));
-    job.implementations.push(bypassRootBeerObfuscatedC(false, job.identifier));
-    
+    job.implementations.push(rootBeerIsRooted(false, job.identifier));
+    job.implementations.push(rootBeerCheckForBinary(false, job.identifier));
+    job.implementations.push(rootBeerCheckForDangerousProps(false, job.identifier));
+    job.implementations.push(rootBeerDetectRootCloakingApps(false, job.identifier));
+    job.implementations.push(rootBeerCheckSuExists(false, job.identifier));
+    job.implementations.push(rootBeerDetectTestKeys(false, job.identifier));
+    job.implementations.push(rootBeerNative(false, job.identifier));
+
     jobs.add(job);
   };
 
@@ -423,19 +325,16 @@ export namespace root {
     job.implementations.push(execSuCheck(true, job.identifier));
     job.implementations.push(fileExistsCheck(true, job.identifier));
     job.implementations.push(jailMonkeyBypass(true, job.identifier));
-    
+
     // RootBeer functions
-    job.implementations.push(bypassRootBeer_isRooted(true, job.identifier));
-    job.implementations.push(bypassRootBeer_checkForBinary(true, job.identifier));
-    job.implementations.push(bypassRootBeer_checkForDangerousProps(true, job.identifier));
-    job.implementations.push(bypassRootBeer_detectRootCloakingApps(true, job.identifier));
-    job.implementations.push(bypassRootBeer_checkSuExists(true, job.identifier));
-    job.implementations.push(bypassRootBeer_detectTestKeys(true, job.identifier));
-    job.implementations.push(bypassRootBeerNative(true, job.identifier));
-    job.implementations.push(bypassRootBeerObfuscatedA(true, job.identifier));
-    job.implementations.push(bypassRootBeerObfuscatedB(true, job.identifier));
-    job.implementations.push(bypassRootBeerObfuscatedC(true, job.identifier));
-    
+    job.implementations.push(rootBeerIsRooted(true, job.identifier));
+    job.implementations.push(rootBeerCheckForBinary(true, job.identifier));
+    job.implementations.push(rootBeerCheckForDangerousProps(true, job.identifier));
+    job.implementations.push(rootBeerDetectRootCloakingApps(true, job.identifier));
+    job.implementations.push(rootBeerCheckSuExists(true, job.identifier));
+    job.implementations.push(rootBeerDetectTestKeys(true, job.identifier));
+    job.implementations.push(rootBeerNative(true, job.identifier));
+
     jobs.add(job);
   };
-}
+};
