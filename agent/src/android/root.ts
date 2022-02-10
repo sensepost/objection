@@ -38,13 +38,11 @@ export namespace root {
         if (success) {
           send(c.blackBright(`[${ident}] `) + `Marking "test-keys" check as ` + c.green(`successful`) + `.`);
           return true;
-        } else {
-          send(c.blackBright(`[${ident}] `) + `Marking "test-keys" check as ` + c.green(`failed`) + `.`);
-          return false;
         }
-      };
 
-      return JavaString;
+        send(c.blackBright(`[${ident}] `) + `Marking "test-keys" check as ` + c.green(`failed`) + `.`);
+        return false;
+      };
     });
   };
 
@@ -58,17 +56,15 @@ export namespace root {
           if (success) {
             send(c.blackBright(`[${ident}] `) + `Check for 'su' using command exec detected, allowing.`);
             return this.apply(this, arguments);
-          } else {
-            send(c.blackBright(`[${ident}] `) + `Check for 'su' using command exec detected, throwing IOException.`);
-            throw iOException.$new("objection anti-root");
           }
+
+          send(c.blackBright(`[${ident}] `) + `Check for 'su' using command exec detected, throwing IOException.`);
+          throw iOException.$new("objection anti-root");
         }
 
         // call the original method
         return this.exec.overload("java.lang.String").call(this, command);
       };
-
-      return JavaRuntime;
     });
   };
 
@@ -84,20 +80,18 @@ export namespace root {
               `File existence check for ${filename} detected, marking as ${c.green("true")}.`,
             );
             return true;
-          } else {
-            send(
-              c.blackBright(`[${ident}] `) +
-              `File existence check for ${filename} detected, marking as ${c.green("false")}.`,
-            );
-            return false;
           }
+
+          send(
+            c.blackBright(`[${ident}] `) +
+            `File existence check for ${filename} detected, marking as ${c.green("false")}.`,
+          );
+          return false;
         }
 
         // call the original method
         return this.exists.call(this);
       };
-
-      return JavaFile;
     });
   };
 
@@ -113,13 +107,13 @@ export namespace root {
             `RootBeer->isRooted() check detected, marking as ${c.green("true")}.`,
           );
           return true;
-        } else {
-          send(
-            c.blackBright(`[${ident}] `) +
-            `RootBeer->isRooted() check detected, marking as ${c.green("false")}.`,
-          );
-          return false;
         }
+
+        send(
+          c.blackBright(`[${ident}] `) +
+          `RootBeer->isRooted() check detected, marking as ${c.green("false")}.`,
+        );
+        return false;
       };
     });
   };
@@ -134,16 +128,14 @@ export namespace root {
             `RootBeer->checkForBinary() check detected, marking as ${c.green("true")}.`,
           );
           return true;
-        } else {
-          send(
-            c.blackBright(`[${ident}] `) +
-            `RootBeer->checkForBinary() check detected, marking as ${c.green("false")}.`,
-          );
-          return false;
         }
-      };
 
-      return RootBeer;
+        send(
+          c.blackBright(`[${ident}] `) +
+          `RootBeer->checkForBinary() check detected, marking as ${c.green("false")}.`,
+        );
+        return false;
+      };
     });
   };
 
@@ -157,16 +149,14 @@ export namespace root {
             `RootBeer->checkForDangerousProps() check detected, marking as ${c.green("true")}.`,
           );
           return true;
-        } else {
-          send(
-            c.blackBright(`[${ident}] `) +
-            `RootBeer->checkForDangerousProps() check detected, marking as ${c.green("false")}.`,
-          );
-          return false;
         }
-      };
 
-      return RootBeer;
+        send(
+          c.blackBright(`[${ident}] `) +
+          `RootBeer->checkForDangerousProps() check detected, marking as ${c.green("false")}.`,
+        );
+        return false;
+      };
     });
   };
 
@@ -180,16 +170,14 @@ export namespace root {
             `RootBeer->detectRootCloakingApps() check detected, marking as ${c.green("true")}.`,
           );
           return true;
-        } else {
-          send(
-            c.blackBright(`[${ident}] `) +
-            `RootBeer->detectRootCloakingApps() check detected, marking as ${c.green("false")}.`,
-          );
-          return false;
         }
-      };
 
-      return RootBeer;
+        send(
+          c.blackBright(`[${ident}] `) +
+          `RootBeer->detectRootCloakingApps() check detected, marking as ${c.green("false")}.`,
+        );
+        return false;
+      };
     });
   };
 
@@ -203,17 +191,14 @@ export namespace root {
             `RootBeer->checkSuExists() check detected, marking as ${c.green("true")}.`,
           );
           return true;
-        } else {
-          send(
-            c.blackBright(`[${ident}] `) +
-            `RootBeer->checkSuExists() check detected, marking as ${c.green("false")}.`,
-          );
-          return false;
         }
-        // call the original method
-        return this.checkSuExists.call(this);
+
+        send(
+          c.blackBright(`[${ident}] `) +
+          `RootBeer->checkSuExists() check detected, marking as ${c.green("false")}.`,
+        );
+        return false;
       };
-      return RootBeer;
     });
   };
 
@@ -227,16 +212,14 @@ export namespace root {
             `RootBeer->detectTestKeys() check detected, marking as ${c.green("true")}.`,
           );
           return true;
-        } else {
-          send(
-            c.blackBright(`[${ident}] `) +
-            `RootBeer->detectTestKeys() check detected, marking as ${c.green("false")}.`,
-          );
-          return false;
         }
-      };
 
-      return RootBeer;
+        send(
+          c.blackBright(`[${ident}] `) +
+          `RootBeer->detectTestKeys() check detected, marking as ${c.green("false")}.`,
+        );
+        return false;
+      };
     });
   };
 
@@ -271,16 +254,14 @@ export namespace root {
             `RootBeerNative->checkForRoot() check detected, marking as ${c.green("1")}.`,
           );
           return 1;
-        } else {
-          send(
-            c.blackBright(`[${ident}] `) +
-            `RootBeerNative->checkForRoot() check detected, marking as ${c.green("0")}.`,
-          );
-          return 0;
         }
-      };
 
-      return RootBeerNative;
+        send(
+          c.blackBright(`[${ident}] `) +
+          `RootBeerNative->checkForRoot() check detected, marking as ${c.green("0")}.`,
+        );
+        return 0;
+      };
     });
   };
 
