@@ -696,7 +696,7 @@ COMMANDS = {
                     'search': {
                         'meta': 'Search for various classes and or methods',
                         'exec': ios_hooking.search,
-                        'flags': ['--json', '--only-classes', '--quiet']
+                        'flags': ['--json', '--only-classes']
                     },
                     'generate': {
                         'meta': 'Generate Frida hooks for iOS',

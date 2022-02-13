@@ -1,10 +1,6 @@
 import unittest
 from unittest import mock
-from unittest.mock import MagicMock
 
-from frida import TimedOutError
-
-from objection.__init__ import __version__
 from objection.commands.android.hooking import show_registered_activities
 from objection.console.repl import Repl
 from ..helpers import capture
@@ -13,46 +9,6 @@ from ..helpers import capture
 class TestRepl(unittest.TestCase):
     def setUp(self):
         self.repl = Repl()
-
-    def test_sets_prompt_tokens(self):
-        self.repl.set_prompt_tokens(('a', 'b', 'c', 'd'))
-
-        self.assertEqual(type(self.repl.prompt_tokens), list)
-        self.assertEqual(len(self.repl.prompt_tokens), 5)
-
-        # test the token values. not 100% how to test the types properly
-        # [(Token.Applicationname, 'a'), (Token.On, ' on '),
-        # (Token.Devicetype, '(c: '), (Token.Version, 'd) '), (Token.Connection, '[usb] # ')]
-        self.assertEqual(self.repl.prompt_tokens[0][1], 'a')
-        self.assertEqual(self.repl.prompt_tokens[1][1], ' on ')
-        self.assertEqual(self.repl.prompt_tokens[2][1], '(c: ')
-        self.assertEqual(self.repl.prompt_tokens[3][1], 'd) ')
-        self.assertEqual(self.repl.prompt_tokens[4][1], '[usb] # ')
-
-    def test_gets_prompt_tokens_without_having_them_set_first(self):
-        self.assertEqual(type(self.repl.prompt_tokens), list)
-        self.assertEqual(len(self.repl.prompt_tokens), 0)
-
-        tokens = self.repl.get_prompt_message()
-
-        # [(Token.Applicationname, 'unknown application'),
-        # (Token.On, ''), (Token.Devicetype, ''), (Token.Version, ' '), (Token.Connection, '[usb] # ')]
-        self.assertEqual(tokens[0][1], 'unknown application')
-        self.assertEqual(tokens[1][1], '')
-        self.assertEqual(tokens[2][1], '')
-        self.assertEqual(tokens[3][1], ' ')
-        self.assertEqual(tokens[4][1], '[usb] # ')
-
-    def test_gets_prompt_tokens_after_setting_them(self):
-        self.repl.set_prompt_tokens(('a', 'b', 'c', 'd'))
-
-        tokens = self.repl.get_prompt_message()
-
-        self.assertEqual(tokens[0][1], 'a')
-        self.assertEqual(tokens[1][1], ' on ')
-        self.assertEqual(tokens[2][1], '(c: ')
-        self.assertEqual(tokens[3][1], 'd) ')
-        self.assertEqual(tokens[4][1], '[usb] # ')
 
     def test_does_nothing_when_empty_command_is_passed(self):
         with capture(self.repl.run_command, '') as output:
@@ -133,72 +89,6 @@ class TestRepl(unittest.TestCase):
                            '   ios keychain clear\n')
 
         self.assertEqual(help_file, expected_output)
-
-    @mock.patch('objection.utils.agent.Agent.inject')
-    @mock.patch('objection.utils.agent.Agent.unload')
-    @mock.patch('objection.console.repl.get_device_info')
-    def test_hanldes_reconnects(self, get_device_info, mock_unload, mock_inject):
-        mock_inject.return_value = None
-        mock_unload.return_type = None
-        get_device_info.return_value = ('a', 'b', 'c', 'd')
-
-        with capture(self.repl.handle_reconnect, 'reconnect') as o:
-            output = o
-
-        expected_output = ('Reconnecting...\n'
-                           'Reconnection successful!\n')
-
-        self.assertEqual(output, expected_output)
-        self.assertTrue(get_device_info.called)
-        self.assertTrue(mock_unload.called)
-        self.assertTrue(mock_inject.called)
-
-    @mock.patch('objection.utils.agent.Agent.unload')
-    @mock.patch('objection.console.repl.get_device_info')
-    def test_handles_reconnects_and_reports_failures(self, mock_unload, get_device_info):
-        mock_unload.return_type = None
-        get_device_info.side_effect = TimedOutError()
-
-        with capture(self.repl.handle_reconnect, 'reconnect') as o:
-            output = o
-
-        expected_output = ('Reconnecting...\n'
-                           'Failed to reconnect with error: \n')
-
-        self.assertEqual(output, expected_output)
-
-    def test_starts_repl_and_exists_cleanly_with_banner(self):
-        self.repl.session = MagicMock(name='session')
-        self.repl.session.prompt.return_value = 'exit'
-
-        with capture(self.repl.run, False) as o:
-            output = o
-
-        expected_output = ("""
-     _   _         _   _
- ___| |_|_|___ ___| |_|_|___ ___
-| . | . | | -_|  _|  _| | . |   |
-|___|___| |___|___|_| |_|___|_|_|
-      |___|(object)inject(ion) v{0}
-
-     Runtime Mobile Exploration
-        by: @leonjza from @sensepost
-
-[tab] for command suggestions
-Exiting...\n""".format(__version__))
-
-        self.assertEqual(output, expected_output)
-
-    def test_starts_repl_and_exists_cleanly_with_banner_and_quiet_flag(self):
-        self.repl.session = MagicMock(name='session')
-        self.repl.session.prompt.return_value = 'exit'
-
-        with capture(self.repl.run, True) as o:
-            output = o
-
-        expected_output = 'Exiting...\n'
-
-        self.assertEqual(output, expected_output)
 
     @mock.patch('objection.console.repl.PromptSession')
     @mock.patch('objection.console.repl.Repl.run_command')

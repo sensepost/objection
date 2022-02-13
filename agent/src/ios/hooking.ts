@@ -20,34 +20,50 @@ export namespace hooking {
 
     return ObjC.classes[className].$ownMethods;
   };
-  export const enumerate = (pattern: string, registerJob: boolean = true): ApiResolverMatch[] => {
-    const resolver = new ApiResolver('objc')
-    if (registerJob === true){
-      const job: IJob = {
-        identifier: jobs.identifier(),
-        invocations: [],
-        type: `ios-enumerate for: ${pattern}`,
-      };
-      jobs.add(job)
+
+  const objcEnumerate = (pattern: string): ApiResolverMatch[] => {
+    return new ApiResolver('objc').enumerateMatches(pattern);
+  };
+
+  export const search = (patternOrClass: string): ApiResolverMatch[] => {
+
+    // if we didnt get a pattern, make one assuming its meant to be a class
+    if (!patternOrClass.includes('[')) patternOrClass = `*[*${patternOrClass}* *]`;
+
+    return objcEnumerate(patternOrClass);
+  };
+
+  export const watch = (patternOrClass: string, dargs: boolean = false, dbt: boolean = false,
+    dret: boolean = false, watchParents: boolean = false): void => {
+
+    // Add the job
+    // We init a new job here as the child watch* calls will be grouped in a single job.
+    // mostly commandline fluff
+    const job: IJob = {
+      identifier: jobs.identifier(),
+      invocations: [],
+      type: `ios-watch for: ${patternOrClass}`,
+    };
+    jobs.add(job);
+
+    const isPattern = patternOrClass.includes('[');
+
+    // if we have a patterm we'll loop the methods, hook and push a listener to the job
+    if (isPattern === true) {
+      const matches = objcEnumerate(patternOrClass);
+      matches.forEach((match: ApiResolverMatch) => {
+        watchMethod(match.name, job, dargs, dbt, dret);
+      });
+
+      return;
     }
 
-    return resolver.enumerateMatches(pattern)
+    watchClass(patternOrClass, job, dargs, dbt, dret, watchParents);
   };
-  export const searchMethods = (partial: string): string[] => {
-    const results: string[] = []; // the response 
 
-    Object.keys(ObjC.classes).forEach((clazz: string) => {
-      ObjC.classes[clazz].$ownMethods.forEach((method) => {
+  const watchClass = (clazz: string, job: IJob, dargs: boolean = false, dbt: boolean = false,
+    dret: boolean = false, parents: boolean = false): void => {
 
-        if (method.toLowerCase().indexOf(partial) !== -1) {
-          results.push(`[` + ObjC.classes[clazz].$className + ` ` + method + `]`);
-        }
-      });
-    });
-
-    return results;
-  };
-  export const watchClass = (clazz: string, job: IJob, dargs: boolean = false, dbt: boolean = false, dret: boolean = false, parents: boolean = false): void => {
     const target = ObjC.classes[clazz];
 
     if (!target) {
@@ -60,40 +76,15 @@ export namespace hooking {
     (parents ? target.$methods : target.$ownMethods).forEach((method) => {
       // filter and make sure we have a type and name. Looks like some methods can
       // have '' as name... am expecting something like "- isJailBroken"
-      const fullMethodName = `${method[0]}[${clazz} ${method.substring(2)}]`
-      watchMethod(fullMethodName, job, dargs, dbt, dret)
+      const fullMethodName = `${method[0]}[${clazz} ${method.substring(2)}]`;
+      watchMethod(fullMethodName, job, dargs, dbt, dret);
     });
 
   };
-  export const search = (patternOrClass: string, registerJob: boolean = false): ApiResolverMatch[] => {
-    const isPattern = patternOrClass.includes('[')
-    if (isPattern === false) {
-      // Make a pattern
-      return enumerate(`*[${patternOrClass} *]`, registerJob)
-    } else {
-      return enumerate(patternOrClass, registerJob)
-    }
-  }
-  export const watch = (patternOrClass: string, dargs: boolean = false, dbt: boolean = false, dret: boolean = false, watchParents: boolean = false): void => {
-    // Add the job
-    const job: IJob = {
-      identifier: jobs.identifier(),
-      invocations: [],
-      type: `ios-watch for: ${patternOrClass}`,
-    };
-    jobs.add(job)
 
-    const isPattern = patternOrClass.includes('[')
-    if (isPattern === true) {
-      const matches = enumerate(patternOrClass, false)
-      matches.forEach((match: ApiResolverMatch) => {
-        watchMethod(match.name, job, dargs, dbt, dret)
-      })
-    } else {
-      watchClass(patternOrClass, job, dargs, dbt, dret, watchParents)
-    }
-  }
-  export const watchMethod = (selector: string, job: IJob, dargs: boolean, dbt: boolean, dret: boolean): void => {
+  const watchMethod = (selector: string, job: IJob, dargs: boolean, dbt: boolean,
+    dret: boolean): void => {
+
     const resolver = new ApiResolver("objc");
     let matchedMethod = {
       address: undefined,
@@ -103,8 +94,8 @@ export namespace hooking {
     // handle the resolvers error it may throw if the selector format is off.
     try {
       // select the first match
-      const ressolved = resolver.enumerateMatches(selector);
-      if (ressolved.length <= 0) {
+      const resolved = resolver.enumerateMatches(selector);
+      if (resolved.length <= 0) {
         send(`${c.red(`Error:`)} No matches for selector ${c.redBright(`${selector}`)}. ` +
           `Double check the name, or try "ios hooking list class_methods" first.`);
         return;
@@ -112,11 +103,11 @@ export namespace hooking {
 
       // not sure if this will ever be the case... but lets log it
       // anyways
-      if (ressolved.length > 1) {
+      if (resolved.length > 1) {
         send(`${c.yellow(`Warning:`)} More than one result for selector ${c.redBright(`${selector}`)}!`);
       }
 
-      matchedMethod = ressolved[0];
+      matchedMethod = resolved[0];
     } catch (error) {
       send(
         `${c.red(`Error:`)} Unable to find address for selector ${c.redBright(`${selector}`)}! ` +
@@ -174,6 +165,8 @@ export namespace hooking {
         send(c.blackBright(`[${job.identifier}] `) + `Return Value: ${c.red(retval.toString())}`);
       },
     });
+
+    job.invocations.push(watchInvocation);
   };
 
   export const setMethodReturn = (selector: string, returnValue: boolean): void => {

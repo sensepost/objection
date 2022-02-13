@@ -3,7 +3,6 @@ import unittest
 from objection.state.device import device_state, Ios
 from objection.utils.helpers import clean_argument_flags
 from objection.utils.helpers import get_tokens
-from objection.utils.helpers import normalize_gadget_name
 from objection.utils.helpers import pretty_concat
 from objection.utils.helpers import print_frida_connection_help
 from objection.utils.helpers import sizeof_fmt
@@ -47,17 +46,6 @@ class TestHelpers(unittest.TestCase):
 
         self.assertEqual(result, ['lajfhlaksjdfhlaskjfhafsdlkjh'])
 
-    def test_normalizes_gadget_names_when_interger_is_given(self):
-        result = normalize_gadget_name('400')
-
-        self.assertEqual(type(result), int)
-        self.assertEqual(result, 400)
-
-    def test_normalizes_gadget_name_when_string_name_is_given(self):
-        result = normalize_gadget_name('gadget')
-
-        self.assertEqual(result, 'gadget')
-
     def test_cleans_argument_lists_with_flags(self):
         result = clean_argument_flags(['foo', '--bar'])
         self.assertEqual(result, ['foo'])
@@ -72,17 +60,6 @@ If you are using a non rooted/jailbroken device, ensure that your patched applic
 If you have multiple devices, specify the target device with --serial. A list of attached device serials can be found with the frida-ls-devices command.
 
 For more information, please refer to the objection wiki at: https://github.com/sensepost/objection/wiki
-"""
-
-        self.assertEqual(output, expected_output)
-
-    def test_warns_about_operating_system_versions(self):
-        device_state.platform = Ios
-        with capture(warn_about_older_operating_systems) as o:
-            output = o
-
-        expected_output = """Warning: You appear to be running iOS 1 which may result in some hooks failing.
-It is recommended to use at least an iOS version 9 device with objection.
 """
 
         self.assertEqual(output, expected_output)

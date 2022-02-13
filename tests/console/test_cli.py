@@ -4,7 +4,7 @@ from unittest import mock
 from click.testing import CliRunner
 
 from objection.__init__ import __version__
-from objection.console.cli import version, patchipa, patchapk, device_type
+from objection.console.cli import version, patchipa, patchapk
 
 
 class TestsCommandLineInteractions(unittest.TestCase):
@@ -15,17 +15,6 @@ class TestsCommandLineInteractions(unittest.TestCase):
         self.assertIsNone(result.exception)
         self.assertEqual(result.exit_code, 0)
         self.assertEqual(result.output, 'objection: ' + __version__ + '\n')
-
-    @mock.patch('objection.utils.agent.Agent.inject')
-    @mock.patch('objection.console.cli.get_device_info')
-    def test_device_info(self, mock_inject, get_device_info):
-        mock_inject.return_value = None
-        get_device_info.return_value = 'a', 'b', 'c', 'd'
-
-        runner = CliRunner()
-        runner.invoke(device_type)
-
-        self.assertTrue(get_device_info.called)
 
     @mock.patch('objection.console.cli.patch_android_apk')
     def test_patchapk_runs_with_minimal_cli_arguments(self, _):
