@@ -1,9 +1,16 @@
-import { clipboard } from "../android/clipboard";
-import { androidfilesystem } from "../android/filesystem";
-import { heap } from "../android/heap";
-import { hooking } from "../android/hooking";
-import { intent } from "../android/intent";
-import { keystore } from "../android/keystore";
+import * as clipboard from "../android/clipboard";
+import * as androidfilesystem from "../android/filesystem";
+import * as heap from "../android/heap";
+import * as hooking from "../android/hooking";
+import * as intent from "../android/intent";
+import * as keystore from "../android/keystore";
+import * as sslpinning from "../android/pinning";
+import * as root from "../android/root";
+import * as androidshell from "../android/shell";
+import * as userinterface from "../android/userinterface";
+import * as proxy from "../android/proxy";
+import * as general from "../android/general";
+
 import {
   IHeapObject,
   IJavaField,
@@ -14,12 +21,6 @@ import {
   IExecutedCommand,
   IKeyStoreEntry
 } from "../android/lib/interfaces";
-import { sslpinning } from "../android/pinning";
-import { root } from "../android/root";
-import { androidshell } from "../android/shell";
-import { userinterface } from "../android/userinterface";
-import { proxy } from "../android/proxy";
-import { general } from "../android/general";
 import { JavaMethodsOverloadsResult } from "../android/lib/types";
 
 export const android = {

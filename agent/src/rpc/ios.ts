@@ -1,14 +1,21 @@
-import { binary } from "../ios/binary";
-import { binarycookies } from "../ios/binarycookies";
-import { bundles } from "../ios/bundles";
-import { credentialstorage } from "../ios/credentialstorage";
-import { iosfilesystem } from "../ios/filesystem";
-import { heap } from "../ios/heap";
-import { hooking } from "../ios/hooking";
-import { ioscrypto } from "../ios/crypto";
-import { iosjailbreak } from "../ios/jailbreak";
-import { ioskeychain } from "../ios/keychain";
+import * as binary from "../ios/binary";
+import * as binarycookies from "../ios/binarycookies";
+import * as bundles from "../ios/bundles";
+import * as credentialstorage from "../ios/credentialstorage";
+import * as iosfilesystem from "../ios/filesystem";
+import * as heap from "../ios/heap";
+import * as hooking from "../ios/hooking";
+import * as ioscrypto from "../ios/crypto";
+import * as iosjailbreak from "../ios/jailbreak";
+import * as ioskeychain from "../ios/keychain";
+import * as nsuserdefaults from "../ios/nsuserdefaults";
+import * as pasteboard from "../ios/pasteboard";
+import * as sslpinning from "../ios/pinning";
+import * as plist from "../ios/plist";
+import * as userinterface from "../ios/userinterface";
+
 import { BundleType } from "../ios/lib/constants";
+import { NSUserDefaults } from "../ios/lib/types";
 import {
   IBinaryModuleDictionary,
   ICredential,
@@ -18,12 +25,7 @@ import {
   IIosFileSystem,
   IKeychainItem,
 } from "../ios/lib/interfaces";
-import { NSUserDefaults } from "../ios/lib/types";
-import { nsuserdefaults } from "../ios/nsuserdefaults";
-import { pasteboard } from "../ios/pasteboard";
-import { sslpinning } from "../ios/pinning";
-import { plist } from "../ios/plist";
-import { userinterface } from "../ios/userinterface";
+
 
 export const ios = {
   // binary
