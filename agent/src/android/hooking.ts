@@ -327,7 +327,6 @@ export namespace hooking {
         }
 
         send(`Hooking ${c.green(clazz)}.${c.greenBright(method)}(${c.red(calleeArgTypes.join(", "))})`);
-
         // replace the implementation of this method
         // tslint:disable-next-line:only-arrow-functions
         m.implementation = function () {
@@ -369,6 +368,9 @@ export namespace hooking {
           // also return the captured return value
           return retVal;
         };
+
+        // Push the implementation so that it can be nulled later
+        job.implementations.push(m)
       });
     });
   };
