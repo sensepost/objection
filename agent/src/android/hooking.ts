@@ -20,9 +20,11 @@ import {
 
 export namespace hooking {
 
-  import EnumerateMethodsMatchGroup = Java.EnumerateMethodsMatchGroup;
-  import cast = Java.cast;
-  import EnumerateMethodsMatchClass = Java.EnumerateMethodsMatchClass;
+  enum PatternType {
+    Regex = 'regex',
+    Klass = 'klass',
+  }
+
   const splitClassMethod = (fqClazz: string): string[] => {
     // split a fully qualified class name, assuming the last period denotes the method
     const methodSeperatorIndex: number = fqClazz.lastIndexOf(".");
@@ -49,59 +51,60 @@ export namespace hooking {
           }
           loaders.push(l.toString());
         },
-        onComplete() { }
+        onComplete: function () { }
       });
 
       return loaders;
     });
   };
 
-  enum PatternType {
-    Regex = 'regex',
-    Klass = 'klass',
-  }
   const getPatternType = (pattern: string): PatternType => {
     if (pattern.indexOf('!') !== -1) {
-      return PatternType.Regex
-    } else {
-      return PatternType.Klass
+      return PatternType.Regex;
     }
-  }
+
+    return PatternType.Klass;
+  };
+
   export const lazyWatchForPattern = (query: string): void => {
-    let found = false
+    // TODO: Use param to control interval
+    let found = false;
 
     // Check if the pattern is found before starting an interval
-    enumerate(query).then(matches => {
+    javaEnumerate(query).then(matches => {
       if (matches.length > 0) {
-        found = true
-        send(`${c.green("Notify:")} Pattern ${c.green(query)} was matched`)
+        found = true;
+        send(`${c.green(query)} is already loaded / available`);
       }
-    })
+    });
 
-    if (found) {
-      return
-    }
+    if (found) return;
 
+    send(`Watching for ${c.green(query)} ${c.blackBright(`(not starting a job)`)}`);
+
+    // TODO: The javaEnumerate promise makes this racy. Figure it out one day.
     const interval = setInterval(() => {
-      enumerate(query).then(matches => {
+      javaEnumerate(query).then(matches => {
         // Only notify if we haven't before
-        if (found == false && matches.length > 0) {
-          send(`${c.green("Notify:")} Pattern ${c.green(query)} was matched`)
-          clearInterval(interval)
+        if (!found && matches.length > 0) {
+          send(`${c.green(query)} is now available`);
+          found = true;
         }
-      })
-    }, 1000 * 5);
 
-  }
-  export const enumerate = (query: string): Promise<EnumerateMethodsMatchGroup[]> => {
+        if (found) clearInterval(interval);
+      });
+    }, 1000 * 5);
+  };
+
+  export const javaEnumerate = (query: string): Promise<Java.EnumerateMethodsMatchGroup[]> => {
     // If the query is just a classname, strongarm it into a pattern.
     if (getPatternType(query) === PatternType.Klass) {
-      query = `${query}!*`
+      query = `*${query}*!*`;
     }
+
     return wrapJavaPerform(() => {
       return Java.enumerateMethods(query);
-    }
-    );
+    });
   };
 
   export const getClassMethods = (className: string): Promise<string[]> => {
@@ -113,72 +116,78 @@ export namespace hooking {
       });
     });
   };
+
   // This function takes in a method such as package.class.perform()
   // and extracts only the method name, ie "perform"
   const genericMethodNameToMethodOnly = (fullMethodName: string): string => {
     // Reduces [package, class, perform()] to "perform()"
-    const method = fullMethodName.split('.').filter((part: string) => part.includes('('))[0]
+    const method = fullMethodName.split('.').filter((part: string) => part.includes('('))[0];
     // Now extract everything before the first '('
-    return method.substring(0, method.indexOf('('))
-  }
+    return method.substring(0, method.indexOf('('));
+  };
+
   // This method assumes that it's being called from inside wrapJavaPerform
+  // TODO: Not in use yet, but this is a proposal to replace Java.use() to
+  //  support multiple classloaders transparently.
   export const getClassHandle = (className: string): JavaClass | null => {
-    let clazz: JavaClass = null
-    const loaders = Java.enumerateClassLoadersSync()
-    let found = false
+    let clazz: JavaClass = null;
+    const loaders = Java.enumerateClassLoadersSync();
+    let found = false;
+
     // Try to get a handle using each of the class loaders
     for (let i = 0; i < loaders.length; i++) {
-      const loader = loaders[i]
-      const factory = Java.ClassFactory.get(loader)
+      const loader = loaders[i];
+      const factory = Java.ClassFactory.get(loader);
       try {
-        clazz = factory.use(className)
-        found = true
-        break
+        clazz = factory.use(className);
+        found = true;
+        break;
       } catch { }
     }
     if (found) {
-      return clazz
+      return clazz;
     } else {
-      return null
+      return null;
     }
-  }
+  };
+
   // This method assumes that it's being called from inside wrapJavaPerform
   // It behaves the same as the above, except only uses the specified class
   // loader
   export const getClassHandleWithLoaderClassName = (className: string, loaderClassName: any): JavaClass | null => {
-    let clazz: JavaClass = null
+    let clazz: JavaClass = null;
     const loaders = Java.enumerateClassLoadersSync()
-      .filter(loader => loaderClassName === loader.$className)
+      .filter(loader => loaderClassName === loader.$className);
 
-    if (loaders.length == 0) {
-      return null
-    } else {
-      let found = false
-      // Try to get a handle using each of the class loaders
-      // This is still required because some loaders may have the
-      // same name, so distinguishing between them using this is
-      // incorrect. I'm sure there is a way of finding the correct
-      // one efficiently.
-      for (let i = 0; i < loaders.length; i++) {
-        const loader = loaders[i]
-        const factory = Java.ClassFactory.get(loader)
-        try {
-          clazz = factory.use(className)
-          found = true
-          break
-        } catch { }
-      }
-      if (found) {
-        return clazz
-      } else {
-        return null
-      }
+    if (loaders.length == 0) return null;
+
+    let found = false;
+    // Try to get a handle using each of the class loaders
+    // This is still required because some loaders may have the
+    // same name, so distinguishing between them using this is
+    // incorrect. I'm sure there is a way of finding the correct
+    // one efficiently.
+    for (let i = 0; i < loaders.length; i++) {
+      const loader = loaders[i];
+      const factory = Java.ClassFactory.get(loader);
+      try {
+        clazz = factory.use(className);
+        found = true;
+        break;
+      } catch { }
     }
-  }
-  export const getClassMethodsOverloads = (className: string, methodsAllowList: string[] = [], loader?: string): Promise<JavaMethodsOverloadsResult> => {
+
+    if (found) return clazz;
+
+    return null;
+  };
+
+  export const getClassMethodsOverloads = (className: string,
+    methodsAllowList: string[] = [], loader?: string): Promise<JavaMethodsOverloadsResult> => {
+
     return wrapJavaPerform(() => {
-      const result: JavaMethodsOverloadsResult = {}
-      const clazz = loader !== null ? getClassHandleWithLoaderClassName(className, loader) : Java.use(className)
+      const result: JavaMethodsOverloadsResult = {};
+      const clazz = loader !== null ? getClassHandleWithLoaderClassName(className, loader) : Java.use(className);
 
       if (clazz === null) {
         throw new Error("Could not find class!");
@@ -187,10 +196,10 @@ export namespace hooking {
       // TODO(cduplooy): The below line can fail with Error: java.lang.NoClassDefFoundError: Failed resolution of: Landroidx/datastore/core/DataStore;
       // This seems to involve custom class loaders...
       const methods = clazz.class.getDeclaredMethods()
-        .map(method => genericMethodNameToMethodOnly(method.toGenericString()))
+        .map(method => genericMethodNameToMethodOnly(method.toGenericString()));
       methods.forEach(methodName => {
         if (methodsAllowList.length === 0 || (methodsAllowList.length > 0 && methodsAllowList.includes(methodName))) {
-          const overloads = clazz[methodName].overloads
+          const overloads = clazz[methodName].overloads;
           result[methodName] = {
             'argTypes': overloads.map(overload => overload.argumentTypes),
             'returnType': overloads.map(overload => overload.returnType),
@@ -198,14 +207,14 @@ export namespace hooking {
             'handle': overloads.map(overload => overload.handle),
             'holder': overloads.map(overload => overload.holder),
             'type': overloads.map(overload => overload.type),
-          }
+          };
         }
-      })
+      });
 
       // Finally append the constructor details
       if (clazz.class.getConstructors().length > 0) {
         if (methodsAllowList.length === 0 || (methodsAllowList.length > 0 && methodsAllowList.includes("$init"))) {
-          const overloads = clazz['$init'].overloads
+          const overloads = clazz['$init'].overloads;
           result['$init'] = {
             'argTypes': overloads.map(overload => overload.argumentTypes),
             'returnType': overloads.map(overload => overload.returnType),
@@ -213,15 +222,20 @@ export namespace hooking {
             'handle': overloads.map(overload => overload.handle),
             'holder': overloads.map(overload => overload.holder),
             'type': overloads.map(overload => overload.type),
-          }
+          };
         }
       }
 
-      return result
+      return result;
     });
   };
+
   export const watch = (pattern: string, dargs: boolean, dbt: boolean, dret: boolean): Promise<void> => {
-    const patternType = getPatternType(pattern)
+
+    // The general idea here is that we enumerate the total functions (based on the pattern type)
+    // and via watchClass (which calls wathMethod) apply hooks.
+    const patternType = getPatternType(pattern);
+
     if (patternType === PatternType.Klass) {
 
       // start a new job container
@@ -230,40 +244,43 @@ export namespace hooking {
         implementations: [],
         type: `watch-class for: ${pattern}`,
       };
-      jobs.add(job)
-      return watchClass(pattern, job, dargs, dbt, dret)
-    } else if (patternType === PatternType.Regex) {
-      const job: IJob = {
-        identifier: jobs.identifier(),
-        implementations: [],
-        type: `watch-pattern for: ${pattern}`,
-      };
-      jobs.add(job)
 
-      return new Promise((resolve, reject) => {
-        enumerate(pattern).then((matches: EnumerateMethodsMatchGroup[]) => {
-          matches.forEach((match: EnumerateMethodsMatchGroup) => {
-            match.classes.forEach((klass: EnumerateMethodsMatchClass) => {
-              klass.methods.forEach(method => {
-                // Only watch matched methods
-                watchMethod(`${klass.name}.${method}`, job, null, dargs, dbt, dret)
-              })
-            })
-          })
-          resolve()
-        }).catch((error) => {
-          reject(error)
-        })
-      })
-    } else {
-      send('Unknown pattern type')
+      const w = watchClass(pattern, job, dargs, dbt, dret);
+      jobs.add(job);
+
+      return w;
     }
-  }
-  export const watchClass = (clazz: string, job: IJob, dargs: boolean = false, dbt: boolean = false, dret: boolean = false): Promise<void> => {
+
+    // assume we have PatternType.Regex
+    const job: IJob = {
+      identifier: jobs.identifier(),
+      implementations: [],
+      type: `watch-pattern for: ${pattern}`,
+    };
+    jobs.add(job);
+
+    return new Promise((resolve, reject) => {
+      javaEnumerate(pattern).then((matches: Java.EnumerateMethodsMatchGroup[]) => {
+        matches.forEach((match: Java.EnumerateMethodsMatchGroup) => {
+          match.classes.forEach((klass: Java.EnumerateMethodsMatchClass) => {
+            klass.methods.forEach(method => {
+              // Only watch matched methods
+              watchMethod(`${klass.name}.${method}`, job, dargs, dbt, dret);
+            });
+          });
+        });
+        resolve();
+      }).catch((error) => {
+        reject(error);
+      });
+    });
+  };
+
+  const watchClass = (clazz: string, job: IJob, dargs: boolean = false, dbt: boolean = false, dret: boolean = false): Promise<void> => {
     return wrapJavaPerform(() => {
       const clazzInstance: JavaClass = Java.use(clazz);
 
-      const uniqueMethods: string[] = clazzInstance.class.getDeclaredMethods().map((method) => {
+      clazzInstance.class.getDeclaredMethods().map((method) => {
         // perform a cleanup of the method. An example after toGenericString() would be:
         // public void android.widget.ScrollView.draw(android.graphics.Canvas) throws Exception
         // public final rx.c.b<java.lang.Throwable> com.apple.android.music.icloud.a.a(rx.c.b<java.lang.Throwable>)
@@ -284,28 +301,23 @@ export namespace hooking {
         return m.split("(")[0];
 
       }).filter((value, index, self) => {
-        return self.indexOf(value) === index;
-      });
 
-      uniqueMethods.forEach((method) => {
+        return self.indexOf(value) === index;
+      }).forEach((method) => {
+
         // get the argument types for this overload
-        send(`Watching ${c.green(clazz)}.${c.greenBright(method)}()`);
+        // send(`Watching ${c.green(clazz)}.${c.greenBright(method)}()`);
         const fqClazz = `${clazz}.${method}`;
-        watchMethod(fqClazz, job, null, dargs, dbt, dret);
+        watchMethod(fqClazz, job, dargs, dbt, dret);
       });
     });
   };
 
-  export const watchMethod = (
-    fqClazz: string, job: IJob, filterOverload: string | null, dargs: boolean, dbt: boolean, dret: boolean,
+  const watchMethod = (
+    fqClazz: string, job: IJob, dargs: boolean, dbt: boolean, dret: boolean,
   ): Promise<void> => {
     const [clazz, method] = splitClassMethod(fqClazz);
-    send(`Attempting to watch class ${c.green(clazz)} and method ${c.green(method)}.`);
-
-    if (filterOverload != null) {
-      send(c.blackBright(`Will filter for method overload with arguments:`) +
-        ` ${c.green(filterOverload)}`);
-    }
+    // send(`Attempting to watch class ${c.green(clazz)} and method ${c.green(method)}.`);
 
     return wrapJavaPerform(() => {
       const throwable: Throwable = Java.use("java.lang.Throwable");
@@ -321,12 +333,7 @@ export namespace hooking {
         // get the argument types for this overload
         const calleeArgTypes: string[] = m.argumentTypes.map((arg) => arg.className);
 
-        // check if we need to filter on a specific overload
-        if (filterOverload != null && calleeArgTypes.join(",") !== filterOverload) {
-          return;
-        }
-
-        send(`Hooking ${c.green(clazz)}.${c.greenBright(method)}(${c.red(calleeArgTypes.join(", "))})`);
+        send(`Watching ${c.green(clazz)}.${c.greenBright(method)}(${c.red(calleeArgTypes.join(", "))})`);
         // replace the implementation of this method
         // tslint:disable-next-line:only-arrow-functions
         m.implementation = function () {
@@ -370,7 +377,7 @@ export namespace hooking {
         };
 
         // Push the implementation so that it can be nulled later
-        job.implementations.push(m)
+        job.implementations.push(m);
       });
     });
   };

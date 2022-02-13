@@ -348,10 +348,10 @@ COMMANDS = {
                     'search': {
                         'meta': 'Search for various classes and or methods',
                         'exec': android_hooking.search,
-                        'flags': ['--json', '--only-classes', '--quiet']
+                        'flags': ['--json', '--only-classes']
                     },
                     'notify': {
-                        'meta': 'TODO',
+                        'meta': 'Notify when a class becomes available',
                         'exec': android_hooking.notify
                     },
                     'generate': {

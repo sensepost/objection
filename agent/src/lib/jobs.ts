@@ -44,36 +44,36 @@ export namespace jobs {
   export const kill = (ident: string): boolean => {
     currentJobs.forEach((job) => {
 
-      if (job.identifier === ident) {
+      if (job.identifier !== ident) return;
 
-        // detach any invocations
-        if (job.invocations && job.invocations.length > 0) {
-          job.invocations.forEach((invocation) => {
-            (invocation) ? invocation.detach() :
-              c.log(c.blackBright(`[warn] Skipping detach on null`));
-          });
-        }
-
-        // revert any replacements
-        if (job.replacements && job.replacements.length > 0) {
-          job.replacements.forEach((replacement) => {
-            Interceptor.revert(replacement);
-          });
-        }
-
-        // remove implementation replacements
-        if (job.implementations && job.implementations.length > 0) {
-          job.implementations.forEach((method) => {
-            // TODO: May be racy if the method is currently used.
-            method.implementation = null;
-          });
-        }
-
-        // remove the job from the current jobs
-        currentJobs = currentJobs.filter((j) => {
-          return j.identifier !== job.identifier;
+      // detach any invocations
+      if (job.invocations && job.invocations.length > 0) {
+        job.invocations.forEach((invocation) => {
+          (invocation) ? invocation.detach() :
+            c.log(c.blackBright(`[warn] Skipping detach on null`));
         });
       }
+
+      // revert any replacements
+      if (job.replacements && job.replacements.length > 0) {
+        job.replacements.forEach((replacement) => {
+          Interceptor.revert(replacement);
+        });
+      }
+
+      // remove implementation replacements
+      if (job.implementations && job.implementations.length > 0) {
+        job.implementations.forEach((method) => {
+          // TODO: May be racy if the method is currently used.
+          method.implementation = null;
+        });
+      }
+
+      // remove the job from the current jobs
+      currentJobs = currentJobs.filter((j) => {
+        return j.identifier !== job.identifier;
+      });
+
     });
 
     return true;

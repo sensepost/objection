@@ -20,10 +20,7 @@ import { androidshell } from "../android/shell";
 import { userinterface } from "../android/userinterface";
 import { proxy } from "../android/proxy";
 import { general } from "../android/general";
-import EnumerateMethodsMatchGroup = Java.EnumerateMethodsMatchGroup;
-import {
-  JavaMethodsOverloadsResult
-} from "../android/lib/types";
+import { JavaMethodsOverloadsResult } from "../android/lib/types";
 
 export const android = {
   // android clipboard
@@ -48,7 +45,7 @@ export const android = {
 
   // android hooking
   androidHookingGetClassMethods: (className: string): Promise<string[]> => hooking.getClassMethods(className),
-  androidHookingGetClassMethodsOverloads: (className: string, methodAllowList: string[] = [], loader? : string): Promise<JavaMethodsOverloadsResult> => hooking.getClassMethodsOverloads(className, methodAllowList, loader),
+  androidHookingGetClassMethodsOverloads: (className: string, methodAllowList: string[] = [], loader?: string): Promise<JavaMethodsOverloadsResult> => hooking.getClassMethodsOverloads(className, methodAllowList, loader),
   androidHookingGetClasses: (): Promise<string[]> => hooking.getClasses(),
   androidHookingGetClassLoaders: (): Promise<string[]> => hooking.getClassLoaders(),
   androidHookingGetCurrentActivity: (): Promise<ICurrentActivityFragment> => hooking.getCurrentActivity(),
@@ -59,9 +56,9 @@ export const android = {
     hooking.setReturnValue(fqClazz, filterOverload, ret),
   androidHookingWatch: (pattern: string, watchArgs: boolean, watchBacktrace: boolean, watchRet: boolean): Promise<void> =>
     hooking.watch(pattern, watchArgs, watchBacktrace, watchRet),
-  androidHookingEnumerate: (query: string): Promise<EnumerateMethodsMatchGroup[]> => hooking.enumerate(query),
+  androidHookingEnumerate: (query: string): Promise<Java.EnumerateMethodsMatchGroup[]> => hooking.javaEnumerate(query),
   androidHookingLazyWatchForPattern: (query: string): void => hooking.lazyWatchForPattern(query),
-  
+
   // android heap methods
   androidHeapEvaluateHandleMethod: (handle: number, js: string): Promise<void> => heap.evaluate(handle, js),
   androidHeapExecuteHandleMethod: (handle: number, method: string, returnString: boolean): Promise<string | null> =>

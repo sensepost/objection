@@ -6,6 +6,7 @@ import click
 from objection.state.connection import state_connection
 from objection.utils.helpers import clean_argument_flags
 
+
 def _is_pattern_or_constant(s: str) -> bool:
     """
         Check if a provided pattern matches "CLASS!METHOD"
@@ -24,8 +25,9 @@ def _is_pattern_or_constant(s: str) -> bool:
         return False
     elif len(parts[0]) == 0 or len(parts[1]) == 0:
         return False
-    
+
     return True
+
 
 def _string_is_true(s: str) -> bool:
     """
@@ -69,6 +71,62 @@ def _should_dump_return_value(args: list = None) -> bool:
     """
 
     return '--dump-return' in args
+
+
+def _should_dump_json(args: list) -> bool:
+    """
+        Check if --json is part of the arguments.
+
+        :param args:
+        :return:
+    """
+
+    return '--json' in args
+
+
+def _should_be_quiet(args: list) -> bool:
+    """
+        Check if --quiet is part of the arguments.
+
+        :param args:
+        :return:
+    """
+
+    return '--quiet' in args
+
+
+def _should_print_only_classes(args: list = None) -> bool:
+    """
+        Check if --only-classes is part of the arguments.
+
+        :param args:
+        :return:
+    """
+
+    return '--only-classes' in args
+
+
+def _get_flag_value(flag: str, args: list) -> Optional[str]:
+    """
+        Gets the value for a flag
+
+        :param flag:
+        :param args:
+        :return:
+    """
+
+    target = None
+
+    for i in range(len(args)):
+        if args[i] == flag:
+            target = i + 1
+
+    if target is None:
+        return None
+    elif target < len(args):
+        return args[target]
+    else:
+        return None
 
 
 def show_android_classes(args: list = None) -> None:
@@ -132,13 +190,20 @@ def show_android_class_methods(args: list = None) -> None:
 
 
 def notify(args: list = None) -> None:
+    """
+        Notify when a class becomes available.
+
+        :param args:
+        :return:
+    """
+
     if len(clean_argument_flags(args)) <= 0:
-        click.secho('Usage: android hooking notify $PATTERN', bold=True)
+        click.secho('Usage: android hooking notify <pattern>', bold=True)
         return
 
     query = args[0]
     if not _is_pattern_or_constant(query):
-        click.secho('Incorrect query syntax, please use <CLASS>!<METHOD>', fg='red')
+        click.secho('Incorrect query syntax, please use <class>!<method> or just the class name', fg='red')
         return
 
     api = state_connection.get_api()
@@ -146,27 +211,101 @@ def notify(args: list = None) -> None:
 
 
 def watch(args: list = None) -> None:
+    """
+        Hook functions and print useful information when they are called.
+
+        :param args:
+        :return:
+    """
+
     if len(clean_argument_flags(args)) < 1:
-        click.secho('Usage: android hooking watch <pattern> '
+        click.secho('Usage: android hooking watch <package pattern> '
                     '(eg: com.example.test, *com.example*!*, com.example.test!toString)'
                     '(optional: --dump-args) '
                     '(optional: --dump-backtrace) '
                     '(optional: --dump-return)',
                     bold=True)
-    
+        return
+
     query = args[0]
     if not _is_pattern_or_constant(query):
         click.secho('Incorrect query syntax, please use <CLASS>!<METHOD>', fg='red')
         return
-    
-    api = state_connection.get_api()
 
+    api = state_connection.get_api()
     api.android_hooking_watch(query,
                               _should_dump_args(args),
                               _should_dump_backtrace(args),
-                              _should_dump_return_value(args)
-                              )
+                              _should_dump_return_value(args))
     return
+
+
+def search(args: list = None) -> None:
+    """
+        Enumerates the current Android application for classes and methods.
+
+        :param args:
+        :return:
+    """
+
+    if len(clean_argument_flags(args)) <= 0:
+        click.secho('Usage: android hooking search \'<class>!<method>\n\''
+                    '(optional: --json <filename>)'
+                    '(optional: --only-classes)', bold=True)
+        return
+
+    query = args[0]
+
+    if not _is_pattern_or_constant(query):
+        click.secho('Incorrect query syntax, please use <class>!<method>', fg='red')
+        return
+
+    api = state_connection.get_api()
+    results = api.android_hooking_enumerate(query)
+
+    # Only get overloads if this flag is specified, otherwise just enumerating can be kind of slow
+    if _should_dump_json(args):
+        results_json = {
+            'meta': {
+                'runtime': 'java'
+            }
+        }
+
+        for result in results:
+            for _class in result['classes']:
+                loader = result['loader']
+                if loader is not None:
+                    # <instance: java.lang.ClassLoader, $className: dalvik.system.PathClassLoader>
+                    # but we only care about the className
+                    start_index = loader.find('$className: ') + 12
+                    start_part = loader[start_index:]
+                    if start_part.find('>'):
+                        end_index = start_part.find('>')
+                    else:
+                        end_index = start_part.find(' ')
+                    loader = start_part[:end_index]
+
+                _class['overloads'] = api.android_hooking_get_class_methods_overloads(_class['name'], _class['methods'],
+                                                                                      loader)
+
+        target_file = _get_flag_value('--json', args)
+        if target_file:
+            results_json['data'] = results
+            with open(target_file, 'w') as fd:
+                fd.write(json.dumps(results_json))
+                click.secho(f'JSON dumped to file {target_file}', bold=True)
+
+        return
+
+    # just print to the console
+    for result in results:
+        for _class in result['classes']:
+            if _should_print_only_classes(args):
+                print(_class['name'])
+                continue
+
+            for method in _class['methods']:
+                print(f'{_class["name"]}.{method}')
 
 
 def show_registered_broadcast_receivers(args: list = None) -> None:
@@ -261,96 +400,3 @@ def set_method_return_value(args: list = None) -> None:
     api.android_hooking_set_method_return(class_name,
                                           overload_filter,
                                           retval)
-
-
-def _should_be_quiet(args: list = None) -> bool:
-    return '--quiet' in args
-
-
-
-def _should_dump_json(args: list = None) -> bool:
-    return '--json' in args
-
-
-def _get_flag_value(flag: str, args: list = None) -> Optional[str]:
-    target = None
-    for i in range(len(args)):
-        if args[i] == flag:
-            target = i + 1
-
-    if target is None:
-        return None
-    elif target < len(args):
-        return args[target]
-    else:
-        click.secho(f'Could not find specified value for {flag}', bold=True)
-        return None
-
-
-def _should_print_only_classes(args: list = None) -> bool:
-    return '--only-classes' in args
-
-
-def search(args: list = None) -> None:
-    """
-        Enumerates the current Android application for classes and methods.
-
-        :param args:
-        :return:
-    """
-    if len(clean_argument_flags(args)) <= 0:
-        click.secho('Usage: android hooking search \'<class>!<method>\n\''
-                    '(optional: --json <filename>)'
-                    '(optional: --only-classes)'
-                    '(optional: --quiet)', bold=True)
-        return
-
-    should_dump_json = _should_dump_json(args)
-    should_print_only_classes = _should_print_only_classes(args)
-    should_be_quiet = _should_be_quiet(args)
-    query = args[0]
-
-    if not _is_pattern_or_constant(query):
-        click.secho('Incorrect query syntax, please use <CLASS>!<METHOD>', fg='red')
-        return
-
-    api = state_connection.get_api()
-    results_json = {
-        'meta': {
-            'runtime': 'java'
-        }
-    }
-
-    results = api.android_hooking_enumerate(query)
-    # Only get overloads if this flag is specified, otherwise just enumerating can be kind of slow
-    if should_dump_json:
-        for result in results:
-            for _class in result['classes']:
-                loader = result['loader']
-                if loader is not None:
-                    # <instance: java.lang.ClassLoader, $className: dalvik.system.PathClassLoader>
-                    # but we only care about the className
-                    start_index = loader.find('$className: ') + 12
-                    start_part = loader[start_index:]
-                    if start_part.find('>'):
-                        end_index = start_part.find('>')
-                    else:
-                        end_index = start_part.find(' ')
-                    loader = start_part[:end_index]
-                _class['overloads'] = api.android_hooking_get_class_methods_overloads(_class['name'], _class['methods'], loader)
-
-    if not should_be_quiet:
-        for result in results:
-            for _class in result['classes']:
-                print(_class['name'])
-                if not should_print_only_classes:
-                    for method in _class['methods']:
-                        print(f'\t{method}')
-
-    if should_dump_json:
-        target_file = _get_flag_value('--json', args)
-        if target_file:
-            results_json['data'] = results
-            with open(target_file, 'w') as fd:
-                fd.write(json.dumps(results_json))
-                click.secho(f'JSON dumped to {target_file}', bold=True)
