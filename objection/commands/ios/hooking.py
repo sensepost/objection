@@ -1,3 +1,6 @@
+import json
+from typing import Optional
+
 import click
 
 from objection.state.connection import state_connection
@@ -151,9 +154,7 @@ def show_ios_classes(args: list = None) -> None:
 
     # loop the class names and check if we should be ignoring it.
     for class_name in sorted(classes):
-
         if _should_ignore_native_classes(args):
-
             if not _class_is_prefixed_with_native(class_name):
                 click.secho(class_name)
                 continue
@@ -193,49 +194,20 @@ def show_ios_class_methods(args: list) -> None:
         click.secho('No class / methods found')
 
 
-def watch_class(args: list) -> None:
-    """
-        Starts an objection job that hooks into all of the methods
-        available in a class and reports on invocations.
-
-        :param args:
-        :return:
-    """
-
+def watch(args: list) -> None:
     if len(clean_argument_flags(args)) <= 0:
         click.secho('Usage: ios hooking watch class <class_name> (--include-parents)', bold=True)
         return
 
-    class_name = args[0]
+    should_watch_args = _should_dump_args(args)
+    should_watch_ret = _should_dump_return_value(args)
+    should_backtrace = _should_dump_backtrace(args)
+    should_watch_parents = _should_include_parent_methods(args)
+
+    pattern = args[0]
 
     api = state_connection.get_api()
-    api.ios_hooking_watch_class(class_name)
-
-
-def watch_class_method(args: list) -> None:
-    """
-        Starts an objection jon that hooks into a specific class method
-        and reports on invocations.
-
-        :param args:
-        :return:
-    """
-
-    if len(clean_argument_flags(args)) <= 0:
-        click.secho(('Usage: ios hooking watch method <selector> (eg: -[ClassName methodName:]) '
-                     '(optional: --dump-backtrace) '
-                     '(optional: --dump-args) '
-                     '(optional: --dump-return)'), bold=True)
-        return
-
-    selector = args[0]
-
-    api = state_connection.get_api()
-    api.ios_hooking_watch_method(selector,
-                                 _should_dump_args(args),
-                                 _should_dump_backtrace(args),
-                                 _should_dump_return_value(args))
-
+    api.ios_hooking_watch(pattern, should_watch_args, should_backtrace, should_watch_ret, should_watch_parents)
 
 def set_method_return_value(args: list) -> None:
     """
@@ -271,10 +243,10 @@ def search_class(args: list) -> None:
         click.secho('Usage: ios hooking search classes <name>', bold=True)
         return
 
-    search = args[0]
+    query = args[0]
 
     api = state_connection.get_api()
-    classes = api.ios_hooking_get_classes(search)
+    classes = api.ios_hooking_get_classes(query)
     found_classes = 0
 
     if len(classes) > 0:
@@ -282,7 +254,7 @@ def search_class(args: list) -> None:
         # filter the classes for the search
         for classname in classes:
 
-            if search.lower() in classname.lower():
+            if query.lower() in classname.lower():
                 click.secho(classname)
                 found_classes += 1
 
@@ -304,10 +276,10 @@ def search_method(args: list) -> None:
         click.secho('Usage: ios hooking search methods <name>', bold=True)
         return
 
-    search = args[0]
+    query = args[0]
 
     api = state_connection.get_api()
-    methods = api.ios_hooking_search_methods(search)
+    methods = api.ios_hooking_search_methods(query)
 
     if len(methods) > 0:
 
@@ -319,3 +291,79 @@ def search_method(args: list) -> None:
 
     else:
         click.secho('No methods found')
+
+
+def search(args: list) -> None:
+    """
+        Searches the current iOS application for classes and methods.
+
+        :param args:
+        :return:
+    """
+    if len(clean_argument_flags(args)) <= 0:
+        click.secho('Usage: ios hooking search \'*[CLASS METHOD]\'', bold=True)
+        return
+
+    should_print_only_classes = _should_print_only_classes(args)
+    should_dump_json = _should_dump_json(args)
+
+    api = state_connection.get_api()
+    # False is passed to prevent registering a job, since search should return fairly quickly
+    results = api.ios_hooking_search(args[0], False)
+
+    data = {}
+    for func in results:
+        fullname = func['name']
+        start_bracket = fullname.find('[') + 1
+        class_name = fullname[start_bracket: fullname.find(' ')]
+        if data.get(class_name) is not None:
+            data[class_name].append(fullname)
+        else:
+            data[class_name] = [fullname]
+
+    # Print the matching methods
+    for klass in data.keys():
+        methods = data[klass]
+        print(klass)
+        for method in methods:
+            if not should_print_only_classes:
+                print(f'\t{method}')
+
+    if should_dump_json:
+        target_file = _get_flag_value('--json', args)
+        if target_file:
+            with open(target_file, 'w') as fd:
+                fd.write(json.dumps({
+                    'meta': {
+                        'runtime': 'objc'
+                    },
+                    'classes': data
+                }))
+                click.secho(f'JSON dumped to {target_file}', bold=True)
+
+
+def _should_print_only_classes(args: list) -> bool:
+    return '--only-classes' in args
+
+
+def _should_dump_json(args: list) -> bool:
+    return '--json' in args
+
+
+def _get_flag_value(flag:str, args: list) -> Optional[str]:
+    target = None
+    for i in range(len(args)):
+        if args[i] == flag:
+            target = i + 1
+
+    if target is None:
+        return None
+    elif target < len(args):
+        return args[target]
+    else:
+        click.secho(f'Could not find specified value for {flag}', bold=True)
+        return None
+
+
+def _should_be_quiet(args: list) -> bool:
+    return '--quiet' in args

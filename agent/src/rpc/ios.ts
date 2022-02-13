@@ -61,9 +61,12 @@ export const ios = {
   iosHookingSearchMethods: (partial: string): string[] => hooking.searchMethods(partial),
   iosHookingSetReturnValue: (selector: string, returnVal: boolean): void =>
     hooking.setMethodReturn(selector, returnVal),
-  iosHookingWatchClass: (clazz: string, parents: boolean): void => hooking.watchClass(clazz, parents),
-  iosHookingWatchMethod: (selector: string, dargs: boolean, dbt: boolean, dret: boolean): void =>
-    hooking.watchMethod(selector, dargs, dbt, dret),
+  iosHookingWatch: (pattern: string, dargs: boolean, dbt: boolean, dret: boolean, dparents: boolean) =>
+    hooking.watch(pattern, dargs, dbt, dret, dparents),
+  iosHookingEnumerate: (pattern: string): ApiResolverMatch[] =>
+    hooking.enumerate(pattern),
+  iosHookingSearch: (pattern: string, registerJob: boolean): ApiResolverMatch[] =>
+    hooking.search(pattern, registerJob),
 
   // ios crypto monitoring
   iosMonitorCryptoEnable: (): void => ioscrypto.monitor(),
