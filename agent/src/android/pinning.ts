@@ -146,7 +146,8 @@ const okHttp3CertificatePinnerCheckOkHttp = (ident: string): any | undefined => 
       const certificatePinner: CertificatePinner = Java.use("okhttp3.CertificatePinner");
       send(c.blackBright(`Found okhttp3.CertificatePinner, overriding CertificatePinner.check$okhttp()`));
 
-      const CertificatePinnerCheckOkHttp = certificatePinner.check$okhttp.overload("java.lang.String", "u15");
+      // const CertificatePinnerCheckOkHttp = certificatePinner.check$okhttp.overload("java.lang.String", "u15");
+      const CertificatePinnerCheckOkHttp = certificatePinner.check$okhttp;
 
       // tslint:disable-next-line:only-arrow-functions
       CertificatePinnerCheckOkHttp.implementation = function () {
