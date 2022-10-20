@@ -83,7 +83,7 @@ const sslContextEmptyTrustManager = (ident: string): any => {
   });
 };
 
-const okHttp3CertificatePinnerCheckOkHttp = (ident: string): any | undefined => {
+const okHttp3CertificatePinnerCheck = (ident: string): any | undefined => {
   // -- Sample Java
   //
   // Example used to test this bypass.
@@ -102,20 +102,20 @@ const okHttp3CertificatePinnerCheckOkHttp = (ident: string): any | undefined => 
   return wrapJavaPerform(() => {
     try {
       const certificatePinner: CertificatePinner = Java.use("okhttp3.CertificatePinner");
-      send(c.blackBright(`Found okhttp3.CertificatePinner, overriding CertificatePinner.check$okhttp()`));
+      send(c.blackBright(`Found okhttp3.CertificatePinner, overriding CertificatePinner.check()`));
 
-      const CertificatePinnerCheckOkHttp = certificatePinner.check$okhttp.overload("java.lang.String", "u15");
+      const CertificatePinnerCheck = certificatePinner.check.overload("java.lang.String", "java.util.List");
 
       // tslint:disable-next-line:only-arrow-functions
-      CertificatePinnerCheckOkHttp.implementation = function () {
+      CertificatePinnerCheck.implementation = function () {
         qsend(quiet,
-          c.blackBright(`[${ident}] `) + `Called check$okhttp ` +
-          c.green(`OkHTTP 3.x CertificatePinner.check$okhttp()`) +
+          c.blackBright(`[${ident}] `) + `Called ` +
+          c.green(`OkHTTP 3.x CertificatePinner.check()`) +
           `, not throwing an exception.`,
         );
       };
 
-      return CertificatePinnerCheckOkHttp;
+      return CertificatePinnerCheck;
 
     } catch (err) {
       if ((err as Error).message.indexOf("ClassNotFoundException") === 0) {
@@ -143,48 +143,19 @@ const okHttp3CertificatePinnerCheckOkHttp = (ident: string): any | undefined => 
   // Response response = client.newCall(request).execute();
   return wrapJavaPerform(() => {
     try {
-      const certificatePinner: CertificatePinner = Java.use("okhttp3.CertificatePinner");
-      send(c.blackBright(`Found okhttp3.CertificatePinner, overriding CertificatePinner.check$okhttp()`));
+      const certificatePinner = Java.use("okhttp3.CertificatePinner");
+      certificatePinner["check$okhttp"].overloads.forEach((m) => {
+          // get the argument types for this overload
+          var calleeArgTypes = m.argumentTypes.map((arg) => arg.className);
+          send(color_1.colors.blackBright(`Found okhttp3.CertificatePinner.check$okhttp(${calleeArgTypes.join(", ")}), overriding ...`));
 
-      const CertificatePinnerCheckOkHttp = certificatePinner.check$okhttp;
-
-      // tslint:disable-next-line:only-arrow-functions
-      CertificatePinnerCheckOkHttp.implementation = function () {
-        qsend(quiet,
-          c.blackBright(`[${ident}] `) + `Called check$okhttp ` +
-          c.green(`OkHTTP 3.x CertificatePinner.check$okhttp()`) +
-          `, not throwing an exception.`,
-        );
-      };
-
+          m.implementation = function () {
+              helpers_1.qsend(quiet, color_1.colors.blackBright(`[${ident}] `) + `Called check$okhttp ` +
+                  color_1.colors.green(`OkHTTP 3.x CertificatePinner.check$okhttp()`) +
+                  `, not throwing an exception.`);
+          }
+      });
       return CertificatePinnerCheckOkHttp;
-
-    } catch (err) {
-      if ((err as Error).message.indexOf("ClassNotFoundException") === 0) {
-        throw err;
-      }
-    }
-  });
-};
-
-const okHttp3CertificatePinnerCheckOkHttp2 = (ident: string): any | undefined => {
-  return wrapJavaPerform(() => {
-    try {
-      const certificatePinner: CertificatePinner = Java.use("okhttp3.CertificatePinner");
-      send(c.blackBright(`Found okhttp3.CertificatePinner, overriding CertificatePinner.check$okhttp("java.lang.String", "u15")`));
-
-      const CertificatePinnerCheckOkHttp2 = certificatePinner.check$okhttp.overload("java.lang.String", "u15");
-
-      // tslint:disable-next-line:only-arrow-functions
-      CertificatePinnerCheckOkHttp2.implementation = function () {
-        qsend(quiet,
-          c.blackBright(`[${ident}] `) + `Called check$okhttp ` +
-          c.green(`OkHTTP 3.x CertificatePinner.check$okhttp()`) +
-          `, not throwing an exception.`,
-        );
-      };
-
-      return CertificatePinnerCheckOkHttp2;
 
     } catch (err) {
       if ((err as Error).message.indexOf("ClassNotFoundException") === 0) {
@@ -351,7 +322,6 @@ export const disable = (q: boolean): void => {
   job.implementations.push(sslContextEmptyTrustManager(job.identifier));
   job.implementations.push(okHttp3CertificatePinnerCheck(job.identifier));
   job.implementations.push(okHttp3CertificatePinnerCheckOkHttp(job.identifier));
-  job.implementations.push(okHttp3CertificatePinnerCheckOkHttp2(job.identifier));
   job.implementations.push(appceleratorTitaniumPinningTrustManager(job.identifier));
   job.implementations.push(trustManagerImplVerifyChainCheck(job.identifier));
   job.implementations.push(trustManagerImplCheckTrustedRecursiveCheck(job.identifier));
