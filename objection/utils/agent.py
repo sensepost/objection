@@ -251,10 +251,11 @@ class Agent(object):
 
         self.session.on('detached', self.handlers.session_on_detached)
 
-        if self.config.debugger:
-            self.session.enable_debugger()
 
         self.script = self.session.create_script(source=self._get_agent_source())
+        if self.config.debugger:
+            click.secho('Debugger enabled, visit chrome://inspect', bold=True)
+            self.script.enable_debugger()
         self.script.on('message', self.handlers.script_on_message)
         self.script.load()
 
