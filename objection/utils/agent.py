@@ -252,10 +252,15 @@ class Agent(object):
         self.session.on('detached', self.handlers.session_on_detached)
 
 
-        self.script = self.session.create_script(source=self._get_agent_source())
+        # Default runtime is qjs, however the chrome web debugger does not work with that
+        # TODO: Maybe at some point it'd be useful to have an option to select the runtime
         if self.config.debugger:
+            self.script = self.session.create_script(source=self._get_agent_source(), runtime='v8')
             click.secho('Debugger enabled, visit chrome://inspect', bold=True)
             self.script.enable_debugger()
+        else:
+            self.script = self.session.create_script(source=self._get_agent_source())
+
         self.script.on('message', self.handlers.script_on_message)
         self.script.load()
 
