@@ -352,7 +352,9 @@ COMMANDS = {
                     },
                     'notify': {
                         'meta': 'Notify when a class becomes available',
-                        'exec': android_hooking.notify
+                        'exec': android_hooking.notify,
+                        'flags': ['--dump-args', '--dump-return', '--dump-backtrace', '--watch']
+
                     },
                     'generate': {
                         'meta': 'Generate Frida hooks for Android',

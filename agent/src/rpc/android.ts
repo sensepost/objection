@@ -58,7 +58,7 @@ export const android = {
   androidHookingWatch: (pattern: string, watchArgs: boolean, watchBacktrace: boolean, watchRet: boolean): Promise<void> =>
     hooking.watch(pattern, watchArgs, watchBacktrace, watchRet),
   androidHookingEnumerate: (query: string): Promise<Java.EnumerateMethodsMatchGroup[]> => hooking.javaEnumerate(query),
-  androidHookingLazyWatchForPattern: (query: string): void => hooking.lazyWatchForPattern(query),
+  androidHookingLazyWatchForPattern: (query: string, watch: boolean, dargs: boolean, dret: boolean, dbt: boolean): void => hooking.lazyWatchForPattern(query, watch, dargs, dret, dbt),
 
   // android heap methods
   androidHeapEvaluateHandleMethod: (handle: number, js: string): Promise<void> => heap.evaluate(handle, js),
