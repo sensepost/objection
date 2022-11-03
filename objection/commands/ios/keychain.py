@@ -138,6 +138,49 @@ def clear(args: list = None) -> None:
     click.secho('Keychain cleared', fg='green')
 
 
+def remove(args: list) -> None:
+    """
+        Remove matching keychain entries from the keychain
+
+        :param args:
+        :return:
+    """
+
+    account = _get_flag_value(args, '--account')
+    service = _get_flag_value(args, '--service')
+
+    click.secho('Removing entry from the iOS keychain...', dim=True)
+    click.secho('Account:  {0}'.format(account), dim=True)
+    click.secho('Service:  {0}'.format(service), dim=True)
+
+    api = state_connection.get_api()
+    api.ios_keychain_remove(account, service);
+    click.secho('Successfully removed matching keychain items', fg='green')
+    
+
+def update(args: list) -> None:
+    """
+        Update matching keychain entry from the keychain
+
+        :param args:
+        :return:
+    """
+
+    account = _get_flag_value(args, '--account')
+    service = _get_flag_value(args, '--service')
+    newData = _get_flag_value(args, '--newData')
+
+    click.secho('Updating entries from the iOS keychain...', dim=True)
+    click.secho('Account:   {0}'.format(account), dim=True)
+    click.secho('Service:   {0}'.format(service), dim=True)
+    click.secho('New Data:  {0}'.format(newData), dim=True)
+
+    api = state_connection.get_api()
+    api.ios_keychain_update(account, service, newData);
+    click.secho('Successfully updated matching keychain item', fg='green')
+   
+
+
 def add(args: list) -> None:
     """
         Adds a new kSecClassGenericPassword keychain entry to the keychain

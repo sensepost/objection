@@ -24,6 +24,12 @@ const nativeExports: any = {
     moduleName: "Security",
     retType: "pointer",
   },
+  SecItemUpdate: {
+    argTypes: ["pointer", "pointer"],
+    exportName: "SecItemUpdate",
+    moduleName: "Security",
+    retType: "pointer",
+  },
 
   // SSL pinning methods
   SSLCreateContext: {
@@ -86,6 +92,7 @@ const api: any = {
   SecAccessControlGetConstraints: null,
   SecItemAdd: null,
   SecItemCopyMatching: null,
+  SecItemUpdate: null,
   SecItemDelete: null,
 
   SSLCreateContext: null,
