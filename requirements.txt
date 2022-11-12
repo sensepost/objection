@@ -9,3 +9,4 @@ requests
 flask
 pygments
 litecli>=1.3.0
+lief
