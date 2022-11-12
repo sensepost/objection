@@ -8,6 +8,7 @@ import xml.etree.ElementTree as ElementTree
 
 import click
 import delegator
+import lief
 import requests
 import semver
 
@@ -210,6 +211,8 @@ class AndroidPatcher(BasePlatformPatcher):
         self.skip_cleanup = skip_cleanup
         self.skip_resources = skip_resources
         self.manifest = manifest
+
+        self.architecture = None
 
         self.keystore = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../assets', 'objection.jks')
         self.netsec_config = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../assets',
@@ -822,8 +825,26 @@ class AndroidPatcher(BasePlatformPatcher):
         if target_class:
             click.secho('Using target class: {0} for patch'.format(target_class), fg='green', bold=True)
         else:
-            click.secho('Target class not specified, searching for launchable activity instead...', fg='green',
+            click.secho('Target class not specified, injecting through existing native libraries...', fg='green',
                         bold=True)
+            # Inspired by https://fadeevab.com/frida-gadget-injection-on-android-no-root-2-methods/
+            if not self.architecture:
+                raise Exception('Frida-gadget should have been copied prior to injecting!')
+            libs_path = os.path.join(self.apk_temp_directory, 'lib', self.architecture)
+            existing_libs_in_apk = [
+                lib
+                for lib in os.listdir(libs_path)
+                if lib not in ['libfrida-gadget.so', self.libfridagadgetconfig_name]
+            ]
+            if existing_libs_in_apk:
+                for lib in existing_libs_in_apk:
+                    libnative = lief.parse(os.path.join(libs_path, lib))
+                    libnative.add_library('libfrida-gadget.so')  # Injection!
+                    libnative.write(os.path.join(libs_path, lib))
+                return
+            else:
+                click.secho('No native libraries found in APK, searching for launchable activity instead...', fg='green',
+                            bold=True)
 
         activity_path = self._determine_smali_path_for_class(
             target_class if target_class else self._get_launchable_activity())
@@ -863,6 +884,7 @@ class AndroidPatcher(BasePlatformPatcher):
             :param gadget_config:
             :return:
         """
+        self.architecture = architecture
 
         libs_path = os.path.join(self.apk_temp_directory, 'lib', architecture)
 
