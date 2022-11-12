@@ -1,4 +1,5 @@
 import contextlib
+import functools
 import lzma
 import os
 import re
@@ -805,6 +806,30 @@ class AndroidPatcher(BasePlatformPatcher):
 
         return patched_smali
 
+    @functools.cache
+    def _find_libs_path(self):
+        """
+            Find the libraries path for the target architecture within the APK.
+        """
+        base_libs_path = os.path.join(self.apk_temp_directory, 'lib')
+        available_libs_arch = os.listdir(base_libs_path)
+        if self.architecture in available_libs_arch:
+            # Exact match with arch
+            return os.path.join(base_libs_path, self.architecture)
+        else:
+            # Try to use prefix search
+            try:
+                matching_arch = next(
+                    item for item in available_libs_arch if item.startswith(self.architecture)
+                )
+                click.secho('Using matching architecture {0} from provided architecture {1}.'.format(
+                    matching_arch, self.architecture
+                ), dim=True)
+                return os.path.join(base_libs_path, matching_arch)
+            except StopIteration:
+                # Might create the arch folder inside the APK tree
+                return os.path.join(base_libs_path, self.architecture)
+
     def inject_load_library(self, target_class: str = None):
         """
             Injects a loadLibrary call into a class.
@@ -830,7 +855,7 @@ class AndroidPatcher(BasePlatformPatcher):
             # Inspired by https://fadeevab.com/frida-gadget-injection-on-android-no-root-2-methods/
             if not self.architecture or not self.libfridagadget_name:
                 raise Exception('Frida-gadget should have been copied prior to injecting!')
-            libs_path = os.path.join(self.apk_temp_directory, 'lib', self.architecture)
+            libs_path = self._find_libs_path()
             existing_libs_in_apk = [
                 lib
                 for lib in os.listdir(libs_path)
@@ -891,7 +916,7 @@ class AndroidPatcher(BasePlatformPatcher):
         self.libfridagadget_name = libfridagadget_name
         self.libfridagadgetconfig_name = libfridagadget_name.replace('.so', '.config.so')
 
-        libs_path = os.path.join(self.apk_temp_directory, 'lib', architecture)
+        libs_path = self._find_libs_path()
 
         # check if the libs path exists
         if not os.path.exists(libs_path):
