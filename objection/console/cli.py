@@ -266,8 +266,8 @@ def patchipa(source: str, gadget_version: str, codesign_signature: str, provisio
 @click.option('--skip-resources', '-D', is_flag=True, default=False,
               help='Skip resource decoding as part of the apktool processing.', show_default=True)
 @click.option('--target-class', '-t', help='The target class to patch.', default=None)
-@click.option('--use-aapt2', '-2', is_flag=True, default=False,
-              help='Use the aapt2 binary instead of aapt as part of the apktool processing.', show_default=True)
+@click.option('--use-aapt2', '-2', is_flag=True, default=True,
+              help='Use the aapt2 binary instead of aapt au part of the apktool processing.', show_default=True)
 @click.option('--gadget-name', '-g', default='libfrida-gadget.so',
               help=(
                   'Name of the gadget library. Can be named whatever you want to dodge anti-frida '
