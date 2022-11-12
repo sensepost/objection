@@ -122,7 +122,6 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
 
         :return:
     """
-
     github = Github(gadget_version=gadget_version)
     android_gadget = AndroidGadget(github)
 
