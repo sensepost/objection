@@ -828,18 +828,18 @@ class AndroidPatcher(BasePlatformPatcher):
             click.secho('Target class not specified, injecting through existing native libraries...', fg='green',
                         bold=True)
             # Inspired by https://fadeevab.com/frida-gadget-injection-on-android-no-root-2-methods/
-            if not self.architecture:
+            if not self.architecture or not self.libfridagadget_name:
                 raise Exception('Frida-gadget should have been copied prior to injecting!')
             libs_path = os.path.join(self.apk_temp_directory, 'lib', self.architecture)
             existing_libs_in_apk = [
                 lib
                 for lib in os.listdir(libs_path)
-                if lib not in ['libfrida-gadget.so', self.libfridagadgetconfig_name]
+                if lib not in [self.libfridagadget_name, self.libfridagadgetconfig_name]
             ]
             if existing_libs_in_apk:
                 for lib in existing_libs_in_apk:
                     libnative = lief.parse(os.path.join(libs_path, lib))
-                    libnative.add_library('libfrida-gadget.so')  # Injection!
+                    libnative.add_library(self.libfridagadget_name)  # Injection!
                     libnative.write(os.path.join(libs_path, lib))
                 return
             else:
@@ -874,7 +874,9 @@ class AndroidPatcher(BasePlatformPatcher):
         with open(activity_path, 'w') as f:
             f.write(''.join(patched_smali))
 
-    def add_gadget_to_apk(self, architecture: str, gadget_source: str, gadget_config: str):
+    def add_gadget_to_apk(self, architecture: str,
+                          gadget_source: str, gadget_config: str,
+                          libfridagadget_name: str = 'libfrida-gadget.so'):
         """
             Copies a frida gadget for a specific architecture to
             an extracted APK's lib path.
@@ -882,9 +884,12 @@ class AndroidPatcher(BasePlatformPatcher):
             :param architecture:
             :param gadget_source:
             :param gadget_config:
+            :param libfridagadget_name:
             :return:
         """
         self.architecture = architecture
+        self.libfridagadget_name = libfridagadget_name
+        self.libfridagadgetconfig_name = libfridagadget_name.replace('.so', '.config.so')
 
         libs_path = os.path.join(self.apk_temp_directory, 'lib', architecture)
 
@@ -894,11 +899,11 @@ class AndroidPatcher(BasePlatformPatcher):
             os.makedirs(libs_path)
 
         click.secho('Copying Frida gadget to libs path...', fg='green', dim=True)
-        shutil.copyfile(gadget_source, os.path.join(libs_path, 'libfrida-gadget.so'))
+        shutil.copyfile(gadget_source, os.path.join(libs_path, self.libfridagadget_name))
 
         if gadget_config:
             click.secho('Adding a gadget configuration file...', fg='green')
-            shutil.copyfile(gadget_config, os.path.join(libs_path, 'libfrida-gadget.config.so'))
+            shutil.copyfile(gadget_config, os.path.join(libs_path, self.libfridagadgetconfig_name))
 
     def build_new_apk(self, use_aapt2: bool = False):
         """

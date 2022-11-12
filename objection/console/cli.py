@@ -270,6 +270,12 @@ def patchipa(source: str, gadget_version: str, codesign_signature: str, provisio
 @click.option('--target-class', '-t', help='The target class to patch.', default=None)
 @click.option('--use-aapt2', '-2', is_flag=True, default=False,
               help='Use the aapt2 binary instead of aapt as part of the apktool processing.', show_default=True)
+@click.option('--gadget-name', '-g', default='libfrida-gadget.so',
+              help=(
+                  'Name of the gadget library. Can be named whatever you want to dodge anti-frida '
+                  'detection schemes looking for loaded libraries with frida in the name.'
+                  'Refer to https://frida.re/docs/gadget/ for more information.'),
+              show_default=True)
 @click.option('--gadget-config', '-c', default=None, help=(
         'The gadget configuration file to use. '
         'Refer to https://frida.re/docs/gadget/ for more information.'), show_default=False)
@@ -282,7 +288,7 @@ def patchipa(source: str, gadget_version: str, codesign_signature: str, provisio
 @click.option('--only-main-classes', help="Only patch classes that are in the main dex file.", is_flag=True, default=False)
 def patchapk(source: str, architecture: str, gadget_version: str, pause: bool, skip_cleanup: bool,
              enable_debug: bool, skip_resources: bool, network_security_config: bool, target_class: str,
-             use_aapt2: bool, gadget_config: str, script_source: str, ignore_nativelibs: bool, manifest: str, skip_signing: bool, only_main_classes:bool = False) -> None:
+             use_aapt2: bool, gadget_name: str, gadget_config: str, script_source: str, ignore_nativelibs: bool, manifest: str, skip_signing: bool, only_main_classes:bool = False) -> None:
     """
         Patch an APK with the frida-gadget.so.
     """
@@ -300,6 +306,11 @@ def patchapk(source: str, architecture: str, gadget_version: str, pause: bool, s
     # ensure we decode resources if we do not have the --ignore-nativelibs flag.
     if not ignore_nativelibs and skip_resources:
         click.secho('The --ignore-nativelibs flag is required with the --skip-resources flag.', fg='red')
+        return
+
+    # ensure provided gadget name is a valid android lib name
+    if not gadget_name.startswith('lib') or not gadget_name.endswith('.so'):
+        click.secho("Gadget name should start with 'lib' and end in '.so'", fg='red')
         return
 
     patch_android_apk(**locals())
