@@ -100,7 +100,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
                       enable_debug: bool = True, gadget_version: str = None, skip_resources: bool = False,
                       network_security_config: bool = False, target_class: str = None,
                       use_aapt2: bool = False, gadget_config: str = None, script_source: str = None,
-                      ignore_nativelibs: bool = True, manifest: str = None) -> None:
+                      ignore_nativelibs: bool = False, manifest: str = None) -> None:
     """
         Patches an Android APK by extracting, patching SMALI, repackaging
         and signing a new APK.
@@ -121,7 +121,6 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
 
         :return:
     """
-
     github = Github(gadget_version=gadget_version)
     android_gadget = AndroidGadget(github)
 
