@@ -472,6 +472,10 @@ export const getBroadcastReceivers = (): Promise<string[]> => {
     const currentApplication = activityThread.currentApplication();
     // not using the helper as we need other variables too
     const context = currentApplication.getApplicationContext();
+    const receiversFromContext = context.getPackageManager().getPackageInfo(
+      context.getPackageName(),
+      GET_RECEIVERS
+    ).receivers.value
 
     let receivers = [];
 
@@ -481,11 +485,10 @@ export const getBroadcastReceivers = (): Promise<string[]> => {
       });
     });
 
-    receivers = receivers.concat(context.getPackageManager()
-      .getPackageInfo(context.getPackageName(), GET_RECEIVERS).receivers.value.map((activityInfo) => {
+    if (receiversFromContext != null)
+      receivers = receivers.concat(receiversFromContext.map((activityInfo) => {
         return activityInfo.name.value;
-      }),
-    );
+      }));
 
     return receivers;
   });
