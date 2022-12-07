@@ -373,6 +373,9 @@ class IosPatcher(BasePlatformPatcher):
             click.secho(load_library_output.out, fg='red', dim=True)
             click.secho(load_library_output.err, fg='red')
 
+        if codesign_signature is 'PASS':
+            return
+
         # get the paths of all of the .dylib files in this applications
         # bundle. we will have to codesign all of them and not just the
         # frida gadget
@@ -416,6 +419,9 @@ class IosPatcher(BasePlatformPatcher):
         zipf = zipfile.ZipFile(self.patched_ipa_path, 'w')
         zipdir(os.path.join(self.temp_directory, 'Payload'), zipf)
         zipf.close()
+
+        if codesign_signature is 'PASS':
+            return
 
         # codesign the new ipa
         click.secho('Codesigning patched IPA...', fg='green')
