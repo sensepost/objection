@@ -78,7 +78,7 @@ def show_frameworks(args: list = None) -> None:
 
 def show_bundles(args: list = None) -> None:
     """
-        Prints information about bundles that are not nessesarily frameworks
+        Prints information about bundles that are not necessarily frameworks
 
         https://developer.apple.com/documentation/foundation/nsbundle/1413705-allbundles?language=objc
 
