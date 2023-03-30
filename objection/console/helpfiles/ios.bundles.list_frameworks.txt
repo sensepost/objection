@@ -12,7 +12,7 @@ print the entire path to the framework.
 The --include-apple-frameworks flag signals the command to also output
 bundles that form part of the com.apple package namespace. By default this
 is hidden and only external frameworks not in the com.apple namespace is
-retured.
+returned.
 
 [1] https://developer.apple.com/documentation/foundation/nsbundle/1408056-allframeworks?language=objc
 

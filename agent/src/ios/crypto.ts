@@ -279,7 +279,7 @@ const cccryptorupdate = (ident: string): InvocationListener => {
     },
     onLeave(retval) {
       const blocksize = CCAlgorithm[alg].blocksize;
-      // if the messsage is longer than 1 block then we need to
+      // if the message is longer than 1 block then we need to
       // remember everything before the final block
       if (this.dataInLength > blocksize) {
         // TODO: There is sometimes padding added to the end of this message
