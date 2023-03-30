@@ -247,7 +247,7 @@ const decodeAcl = (entry: NSDictionary): string => {
               break;
 
             case "cbio":
-              constraints.objectForKey_("cbio").count() === 1 ?
+              constraints.objectForKey_("cbio").count().valueOf() === 1 ?
                 flags.push("kSecAccessControlBiometryAny") :
                 flags.push("kSecAccessControlBiometryCurrentSet");
               break;
