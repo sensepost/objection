@@ -383,7 +383,7 @@ COMMANDS = {
                         }
                     },
                     'print': {
-                        'meta': 'Print information about objects on the iOS heap',
+                        'meta': 'Print information about objects on the Android heap',
                         'commands': {
                             'fields': {
                                 'meta': 'Print instance fields for a Java object handle',
