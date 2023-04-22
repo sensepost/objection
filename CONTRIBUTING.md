@@ -2,9 +2,9 @@
 
 First off, thanks for taking the time to contribute! 🎉💥
 
-The following is some simple guidelines for contributing to the project. Before you get started though, it is highly recommended that you read the Wiki article entry available [here](https://github.com/sensepost/objection/wiki/Hacking) to get an idea of how the project is put structured and to learn about the various components.
+The following are some simple guidelines for contributing to the project. Before you get started though, it is highly recommended that you read the Wiki article entry available [here](https://github.com/sensepost/objection/wiki/Hacking) to get an idea of how the project is put structured and to learn about the various components.
 
-Finally, when submitting your pull request, please try and be as descriptive as possible about what is changing/is fixed. Ideally, including tests greatly helps fascilitate this process.
+Finally, when submitting your pull request, please try and be as descriptive as possible about what is changing/is fixed. Ideally, including tests greatly helps facilitate this process.
 
 Thanks! 🤘
 
@@ -17,11 +17,11 @@ Objection consists of two major parts. The Python command line environment and t
 
 ## Environment Setup
 
-Wether you want to contribute to the TypeScript agent or the Python command line, both components would require some setup.
+Whether you want to contribute to the TypeScript agent or the Python command line, both components would require some setup.
 
 ### Python Command Line
 
-Any Python 3 environment should do, but we recommend you use the latest version of Python. To satisfy all of the dependencies that you may need, install those defined in the [`requirements-dev.txt`](https://github.com/sensepost/objection/blob/master/requirements-dev.txt) file in the projects root. This would make all of the code dependencies available, as well as some useful debugging helpers.
+Any Python 3 environment should do, but we recommend you use the latest version of Python. To satisfy all of the dependencies that you may need, install those defined in the [`requirements-dev.txt`](https://github.com/sensepost/objection/blob/master/requirements-dev.txt) file in the project's root. This would make all of the code dependencies available, as well as some useful debugging helpers.
 
 ### TypeScript Agent
 
