@@ -20,6 +20,8 @@ from ..commands.android import keystore
 from ..commands.android import pinning as android_pinning
 from ..commands.android import proxy as android_proxy
 from ..commands.android import root
+from ..commands.android import sharedprefs
+
 from ..commands.ios import binary
 from ..commands.ios import bundles
 from ..commands.ios import cookies
@@ -496,6 +498,16 @@ COMMANDS = {
                         'meta': 'Control FLAG_SECURE of the current Activity',
                         'exec': ui.android_flag_secure
                     },
+                }
+            },
+             'sharedprefs': {
+                'meta': 'Work with shared preferences',
+                'commands': {
+                    'monitor': {
+                        'meta': 'Monitor usage of shared preferences',
+                        'flags': ['--encrypted-only'],
+                        'exec': sharedprefs.monitor
+                    }
                 }
             },
         },
