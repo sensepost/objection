@@ -264,6 +264,8 @@ def patchipa(source: str, gadget_version: str, codesign_signature: str, provisio
                    'Android 7 and up. This option can not be used with the --skip-resources flag.')
 @click.option('--skip-resources', '-D', is_flag=True, default=False,
               help='Skip resource decoding as part of the apktool processing.', show_default=False)
+@click.option('--skip-signing', '-C', is_flag=True, default=False,
+              help='Skip signing the apk file.', show_default=False)
 @click.option('--target-class', '-t', help='The target class to patch.', default=None)
 @click.option('--use-aapt2', '-2', is_flag=True, default=False,
               help='Use the aapt2 binary instead of aapt as part of the apktool processing.', show_default=False)
@@ -278,7 +280,7 @@ def patchipa(source: str, gadget_version: str, codesign_signature: str, provisio
 @click.option('--manifest', '-m', help='A decoded AndroidManifest.xml file to read.', default=None)
 def patchapk(source: str, architecture: str, gadget_version: str, pause: bool, skip_cleanup: bool,
              enable_debug: bool, skip_resources: bool, network_security_config: bool, target_class: str,
-             use_aapt2: bool, gadget_config: str, script_source: str, ignore_nativelibs: bool, manifest: str) -> None:
+             use_aapt2: bool, gadget_config: str, script_source: str, ignore_nativelibs: bool, manifest: str, skip_signing: bool) -> None:
     """
         Patch an APK with the frida-gadget.so.
     """
