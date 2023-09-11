@@ -170,6 +170,39 @@ export const empty = (): void => {
   });
 };
 
+  // remove matching itemms from the keychain
+  export const remove = (account: string, service: string): void => {
+    const searchDictionary: NSMutableDictionaryType = ObjC.classes.NSMutableDictionary.alloc().init();
+    searchDictionary.setObject_forKey_(kSec.kSecAttrSynchronizableAny, kSec.kSecAttrSynchronizable);
+    itemClasses.forEach((clazz) => {
+      // set the class-type we are querying for now & delete
+      searchDictionary.setObject_forKey_(clazz, kSec.kSecClass);
+      searchDictionary.setObject_forKey_(account, kSec.kSecAttrAccount);
+      searchDictionary.setObject_forKey_(service, kSec.kSecAttrService);
+      libObjc.SecItemDelete(searchDictionary);
+    });
+  };
+
+  // update matching item from the keychain
+  export const update = (account: string, service: string, newData: string): void => {
+    
+    const searchDictionary: NSMutableDictionaryType = ObjC.classes.NSMutableDictionary.alloc().init();    
+    searchDictionary.setObject_forKey_(kSec.kSecAttrSynchronizableAny, kSec.kSecAttrSynchronizable);
+    
+    // set the class-type we are querying for now & update
+    searchDictionary.setObject_forKey_(kSec.kSecClassGenericPassword, kSec.kSecClass);
+    searchDictionary.setObject_forKey_(account, kSec.kSecAttrAccount);
+    searchDictionary.setObject_forKey_(service, kSec.kSecAttrService);
+
+    // set the dictionary with new value
+    const itemDict: NSMutableDictionaryType = ObjC.classes.NSMutableDictionary.alloc().init();
+    const v: NSStringType = ObjC.classes.NSString.stringWithString_(newData).dataUsingEncoding_(NSUTF8StringEncoding);
+    itemDict.setObject_forKey_(account, kSec.kSecAttrAccount);    
+    itemDict.setObject_forKey_(v, kSec.kSecValueData);    
+    libObjc.SecItemUpdate(searchDictionary, itemDict); 
+    
+  };
+
 // add a string entry to the keychain
 export const add = (account: string, service: string, data: string): boolean => {
 
