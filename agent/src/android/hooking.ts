@@ -64,15 +64,36 @@ const getPatternType = (pattern: string): PatternType => {
   return PatternType.Klass;
 };
 
-export const lazyWatchForPattern = (query: string): void => {
+export const lazyWatchForPattern = (query: string, watch: boolean, dargs: boolean, dret: boolean, dbt: boolean): void => {
   // TODO: Use param to control interval
   let found = false;
+  const job: IJob = {
+    identifier: jobs.identifier(),
+    implementations: [],
+    type: `notify-class for: ${query}`,
+  };
+
+  // This method loops over all enumerate matches and then calls watch
+  // with the arguments specified in the parent function
+  const watchMatches = (matches: Java.EnumerateMethodsMatchGroup[]) => {
+    matches.forEach(match => {
+      match.classes.forEach(_class => {
+        _class.methods.forEach(_method => {
+          watchMethod(_class.name + "." + _method, job, dargs, dbt, dret);
+        })
+      })
+    })
+  }
 
   // Check if the pattern is found before starting an interval
   javaEnumerate(query).then(matches => {
     if (matches.length > 0) {
       found = true;
       send(`${c.green(query)} is already loaded / available`);
+      if (watch) {
+        watchMatches(matches);
+        jobs.add(job);
+      }
     }
   });
 
@@ -87,6 +108,10 @@ export const lazyWatchForPattern = (query: string): void => {
       if (!found && matches.length > 0) {
         send(`${c.green(query)} is now available`);
         found = true;
+        if (watch) {
+          watchMatches(matches);
+          jobs.add(job);
+        }
       }
 
       if (found) clearInterval(interval);

@@ -51,6 +51,17 @@ def _should_dump_backtrace(args: list = None) -> bool:
     return '--dump-backtrace' in args
 
 
+def _should_watch(args: list = None) -> bool:
+    """
+        Check if --dump-args is part of the arguments.
+
+        :param args:
+        :return:
+    """
+
+    return '--watch' in args
+
+
 def _should_dump_args(args: list = None) -> bool:
     """
         Check if --dump-args is part of the arguments.
@@ -207,7 +218,14 @@ def notify(args: list = None) -> None:
         return
 
     api = state_connection.get_api()
-    api.android_hooking_lazy_watch_for_pattern(query)
+    should_watch = _should_watch(args)
+    dump_arguments = _should_dump_args(args)
+    dump_backtrace = _should_dump_backtrace(args)
+    dump_return = _should_dump_return_value(args)
+    api.android_hooking_lazy_watch_for_pattern(query, 
+        should_watch, dump_arguments, 
+        dump_return, 
+        dump_backtrace)
 
 
 def watch(args: list = None) -> None:
