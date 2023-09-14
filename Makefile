@@ -19,3 +19,6 @@ upload:
 
 test:
 	python -m unittest
+
+build-docker:
+	docker build --platform linux/amd64 --tag objection:latest .
