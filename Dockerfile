@@ -3,8 +3,7 @@ FROM ubuntu:jammy AS builder
 WORKDIR /app
 
 # Install necessary tools and clean up in the same layer
-RUN apt-get update && apt-get install --no-install-recommends wget unzip openjdk-17-jre python3-pip -y && \
-    pip install --no-cache-dir --upgrade objection && \
+RUN apt-get update && apt-get install --no-install-recommends wget unzip openjdk-17-jre -y && \
     wget https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip && \
     unzip commandlinetools-linux-10406996_latest.zip && \
     rm commandlinetools-linux-10406996_latest.zip && \
