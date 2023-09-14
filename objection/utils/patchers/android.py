@@ -168,7 +168,7 @@ class AndroidGadget(BasePlatformGadget):
 
     def cleanup(self):
         """
-            Cleans up a downloaded iOS .xz gadget.
+            Cleans up downloaded .xz gadgets.
 
             :return:
         """
@@ -248,16 +248,6 @@ class AndroidPatcher(BasePlatformPatcher):
                         'https://github.com/sensepost/objection/wiki/Apktool-Upgrades', fg='yellow')
             return False
 
-        # run clean-frameworks-dir
-        click.secho('Running apktool empty-framework-dir...', dim=True)
-        o = delegator.run(self.list2cmdline([
-            self.required_commands['apktool']['location'],
-            'empty-framework-dir',
-        ]), timeout=self.command_run_timeout).out.strip()
-
-        if len(o) > 0:
-            click.secho(o, fg='yellow', dim=True)
-
         return True
 
     def set_apk_source(self, source: str):
@@ -304,14 +294,14 @@ class AndroidPatcher(BasePlatformPatcher):
 
         if not self.aapt:
             o = delegator.run(self.list2cmdline([
-                self.required_commands['aapt']['location'],
+                self.required_commands['aapt2']['location'],
                 'dump',
                 'badging',
                 self.apk_source
             ]), timeout=self.command_run_timeout)
 
             if len(o.err) > 0:
-                click.secho('An error may have occurred while running aapt.', fg='red')
+                click.secho('An error may have occurred while running aapt2.', fg='red')
                 click.secho(o.err, fg='red')
 
             self.aapt = o.out
@@ -876,7 +866,7 @@ class AndroidPatcher(BasePlatformPatcher):
             click.secho('Adding a gadget configuration file...', fg='green')
             shutil.copyfile(gadget_config, os.path.join(libs_path, 'libfrida-gadget.config.so'))
 
-    def build_new_apk(self, use_aapt2: bool = False):
+    def build_new_apk(self, use_aapt2: bool = True):
         """
             Build a new .apk with the frida-gadget patched in.
 
