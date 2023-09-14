@@ -26,7 +26,6 @@ RUN apt-get update && apt-get install --no-install-recommends openjdk-17-jre pyt
     mkdir android_sdk
 
 # Copy necessary files from builder stage
-RUN pip3 install --upgrade objection
 COPY --from=builder /app/android_sdk/build-tools/27.0.3/aapt2 /app/android_sdk
 COPY --from=builder /app/android_sdk/build-tools/27.0.3/aapt /app/android_sdk
 COPY --from=builder /app/android_sdk/build-tools/27.0.3/lib /app/android_sdk/lib
