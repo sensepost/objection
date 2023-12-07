@@ -6,10 +6,10 @@ clean:
 	$(RM) $(DIST_DIR)/*
 
 frida-agent:
-	cd agent && npm run build
+	cd agent && yarn install && yarn build
 
 sdist:
-	python setup.py sdist
+	python3 setup.py sdist
 
 testupload:
 	twine upload dist/* -r testpypi
