@@ -6,7 +6,7 @@ clean:
 	$(RM) $(DIST_DIR)/*
 
 frida-agent:
-	cd agent && yarn install --non-interactive && yarn build
+	cd agent && yarn install && yarn build
 
 sdist:
 	python3 setup.py sdist
