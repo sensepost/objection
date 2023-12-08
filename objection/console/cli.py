@@ -267,7 +267,7 @@ def patchipa(source: str, gadget_version: str, codesign_signature: str, provisio
 @click.option('--skip-signing', '-C', is_flag=True, default=False,
               help='Skip signing the apk file.', show_default=False)
 @click.option('--target-class', '-t', help='The target class to patch.', default=None)
-@click.option('--use-aapt2', '-2', is_flag=True, default=False,
+@click.option('--use-aapt2', '-2', is_flag=True, default=True,
               help='Use the aapt2 binary instead of aapt as part of the apktool processing.', show_default=False)
 @click.option('--gadget-config', '-c', default=None, help=(
         'The gadget configuration file to use. '
