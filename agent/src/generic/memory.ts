@@ -45,25 +45,11 @@ export const search = (pattern: string, onlyOffsets: boolean = false): string[] 
   return addresses.reduce((a, b) => a.concat(b));
 };
 
-export const replace = (pattern: string, replace: number[]): string[] => {
-  const addresses = listRanges("rw-")
-    .map((range) => {
-      return Memory.scanSync(range.base, range.size, pattern)
-        .map((match) => {
-          try {
-            match.address.writeByteArray(replace);  
-          } catch (error) {
-            return "Failed to replace at " + match.address.toString();
-          }
-          return match.address.toString();
-        });
-    }).filter((m) => m.length !== 0);
-
-  if (addresses.length <= 0) {
-    return [];
-  }
-
-  return addresses.reduce((a, b) => a.concat(b));
+export const replace = (pattern: string, replace: number[]): string[] => {  
+  return search(pattern, true).map((match) => {
+    write(match, replace);
+    return match;
+  })
 };
 
 export const write = (address: string, value: number[]): void => {
