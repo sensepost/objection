@@ -7,5 +7,7 @@ export const memory = {
   memoryListModules: (): Module[] => m.listModules(),
   memoryListRanges: (protection: string): RangeDetails[] => m.listRanges(protection),
   memorySearch: (pattern: string, onlyOffsets: boolean): string[] => m.search(pattern, onlyOffsets),
+  memoryReplace: (pattern: string, replace: number[]): string[] => m.replace(pattern, replace),
   memoryWrite: (address: string, value: number[]): void => m.write(address, value),
+
 };
