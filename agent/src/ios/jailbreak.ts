@@ -1,4 +1,3 @@
-import { setReturnValue } from "../android/hooking";
 import { colors as c } from "../lib/color";
 import { IJob } from "../lib/interfaces";
 import * as jobs from "../lib/jobs";
@@ -1127,6 +1126,7 @@ const inet_addr = (success: boolean, ident: string): InvocationListener => {
 
 
 // TODO: popen; ssh loopback; posix_spawn; dlsym
+// TODO: This file is getting large, future me will streamline this file
 
 export const disable = (): void => {
   const job: IJob = {
