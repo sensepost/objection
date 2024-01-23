@@ -199,7 +199,7 @@ class AndroidPatcher(BasePlatformPatcher):
         }
     }
 
-    def __init__(self, skip_cleanup: bool = False, skip_resources: bool = False, manifest: str = None):
+    def __init__(self, skip_cleanup: bool = False, skip_resources: bool = False, manifest: str = None, only_main_classes: bool = False):
         super(AndroidPatcher, self).__init__()
 
         self.apk_source = None
@@ -405,6 +405,7 @@ class AndroidPatcher(BasePlatformPatcher):
             '-f',
             '-r' if self.skip_resources else '',
             '-o',
+            '--only-main-classes' if self.only_main_classes else '',
             self.apk_temp_directory,
             self.apk_source
         ]), timeout=self.command_run_timeout)
@@ -412,7 +413,7 @@ class AndroidPatcher(BasePlatformPatcher):
         if len(o.err) > 0:
             click.secho('An error may have occurred while extracting the APK.', fg='red')
             click.secho(o.err, fg='red')
-
+            
     def inject_internet_permission(self):
         """
             Checks the status of the source APK to see if it
