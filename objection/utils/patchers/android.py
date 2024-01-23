@@ -214,6 +214,7 @@ class AndroidPatcher(BasePlatformPatcher):
         self.keystore = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../assets', 'objection.jks')
         self.netsec_config = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../assets',
                                           'network_security_config.xml')
+        self.only_main_classes = only_main_classes
 
     def is_apktool_ready(self) -> bool:
         """
@@ -404,8 +405,8 @@ class AndroidPatcher(BasePlatformPatcher):
             'decode',
             '-f',
             '-r' if self.skip_resources else '',
-            '-o',
             '--only-main-classes' if self.only_main_classes else '',
+            '-o',
             self.apk_temp_directory,
             self.apk_source
         ]), timeout=self.command_run_timeout)

@@ -281,7 +281,7 @@ def patchipa(source: str, gadget_version: str, codesign_signature: str, provisio
 @click.option('--only-main-classes', help="Only patch classes that are in the main dex file.", is_flag=True, default=False)
 def patchapk(source: str, architecture: str, gadget_version: str, pause: bool, skip_cleanup: bool,
              enable_debug: bool, skip_resources: bool, network_security_config: bool, target_class: str,
-             use_aapt2: bool, gadget_config: str, script_source: str, ignore_nativelibs: bool, manifest: str, skip_signing: bool) -> None:
+             use_aapt2: bool, gadget_config: str, script_source: str, ignore_nativelibs: bool, manifest: str, skip_signing: bool, only_main_classes:bool = False) -> None:
     """
         Patch an APK with the frida-gadget.so.
     """
