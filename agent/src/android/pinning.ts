@@ -180,7 +180,7 @@ const okHttp3CertificatePinnerExpanded = (ident: string): any | undefined => {
           CertificatePinnerCheckOkHttp.implementation = function (str,cert) {
             qsend(quiet,
               c.blackBright(`[${ident}] `) + `Called check$okhttp ` +
-              c.green(`OkHTTP 3.x CertificatePinner.check$okhttp()`) +
+              c.green(`OkHTTP 3.x CertificatePinner.check$okhttp() - `) +
               str,
           } catch(err) {
             qsend(quiet,
@@ -195,7 +195,7 @@ const okHttp3CertificatePinnerExpanded = (ident: string): any | undefined => {
           CertificatePinnerCheckOkHttp.implementation = function (str,cert_array) {
             qsend(quiet,
               c.blackBright(`[${ident}] `) + `Called check$okhttp ` +
-              c.green(`OkHTTP 3.x CertificatePinner.check$okhttp()`) +
+              c.green(`OkHTTP 3.x CertificatePinner.check$okhttp() - `) +
               str,
           } catch(err) {
             qsend(quiet,
@@ -374,6 +374,7 @@ export const disable = (q: boolean): void => {
   job.implementations.push(sslContextEmptyTrustManager(job.identifier));
   job.implementations.push(okHttp3CertificatePinnerCheck(job.identifier));
   job.implementations.push(okHttp3CertificatePinnerCheckOkHttp(job.identifier));
+  job.implementations.push(okHttp3CertificatePinnerExpanded(job.identifier));
   job.implementations.push(appceleratorTitaniumPinningTrustManager(job.identifier));
   job.implementations.push(trustManagerImplVerifyChainCheck(job.identifier));
   job.implementations.push(trustManagerImplCheckTrustedRecursiveCheck(job.identifier));
