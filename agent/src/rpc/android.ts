@@ -9,6 +9,7 @@ import * as root from "../android/root";
 import * as androidshell from "../android/shell";
 import * as userinterface from "../android/userinterface";
 import * as proxy from "../android/proxy";
+import * as sharedprefs from "../android/sharedprefs";
 import * as general from "../android/general";
 
 import {
@@ -91,4 +92,7 @@ export const android = {
   // android user interface
   androidUiScreenshot: () => userinterface.screenshot(),
   androidUiSetFlagSecure: (v: boolean): Promise<void> => userinterface.setFlagSecure(v),
+
+  // android shared preferences
+  androidSharedprefsMonitor: (encrypted_only: boolean) => sharedprefs.monitor(encrypted_only),
 };
