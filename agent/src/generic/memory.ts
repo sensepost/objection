@@ -45,6 +45,13 @@ export const search = (pattern: string, onlyOffsets: boolean = false): string[] 
   return addresses.reduce((a, b) => a.concat(b));
 };
 
+export const replace = (pattern: string, replace: number[]): string[] => {  
+  return search(pattern, true).map((match) => {
+    write(match, replace);
+    return match;
+  })
+};
+
 export const write = (address: string, value: number[]): void => {
   new NativePointer(address).writeByteArray(value);
 };

@@ -225,6 +225,12 @@ COMMANDS = {
                 'exec': memory.find_pattern
             },
 
+            'replace': {
+                'meta': 'Search and replace pattern in the applications memory',
+                'flags': ['--string-pattern', '--string-replace'],
+                'exec': memory.replace_pattern
+            },
+
             'write': {
                 'meta': 'Write raw bytes to a memory address. Use with caution!',
                 'flags': ['--string'],
