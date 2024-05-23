@@ -527,6 +527,16 @@ COMMANDS = {
                         'meta': 'Delete all keychain entries for the current app\'s entitlement group',
                         'exec': keychain.clear
                     },
+                    'remove': {
+                        'meta': 'Remove an entry from the iOS keychain',
+                        'flags': ['--account', '--service'],
+                        'exec': keychain.remove
+                    },
+                    'update': {
+                        'meta': 'Update an entry from the iOS keychain',
+                        'flags': ['--account', '--service', '--newData'],
+                        'exec': keychain.update
+                    },                     
                     'add': {
                         'meta': 'Add an entry to the iOS keychain',
                         'flags': ['--account', '--service', '--data'],

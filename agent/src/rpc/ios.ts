@@ -96,6 +96,9 @@ export const ios = {
   // ios keychain
   iosKeychainAdd: (account: string, service: string, data: string): boolean =>
     ioskeychain.add(account, service, data),
+  iosKeychainRemove: (account: string, service: string): void => ioskeychain.remove(account, service),
+  iosKeychainUpdate: (account: string, service: string, newData: string): void => 
+    ioskeychain.update(account, service, newData),    
   iosKeychainEmpty: (): void => ioskeychain.empty(),
   iosKeychainList: (smartDecode): IKeychainItem[] => ioskeychain.list(smartDecode),
   iosKeychainListRaw: (): void => ioskeychain.listRaw(),
