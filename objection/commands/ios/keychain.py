@@ -149,6 +149,10 @@ def remove(args: list) -> None:
     account = _get_flag_value(args, '--account')
     service = _get_flag_value(args, '--service')
 
+    if not account or not service:
+        click.secho('Either --account or --service is not set. We need both', bold=True)
+        return
+
     click.secho('Removing entry from the iOS keychain...', dim=True)
     click.secho('Account:  {0}'.format(account), dim=True)
     click.secho('Service:  {0}'.format(service), dim=True)
@@ -156,7 +160,7 @@ def remove(args: list) -> None:
     api = state_connection.get_api()
     api.ios_keychain_remove(account, service);
     click.secho('Successfully removed matching keychain items', fg='green')
-    
+
 
 def update(args: list) -> None:
     """
@@ -168,17 +172,22 @@ def update(args: list) -> None:
 
     account = _get_flag_value(args, '--account')
     service = _get_flag_value(args, '--service')
-    newData = _get_flag_value(args, '--newData')
+    newdata = _get_flag_value(args, '--newdata')
+
+    if not account or not service or not newdata:
+        click.secho('All flags need to be set, incl. --account, --service and --newdata')
+        return
 
     click.secho('Updating entries from the iOS keychain...', dim=True)
     click.secho('Account:   {0}'.format(account), dim=True)
     click.secho('Service:   {0}'.format(service), dim=True)
-    click.secho('New Data:  {0}'.format(newData), dim=True)
+    click.secho('New Data:  {0}'.format(newdata), dim=True)
 
     api = state_connection.get_api()
-    api.ios_keychain_update(account, service, newData);
+    api.ios_keychain_update(account, service, newdata)
     click.secho('Successfully updated matching keychain item', fg='green')
-   
+
+
 def add(args: list) -> None:
     """
         Adds a new kSecClassGenericPassword keychain entry to the keychain
@@ -189,7 +198,7 @@ def add(args: list) -> None:
 
     if not _data_flag_has_identifier(args):
         click.secho('When specifying the --data flag, either --account or '
-                    '--server should also be added', fg='red')
+                    '--service should also be added', fg='red')
         return
 
     account = _get_flag_value(args, '--account')
