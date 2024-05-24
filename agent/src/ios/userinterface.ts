@@ -1,8 +1,8 @@
 // tslint:disable-next-line:no-var-requires
 const sc = require("frida-screenshot");
-import { colors as c } from "../lib/color";
-import { IJob } from "../lib/interfaces";
-import * as jobs from "../lib/jobs";
+import { colors as c } from "../lib/color.js";
+import { IJob } from "../lib/interfaces.js";
+import * as jobs from "../lib/jobs.js";
 
 
 export const screenshot = (): any => {
@@ -128,7 +128,11 @@ export const biometricsBypass = (): void => {
   });
 
   // register the job
-  policyJob.invocations.push(lacontext1);
+  if (policyJob.invocations) {
+    policyJob.invocations.push(lacontext1);
+  } else {
+    policyJob.invocations = [ lacontext1 ];
+  }
   jobs.add(policyJob);
 
   // -- Sample Swift
@@ -186,6 +190,10 @@ export const biometricsBypass = (): void => {
   });
 
   // register the job
-  accessControlJob.invocations.push(lacontext2);
+  if (accessControlJob.invocations) {
+    accessControlJob.invocations.push(lacontext2);
+  } else {
+    accessControlJob.invocations = [ lacontext2 ];
+  }
   jobs.add(accessControlJob);
 };

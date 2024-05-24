@@ -1,4 +1,4 @@
-import * as m from "../generic/memory";
+import * as m from "../generic/memory.js";
 
 export const memory = {
 

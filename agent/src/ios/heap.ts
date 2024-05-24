@@ -1,6 +1,6 @@
-import { colors as c } from "../lib/color";
-import { bytesToUTF8 } from "./lib/helpers";
-import { IHeapObject } from "./lib/interfaces";
+import { colors as c } from "../lib/color.js";
+import { bytesToUTF8 } from "./lib/helpers.js";
+import { IHeapObject } from "./lib/interfaces.js";
 
 
 const enumerateInstances = (clazz: string): ObjC.Object[] => {
@@ -19,21 +19,25 @@ const enumerateInstances = (clazz: string): ObjC.Object[] => {
 
 export const getInstances = (clazz: string): IHeapObject[] => {
   c.log(`${c.blackBright(`Enumerating live instances of`)} ${c.greenBright(clazz)}...`);
+  
+  const instances: IHeapObject[] = [];
 
-  return enumerateInstances(clazz).map((instance): IHeapObject => {
+  enumerateInstances(clazz).map((instance) => {
     try {
-      return {
+      instances.push({
         className: instance.$className,
         handle: instance.handle.toString(),
         ivars: instance.$ivars,
         kind: instance.$kind,
         methods: instance.$ownMethods,
         superClass: instance.$superClass.$className,
-      };
+      });
     } catch (err) {
       c.log(`Warning: ${c.yellowBright((err as Error).message)}`);
     }
   });
+
+  return instances;
 };
 
 const resolvePointer = (pointer: string): ObjC.Object => {
@@ -51,7 +55,7 @@ export const getIvars = (pointer: string, toUTF8: boolean): [string, any[string]
   // just gone and replaces values in $ivars, but there are some
   // access errors for that.
   if (toUTF8) {
-    const $clonedIvars = {};
+    const $clonedIvars: {[name: string]: any} = {};
     c.log(c.blackBright(`Converting ivar values to UTF8 strings...`));
     for (const k in $ivars) {
       if ($ivars.hasOwnProperty(k)) {

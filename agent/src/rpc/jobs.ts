@@ -1,4 +1,4 @@
-import * as j from "../lib/jobs";
+import * as j from "../lib/jobs.js";
 
 export const jobs = {
   // jobs

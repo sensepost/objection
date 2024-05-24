@@ -1,9 +1,9 @@
 import util from "util";
-import { colors as c } from "./color";
+import { colors as c } from "./color.js";
 
 // sure, TS does not support this, but meh.
 // https://www.reddit.com/r/typescript/comments/87i59e/beginner_advice_strongly_typed_function_for/
-export function reverseEnumLookup<T>(enumType: T, value: string): string | undefined {
+export function reverseEnumLookup<T>(enumType: T, value: string): string {
   for (const key in enumType) {
 
     if (Object.hasOwnProperty.call(enumType, key) && enumType[key] as any === value) {
@@ -11,14 +11,14 @@ export function reverseEnumLookup<T>(enumType: T, value: string): string | undef
     }
   }
 
-  return undefined;
+  return "";
 }
 
 // converts a hexstring to a bytearray
 export const hexStringToBytes = (str: string): Uint8Array => {
-  const a = [];
+  var a: number[] = [];
   for (let i = 0, len = str.length; i < len; i += 2) {
-    a.push(parseInt(str.substr(i, 2), 16));
+    a.push(parseInt(str.substring(i, i+2), 16));
   }
 
   return new Uint8Array(a);
@@ -48,7 +48,7 @@ export const debugDump = (o: any, depth: number = 2): void => {
 };
 
 // a small helper method to format JSON nicely before printing
-function printArgs(args: JSON): string {
+function printArgs(args: {[key: string]:object}): string {
   let printableString: string = " (\n";
   for (const arg in args) {
     printableString += `  ${c.blue(arg)} : ${args[arg]}\n`;

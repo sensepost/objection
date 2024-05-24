@@ -1,4 +1,4 @@
-import { wrapJavaPerform } from "./lib/libjava";
+import { wrapJavaPerform } from "./lib/libjava.js";
 
 export const deoptimize = (): Promise<void> => {
   return wrapJavaPerform(() => {

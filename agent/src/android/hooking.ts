@@ -1,12 +1,12 @@
-import { colors as c } from "../lib/color";
-import { IJob } from "../lib/interfaces";
-import * as jobs from "../lib/jobs";
-import { ICurrentActivityFragment } from "./lib/interfaces";
+import { colors as c } from "../lib/color.js";
+import { IJob } from "../lib/interfaces.js";
+import * as jobs from "../lib/jobs.js";
+import { ICurrentActivityFragment } from "./lib/interfaces.js";
 import {
   getApplicationContext,
   R,
   wrapJavaPerform
-} from "./lib/libjava";
+} from "./lib/libjava.js";
 import {
   Activity,
   ActivityClientRecord,
@@ -16,7 +16,7 @@ import {
   PackageManager,
   Throwable,
   JavaMethodsOverloadsResult,
-} from "./lib/types";
+} from "./lib/types.js";
 
 enum PatternType {
   Regex = 'regex',
@@ -400,7 +400,12 @@ const watchMethod = (
       };
 
       // Push the implementation so that it can be nulled later
-      job.implementations.push(m);
+      if (job.implementations) {
+        job.implementations.push(m);
+      } else {
+        job.implementations = [ m ];
+      }
+
     });
   });
 };
@@ -468,7 +473,7 @@ export const getServices = (): Promise<string[]> => {
     // not using the helper as we need other variables too
     const context = currentApplication.getApplicationContext();
 
-    let services = [];
+    var services: string[] = [];
 
     currentApplication.mLoadedApk.value.mServices.value.values().toArray().map((potentialServices) => {
       Java.cast(potentialServices, arrayMap).keySet().toArray().map((service) => {
@@ -502,7 +507,7 @@ export const getBroadcastReceivers = (): Promise<string[]> => {
       GET_RECEIVERS
     ).receivers.value
 
-    let receivers = [];
+    var receivers: string[] = [];
 
     currentApplication.mLoadedApk.value.mReceivers.value.values().toArray().map((potentialReceivers) => {
       Java.cast(potentialReceivers, arrayMap).keySet().toArray().map((receiver) => {
@@ -565,7 +570,12 @@ export const setReturnValue = (fqClazz: string, filterOverload: string | null, n
       };
 
       // record override
-      job.implementations.push(m);
+      if (job.implementations) {
+        job.implementations.push(m);
+      } else {
+        job.implementations = [ m ];
+      }
+      
     });
 
     jobs.add(job);

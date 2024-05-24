@@ -1,6 +1,6 @@
-import { colors as c } from "../lib/color";
-import { IJob } from "../lib/interfaces";
-import * as jobs from "../lib/jobs";
+import { colors as c } from "../lib/color.js";
+import { IJob } from "../lib/interfaces.js";
+import * as jobs from "../lib/jobs.js";
 
 
 export const getClasses = () => {
@@ -85,9 +85,9 @@ const watchMethod = (selector: string, job: IJob, dargs: boolean, dbt: boolean,
   dret: boolean): void => {
 
   const resolver = new ApiResolver("objc");
-  let matchedMethod = {
-    address: undefined,
-    name: undefined,
+  let matchedMethod: ApiResolverMatch = {
+    address: NULL,
+    name: '',
   };
 
   // handle the resolvers error it may throw if the selector format is off.
@@ -164,8 +164,12 @@ const watchMethod = (selector: string, job: IJob, dargs: boolean, dbt: boolean,
       send(c.blackBright(`[${job.identifier}] `) + `Return Value: ${c.red(retval.toString())}`);
     },
   });
-
-  job.invocations.push(watchInvocation);
+  if (job.invocations) {
+    job.invocations.push(watchInvocation);
+  } else {
+    job.invocations = [ watchInvocation ];
+  }
+  
 };
 
 export const setMethodReturn = (selector: string, returnValue: boolean): void => {
@@ -173,9 +177,9 @@ export const setMethodReturn = (selector: string, returnValue: boolean): void =>
   const FALSE = new NativePointer(0x0);
 
   const resolver = new ApiResolver("objc");
-  let matchedMethod = {
-    address: undefined,
-    name: undefined,
+  let matchedMethod: ApiResolverMatch = {
+    address: NULL,
+    name: '',
   };
 
   // handle the resolvers error it may throw if the selector format
@@ -239,6 +243,10 @@ export const setMethodReturn = (selector: string, returnValue: boolean): void =>
   });
 
   // register the job
-  job.invocations.push(watchInvocation);
+  if (job.invocations) {
+    job.invocations.push(watchInvocation);
+  } else {
+    job.invocations = [ watchInvocation ];
+  };
   jobs.add(job);
 };

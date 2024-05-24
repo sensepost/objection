@@ -1,11 +1,11 @@
-import { IExecutedCommand } from "./lib/interfaces";
-import { wrapJavaPerform } from "./lib/libjava";
+import { IExecutedCommand } from "./lib/interfaces.js";
+import { wrapJavaPerform } from "./lib/libjava.js";
 import {
   BufferedReader,
   InputStreamReader,
   Runtime,
   StringBuilder
-} from "./lib/types";
+} from "./lib/types.js";
 
 
 // Executes shell commands on an Android device using Runtime.getRuntime().exec()

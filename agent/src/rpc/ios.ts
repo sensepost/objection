@@ -1,21 +1,21 @@
-import * as binary from "../ios/binary";
-import * as binarycookies from "../ios/binarycookies";
-import * as bundles from "../ios/bundles";
-import * as credentialstorage from "../ios/credentialstorage";
-import * as iosfilesystem from "../ios/filesystem";
-import * as heap from "../ios/heap";
-import * as hooking from "../ios/hooking";
-import * as ioscrypto from "../ios/crypto";
-import * as iosjailbreak from "../ios/jailbreak";
-import * as ioskeychain from "../ios/keychain";
-import * as nsuserdefaults from "../ios/nsuserdefaults";
-import * as pasteboard from "../ios/pasteboard";
-import * as sslpinning from "../ios/pinning";
-import * as plist from "../ios/plist";
-import * as userinterface from "../ios/userinterface";
+import * as binary from "../ios/binary.js";
+import * as binarycookies from "../ios/binarycookies.js";
+import * as bundles from "../ios/bundles.js";
+import * as credentialstorage from "../ios/credentialstorage.js";
+import * as iosfilesystem from "../ios/filesystem.js";
+import * as heap from "../ios/heap.js";
+import * as hooking from "../ios/hooking.js";
+import * as ioscrypto from "../ios/crypto.js";
+import * as iosjailbreak from "../ios/jailbreak.js";
+import * as ioskeychain from "../ios/keychain.js";
+import * as nsuserdefaults from "../ios/nsuserdefaults.js";
+import * as pasteboard from "../ios/pasteboard.js";
+import * as sslpinning from "../ios/pinning.js";
+import * as plist from "../ios/plist.js";
+import * as userinterface from "../ios/userinterface.js";
 
-import { BundleType } from "../ios/lib/constants";
-import { NSUserDefaults } from "../ios/lib/types";
+import { BundleType } from "../ios/lib/constants.js";
+import { NSUserDefaults } from "../ios/lib/types.js";
 import {
   IBinaryModuleDictionary,
   ICredential,
@@ -24,7 +24,7 @@ import {
   IIosCookie,
   IIosFileSystem,
   IKeychainItem,
-} from "../ios/lib/interfaces";
+} from "../ios/lib/interfaces.js";
 
 
 export const ios = {
@@ -100,7 +100,7 @@ export const ios = {
   iosKeychainUpdate: (account: string, service: string, newData: string): void => 
     ioskeychain.update(account, service, newData),    
   iosKeychainEmpty: (): void => ioskeychain.empty(),
-  iosKeychainList: (smartDecode): IKeychainItem[] => ioskeychain.list(smartDecode),
+  iosKeychainList: (smartDecode: boolean = false): IKeychainItem[] => ioskeychain.list(smartDecode),
   iosKeychainListRaw: (): void => ioskeychain.listRaw(),
 
   // ios nsuserdefaults

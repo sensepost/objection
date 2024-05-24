@@ -1,26 +1,26 @@
 // dumps all of the keychain items available to the current
 // application.
-import { colors as c } from "../lib/color";
-import { reverseEnumLookup } from "../lib/helpers";
+import { colors as c } from "../lib/color.js";
+import { reverseEnumLookup } from "../lib/helpers.js";
 import {
   kSec,
   NSUTF8StringEncoding
-} from "./lib/constants";
+} from "./lib/constants.js";
 import {
   bytesToHexString,
   bytesToUTF8,
   smartDataToString
-} from "./lib/helpers";
+} from "./lib/helpers.js";
 import {
   IKeychainData,
   IKeychainItem
-} from "./lib/interfaces";
-import { libObjc } from "./lib/libobjc";
+} from "./lib/interfaces.js";
+import { libObjc } from "./lib/libobjc.js";
 import {
   NSDictionary,
   NSMutableDictionary as NSMutableDictionaryType,
   NSString as NSStringType,
-} from "./lib/types";
+} from "./lib/types.js";
 
 // keychain item times to query for
 const itemClasses = [
@@ -109,8 +109,11 @@ const enumerateKeychain = (): IKeychainData[] => {
 
     return data;
   });
+  
+  const keyChainData: IKeychainData[] = [];
+  keyChainData.concat(...itemClassResults).filter((n) => n !== undefined);
 
-  return [].concat(...itemClassResults).filter((n) => n !== undefined);
+  return keyChainData;
 };
 
 // print raw entries using some Frida magic

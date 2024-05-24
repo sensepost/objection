@@ -1,9 +1,9 @@
-import { colors as c } from "../lib/color";
+import { colors as c } from "../lib/color.js";
 import {
   getApplicationContext,
   wrapJavaPerform
-} from "./lib/libjava";
-import { ClipboardManager } from "./lib/types";
+} from "./lib/libjava.js";
+import { ClipboardManager } from "./lib/types.js";
 
 export const monitor = (): Promise<void> => {
   // -- Sample Java

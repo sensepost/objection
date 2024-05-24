@@ -1,4 +1,4 @@
-import { NSDictionary } from "./types";
+import { NSDictionary } from "./types.js";
 
 export interface IKeychainData {
   clazz: string;
