@@ -1,14 +1,22 @@
-import { colors as c } from "../lib/color";
-import { fsend } from "../lib/helpers";
-import { IJob } from "../lib/interfaces";
-import * as jobs from "../lib/jobs";
+import { colors as c } from "../lib/color.js";
+import { fsend } from "../lib/helpers.js";
+import { IJob } from "../lib/interfaces.js";
+import * as jobs from "../lib/jobs.js";
 import {
   arrayBufferToHex,
   hexToString
-} from "./lib/helpers";
+} from "./lib/helpers.js";
+
+type CCAlgorithm = {
+  [key: number]: { name: string; blocksize: number };
+};
+
+type AlgorithmType = {
+  [key: number]: string;
+};
 
 // Encryption algorithms implemented by this module.
-const CCAlgorithm = {
+const CCAlgorithm: CCAlgorithm = {
   0: { name: "kCCAlgorithmAES128", blocksize: 16 },
   1: { name: "kCCAlgorithmDES", blocksize: 8 },
   2: { name: "kCCAlgorithm3DES", blocksize: 8 },
@@ -18,24 +26,24 @@ const CCAlgorithm = {
 };
 
 // Encryption algorithms implemented by this module.
-const CCOperation = {
+const CCOperation: AlgorithmType = {
   0: "kCCEncrypt",
   1: "kCCDecrypt"
 };
 
 // Options flags, passed to CCCryptorCreate().
-const CCOption = {
+const CCOption: AlgorithmType = {
   1: "kCCOptionPKCS7Padding",
   2: "kCCOptionECBMode"
 };
 
 // alg for pbkdf. Right now only pbkdf2 is supported by CommonCrypto
-const CCPBKDFAlgorithm = {
+const CCPBKDFAlgorithm: AlgorithmType = {
   2: "kCCPBKDF2"
 };
 
 // alg for prt for pbkdf
-const CCPseudoRandomAlgorithm = {
+const CCPseudoRandomAlgorithm: AlgorithmType = {
   1: "kCCPRFHmacAlgSHA1",
   2: "kCCPRFHmacAlgSHA224",
   3: "kCCPRFHmacAlgSHA256",
@@ -45,7 +53,7 @@ const CCPseudoRandomAlgorithm = {
 
 
 // ident for crypto hooks job
-let cryptoidentifier: string = null;
+let cryptoidentifier: string = "";
 
 // operation being performed 0=encrypt 1=decrypt
 let op = 0;
@@ -57,7 +65,7 @@ let alg = 0;
 // keep track of all the output bytes.
 // this is necessary because CCCryptorUpdate needs to be
 // append the final block from CCCryptorFinal
-let dataOutBytes = null;
+let dataOutBytes: string = "";
 
 const secrandomcopybytes = (ident: string): InvocationListener => {
   const hook = "SecRandomCopyBytes";
@@ -334,12 +342,12 @@ export const monitor = (): void => {
 
   const job: IJob = {
     identifier: jobs.identifier(),
-    invocations: [],
     type: "ios-crypto-monitor",
   };
 
+  job.invocations = [];
   cryptoidentifier = job.identifier;
-
+  
   job.invocations.push(secrandomcopybytes(job.identifier));
   job.invocations.push(cckeyderivationpbkdf(job.identifier));
   job.invocations.push(cccrypt(job.identifier));

@@ -1,4 +1,4 @@
-import { NSMutableDictionary } from "./lib/types";
+import { NSMutableDictionary } from "./lib/types.js";
 
 
 export const read = (path: string): string => {

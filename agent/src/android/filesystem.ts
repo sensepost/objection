@@ -1,14 +1,14 @@
 import * as fs from "fs";
-import { hexStringToBytes } from "../lib/helpers";
-import { IAndroidFilesystem } from "./lib/interfaces";
+import { hexStringToBytes } from "../lib/helpers.js";
+import { IAndroidFilesystem } from "./lib/interfaces.js";
 import {
   getApplicationContext,
   wrapJavaPerform
-} from "./lib/libjava";
+} from "./lib/libjava.js";
 import {
   File,
   JavaClass
-} from "./lib/types";
+} from "./lib/types.js";
 
 export const exists = (path: string): Promise<boolean> => {
   // -- Sample Java

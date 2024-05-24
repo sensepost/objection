@@ -1,9 +1,9 @@
-import { colors as c } from "../lib/color";
+import { colors as c } from "../lib/color.js";
 import {
   getApplicationContext,
   wrapJavaPerform
-} from "./lib/libjava";
-import { Intent } from "./lib/types";
+} from "./lib/libjava.js";
+import { Intent } from "./lib/types.js";
 
 // https://developer.android.com/reference/android/content/Intent.html#FLAG_ACTIVITY_NEW_TASK
 const FLAG_ACTIVITY_NEW_TASK = 0x10000000;

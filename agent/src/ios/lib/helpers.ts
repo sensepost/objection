@@ -1,10 +1,10 @@
-import { NSUTF8StringEncoding } from "./constants";
+import { NSUTF8StringEncoding } from "./constants.js";
 import {
   NSBundle,
   NSDictionary,
   NSFileManager,
   NSString as NSStringType
-} from "./types";
+} from "./types.js";
 
 // Attempt to unarchive data. Returning a string of `` indicates that the
 // unarchiving failed.
@@ -30,8 +30,8 @@ export const unArchiveDataAndGetString = (data: ObjC.Object | any): string => {
       case "__NSDictionaryI":
         const dict: NSDictionary = new ObjC.Object(unArchivedData);
         const enumerator = dict.keyEnumerator();
-        let key;
-        const s: object = {};
+        let key: string;
+        const s: {[key: string]: any } = {};
 
         // tslint:disable-next-line:no-conditional-assignment
         while ((key = enumerator.nextObject()) !== null) {
@@ -136,7 +136,7 @@ export const getNSMainBundle = (): NSBundle => {
   return bundle.mainBundle();
 };
 
-export const arrayBufferToHex = (arrayBuffer): string => {
+export const arrayBufferToHex = (arrayBuffer: ArrayBuffer | null): string => {
   if (typeof arrayBuffer !== 'object' || arrayBuffer === null || typeof arrayBuffer.byteLength !== 'number') {
     throw new TypeError('Expected input to be an ArrayBuffer');
   }
@@ -153,10 +153,10 @@ export const arrayBufferToHex = (arrayBuffer): string => {
   return result;
 };
 
-export const hexToString = (hexx): string => {
+export const hexToString = (hexx: string): string => {
   const hex = hexx.toString(); // force conversion
   let str = '';
-  for (let i = 0; (i < hex.length && hex.substr(i, 2) !== '00'); i += 2)
-    str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+  for (let i = 0; (i < hex.length && hex.substring(i, i+2) !== '00'); i += 2)
+    str += String.fromCharCode(parseInt(hex.substring(i, i+2), 16));
   return str;
 };

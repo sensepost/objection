@@ -30,13 +30,13 @@
   "dependencies": {
     "frida-java-bridge": "^6",
     "frida-objc-bridge": "^7",
-    "frida-screenshot": "^3",
+    "frida-screenshot": "^5",
     "macho": "^1"
   },
   "devDependencies": {
     "@types/frida-gum": "^18",
-    "@types/node": "^17",
-    "frida-compile": "^10",
+    "@types/node": "^18",
+    "frida-compile": "^16",
     "tslint": "^6"
   }
 }

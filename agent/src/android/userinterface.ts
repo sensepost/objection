@@ -1,5 +1,5 @@
-import { colors as c } from "../lib/color";
-import { wrapJavaPerform } from "./lib/libjava";
+import { colors as c } from "../lib/color.js";
+import { wrapJavaPerform } from "./lib/libjava.js";
 import {
   Activity,
   ActivityClientRecord,
@@ -7,7 +7,7 @@ import {
   Bitmap,
   ByteArrayOutputStream,
   CompressFormat,
-} from "./lib/types";
+} from "./lib/types.js";
 
 
 // https://developer.android.com/reference/android/view/WindowManager.LayoutParams.html#FLAG_SECURE

@@ -1,6 +1,6 @@
-import { colors as c } from "../lib/color";
-import { IJob } from "../lib/interfaces";
-import * as jobs from "../lib/jobs";
+import { colors as c } from "../lib/color.js";
+import { IJob } from "../lib/interfaces.js";
+import * as jobs from "../lib/jobs.js";
 
 // Attempts to disable Jailbreak detection.
 // This seems like an odd thing to do on a device that is probably not
@@ -115,9 +115,13 @@ const fileExistsAtPath = (success: boolean, ident: string): InvocationListener =
 
 // toggles replies to fopen: for the paths in jailbreakPaths
 const fopen = (success: boolean, ident: string): InvocationListener => {
+  const fopen_addr = Module.findExportByName(null, "fopen");
+  if (!fopen_addr) {
+    send(c.red(`fopen function not found!`));
+    return new InvocationListener(); 
+  }
 
-  return Interceptor.attach(
-    Module.findExportByName(null, "fopen"), {
+  return Interceptor.attach(fopen_addr, {
     onEnter(args) {
 
       this.is_common_path = false;
@@ -236,7 +240,7 @@ const canOpenURL = (success: boolean, ident: string): InvocationListener => {
 const libSystemBFork = (success: boolean, ident: string): InvocationListener => {
   // Hook fork() in libSystem.B.dylib and return 0
   // TODO: Hook vfork
-  const libSystemBdylibFork: NativePointer = Module.findExportByName("libSystem.B.dylib", "fork");
+  const libSystemBdylibFork = Module.findExportByName("libSystem.B.dylib", "fork");
 
   // iOS simulator does not have libSystem.B.dylib
   // TODO: Remove as iOS 12 similar may have this now.
@@ -283,7 +287,7 @@ const libSystemBFork = (success: boolean, ident: string): InvocationListener => 
 // ref: https://www.ayrx.me/gantix-jailmonkey-root-detection-bypass/
 const jailMonkeyBypass = (success: boolean, ident: string): InvocationListener => {
   const JailMonkeyClass = ObjC.classes.JailMonkey;
-  if (JailMonkeyClass === undefined) return null;
+  if (JailMonkeyClass === undefined) return new InvocationListener();
 
   return Interceptor.attach(JailMonkeyClass["- isJailBroken"].implementation, {
     onLeave(retval) {
@@ -298,9 +302,10 @@ const jailMonkeyBypass = (success: boolean, ident: string): InvocationListener =
 export const disable = (): void => {
   const job: IJob = {
     identifier: jobs.identifier(),
-    invocations: [],
     type: "ios-jailbreak-disable",
   };
+
+  job.invocations = [];
 
   job.invocations.push(fileExistsAtPath(false, job.identifier));
   job.invocations.push(libSystemBFork(false, job.identifier));
@@ -314,9 +319,10 @@ export const disable = (): void => {
 export const enable = (): void => {
   const job: IJob = {
     identifier: jobs.identifier(),
-    invocations: [],
     type: "ios-jailbreak-enable",
   };
+
+  job.invocations = [];
 
   job.invocations.push(fileExistsAtPath(true, job.identifier));
   job.invocations.push(libSystemBFork(true, job.identifier));

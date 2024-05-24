@@ -1,15 +1,15 @@
 import * as fs from "fs";
-import { hexStringToBytes } from "../lib/helpers";
-import { getNSFileManager } from "./lib/helpers";
+import { hexStringToBytes } from "../lib/helpers.js";
+import { getNSFileManager } from "./lib/helpers.js";
 import {
   IIosFilePath,
   IIosFileSystem
-} from "./lib/interfaces";
+} from "./lib/interfaces.js";
 import {
   NSDictionary,
   NSFileManager,
   NSString as NSStringType
-} from "./lib/types";
+} from "./lib/types.js";
 
 
 // a resolved nsfilemanager instance

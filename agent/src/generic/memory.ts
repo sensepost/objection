@@ -1,13 +1,13 @@
-import { colors } from "../lib/color";
+import { colors } from "../lib/color.js"
 
 export const listModules = (): Module[] => {
   return Process.enumerateModules();
 };
 
-export const listExports = (name: string): ModuleExportDetails[] | null => {
+export const listExports = (name: string): ModuleExportDetails[] => {
   const mod: Module[] = Process.enumerateModules().filter((m) => m.name === name);
   if (mod.length <= 0) {
-    return null;
+    return [];
   }
   return mod[0].enumerateExports();
 };
@@ -19,7 +19,13 @@ export const listRanges = (protection: string = "rw-"): RangeDetails[] => {
 export const dump = (address: string, size: number): ArrayBuffer => {
   // Originally part of Frida <=11 but got removed in 12.
   // https://github.com/frida/frida-python/commit/72899a4315998289fb171149d62477ba7d1fcb91
-  return new NativePointer(address).readByteArray(size);
+  const data = new NativePointer(address).readByteArray(size);
+  if (data) {
+    return data;
+  }
+  else {
+    return new ArrayBuffer(0);
+  }
 };
 
 export const search = (pattern: string, onlyOffsets: boolean = false): string[] => {

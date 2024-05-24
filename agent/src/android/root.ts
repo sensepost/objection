@@ -1,13 +1,13 @@
-import { colors as c } from "../lib/color";
-import { IJob } from "../lib/interfaces";
-import * as jobs from "../lib/jobs";
-import { wrapJavaPerform } from "./lib/libjava";
+import { colors as c } from "../lib/color.js";
+import { IJob } from "../lib/interfaces.js";
+import * as jobs from "../lib/jobs.js";
+import { wrapJavaPerform } from "./lib/libjava.js";
 import {
   File,
   IOException,
   JavaString,
   Runtime
-} from "./lib/types";
+} from "./lib/types.js";
 
 const commonPaths = [
   "/data/local/bin/su",
@@ -294,9 +294,10 @@ const jailMonkeyBypass = (success: boolean, ident: string): any => {
 export const disable = (): void => {
   const job: IJob = {
     identifier: jobs.identifier(),
-    implementations: [],
     type: "root-detection-disable",
   };
+
+  job.implementations = [];
 
   job.implementations.push(testKeysCheck(false, job.identifier));
   job.implementations.push(execSuCheck(false, job.identifier));
@@ -322,6 +323,7 @@ export const enable = (): void => {
     implementations: [],
     type: "root-detection-enable",
   };
+  job.implementations = [];
 
   job.implementations.push(testKeysCheck(true, job.identifier));
   job.implementations.push(execSuCheck(true, job.identifier));

@@ -1,10 +1,10 @@
-import { ping } from "./generic/ping";
-import { android } from "./rpc/android";
-import { env } from "./rpc/environment";
-import { ios } from "./rpc/ios";
-import { jobs } from "./rpc/jobs";
-import { memory } from "./rpc/memory";
-import { other } from "./rpc/other";
+import { ping } from "./generic/ping.js";
+import { android } from "./rpc/android.js";
+import { env } from "./rpc/environment.js";
+import { ios } from "./rpc/ios.js";
+import { jobs } from "./rpc/jobs.js";
+import { memory } from "./rpc/memory.js";
+import { other } from "./rpc/other.js";
 
 rpc.exports = {
   ...android,
