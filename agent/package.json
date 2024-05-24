@@ -34,9 +34,9 @@
     "macho": "^1"
   },
   "devDependencies": {
-    "@types/frida-gum": "18.7.0",
-    "@types/node": "^18.14.0",
-    "frida-compile": "16.4.1",
+    "@types/frida-gum": "18",
+    "@types/node": "^18",
+    "frida-compile": "16",
     "tslint": "^6"
   }
 }
