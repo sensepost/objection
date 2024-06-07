@@ -1,5 +1,5 @@
-import { wrapJavaPerform } from "./lib/libjava";
-import { colors as c } from "../lib/color";
+import { wrapJavaPerform } from "./lib/libjava.js";
+import { colors as c } from "../lib/color.js";
 
 export const set = (host: string, port: string): Promise<void> => {
   return wrapJavaPerform(() => {

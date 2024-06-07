@@ -2,7 +2,7 @@ import unittest
 from unittest import mock
 
 from objection.commands.memory import _is_string_input, dump_all, dump_from_base, list_modules, list_exports, \
-    find_pattern
+    find_pattern, replace_pattern
 from ..helpers import capture
 
 
@@ -206,6 +206,55 @@ Pattern matched at 1 addresses
 
         expected_output = """Searching for: 41 41 41
 Pattern matched at 1 addresses
+0x08000000
+"""
+
+        self.assertEqual(output, expected_output)
+
+
+    def test_replace_pattern_validates_arguments(self):
+        with capture(replace_pattern, []) as o:
+            output = o
+
+        self.assertEqual(output, 'Usage: memory replace "<search pattern eg: 41 41 ?? 41>" "<replace value eg: 41 50>" (--string-pattern) (--string-replace)\n')
+
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_replace_pattern_without_string_argument(self, mock_api):
+        mock_api.return_value.memory_replace.return_value = ['0x08000000']
+
+        with capture(replace_pattern, ['41 41 41','41 42']) as o:
+            output = o
+
+        expected_output = """Searching for: 41 41 41, replacing with: 41 42
+Pattern replaced at 1 addresses
+0x08000000
+"""
+
+        self.assertEqual(output, expected_output)
+
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_replace_pattern_with_string_argument(self, mock_api):
+        mock_api.return_value.memory_replace.return_value = ['0x08000000']
+
+        with capture(replace_pattern, ['foo-bar-baz', '41 41', '--string-pattern']) as o:
+            output = o
+
+        expected_output = """Searching for: 66 6f 6f 2d 62 61 72 2d 62 61 7a, replacing with: 41 41
+Pattern replaced at 1 addresses
+0x08000000
+"""
+
+        self.assertEqual(output, expected_output)
+
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_replace_pattern_without_string_argument_with_offets_only(self, mock_api):
+        mock_api.return_value.memory_replace.return_value = ['0x08000000']
+
+        with capture(replace_pattern, ['41 41 41', 'ABC', '--string-replace']) as o:
+            output = o
+
+        expected_output = """Searching for: 41 41 41, replacing with: ABC
+Pattern replaced at 1 addresses
 0x08000000
 """
 

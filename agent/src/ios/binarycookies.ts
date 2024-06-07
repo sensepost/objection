@@ -1,9 +1,9 @@
-import { IIosCookie } from "./lib/interfaces";
+import { IIosCookie } from "./lib/interfaces.js";
 import {
   NSArray,
   NSData,
   NSHTTPCookieStorage
-} from "./lib/types";
+} from "./lib/types.js";
 
 
 export const get = (): IIosCookie[] => {

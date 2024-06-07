@@ -1,7 +1,7 @@
 import {
   NSDictionary,
   NSUserDefaults
-} from "./lib/types";
+} from "./lib/types.js";
 
 
 export const get = (): NSUserDefaults | any => {

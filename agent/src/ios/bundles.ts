@@ -1,10 +1,10 @@
-import { BundleType } from "./lib/constants";
-import { IFramework } from "./lib/interfaces";
+import { BundleType } from "./lib/constants.js";
+import { IFramework } from "./lib/interfaces.js";
 import {
   NSArray,
   NSBundle,
   NSDictionary
-} from "./lib/types";
+} from "./lib/types.js";
 
 
 // https://developer.apple.com/documentation/foundation/nsbundle/1408056-allframeworks?language=objc

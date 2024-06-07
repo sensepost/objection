@@ -252,9 +252,12 @@ class Agent(object):
         self.session.on('detached', self.handlers.session_on_detached)
 
         if self.config.debugger:
-            self.session.enable_debugger()
+            click.secho('debugger enabled and runtime set to v8. visit chrome://inspect', bold=True)
+            self.script = self.session.create_script(source=self._get_agent_source(), runtime='v8')
+            self.script.enable_debugger()
+        else:
+            self.script = self.session.create_script(source=self._get_agent_source())
 
-        self.script = self.session.create_script(source=self._get_agent_source())
         self.script.on('message', self.handlers.script_on_message)
         self.script.load()
 

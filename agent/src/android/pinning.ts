@@ -1,8 +1,8 @@
-import { colors as c } from "../lib/color";
-import { qsend } from "../lib/helpers";
-import { IJob } from "../lib/interfaces";
-import * as jobs from "../lib/jobs";
-import { wrapJavaPerform } from "./lib/libjava";
+import { colors as c } from "../lib/color.js";
+import { qsend } from "../lib/helpers.js";
+import { IJob } from "../lib/interfaces.js";
+import * as jobs from "../lib/jobs.js";
+import { wrapJavaPerform } from "./lib/libjava.js";
 import {
   ArrayList,
   CertificatePinner,
@@ -11,7 +11,7 @@ import {
   SSLContext,
   TrustManagerImpl,
   X509TrustManager,
-} from "./lib/types";
+} from "./lib/types.js";
 
 
 // a simple flag to control if we should be quiet or not
@@ -367,9 +367,10 @@ export const disable = (q: boolean): void => {
 
   const job: IJob = {
     identifier: jobs.identifier(),
-    implementations: [],
     type: "android-sslpinning-disable",
   };
+
+  job.implementations = [];
 
   job.implementations.push(sslContextEmptyTrustManager(job.identifier));
   job.implementations.push(okHttp3CertificatePinnerCheck(job.identifier));

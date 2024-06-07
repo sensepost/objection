@@ -225,6 +225,12 @@ COMMANDS = {
                 'exec': memory.find_pattern
             },
 
+            'replace': {
+                'meta': 'Search and replace pattern in the applications memory',
+                'flags': ['--string-pattern', '--string-replace'],
+                'exec': memory.replace_pattern
+            },
+
             'write': {
                 'meta': 'Write raw bytes to a memory address. Use with caution!',
                 'flags': ['--string'],
@@ -352,7 +358,9 @@ COMMANDS = {
                     },
                     'notify': {
                         'meta': 'Notify when a class becomes available',
-                        'exec': android_hooking.notify
+                        'exec': android_hooking.notify,
+                        'flags': ['--dump-args', '--dump-return', '--dump-backtrace', '--watch']
+
                     },
                     'generate': {
                         'meta': 'Generate Frida hooks for Android',
@@ -527,6 +535,16 @@ COMMANDS = {
                         'meta': 'Delete all keychain entries for the current app\'s entitlement group',
                         'exec': keychain.clear
                     },
+                    'remove': {
+                        'meta': 'Remove an entry from the iOS keychain',
+                        'flags': ['--account', '--service'],
+                        'exec': keychain.remove
+                    },
+                    'update': {
+                        'meta': 'Update an entry from the iOS keychain',
+                        'flags': ['--account', '--service', '--newData'],
+                        'exec': keychain.update
+                    },                     
                     'add': {
                         'meta': 'Add an entry to the iOS keychain',
                         'flags': ['--account', '--service', '--data'],

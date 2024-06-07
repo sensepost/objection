@@ -199,7 +199,7 @@ class AndroidPatcher(BasePlatformPatcher):
         }
     }
 
-    def __init__(self, skip_cleanup: bool = False, skip_resources: bool = False, manifest: str = None):
+    def __init__(self, skip_cleanup: bool = False, skip_resources: bool = False, manifest: str = None, only_main_classes: bool = False):
         super(AndroidPatcher, self).__init__()
 
         self.apk_source = None
@@ -214,6 +214,7 @@ class AndroidPatcher(BasePlatformPatcher):
         self.keystore = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../assets', 'objection.jks')
         self.netsec_config = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../assets',
                                           'network_security_config.xml')
+        self.only_main_classes = only_main_classes
 
     def is_apktool_ready(self) -> bool:
         """
@@ -404,6 +405,7 @@ class AndroidPatcher(BasePlatformPatcher):
             'decode',
             '-f',
             '-r' if self.skip_resources else '',
+            '--only-main-classes' if self.only_main_classes else '',
             '-o',
             self.apk_temp_directory,
             self.apk_source
@@ -412,7 +414,7 @@ class AndroidPatcher(BasePlatformPatcher):
         if len(o.err) > 0:
             click.secho('An error may have occurred while extracting the APK.', fg='red')
             click.secho(o.err, fg='red')
-
+            
     def inject_internet_permission(self):
         """
             Checks the status of the source APK to see if it

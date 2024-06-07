@@ -1,4 +1,4 @@
-import * as environment from "../generic/environment";
+import * as environment from "../generic/environment.js";
 
 export const env = {
   // environment

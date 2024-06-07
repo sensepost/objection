@@ -1,27 +1,27 @@
-import * as clipboard from "../android/clipboard";
-import * as androidfilesystem from "../android/filesystem";
-import * as heap from "../android/heap";
-import * as hooking from "../android/hooking";
-import * as intent from "../android/intent";
-import * as keystore from "../android/keystore";
-import * as sslpinning from "../android/pinning";
-import * as root from "../android/root";
-import * as androidshell from "../android/shell";
-import * as userinterface from "../android/userinterface";
-import * as proxy from "../android/proxy";
-import * as general from "../android/general";
+import * as clipboard from "../android/clipboard.js";
+import * as androidfilesystem from "../android/filesystem.js";
+import * as heap from "../android/heap.js";
+import * as hooking from "../android/hooking.js";
+import * as intent from "../android/intent.js";
+import * as keystore from "../android/keystore.js";
+import * as sslpinning from "../android/pinning.js";
+import * as root from "../android/root.js";
+import * as androidshell from "../android/shell.js";
+import * as userinterface from "../android/userinterface.js";
+import * as proxy from "../android/proxy.js";
+import * as general from "../android/general.js";
 
 import {
   IHeapObject,
   IJavaField,
   IKeyStoreDetail
-} from "../android/lib/interfaces";
+} from "../android/lib/interfaces.js";
 import {
   ICurrentActivityFragment,
   IExecutedCommand,
   IKeyStoreEntry
-} from "../android/lib/interfaces";
-import { JavaMethodsOverloadsResult } from "../android/lib/types";
+} from "../android/lib/interfaces.js";
+import { JavaMethodsOverloadsResult } from "../android/lib/types.js";
 
 export const android = {
   // android clipboard
@@ -58,7 +58,7 @@ export const android = {
   androidHookingWatch: (pattern: string, watchArgs: boolean, watchBacktrace: boolean, watchRet: boolean): Promise<void> =>
     hooking.watch(pattern, watchArgs, watchBacktrace, watchRet),
   androidHookingEnumerate: (query: string): Promise<Java.EnumerateMethodsMatchGroup[]> => hooking.javaEnumerate(query),
-  androidHookingLazyWatchForPattern: (query: string): void => hooking.lazyWatchForPattern(query),
+  androidHookingLazyWatchForPattern: (query: string, watch: boolean, dargs: boolean, dret: boolean, dbt: boolean): void => hooking.lazyWatchForPattern(query, watch, dargs, dret, dbt),
 
   // android heap methods
   androidHeapEvaluateHandleMethod: (handle: number, js: string): Promise<void> => heap.evaluate(handle, js),

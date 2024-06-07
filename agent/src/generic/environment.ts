@@ -1,23 +1,23 @@
 import {
   getApplicationContext,
   wrapJavaPerform
-} from "../android/lib/libjava";
+} from "../android/lib/libjava.js";
 import {
   NSSearchPaths,
   NSUserDomainMask
-} from "../ios/lib/constants";
+} from "../ios/lib/constants.js";
 import {
   getNSFileManager,
   getNSMainBundle
-} from "../ios/lib/helpers";
-import { NSBundle } from "../ios/lib/types";
-import { DeviceType } from "../lib/constants";
+} from "../ios/lib/helpers.js";
+import { NSBundle } from "../ios/lib/types.js";
+import { DeviceType } from "../lib/constants.js";
 import {
   IAndroidPackage,
   IFridaInfo,
   IIosBundlePaths,
   IIosPackage
-} from "../lib/interfaces";
+} from "../lib/interfaces.js";
 
 
 // small helper function to lookup ios bundle paths

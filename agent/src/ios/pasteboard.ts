@@ -1,4 +1,4 @@
-import { colors as c } from "../lib/color";
+import { colors as c } from "../lib/color.js";
 
 
 export const monitor = (): void => {

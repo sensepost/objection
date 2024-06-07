@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as httpLib from "http";
 import * as url from "url";
-import { colors as c } from "../lib/color";
+import { colors as c } from "../lib/color.js";
 
 let httpServer: httpLib.Server;
 let listenPort: number;
@@ -43,17 +43,22 @@ export const start = (pwd: string, port: number = 9000): void => {
   servePath = pwd;
 
   httpServer = httpLib.createServer((req, res) => {
-    log(`${c.greenBright(req.method)} ${req.url}`);
+    if (req.method && req.url) {
+      log(`${c.greenBright(req.method)} ${req.url}`);
+    } else {
+      log(`${c.redBright('Missing URL or request method.')}`);
+      return;
+    }
+    
+    const parsedUrl =  new URL(req.url);
 
-    const parsedUrl = url.parse(req.url);
-
-    if (parsedUrl.path === "/") {
+    if (parsedUrl.pathname === "/") {
       res.end(dirListingHTML(pwd));
       return;
     }
 
     res.setHeader("Content-type", "application/octet-stream");
-    res.end(fs.readFileSync(pwd + parsedUrl.path));
+    res.end(fs.readFileSync(pwd + parsedUrl.pathname));
   });
 
   httpServer.listen(port);
@@ -70,13 +75,12 @@ export const stop = (): void => {
   httpServer.close()
     .once("close", () => {
       log(c.blackBright(`Server closed.`));
-
-      httpServer = undefined;
+      // httpServer = undefined;
     });
 };
 
 export const status = (): void => {
-  if (httpServer) {
+  if (httpServer.listening) {
     log(`Server is running on port ` +
       `${c.greenBright(listenPort.toString())} serving ${c.greenBright(servePath)}`);
     return;

@@ -1,5 +1,5 @@
-import { colors as c } from "./color";
-import { IJob } from "./interfaces";
+import { colors as c } from "./color.js";
+import { IJob } from "./interfaces.js";
 
 
 // a record of all of the jobs in the current process

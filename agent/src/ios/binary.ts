@@ -1,7 +1,7 @@
-// tslint:disable-next-line:no-var-requires
-const macho = require("macho");
-import * as iosfilesystem from "./filesystem";
-import { IBinaryModuleDictionary } from "./lib/interfaces";
+import macho from "macho-ts";
+
+import * as iosfilesystem from "./filesystem.js";
+import { IBinaryModuleDictionary } from "./lib/interfaces.js";
 
 
 const isEncrypted = (cmds: any[]): boolean => {
