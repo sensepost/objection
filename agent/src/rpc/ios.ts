@@ -80,7 +80,7 @@ export const ios = {
   // ios user interface
   iosUiAlert: (message: string): void => userinterface.alert(message),
   iosUiBiometricsBypass: (): void => userinterface.biometricsBypass(),
-  iosUiScreenshot: (): any => userinterface.screenshot(),
+  iosUiScreenshot: (): any => userinterface.take(),
   iosUiWindowDump: (): string => userinterface.dump(),
 
   // ios ssl pinning
@@ -97,8 +97,8 @@ export const ios = {
   iosKeychainAdd: (account: string, service: string, data: string): boolean =>
     ioskeychain.add(account, service, data),
   iosKeychainRemove: (account: string, service: string): void => ioskeychain.remove(account, service),
-  iosKeychainUpdate: (account: string, service: string, newData: string): void => 
-    ioskeychain.update(account, service, newData),    
+  iosKeychainUpdate: (account: string, service: string, newData: string): void =>
+    ioskeychain.update(account, service, newData),
   iosKeychainEmpty: (): void => ioskeychain.empty(),
   iosKeychainList: (smartDecode: boolean = false): IKeychainItem[] => ioskeychain.list(smartDecode),
   iosKeychainListRaw: (): void => ioskeychain.listRaw(),

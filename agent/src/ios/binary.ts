@@ -1,5 +1,5 @@
-// tslint:disable-next-line:no-var-requires
-const macho = require("macho");
+import macho from "macho-ts";
+
 import * as iosfilesystem from "./filesystem.js";
 import { IBinaryModuleDictionary } from "./lib/interfaces.js";
 

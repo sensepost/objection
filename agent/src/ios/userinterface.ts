@@ -1,14 +1,14 @@
 // tslint:disable-next-line:no-var-requires
-const sc = require("frida-screenshot");
+import screenshot from "frida-screenshot";
 import { colors as c } from "../lib/color.js";
 import { IJob } from "../lib/interfaces.js";
 import * as jobs from "../lib/jobs.js";
 
 
-export const screenshot = (): any => {
+export const take = (): any => {
   // heavy lifting thanks to frida-screenshot!
   // https://github.com/nowsecure/frida-screenshot
-  return sc();
+  return screenshot(null);
 };
 
 export const dump = (): string => {
@@ -131,7 +131,7 @@ export const biometricsBypass = (): void => {
   if (policyJob.invocations) {
     policyJob.invocations.push(lacontext1);
   } else {
-    policyJob.invocations = [ lacontext1 ];
+    policyJob.invocations = [lacontext1];
   }
   jobs.add(policyJob);
 
@@ -193,7 +193,7 @@ export const biometricsBypass = (): void => {
   if (accessControlJob.invocations) {
     accessControlJob.invocations.push(lacontext2);
   } else {
-    accessControlJob.invocations = [ lacontext2 ];
+    accessControlJob.invocations = [lacontext2];
   }
   jobs.add(accessControlJob);
 };

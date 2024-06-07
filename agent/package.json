@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "description": "Runtime Mobile Exploration",
   "private": true,
+  "type": "module",
   "main": "src/index.ts",
   "scripts": {
     "prepare": "npm run build",
@@ -31,7 +32,7 @@
     "frida-java-bridge": "^6",
     "frida-objc-bridge": "^7",
     "frida-screenshot": "^5",
-    "macho": "^1"
+    "macho-ts": "^0.1.0"
   },
   "devDependencies": {
     "@types/frida-gum": "^18",
