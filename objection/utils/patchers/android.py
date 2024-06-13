@@ -201,7 +201,7 @@ class AndroidPatcher(BasePlatformPatcher):
         }
     }
 
-    def __init__(self, skip_cleanup: bool = False, skip_resources: bool = False, manifest: str = None, only_main_classes: bool = False):
+    def __init__(self, skip_cleanup: bool = False, decode_resources: bool = False, manifest: str = None, only_main_classes: bool = False):
         super(AndroidPatcher, self).__init__()
 
         self.apk_source = None
@@ -210,7 +210,7 @@ class AndroidPatcher(BasePlatformPatcher):
         self.apk_temp_frida_patched_aligned = self.apk_temp_directory + '.aligned.objection.apk'
         self.aapt = None
         self.skip_cleanup = skip_cleanup
-        self.skip_resources = skip_resources
+        self.decode_resources = decode_resources
         self.manifest = manifest
 
         self.architecture = None
@@ -287,11 +287,11 @@ class AndroidPatcher(BasePlatformPatcher):
             :return:
         """
 
-        # error if --skip-resources was used because the manifest is encoded
-        if self.skip_resources is True and self.manifest is None:
-            click.secho('Cannot manually parse the AndroidManifest.xml when --skip-resources '
-                        'is set, remove this and try again, or manually specify a manifest with --manifest.', fg='red')
-            raise Exception('Cannot --skip-resources when trying to manually parse the AndroidManifest.xml')
+        # error if --decode-resources was not used because the manifest is encoded
+        if not self.decode_resources is True and self.manifest is None:
+            click.secho('Cannot manually parse the AndroidManifest.xml when --decoode-resources '
+                        'is not set, add this and try again, or manually specify a manifest with --manifest.', fg='red')
+            raise Exception('Cannot --decode-resources when trying to manually parse the AndroidManifest.xml')
 
         # use the android namespace
         ElementTree.register_namespace('android', 'http://schemas.android.com/apk/res/android')
@@ -408,7 +408,7 @@ class AndroidPatcher(BasePlatformPatcher):
             self.required_commands['apktool']['location'],
             'decode',
             '-f',
-            '-r' if self.skip_resources else '',
+            '-r' if not self.decode_resources else '',
             '--only-main-classes' if self.only_main_classes else '',
             '-o',
             self.apk_temp_directory,

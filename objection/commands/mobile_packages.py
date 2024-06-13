@@ -97,7 +97,7 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
 
 
 def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup: bool = True,
-                      enable_debug: bool = True, gadget_version: str = None, skip_resources: bool = False,
+                      enable_debug: bool = True, gadget_version: str = None, decode_resources: bool = False,
                       network_security_config: bool = False, target_class: str = None,
                       use_aapt2: bool = False, gadget_name: str = 'libfrida-gadget.so',
                       gadget_config: str = None, script_source: str = None,
@@ -112,7 +112,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
         :param skip_cleanup:
         :param enable_debug:
         :param gadget_version:
-        :param skip_resources:
+        :param decode_resources:
         :param network_security_config:
         :param target_class:
         :param use_aapt2:
@@ -177,7 +177,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
 
     click.secho('Patcher will be using Gadget version: {0}'.format(github_version), fg='green')
 
-    patcher = AndroidPatcher(skip_cleanup=skip_cleanup, skip_resources=skip_resources, manifest=manifest, only_main_classes=only_main_classes)
+    patcher = AndroidPatcher(skip_cleanup=skip_cleanup, decode_resources=decode_resources, manifest=manifest, only_main_classes=only_main_classes)
 
     # ensure that we have all of the commandline requirements
     if not patcher.are_requirements_met():
