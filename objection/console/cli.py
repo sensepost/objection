@@ -257,7 +257,7 @@ def patchipa(source: str, gadget_version: str, codesign_signature: str, provisio
               show_default=True)
 @click.option('--skip-cleanup', '-k', is_flag=True, default=True,
               help='Do not clean temporary files once finished.', show_default=True)
-@click.option('--enable-debug', '-d', is_flag=True, default=True,
+@click.option('--enable-debug', '-d', is_flag=True,
               help='Set the android:debuggable flag to true in the application manifest.', show_default=True)
 @click.option('--network-security-config', '-N', is_flag=True, default=False,
               help='Include a network_security_config.xml file allowing for user added CA\'s to be trusted on '
