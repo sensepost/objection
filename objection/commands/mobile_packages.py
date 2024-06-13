@@ -99,9 +99,9 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
 def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup: bool = True,
                       enable_debug: bool = True, gadget_version: str = None, skip_resources: bool = False,
                       network_security_config: bool = False, target_class: str = None,
-                      use_aapt2: bool = True, gadget_name: str = 'libfrida-gadget.so',
+                      use_aapt2: bool = False, gadget_name: str = 'libfrida-gadget.so',
                       gadget_config: str = None, script_source: str = None,
-                      ignore_nativelibs: bool = True, manifest: str = None, skip_signing: bool = False) -> None:
+                      ignore_nativelibs: bool = True, manifest: str = None, skip_signing: bool = False, only_main_classes: bool = False) -> None:
     """
         Patches an Android APK by extracting, patching SMALI, repackaging
         and signing a new APK.
@@ -204,7 +204,8 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
 
     patcher.add_gadget_to_apk(
         architecture,
-        android_gadget.get_frida_library_path(), gadget_config,
+        android_gadget.get_frida_library_path(),
+        gadget_config,
         gadget_name
     )
     patcher.inject_load_library(target_class=target_class)
