@@ -9,4 +9,4 @@ requests
 Flask>=3.0.0
 Pygments>=2.0.0
 litecli>=1.3.0
-lief
+lief>=0.14.0
