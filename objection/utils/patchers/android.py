@@ -930,7 +930,7 @@ class AndroidPatcher(BasePlatformPatcher):
             click.secho('Adding a gadget configuration file...', fg='green')
             shutil.copyfile(gadget_config, os.path.join(libs_path, self.libfridagadgetconfig_name))
 
-    def build_new_apk(self, use_aapt2: bool = False):
+    def build_new_apk(self, use_aapt1: bool = False):
         """
             Build a new .apk with the frida-gadget patched in.
 
@@ -942,7 +942,7 @@ class AndroidPatcher(BasePlatformPatcher):
             self.list2cmdline([self.required_commands['apktool']['location'],
                                'build',
                                self.apk_temp_directory,
-                               ] + (['--use-aapt2'] if use_aapt2 else []) + [
+                               ] + (['--use-aapt2'] if not use_aapt1 else []) + [
                                   '-o',
                                   self.apk_temp_frida_patched
                               ]), timeout=self.command_run_timeout)

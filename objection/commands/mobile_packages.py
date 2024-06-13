@@ -99,7 +99,7 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
 def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup: bool = True,
                       enable_debug: bool = True, gadget_version: str = None, decode_resources: bool = False,
                       network_security_config: bool = False, target_class: str = None,
-                      use_aapt2: bool = False, gadget_name: str = 'libfrida-gadget.so',
+                      use_aapt1: bool = False, gadget_name: str = 'libfrida-gadget.so',
                       gadget_config: str = None, script_source: str = None,
                       ignore_nativelibs: bool = True, manifest: str = None, skip_signing: bool = False, only_main_classes: bool = False) -> None:
     """
@@ -115,7 +115,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
         :param decode_resources:
         :param network_security_config:
         :param target_class:
-        :param use_aapt2:
+        :param use_aapt1:
         :param gadget_name:
         :param gadget_config:
         :param script_source:
@@ -225,7 +225,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
 
         input('Press ENTER to continue...')
 
-    patcher.build_new_apk(use_aapt2=use_aapt2)
+    patcher.build_new_apk(use_aapt1=use_aapt1)
     patcher.zipalign_apk()
     if not skip_signing:
         patcher.sign_apk()
