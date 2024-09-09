@@ -31,6 +31,9 @@ export const info = (): IBinaryModuleDictionary => {
 
     const imports: Set<string> = new Set(a.enumerateImports().map((i) => i.name));
     const fb = iosfilesystem.readFile(a.path);
+    if (typeof(fb) == 'string') {
+      return;
+    }
 
     try {
       const exe = macho.parse(fb);
