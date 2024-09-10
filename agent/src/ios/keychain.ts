@@ -111,9 +111,7 @@ const enumerateKeychain = (): IKeychainData[] => {
   });
   
   const keyChainData: IKeychainData[] = [];
-  keyChainData.concat(...itemClassResults).filter((n) => n !== undefined);
-
-  return keyChainData;
+  return keyChainData.concat(...itemClassResults).filter((n) => n !== undefined);
 };
 
 // print raw entries using some Frida magic
