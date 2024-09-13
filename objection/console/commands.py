@@ -119,7 +119,7 @@ COMMANDS = {
         'exec': filemanager.pwd_print,
     },
 
-    'file': {
+    'filesystem': {
         'meta': 'Work with files on the remote filesystem',
         'commands': {
             'cat': {
@@ -132,8 +132,9 @@ COMMANDS = {
                 'exec': filemanager.upload
             },
             'download': {
-                'meta': 'Download a file',
-                'dynamic': filemanager.list_files_in_current_fm_directory,
+                'meta': 'Download a file or folder',
+                'flags': ['--folder'],
+                'dynamic': filemanager.list_content_in_current_fm_directory,
                 'exec': filemanager.download
             },
 
@@ -456,6 +457,10 @@ COMMANDS = {
                     'launch_service': {
                         'meta': 'Launch a Service class using an Intent',
                         'exec': intents.launch_service
+                    },
+                    'implicit_intents': {
+                        'meta': 'Analyze implicit intents',
+                        'exec': intents.analyze_implicit_intents
                     }
                 }
             },

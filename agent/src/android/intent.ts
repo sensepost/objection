@@ -63,3 +63,39 @@ export const startService = (serviceClass: string): Promise<void> => {
     send(c.blackBright(`Service successfully asked to start.`));
   });
 };
+
+// Analyzes and Detects Android Implicit Intents
+// https://developer.android.com/guide/components/intents-filters#Types
+export const analyzeImplicits = (): Promise<void> => {
+
+
+  return wrapJavaPerform(() => {
+    const classesToHook = [
+      { className: "android.app.Activity", methodName: "startActivityForResult" },
+      { className: "android.app.Activity", methodName: "onActivityResult" },
+      { className: "androidx.activity.ComponentActivity", methodName: "onActivityResult" },
+      { className: "android.content.Context", methodName: "startActivity"},
+      { className: "android.content.BroadcastReceiver", methodName: "onReceive"}
+      // Add other classes and methods as needed
+    ];
+
+    classesToHook.forEach(hook => {
+      try {
+        const clazz = Java.use(hook.className);
+        const method = clazz[hook.methodName];
+        method.overloads.forEach((overload: FridaOverload) => {
+          overload.implementation = function (...args: any[]): any {
+            args.forEach(arg => {
+              if (arg && arg.$className === "android.content.Intent") {
+                analyseIntent(`${hook.className}::${hook.methodName}`, arg);
+              }
+            });
+            return overload.apply(this, args);
+          };
+        });
+      } catch (e) {
+        send(`[-] Error hooking ${c.redBright(`${hook.className}.${hook.methodName}: ${e}`)}`);
+      }
+    });
+  });
+};
