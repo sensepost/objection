@@ -119,7 +119,7 @@ COMMANDS = {
         'exec': filemanager.pwd_print,
     },
 
-    'file': {
+    'filesystem': {
         'meta': 'Work with files on the remote filesystem',
         'commands': {
             'cat': {
@@ -132,8 +132,9 @@ COMMANDS = {
                 'exec': filemanager.upload
             },
             'download': {
-                'meta': 'Download a file',
-                'dynamic': filemanager.list_files_in_current_fm_directory,
+                'meta': 'Download a file or folder',
+                'flags': ['--folder'],
+                'dynamic': filemanager.list_content_in_current_fm_directory,
                 'exec': filemanager.download
             },
 
