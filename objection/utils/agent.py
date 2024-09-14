@@ -216,6 +216,8 @@ class Agent(object):
 
         elif self.config.spawn:
             if self.config.uid is not None:
+                if self.device.query_system_parameters()['os']['id'] != 'android':
+                    raise Exception('--uid flag can only be used on Android.')
                 self.pid = self.device.spawn(self.config.name, uid=int(self.config.uid))
             else:
                 self.pid = self.device.spawn(self.config.name)
@@ -245,9 +247,10 @@ class Agent(object):
             raise Exception('A PID needs to be set before attach()')
 
         if self.config.uid is None:
+            debug_print(f'Attaching to PID: {self.pid}')
             self.session = self.device.attach(self.pid)
         else:
-            self.session = self.device.attach(self.pid, uid=self.config.uid)
+            self.session = self.device.attach(self.pid)
 
         self.session.on('detached', self.handlers.session_on_detached)
 

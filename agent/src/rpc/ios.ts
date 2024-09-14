@@ -40,7 +40,7 @@ export const ios = {
   // ios filesystem
   iosFileCwd: (): string => iosfilesystem.pwd(),
   iosFileDelete: (path: string): boolean => iosfilesystem.deleteFile(path),
-  iosFileDownload: (path: string): Buffer => iosfilesystem.readFile(path),
+  iosFileDownload: (path: string): string | Buffer => iosfilesystem.readFile(path),
   iosFileExists: (path: string): boolean => iosfilesystem.exists(path),
   iosFileLs: (path: string): IIosFileSystem => iosfilesystem.ls(path),
   iosFilePathIsFile: (path: string): boolean => iosfilesystem.pathIsFile(path),
