@@ -17,6 +17,13 @@ class Ios(Device):
     path_separator = '/'
 
 
+class Macos(Device):
+    """ Represents macOS specific configurations. """
+
+    name = 'macos'
+    path_separator = '/'
+
+
 class DeviceState(object):
     """ A class representing the state of a device and its runtime. """
 
