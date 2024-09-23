@@ -1,4 +1,5 @@
 import contextlib
+import functools
 import lzma
 import os
 import re
@@ -8,6 +9,7 @@ import xml.etree.ElementTree as ElementTree
 
 import click
 import delegator
+import lief
 import requests
 import semver
 
@@ -199,7 +201,7 @@ class AndroidPatcher(BasePlatformPatcher):
         }
     }
 
-    def __init__(self, skip_cleanup: bool = False, skip_resources: bool = False, manifest: str = None, only_main_classes: bool = False):
+    def __init__(self, skip_cleanup: bool = False, decode_resources: bool = False, manifest: str = None, only_main_classes: bool = False):
         super(AndroidPatcher, self).__init__()
 
         self.apk_source = None
@@ -208,8 +210,10 @@ class AndroidPatcher(BasePlatformPatcher):
         self.apk_temp_frida_patched_aligned = self.apk_temp_directory + '.aligned.objection.apk'
         self.aapt = None
         self.skip_cleanup = skip_cleanup
-        self.skip_resources = skip_resources
+        self.decode_resources = decode_resources
         self.manifest = manifest
+
+        self.architecture = None
 
         self.keystore = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../assets', 'objection.jks')
         self.netsec_config = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../assets',
@@ -283,11 +287,11 @@ class AndroidPatcher(BasePlatformPatcher):
             :return:
         """
 
-        # error if --skip-resources was used because the manifest is encoded
-        if self.skip_resources is True and self.manifest is None:
-            click.secho('Cannot manually parse the AndroidManifest.xml when --skip-resources '
-                        'is set, remove this and try again, or manually specify a manifest with --manifest.', fg='red')
-            raise Exception('Cannot --skip-resources when trying to manually parse the AndroidManifest.xml')
+        # error if --decode-resources was not used because the manifest is encoded
+        if not self.decode_resources is True and self.manifest is None:
+            click.secho('Cannot manually parse the AndroidManifest.xml when --decoode-resources '
+                        'is not set, add this and try again, or manually specify a manifest with --manifest.', fg='red')
+            raise Exception('Cannot --decode-resources when trying to manually parse the AndroidManifest.xml')
 
         # use the android namespace
         ElementTree.register_namespace('android', 'http://schemas.android.com/apk/res/android')
@@ -404,7 +408,7 @@ class AndroidPatcher(BasePlatformPatcher):
             self.required_commands['apktool']['location'],
             'decode',
             '-f',
-            '-r' if self.skip_resources else '',
+            '-r' if not self.decode_resources else '',
             '--only-main-classes' if self.only_main_classes else '',
             '-o',
             self.apk_temp_directory,
@@ -802,6 +806,30 @@ class AndroidPatcher(BasePlatformPatcher):
 
         return patched_smali
 
+    @functools.cache
+    def _find_libs_path(self):
+        """
+            Find the libraries path for the target architecture within the APK.
+        """
+        base_libs_path = os.path.join(self.apk_temp_directory, 'lib')
+        available_libs_arch = os.listdir(base_libs_path)
+        if self.architecture in available_libs_arch:
+            # Exact match with arch
+            return os.path.join(base_libs_path, self.architecture)
+        else:
+            # Try to use prefix search
+            try:
+                matching_arch = next(
+                    item for item in available_libs_arch if item.startswith(self.architecture)
+                )
+                click.secho('Using matching architecture {0} from provided architecture {1}.'.format(
+                    matching_arch, self.architecture
+                ), dim=True)
+                return os.path.join(base_libs_path, matching_arch)
+            except StopIteration:
+                # Might create the arch folder inside the APK tree
+                return os.path.join(base_libs_path, self.architecture)
+
     def inject_load_library(self, target_class: str = None):
         """
             Injects a loadLibrary call into a class.
@@ -822,8 +850,26 @@ class AndroidPatcher(BasePlatformPatcher):
         if target_class:
             click.secho('Using target class: {0} for patch'.format(target_class), fg='green', bold=True)
         else:
-            click.secho('Target class not specified, searching for launchable activity instead...', fg='green',
+            click.secho('Target class not specified, injecting through existing native libraries...', fg='green',
                         bold=True)
+            # Inspired by https://fadeevab.com/frida-gadget-injection-on-android-no-root-2-methods/
+            if not self.architecture or not self.libfridagadget_name:
+                raise Exception('Frida-gadget should have been copied prior to injecting!')
+            libs_path = self._find_libs_path()
+            existing_libs_in_apk = [
+                lib
+                for lib in os.listdir(libs_path)
+                if lib not in [self.libfridagadget_name, self.libfridagadgetconfig_name]
+            ]
+            if existing_libs_in_apk:
+                for lib in existing_libs_in_apk:
+                    libnative = lief.parse(os.path.join(libs_path, lib))
+                    libnative.add_library(self.libfridagadget_name)  # Injection!
+                    libnative.write(os.path.join(libs_path, lib))
+                return
+            else:
+                click.secho('No native libraries found in APK, searching for launchable activity instead...', fg='green',
+                            bold=True)
 
         activity_path = self._determine_smali_path_for_class(
             target_class if target_class else self._get_launchable_activity())
@@ -853,7 +899,9 @@ class AndroidPatcher(BasePlatformPatcher):
         with open(activity_path, 'w') as f:
             f.write(''.join(patched_smali))
 
-    def add_gadget_to_apk(self, architecture: str, gadget_source: str, gadget_config: str):
+    def add_gadget_to_apk(self, architecture: str,
+                          gadget_source: str, gadget_config: str,
+                          libfridagadget_name: str = 'libfrida-gadget.so'):
         """
             Copies a frida gadget for a specific architecture to
             an extracted APK's lib path.
@@ -861,10 +909,14 @@ class AndroidPatcher(BasePlatformPatcher):
             :param architecture:
             :param gadget_source:
             :param gadget_config:
+            :param libfridagadget_name:
             :return:
         """
+        self.architecture = architecture
+        self.libfridagadget_name = libfridagadget_name
+        self.libfridagadgetconfig_name = libfridagadget_name.replace('.so', '.config.so')
 
-        libs_path = os.path.join(self.apk_temp_directory, 'lib', architecture)
+        libs_path = self._find_libs_path()
 
         # check if the libs path exists
         if not os.path.exists(libs_path):
@@ -872,13 +924,13 @@ class AndroidPatcher(BasePlatformPatcher):
             os.makedirs(libs_path)
 
         click.secho('Copying Frida gadget to libs path...', fg='green', dim=True)
-        shutil.copyfile(gadget_source, os.path.join(libs_path, 'libfrida-gadget.so'))
+        shutil.copyfile(gadget_source, os.path.join(libs_path, self.libfridagadget_name))
 
         if gadget_config:
             click.secho('Adding a gadget configuration file...', fg='green')
-            shutil.copyfile(gadget_config, os.path.join(libs_path, 'libfrida-gadget.config.so'))
+            shutil.copyfile(gadget_config, os.path.join(libs_path, self.libfridagadgetconfig_name))
 
-    def build_new_apk(self, use_aapt2: bool = False):
+    def build_new_apk(self, use_aapt1: bool = False):
         """
             Build a new .apk with the frida-gadget patched in.
 
@@ -890,7 +942,7 @@ class AndroidPatcher(BasePlatformPatcher):
             self.list2cmdline([self.required_commands['apktool']['location'],
                                'build',
                                self.apk_temp_directory,
-                               ] + (['--use-aapt2'] if use_aapt2 else []) + [
+                               ] + (['--use-aapt2'] if not use_aapt1 else []) + [
                                   '-o',
                                   self.apk_temp_frida_patched
                               ]), timeout=self.command_run_timeout)
