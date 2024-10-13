@@ -22,20 +22,6 @@ def debug_print(message: str) -> None:
         click.secho('[debug] {message}'.format(message=message), dim=True)
 
 
-def list_current_jobs() -> dict:
-    """
-        Return a list of the currently listed objection jobs.
-        Used for tab completion in the repl.
-    """
-
-    resp = {}
-
-    for job in job_manager_state.jobs:
-        resp[str(job.id)] = str(job.id)
-
-    return resp
-
-
 def pretty_concat(data: str, at_most: int = 75, left: bool = False) -> str:
     """
         Limits a string to the maximum value of 'at_most',
