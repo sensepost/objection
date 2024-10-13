@@ -15,20 +15,22 @@ const dirListingHTML = (pwd: string, path: string): string => {
   let h = `
     <html>
       <body>
-        <h2>Index Of /</h2>
+        <h2 style="margin: 0;">Index Of ${path}</h2>
         {file_listing}
       </body>
     </html>
     `;
 
   h = h.replace(`{file_listing}`, () => {
-    return fs.list(pwd + path).map((f) => {
+    return fs.list(pwd + decodeURIComponent(path)).map((f) => {
+      if (f.name === '.') return;
+
       // Add a slash at the end if it is a directory.
       var fname = f.name + (f.type == 4 ? '/' : '');
       
       if (path !== '/') {
         return `<a href="${path + fname}">${fname}</a>`;
-      } else {
+      } else if (fname !== '../') {
         return `<a href="${fname}">${fname}</a>`;
       }
     }).join("<br>");
@@ -62,7 +64,7 @@ export const start = (pwd: string, port: number = 9000): void => {
       const fileLocation = pwd + decodeURIComponent(parsedUrl.path);
       
       if (fs.statSync(fileLocation).isDirectory()) {
-        res.end(dirListingHTML(pwd, decodeURIComponent(parsedUrl.path)));
+        res.end(dirListingHTML(pwd, parsedUrl.path));
         return;
       }
 
