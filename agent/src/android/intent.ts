@@ -3,7 +3,8 @@ import {
   getApplicationContext,
   wrapJavaPerform
 } from "./lib/libjava.js";
-import { Intent } from "./lib/types.js";
+import { Intent, FridaOverload } from "./lib/types.js";
+import { analyseIntent } from "./lib/intentUtils.js";
 
 // https://developer.android.com/reference/android/content/Intent.html#FLAG_ACTIVITY_NEW_TASK
 const FLAG_ACTIVITY_NEW_TASK = 0x10000000;
