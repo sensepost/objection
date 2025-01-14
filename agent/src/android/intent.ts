@@ -5,6 +5,9 @@ import {
 } from "./lib/libjava.js";
 import { Intent, FridaOverload } from "./lib/types.js";
 import { analyseIntent } from "./lib/intentUtils.js";
+import { IJob } from "../lib/interfaces.js";
+import * as jobs from "../lib/jobs.js";
+
 
 // https://developer.android.com/reference/android/content/Intent.html#FLAG_ACTIVITY_NEW_TASK
 const FLAG_ACTIVITY_NEW_TASK = 0x10000000;
@@ -69,6 +72,12 @@ export const startService = (serviceClass: string): Promise<void> => {
 // https://developer.android.com/guide/components/intents-filters#Types
 export const analyzeImplicits = (): Promise<void> => {
 
+  const job: IJob = {
+    identifier: jobs.identifier(),
+    implementations: [],
+    type: `implicit-intent-analyser`,
+  };
+  jobs.add(job)
 
   return wrapJavaPerform(() => {
     const classesToHook = [
@@ -93,6 +102,7 @@ export const analyzeImplicits = (): Promise<void> => {
             });
             return overload.apply(this, args);
           };
+          job.implementations.push(method.overload);
         });
       } catch (e) {
         send(`[-] Error hooking ${c.redBright(`${hook.className}.${hook.methodName}: ${e}`)}`);
