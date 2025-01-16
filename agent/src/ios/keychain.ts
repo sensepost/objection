@@ -110,8 +110,7 @@ const enumerateKeychain = (): IKeychainData[] => {
     return data;
   });
   
-  const keyChainData: IKeychainData[] = [];
-  keyChainData.concat(...itemClassResults).filter((n) => n !== undefined);
+  const keyChainData: IKeychainData[] = [].concat(...itemClassResults).filter((n) => n !== undefined);
 
   return keyChainData;
 };
