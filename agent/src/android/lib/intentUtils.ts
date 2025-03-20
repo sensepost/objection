@@ -46,7 +46,7 @@ export const analyseIntent = (methodName: string, intent: Java.Wrapper): void =>
         send("[+] Responding apps:");
         for (let i = 0; i < resolveInfoList.size(); i++) {
           const resolveInfo = resolveInfoList.get(i);
-          send(`[*] Resolve Info List at positi on ${i}: ${c.green(`${resolveInfo.toString()}`)}`);
+          send(`[*] Resolve Info List at position ${i}: ${c.green(`${resolveInfo.toString()}`)}`);
         }
       } else {
         send("[-] No activity context available");
