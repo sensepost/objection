@@ -457,6 +457,10 @@ COMMANDS = {
                     'launch_service': {
                         'meta': 'Launch a Service class using an Intent',
                         'exec': intents.launch_service
+                    },
+                    'implicit_intents': {
+                        'meta': 'Analyze implicit intents',
+                        'exec': intents.analyze_implicit_intents
                     }
                 }
             },

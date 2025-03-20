@@ -1,7 +1,7 @@
 import unittest
 from unittest import mock
 
-from objection.commands.android.intents import launch_activity, launch_service
+from objection.commands.android.intents import launch_activity, launch_service, analyze_implicit_intents
 from ...helpers import capture
 
 
@@ -29,3 +29,9 @@ class TestIntents(unittest.TestCase):
         launch_service(['com.foo.bar'])
 
         self.assertTrue(mock_api.return_value.android_intent_start_service.called)
+
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_analyze_implicit_intents(self, mock_api):
+        analyze_implicit_intents([])
+
+        self.assertTrue(mock_api.return_value.android_intent_analyze.called)

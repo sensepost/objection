@@ -31,3 +31,7 @@ export type ActivityClientRecord = JavaClass | any;
 export type Bitmap = JavaClass | any;
 export type ByteArrayOutputStream = JavaClass | any;
 export type CompressFormat = JavaClass | any;
+export type FridaOverload = {
+  implementation: (...args: any[]) => any;
+  apply: (thisArg: any, args: any[]) => any;
+};
