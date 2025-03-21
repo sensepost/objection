@@ -11,7 +11,7 @@ import frida
 
 from objection.state.app import app_state
 from objection.state.connection import state_connection
-from objection.state.device import device_state, Ios, Android
+from objection.state.device import device_state, Ios, Android, Macos
 from objection.state.jobs import job_manager_state
 from objection.utils.helpers import debug_print
 
@@ -294,7 +294,8 @@ class Agent(object):
             device_state.set_platform(Ios)
         elif params['os']['id'] == 'android':
             device_state.set_platform(Android)
-
+        elif params['os']['id'] == 'macos':
+            device_state.set_platform(Macos)
         # set os version
         device_state.set_version(params['os']['version'])
 
