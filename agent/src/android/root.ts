@@ -1,5 +1,4 @@
 import { colors as c } from "../lib/color.js";
-import { IJob } from "../lib/interfaces.js";
 import * as jobs from "../lib/jobs.js";
 import { wrapJavaPerform } from "./lib/libjava.js";
 import {
@@ -25,7 +24,7 @@ const commonPaths = [
   "/system/xbin/su",
 ];
 
-const testKeysCheck = (success: boolean, ident: string): any => {
+const testKeysCheck = (success: boolean, ident: number): any => {
   return wrapJavaPerform(() => {
     const JavaString: JavaString = Java.use("java.lang.String");
 
@@ -45,7 +44,7 @@ const testKeysCheck = (success: boolean, ident: string): any => {
   });
 };
 
-const execSuCheck = (success: boolean, ident: string): any => {
+const execSuCheck = (success: boolean, ident: number): any => {
   return wrapJavaPerform(() => {
     const JavaRuntime: Runtime = Java.use("java.lang.Runtime");
     const iOException: IOException = Java.use("java.io.IOException");
@@ -67,7 +66,7 @@ const execSuCheck = (success: boolean, ident: string): any => {
   });
 };
 
-const fileExistsCheck = (success: boolean, ident: string): any => {
+const fileExistsCheck = (success: boolean, ident: number): any => {
   return wrapJavaPerform(() => {
     const JavaFile: File = Java.use("java.io.File");
     JavaFile.exists.implementation = function () {
@@ -96,7 +95,7 @@ const fileExistsCheck = (success: boolean, ident: string): any => {
 
 // RootBeer: https://github.com/scottyab/rootbeer
 
-const rootBeerIsRooted = (success: boolean, ident: string): any => {
+const rootBeerIsRooted = (success: boolean, ident: number): any => {
   return wrapJavaPerform(() => {
     const RootBeer = Java.use("com.scottyab.rootbeer.RootBeer");
     RootBeer.isRooted.overload().implementation = function () {
@@ -117,7 +116,7 @@ const rootBeerIsRooted = (success: boolean, ident: string): any => {
   });
 };
 
-const rootBeerCheckForBinary = (success: boolean, ident: string): any => {
+const rootBeerCheckForBinary = (success: boolean, ident: number): any => {
   return wrapJavaPerform(() => {
     const RootBeer = Java.use("com.scottyab.rootbeer.RootBeer");
     RootBeer.checkForBinary.overload('java.lang.String').implementation = function () {
@@ -138,7 +137,7 @@ const rootBeerCheckForBinary = (success: boolean, ident: string): any => {
   });
 };
 
-const rootBeerCheckForDangerousProps = (success: boolean, ident: string): any => {
+const rootBeerCheckForDangerousProps = (success: boolean, ident: number): any => {
   return wrapJavaPerform(() => {
     const RootBeer = Java.use("com.scottyab.rootbeer.RootBeer");
     RootBeer.checkForDangerousProps.overload().implementation = function () {
@@ -159,7 +158,7 @@ const rootBeerCheckForDangerousProps = (success: boolean, ident: string): any =>
   });
 };
 
-const rootBeerDetectRootCloakingApps = (success: boolean, ident: string): any => {
+const rootBeerDetectRootCloakingApps = (success: boolean, ident: number): any => {
   return wrapJavaPerform(() => {
     const RootBeer = Java.use("com.scottyab.rootbeer.RootBeer");
     RootBeer.detectRootCloakingApps.overload().implementation = function () {
@@ -180,7 +179,7 @@ const rootBeerDetectRootCloakingApps = (success: boolean, ident: string): any =>
   });
 };
 
-const rootBeerCheckSuExists = (success: boolean, ident: string): any => {
+const rootBeerCheckSuExists = (success: boolean, ident: number): any => {
   return wrapJavaPerform(() => {
     const RootBeer = Java.use("com.scottyab.rootbeer.RootBeer");
     RootBeer.checkSuExists.overload().implementation = function () {
@@ -201,7 +200,7 @@ const rootBeerCheckSuExists = (success: boolean, ident: string): any => {
   });
 };
 
-const rootBeerDetectTestKeys = (success: boolean, ident: string): any => {
+const rootBeerDetectTestKeys = (success: boolean, ident: number): any => {
   return wrapJavaPerform(() => {
     const RootBeer = Java.use("com.scottyab.rootbeer.RootBeer");
     RootBeer.detectTestKeys.overload().implementation = function () {
@@ -222,7 +221,7 @@ const rootBeerDetectTestKeys = (success: boolean, ident: string): any => {
   });
 };
 
-const rootBeerCheckSeLinux = (success: boolean, ident: string): any => {
+const rootBeerCheckSeLinux = (success: boolean, ident: number): any => {
   return wrapJavaPerform(() => {
     const Util = Java.use("com.scottyab.rootbeer.util");
     Util.isSelinuxFlagInEnabled.overload().implementation = function () {
@@ -243,7 +242,7 @@ const rootBeerCheckSeLinux = (success: boolean, ident: string): any => {
   });
 };
 
-const rootBeerNative = (success: boolean, ident: string): any => {
+const rootBeerNative = (success: boolean, ident: number): any => {
   return wrapJavaPerform(() => {
     const RootBeerNative = Java.use("com.scottyab.rootbeer.RootBeerNative");
     RootBeerNative.checkForRoot.overload('[Ljava.lang.Object;').implementation = function () {
@@ -265,7 +264,7 @@ const rootBeerNative = (success: boolean, ident: string): any => {
 };
 
 // ref: https://www.ayrx.me/gantix-jailmonkey-root-detection-bypass/
-const jailMonkeyBypass = (success: boolean, ident: string): any => {
+const jailMonkeyBypass = (success: boolean, ident: number): any => {
   return wrapJavaPerform(() => {
     const JavaJailMonkeyModule = Java.use("com.gantix.JailMonkey.JailMonkeyModule");
     const JavaHashMap = Java.use("java.util.HashMap");
@@ -292,53 +291,43 @@ const jailMonkeyBypass = (success: boolean, ident: string): any => {
 };
 
 export const disable = (): void => {
-  const job: IJob = {
-    identifier: jobs.identifier(),
-    type: "root-detection-disable",
-  };
+  const job: jobs.Job = new jobs.Job(jobs.identifier(), 'root-detection-disable');
 
-  job.implementations = [];
-
-  job.implementations.push(testKeysCheck(false, job.identifier));
-  job.implementations.push(execSuCheck(false, job.identifier));
-  job.implementations.push(fileExistsCheck(false, job.identifier));
-  job.implementations.push(jailMonkeyBypass(false, job.identifier));
+  job.addImplementation(testKeysCheck(false, job.identifier));
+  job.addImplementation(execSuCheck(false, job.identifier));
+  job.addImplementation(fileExistsCheck(false, job.identifier));
+  job.addImplementation(jailMonkeyBypass(false, job.identifier));
 
   // RootBeer functions
-  job.implementations.push(rootBeerIsRooted(false, job.identifier));
-  job.implementations.push(rootBeerCheckForBinary(false, job.identifier));
-  job.implementations.push(rootBeerCheckForDangerousProps(false, job.identifier));
-  job.implementations.push(rootBeerDetectRootCloakingApps(false, job.identifier));
-  job.implementations.push(rootBeerCheckSuExists(false, job.identifier));
-  job.implementations.push(rootBeerDetectTestKeys(false, job.identifier));
-  job.implementations.push(rootBeerNative(false, job.identifier));
-  job.implementations.push(rootBeerCheckSeLinux(false, job.identifier));
+  job.addImplementation(rootBeerIsRooted(false, job.identifier));
+  job.addImplementation(rootBeerCheckForBinary(false, job.identifier));
+  job.addImplementation(rootBeerCheckForDangerousProps(false, job.identifier));
+  job.addImplementation(rootBeerDetectRootCloakingApps(false, job.identifier));
+  job.addImplementation(rootBeerCheckSuExists(false, job.identifier));
+  job.addImplementation(rootBeerDetectTestKeys(false, job.identifier));
+  job.addImplementation(rootBeerNative(false, job.identifier));
+  job.addImplementation(rootBeerCheckSeLinux(false, job.identifier));
 
   jobs.add(job);
 };
 
 export const enable = (): void => {
-  const job: IJob = {
-    identifier: jobs.identifier(),
-    implementations: [],
-    type: "root-detection-enable",
-  };
-  job.implementations = [];
+  const job: jobs.Job = new jobs.Job(jobs.identifier(), "root-detection-enable");
 
-  job.implementations.push(testKeysCheck(true, job.identifier));
-  job.implementations.push(execSuCheck(true, job.identifier));
-  job.implementations.push(fileExistsCheck(true, job.identifier));
-  job.implementations.push(jailMonkeyBypass(true, job.identifier));
+  job.addImplementation(testKeysCheck(true, job.identifier));
+  job.addImplementation(execSuCheck(true, job.identifier));
+  job.addImplementation(fileExistsCheck(true, job.identifier));
+  job.addImplementation(jailMonkeyBypass(true, job.identifier));
 
   // RootBeer functions
-  job.implementations.push(rootBeerIsRooted(true, job.identifier));
-  job.implementations.push(rootBeerCheckForBinary(true, job.identifier));
-  job.implementations.push(rootBeerCheckForDangerousProps(true, job.identifier));
-  job.implementations.push(rootBeerDetectRootCloakingApps(true, job.identifier));
-  job.implementations.push(rootBeerCheckSuExists(true, job.identifier));
-  job.implementations.push(rootBeerDetectTestKeys(true, job.identifier));
-  job.implementations.push(rootBeerNative(true, job.identifier));
-  job.implementations.push(rootBeerCheckSeLinux(false, job.identifier));
+  job.addImplementation(rootBeerIsRooted(true, job.identifier));
+  job.addImplementation(rootBeerCheckForBinary(true, job.identifier));
+  job.addImplementation(rootBeerCheckForDangerousProps(true, job.identifier));
+  job.addImplementation(rootBeerDetectRootCloakingApps(true, job.identifier));
+  job.addImplementation(rootBeerCheckSuExists(true, job.identifier));
+  job.addImplementation(rootBeerDetectTestKeys(true, job.identifier));
+  job.addImplementation(rootBeerNative(true, job.identifier));
+  job.addImplementation(rootBeerCheckSeLinux(false, job.identifier));
 
   jobs.add(job);
 };

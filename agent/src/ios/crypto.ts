@@ -1,6 +1,5 @@
 import { colors as c } from "../lib/color.js";
 import { fsend } from "../lib/helpers.js";
-import { IJob } from "../lib/interfaces.js";
 import * as jobs from "../lib/jobs.js";
 import {
   arrayBufferToHex,
@@ -53,7 +52,7 @@ const CCPseudoRandomAlgorithm: AlgorithmType = {
 
 
 // ident for crypto hooks job
-let cryptoidentifier: string = "";
+let cryptoidentifier: number = 0;
 
 // operation being performed 0=encrypt 1=decrypt
 let op = 0;
@@ -67,7 +66,7 @@ let alg = 0;
 // append the final block from CCCryptorFinal
 let dataOutBytes: string = "";
 
-const secrandomcopybytes = (ident: string): InvocationListener => {
+const secrandomcopybytes = (ident: number): InvocationListener => {
   const hook = "SecRandomCopyBytes";
   return Interceptor.attach(
     Module.getExportByName(null, hook), {
@@ -87,7 +86,7 @@ const secrandomcopybytes = (ident: string): InvocationListener => {
   });
 };
 
-const cckeyderivationpbkdf = (ident: string): InvocationListener => {
+const cckeyderivationpbkdf = (ident: number): InvocationListener => {
   const hook = "CCKeyDerivationPBKDF";
   return Interceptor.attach(
     Module.getExportByName(null, hook), {
@@ -141,7 +140,7 @@ const cckeyderivationpbkdf = (ident: string): InvocationListener => {
   });
 };
 
-const cccrypt = (ident: string): InvocationListener => {
+const cccrypt = (ident: number): InvocationListener => {
   const hook = "CCCrypt";
   return Interceptor.attach(
     Module.getExportByName(null, hook), {
@@ -212,7 +211,7 @@ const cccrypt = (ident: string): InvocationListener => {
   });
 };
 
-const cccryptorcreate = (ident: string): InvocationListener => {
+const cccryptorcreate = (ident: number): InvocationListener => {
   const hook = "CCCryptorCreate";
   return Interceptor.attach(
     Module.getExportByName(null, hook), {
@@ -258,7 +257,7 @@ const cccryptorcreate = (ident: string): InvocationListener => {
   });
 };
 
-const cccryptorupdate = (ident: string): InvocationListener => {
+const cccryptorupdate = (ident: number): InvocationListener => {
   const hook = "CCCryptorUpdate";
   return Interceptor.attach(
     Module.getExportByName(null, hook), {
@@ -301,7 +300,7 @@ const cccryptorupdate = (ident: string): InvocationListener => {
   });
 };
 
-const cccryptorfinal = (ident: string): InvocationListener => {
+const cccryptorfinal = (ident: number): InvocationListener => {
   const hook = "CCCryptorFinal";
   return Interceptor.attach(
     Module.getExportByName(null, hook), {
@@ -336,24 +335,20 @@ const cccryptorfinal = (ident: string): InvocationListener => {
 export const monitor = (): void => {
   // if we already have a job registered then return
   if (jobs.hasIdent(cryptoidentifier)) {
-    send(`${c.greenBright("Job already registered")}: ${c.blueBright(cryptoidentifier)}`);
+    send(`${c.greenBright("Job already registered")}: ${c.blueBright(cryptoidentifier.toString())}`);
     return;
   }
 
-  const job: IJob = {
-    identifier: jobs.identifier(),
-    type: "ios-crypto-monitor",
-  };
+  const job: jobs.Job = new jobs.Job(jobs.identifier(), "ios-crypto-monitor");
 
-  job.invocations = [];
   cryptoidentifier = job.identifier;
   
-  job.invocations.push(secrandomcopybytes(job.identifier));
-  job.invocations.push(cckeyderivationpbkdf(job.identifier));
-  job.invocations.push(cccrypt(job.identifier));
-  job.invocations.push(cccryptorcreate(job.identifier));
-  job.invocations.push(cccryptorupdate(job.identifier));
-  job.invocations.push(cccryptorfinal(job.identifier));
+  job.addInvocation(secrandomcopybytes(job.identifier));
+  job.addInvocation(cckeyderivationpbkdf(job.identifier));
+  job.addInvocation(cccrypt(job.identifier));
+  job.addInvocation(cccryptorcreate(job.identifier));
+  job.addInvocation(cccryptorupdate(job.identifier));
+  job.addInvocation(cccryptorfinal(job.identifier));
 
   jobs.add(job);
 };

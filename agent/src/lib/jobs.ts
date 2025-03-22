@@ -1,23 +1,86 @@
 import { colors as c } from "./color.js";
-import { IJob } from "./interfaces.js";
+
+export class Job {
+  identifier: number;
+  private invocations?: InvocationListener[] = [];
+  private replacements?: any[] = [];
+  private implementations?: any[] = [];
+  type: string;
+
+  constructor(identifier: number, type: string) {
+    this.identifier = identifier;
+    this.type = type;
+  }
+
+  addInvocation(invocation: any): void {
+    if (invocation === undefined) {
+      // c.log(c.redBright(`[warn] Undefined Invocation!`));
+      c.log(c.redBright(`[warn] Undefined invocation`));
+    }
+    if (invocation !== null)
+      this.invocations.push(invocation);
+    
+  }; 
+  
+  addImplementation(implementation: any): void {
+    if (implementation !== undefined)
+      this.implementations.push(implementation);
+  };
+  
+  addReplacement(replacement: any): void {
+    if (replacement !== undefined)
+      this.replacements.push(replacement);
+  };
+
+  killAll(): void {
+    // remove all invocations
+    if (this.invocations && this.invocations.length > 0) {
+      this.invocations.forEach((invocation) => {
+        (invocation) ? invocation.detach() :
+          c.log(c.blackBright(`[warn] Skipping detach on null`));
+      });
+    }
+
+    // revert any replacements
+    if (this.replacements && this.replacements.length > 0) {
+      this.replacements.forEach((replacement) => {
+        Interceptor.revert(replacement);
+      });
+    }
+
+    // remove implementation replacements
+    if (this.implementations && this.implementations.length > 0) {
+      this.implementations.forEach((method) => {
+        if (method.implementation == undefined) {
+          c.log(c.red(`[warn] ${this.type} job missing implementation value`));
+        }
+         
+        send(c.blackBright(`(`)+ c.blueBright(this.identifier.toString())+ c.blackBright(`) Removing ${method.holder} <function: ${method.methodName}>`))
+        
+        // TODO: May be racy if the method is currently used.
+        method.implementation = null;
+      });
+    }
+  }
+}
 
 
 // a record of all of the jobs in the current process
-let currentJobs: IJob[] = [];
+let currentJobs: Job[] = [];
 
-export const identifier = (): string => Math.random().toString(36).substring(2, 8);
-export const all = (): IJob[] => currentJobs;
+export const identifier = (): number => Number(Math.random().toString(36).substring(2, 8));
+export const all = (): Job[] => currentJobs;
 
-export const add = (jobData: IJob): void => {
+export const add = (jobData: Job): void => {
   send(`Registering job ` + c.blueBright(`${jobData.identifier}`) +
-    `. Type: ` + c.greenBright(`${jobData.type}`));
+    `. Name: ` + c.greenBright(`${jobData.type}`));
   currentJobs.push(jobData);
 };
 
 // determine of a job already exists based on an identifier
-export const hasIdent = (ident: string): boolean => {
+export const hasIdent = (ident: number): boolean => {
 
-  const m: IJob[] = currentJobs.filter((job) => {
+  const m: Job[] = currentJobs.filter((job) => {
     if (job.identifier === ident) {
       return true;
     }
@@ -29,7 +92,7 @@ export const hasIdent = (ident: string): boolean => {
 // determine if a job already exists based on a type
 export const hasType = (type: string): boolean => {
 
-  const m: IJob[] = currentJobs.filter((job) => {
+  const m: Job[] = currentJobs.filter((job) => {
     if (job.type === type) {
       return true;
     }
@@ -40,34 +103,17 @@ export const hasType = (type: string): boolean => {
 
 // kills a job by detaching any invocations and removing
 // the job by identifier
-export const kill = (ident: string): boolean => {
+export const kill = (ident: number): boolean => {
   currentJobs.forEach((job) => {
 
     if (job.identifier !== ident) return;
 
-    // detach any invocations
-    if (job.invocations && job.invocations.length > 0) {
-      job.invocations.forEach((invocation) => {
-        (invocation) ? invocation.detach() :
-          c.log(c.blackBright(`[warn] Skipping detach on null`));
-      });
-    }
+    send(`Killing job ` + c.blueBright(`${job.identifier}`) +
+    `. Name: ` + c.greenBright(`${job.type}`));
 
-    // revert any replacements
-    if (job.replacements && job.replacements.length > 0) {
-      job.replacements.forEach((replacement) => {
-        Interceptor.revert(replacement);
-      });
-    }
-
-    // remove implementation replacements
-    if (job.implementations && job.implementations.length > 0) {
-      job.implementations.forEach((method) => {
-        // TODO: May be racy if the method is currently used.
-        method.implementation = null;
-      });
-    }
-
+    // remove any hooks
+    job.killAll();
+    
     // remove the job from the current jobs
     currentJobs = currentJobs.filter((j) => {
       return j.identifier !== job.identifier;

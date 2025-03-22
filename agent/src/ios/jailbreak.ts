@@ -1,5 +1,4 @@
 import { colors as c } from "../lib/color.js";
-import { IJob } from "../lib/interfaces.js";
 import * as jobs from "../lib/jobs.js";
 
 // Attempts to disable Jailbreak detection.
@@ -49,7 +48,7 @@ const jailbreakPaths = [
 
 
 // toggles replies to fileExistsAtPath: for the paths in jailbreakPaths
-const fileExistsAtPath = (success: boolean, ident: string): InvocationListener => {
+const fileExistsAtPath = (success: boolean, ident: number): InvocationListener => {
 
   return Interceptor.attach(
     ObjC.classes.NSFileManager["- fileExistsAtPath:"].implementation, {
@@ -114,7 +113,7 @@ const fileExistsAtPath = (success: boolean, ident: string): InvocationListener =
 
 
 // toggles replies to fopen: for the paths in jailbreakPaths
-const fopen = (success: boolean, ident: string): InvocationListener => {
+const fopen = (success: boolean, ident: number): InvocationListener => {
   const fopen_addr = Module.findExportByName(null, "fopen");
   if (!fopen_addr) {
     send(c.red(`fopen function not found!`));
@@ -180,7 +179,7 @@ const fopen = (success: boolean, ident: string): InvocationListener => {
 };
 
 // toggles replies to canOpenURL for Cydia
-const canOpenURL = (success: boolean, ident: string): InvocationListener => {
+const canOpenURL = (success: boolean, ident: number): InvocationListener => {
 
   return Interceptor.attach(
     ObjC.classes.UIApplication["- canOpenURL:"].implementation, {
@@ -237,7 +236,7 @@ const canOpenURL = (success: boolean, ident: string): InvocationListener => {
 };
 
 
-const libSystemBFork = (success: boolean, ident: string): InvocationListener => {
+const libSystemBFork = (success: boolean, ident: number): InvocationListener => {
   // Hook fork() in libSystem.B.dylib and return 0
   // TODO: Hook vfork
   const libSystemBdylibFork = Module.findExportByName("libSystem.B.dylib", "fork");
@@ -285,7 +284,7 @@ const libSystemBFork = (success: boolean, ident: string): InvocationListener => 
 };
 
 // ref: https://www.ayrx.me/gantix-jailmonkey-root-detection-bypass/
-const jailMonkeyBypass = (success: boolean, ident: string): InvocationListener => {
+const jailMonkeyBypass = (success: boolean, ident: number): InvocationListener => {
   const JailMonkeyClass = ObjC.classes.JailMonkey;
   if (JailMonkeyClass === undefined) return new InvocationListener();
 
@@ -300,35 +299,25 @@ const jailMonkeyBypass = (success: boolean, ident: string): InvocationListener =
 };
 
 export const disable = (): void => {
-  const job: IJob = {
-    identifier: jobs.identifier(),
-    type: "ios-jailbreak-disable",
-  };
+  const job: jobs.Job = new jobs.Job(jobs.identifier(), "ios-jailbreak-disable");
 
-  job.invocations = [];
-
-  job.invocations.push(fileExistsAtPath(false, job.identifier));
-  job.invocations.push(libSystemBFork(false, job.identifier));
-  job.invocations.push(fopen(false, job.identifier));
-  job.invocations.push(canOpenURL(false, job.identifier));
-  job.invocations.push(jailMonkeyBypass(false, job.identifier));
+  job.addInvocation(fileExistsAtPath(false, job.identifier));
+  job.addInvocation(libSystemBFork(false, job.identifier));
+  job.addInvocation(fopen(false, job.identifier));
+  job.addInvocation(canOpenURL(false, job.identifier));
+  job.addInvocation(jailMonkeyBypass(false, job.identifier));
 
   jobs.add(job);
 };
 
 export const enable = (): void => {
-  const job: IJob = {
-    identifier: jobs.identifier(),
-    type: "ios-jailbreak-enable",
-  };
+  const job: jobs.Job = new jobs.Job(jobs.identifier(), "ios-jailbreak-enable");
 
-  job.invocations = [];
-
-  job.invocations.push(fileExistsAtPath(true, job.identifier));
-  job.invocations.push(libSystemBFork(true, job.identifier));
-  job.invocations.push(fopen(true, job.identifier));
-  job.invocations.push(canOpenURL(true, job.identifier));
-  job.invocations.push(jailMonkeyBypass(true, job.identifier));
+  job.addInvocation(fileExistsAtPath(true, job.identifier));
+  job.addInvocation(libSystemBFork(true, job.identifier));
+  job.addInvocation(fopen(true, job.identifier));
+  job.addInvocation(canOpenURL(true, job.identifier));
+  job.addInvocation(jailMonkeyBypass(true, job.identifier));
 
   jobs.add(job);
 };

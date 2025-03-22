@@ -12,7 +12,7 @@ import frida
 from objection.state.app import app_state
 from objection.state.connection import state_connection
 from objection.state.device import device_state, Ios, Android
-from objection.state.jobs import job_manager_state
+from objection.state.jobs import job_manager_state, Job
 from objection.utils.helpers import debug_print
 
 
@@ -264,20 +264,22 @@ class Agent(object):
         self.script.on('message', self.handlers.script_on_message)
         self.script.load()
 
-    def attach_script(self, source):
+    def attach_script(self, job_name, source):
         """
             Attaches an arbitrary script session.
 
-            # TODO: Implement some script management so we could unload these later.
-
+            :param job_name:
             :param source:
             :return:
         """
 
-        session = self.device.attach(self.pid)
-        script = session.create_script(source=source)
+        session: frida.core.Session = self.device.attach(self.pid)
+        script: frida.core.Script = session.create_script(source=source)
         script.on('message', self.handlers.script_on_message)
         script.load()
+
+        script_job = Job(job_name, 'script', script)
+        job_manager_state.add_job(script_job)
 
     def update_device_state(self):
         """
