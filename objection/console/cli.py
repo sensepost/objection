@@ -268,7 +268,7 @@ def patchipa(source: str, gadget_version: str, codesign_signature: str, provisio
               help='Skip signing the apk file.', show_default=False)
 @click.option('--target-class', '-t', help='The target class to patch.', default=None)
 @click.option('--use-aapt2', '-2', is_flag=True, default=False,
-              help='Use the aapt2 binary instead of aapt as part of the apktool processing.', show_default=False)
+              help='Use the aapt2 binary instead of aapt as part of the apktool processing and for badge dumping.', show_default=False)
 @click.option('--gadget-config', '-c', default=None, help=(
         'The gadget configuration file to use. '
         'Refer to https://frida.re/docs/gadget/ for more information.'), show_default=False)
