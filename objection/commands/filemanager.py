@@ -743,10 +743,10 @@ def cat(args: list):
     _, destination = tempfile.mkstemp('.file')
 
     if device_state.platform == Ios:
-        _download_ios(source, destination)
+        _download_ios(source, destination, False)
 
     if device_state.platform == Android:
-        _download_android(source, destination)
+        _download_android(source, destination, False)
 
     click.secho('====', dim=True)
     with open(destination, 'r', encoding='utf-8', errors='ignore') as f:
