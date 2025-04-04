@@ -158,7 +158,7 @@ def remove(args: list) -> None:
     click.secho('Service:  {0}'.format(service), dim=True)
 
     api = state_connection.get_api()
-    api.ios_keychain_remove(account, service);
+    api.ios_keychain_remove(account, service)
     click.secho('Successfully removed matching keychain items', fg='green')
 
 

@@ -324,7 +324,7 @@ class Agent(object):
         if not self.script:
             raise Exception('Need a script created before reading exports()')
 
-        return self.script.exports
+        return self.script.exports_sync
 
     def run(self):
         """
