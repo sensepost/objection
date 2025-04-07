@@ -167,6 +167,56 @@ const okHttp3CertificatePinnerCheckOkHttp = (ident: string): any | undefined => 
   });
 };
 
+const okHttp3CertificatePinnerExpanded = (ident: string): any | undefined => {
+  return wrapJavaPerform(() => {
+    try {
+      const certificatePinner: CertificatePinner = Java.use("okhttp3.CertificatePinner");
+      send(c.blackBright(`Found okhttp3.CertificatePinner, overriding CertificatePinner.check$okhttp()`));
+
+        try {
+          const CertificatePinnerCheckOkHttp = certificatePinner.check$okhttp.overload('java.lang.String', 'java.security.cert.Certificate');
+
+          // tslint:disable-next-line:only-arrow-functions
+          CertificatePinnerCheckOkHttp.implementation = function (str,cert) {
+            qsend(quiet,
+              c.blackBright(`[${ident}] `) + `Called check$okhttp ` +
+              c.green(`OkHTTP 3.x CertificatePinner.check$okhttp() - `) +
+              str,
+          } catch(err) {
+            qsend(quiet,
+              c.blackBright(`[${ident}] `) +
+              c.red(`Skipping Expanded OkHTTP Hook`),
+          }
+
+        try {
+          const CertificatePinnerCheckOkHttp = certificatePinner.check$okhttp.overload('java.lang.String', '[Ljava.security.cert.Certificate;');
+
+          // tslint:disable-next-line:only-arrow-functions
+          CertificatePinnerCheckOkHttp.implementation = function (str,cert_array) {
+            qsend(quiet,
+              c.blackBright(`[${ident}] `) + `Called check$okhttp ` +
+              c.green(`OkHTTP 3.x CertificatePinner.check$okhttp() - `) +
+              str,
+          } catch(err) {
+            qsend(quiet,
+              c.blackBright(`[${ident}] `) +
+              c.red(`Skipping Expanded OkHTTP Hook`),
+          }
+          
+        );
+      };
+
+      return CertificatePinnerCheckOkHttp;
+
+    } catch (err) {
+      if ((err as Error).message.indexOf("ClassNotFoundException") === 0) {
+        throw err;
+      }
+    }
+  });
+};
+
+
 const appceleratorTitaniumPinningTrustManager = (ident: string): any | undefined => {
   return wrapJavaPerform(() => {
     try {
@@ -325,6 +375,7 @@ export const disable = (q: boolean): void => {
   job.implementations.push(sslContextEmptyTrustManager(job.identifier));
   job.implementations.push(okHttp3CertificatePinnerCheck(job.identifier));
   job.implementations.push(okHttp3CertificatePinnerCheckOkHttp(job.identifier));
+  job.implementations.push(okHttp3CertificatePinnerExpanded(job.identifier));
   job.implementations.push(appceleratorTitaniumPinningTrustManager(job.identifier));
   job.implementations.push(trustManagerImplVerifyChainCheck(job.identifier));
   job.implementations.push(trustManagerImplCheckTrustedRecursiveCheck(job.identifier));
