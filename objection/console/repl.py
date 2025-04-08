@@ -302,7 +302,7 @@ class Repl(object):
                 # agent.inject()
                 # state_connection.a = agent
 
-                click.secho('Reconnection successful!', fg='green')
+                click.secho('Not yet implemented!', fg='yellow')
 
             except (frida.ServerNotRunningError, frida.TimedOutError) as e:
                 click.secho('Failed to reconnect with error: {0}'.format(e), fg='red')

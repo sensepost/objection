@@ -77,7 +77,7 @@ export const android = {
   androidKeystoreClear: () => keystore.clear(),
   androidKeystoreList: (): Promise<IKeyStoreEntry[]> => keystore.list(),
   androidKeystoreDetail: (): Promise<IKeyStoreDetail[]> => keystore.detail(),
-  androidKeystoreWatch: (): void => keystore.watchKeystore(),
+  androidKeystoreWatch: (): Promise<void> => keystore.watchKeystore(),
 
   // android ssl pinning
   androidSslPinningDisable: (quiet: boolean) => sslpinning.disable(quiet),

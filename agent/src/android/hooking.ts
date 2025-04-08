@@ -1,5 +1,4 @@
 import { colors as c } from "../lib/color.js";
-import { IJob } from "../lib/interfaces.js";
 import * as jobs from "../lib/jobs.js";
 import { ICurrentActivityFragment } from "./lib/interfaces.js";
 import {
@@ -67,11 +66,7 @@ const getPatternType = (pattern: string): PatternType => {
 export const lazyWatchForPattern = (query: string, watch: boolean, dargs: boolean, dret: boolean, dbt: boolean): void => {
   // TODO: Use param to control interval
   let found = false;
-  const job: IJob = {
-    identifier: jobs.identifier(),
-    implementations: [],
-    type: `notify-class for: ${query}`,
-  };
+  const job: jobs.Job = new jobs.Job(jobs.identifier(),`notify-class for: ${query}`);
 
   // This method loops over all enumerate matches and then calls watch
   // with the arguments specified in the parent function
@@ -262,11 +257,7 @@ export const watch = (pattern: string, dargs: boolean, dbt: boolean, dret: boole
   if (patternType === PatternType.Klass) {
 
     // start a new job container
-    const job: IJob = {
-      identifier: jobs.identifier(),
-      implementations: [],
-      type: `watch-class for: ${pattern}`,
-    };
+    const job: jobs.Job = new jobs.Job(jobs.identifier(),`watch-class for: ${pattern}`);
 
     const w = watchClass(pattern, job, dargs, dbt, dret);
     jobs.add(job);
@@ -275,11 +266,7 @@ export const watch = (pattern: string, dargs: boolean, dbt: boolean, dret: boole
   }
 
   // assume we have PatternType.Regex
-  const job: IJob = {
-    identifier: jobs.identifier(),
-    implementations: [],
-    type: `watch-pattern for: ${pattern}`,
-  };
+  const job: jobs.Job = new jobs.Job(jobs.identifier(),`watch-pattern for: ${pattern}`);
   jobs.add(job);
 
   return new Promise((resolve, reject) => {
@@ -299,7 +286,7 @@ export const watch = (pattern: string, dargs: boolean, dbt: boolean, dret: boole
   });
 };
 
-const watchClass = (clazz: string, job: IJob, dargs: boolean = false, dbt: boolean = false, dret: boolean = false): Promise<void> => {
+const watchClass = (clazz: string, job: jobs.Job, dargs: boolean = false, dbt: boolean = false, dret: boolean = false): Promise<void> => {
   return wrapJavaPerform(() => {
     const clazzInstance: JavaClass = Java.use(clazz);
 
@@ -337,7 +324,7 @@ const watchClass = (clazz: string, job: IJob, dargs: boolean = false, dbt: boole
 };
 
 const watchMethod = (
-  fqClazz: string, job: IJob, dargs: boolean, dbt: boolean, dret: boolean,
+  fqClazz: string, job: jobs.Job, dargs: boolean, dbt: boolean, dret: boolean,
 ): Promise<void> => {
   const [clazz, method] = splitClassMethod(fqClazz);
   // send(`Attempting to watch class ${c.green(clazz)} and method ${c.green(method)}.`);
@@ -400,11 +387,7 @@ const watchMethod = (
       };
 
       // Push the implementation so that it can be nulled later
-      if (job.implementations) {
-        job.implementations.push(m);
-      } else {
-        job.implementations = [ m ];
-      }
+      job.addImplementation(m);
 
     });
   });
@@ -534,11 +517,7 @@ export const setReturnValue = (fqClazz: string, filterOverload: string | null, n
   }
 
   return wrapJavaPerform(() => {
-    const job: IJob = {
-      identifier: jobs.identifier(),
-      implementations: [],
-      type: `set-return for: ${fqClazz}`,
-    };
+    const job: jobs.Job = new jobs.Job(jobs.identifier(), `set-return for: ${fqClazz}`);
 
     const targetClazz: JavaClass = Java.use(clazz);
 
@@ -570,11 +549,7 @@ export const setReturnValue = (fqClazz: string, filterOverload: string | null, n
       };
 
       // record override
-      if (job.implementations) {
-        job.implementations.push(m);
-      } else {
-        job.implementations = [ m ];
-      }
+      job.addImplementation(m);
       
     });
 

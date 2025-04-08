@@ -1,6 +1,5 @@
 import { colors as c } from "../lib/color.js";
 import { qsend } from "../lib/helpers.js";
-import { IJob } from "../lib/interfaces.js";
 import * as jobs from "../lib/jobs.js";
 import { wrapJavaPerform } from "./lib/libjava.js";
 import {
@@ -17,7 +16,7 @@ import {
 // a simple flag to control if we should be quiet or not
 let quiet: boolean = false;
 
-const sslContextEmptyTrustManager = (ident: string): any => {
+const sslContextEmptyTrustManager = (ident: number): Promise<any> => {
   // -- Sample Java
   //
   // "Generic" TrustManager Example
@@ -83,7 +82,7 @@ const sslContextEmptyTrustManager = (ident: string): any => {
   });
 };
 
-const okHttp3CertificatePinnerCheck = (ident: string): any | undefined => {
+const okHttp3CertificatePinnerCheck = (ident: number): Promise<any | undefined> => {
   // -- Sample Java
   //
   // Example used to test this bypass.
@@ -125,7 +124,7 @@ const okHttp3CertificatePinnerCheck = (ident: string): any | undefined => {
   });
 };
 
-const okHttp3CertificatePinnerCheckOkHttp = (ident: string): any | undefined => {
+const okHttp3CertificatePinnerCheckOkHttp = (ident: number): Promise<any | undefined> => {
   // -- Sample Java
   //
   // Example used to test this bypass.
@@ -167,7 +166,7 @@ const okHttp3CertificatePinnerCheckOkHttp = (ident: string): any | undefined => 
   });
 };
 
-const appceleratorTitaniumPinningTrustManager = (ident: string): any | undefined => {
+const appceleratorTitaniumPinningTrustManager = (ident: number): Promise<any | undefined> => {
   return wrapJavaPerform(() => {
     try {
       const pinningTrustManager: PinningTrustManager = Java.use("appcelerator.https.PinningTrustManager");
@@ -204,7 +203,7 @@ const appceleratorTitaniumPinningTrustManager = (ident: string): any | undefined
 //  blogs/2017/november/bypassing-androids-network-security-configuration/
 //
 // More information: https://sensepost.com/blog/2018/tip-toeing-past-android-7s-network-security-configuration/
-const trustManagerImplVerifyChainCheck = (ident: string): any | undefined => {
+const trustManagerImplVerifyChainCheck = (ident: number): Promise<any> => {
   return wrapJavaPerform(() => {
     try {
       const trustManagerImpl: TrustManagerImpl = Java.use("com.android.org.conscrypt.TrustManagerImpl");
@@ -241,7 +240,7 @@ const trustManagerImplVerifyChainCheck = (ident: string): any | undefined => {
 // Android 7+ TrustManagerImpl.checkTrustedRecursive()
 // The work in the following method is based on:
 // https://techblog.mediaservice.net/2018/11/universal-android-ssl-pinning-bypass-2/
-const trustManagerImplCheckTrustedRecursiveCheck = (ident: string): any | undefined => {
+const trustManagerImplCheckTrustedRecursiveCheck = (ident: number): Promise<any> => {
   return wrapJavaPerform(() => {
     try {
       const arrayList: ArrayList = Java.use("java.util.ArrayList");
@@ -276,7 +275,7 @@ const trustManagerImplCheckTrustedRecursiveCheck = (ident: string): any | undefi
   });
 };
 
-const phoneGapSSLCertificateChecker = (ident: string): any | undefined => {
+const phoneGapSSLCertificateChecker = (ident: number): Promise<any> => {
   return wrapJavaPerform(() => {
     try {
       const sslCertificateChecker: SSLCertificateChecker = Java.use("nl.xservices.plugins.SSLCertificateChecker");
@@ -285,20 +284,20 @@ const phoneGapSSLCertificateChecker = (ident: string): any | undefined => {
           `overriding SSLCertificateChecker.execute()`),
       );
 
-      const SSLCertificateCheckerExecute = sslCertificateChecker.execute;
+      const SSLCertificateCheckerExecute = sslCertificateChecker.execute.overload("java.lang.String", 
+        "org.json.JSONArray", "org.apache.cordova.CallbackContext");
 
-      SSLCertificateCheckerExecute.overload(
-        "java.lang.String", "org.json.JSONArray", "org.apache.cordova.CallbackContext").implementation =
-        // tslint:disable-next-line:only-arrow-functions
-        function (str, jsonArray, callBackContext) {
-          qsend(quiet,
-            c.blackBright(`[${ident}] `) + `Called ` +
-            c.green(`SSLCertificateChecker.execute()`) +
-            `, not throwing an exception.`,
-          );
-          callBackContext.success("CONNECTION_SECURE");
-          return true;
-        };
+      SSLCertificateCheckerExecute.implementation = function (str, jsonArray, callBackContext) {
+        qsend(quiet,
+          c.blackBright(`[${ident}] `) + `Called ` +
+          c.green(`SSLCertificateChecker.execute()`) +
+          `, not throwing an exception.`,
+        );
+        callBackContext.success("CONNECTION_SECURE");
+        return true;
+      };
+
+      return SSLCertificateCheckerExecute;
 
     } catch (err) {
       if ((err as Error).message.indexOf("ClassNotFoundException") === 0) {
@@ -309,25 +308,22 @@ const phoneGapSSLCertificateChecker = (ident: string): any | undefined => {
 };
 
 // the main exported function to run all of the pinning bypass methods known
-export const disable = (q: boolean): void => {
+export const disable = async (q: boolean): Promise<void> => {
   if (q) {
     send(c.yellow(`Quiet mode enabled. Not reporting invocations.`));
     quiet = true;
   }
 
-  const job: IJob = {
-    identifier: jobs.identifier(),
-    type: "android-sslpinning-disable",
-  };
+  const job: jobs.Job = new jobs.Job(jobs.identifier(), "android-sslpinning-disable");
+  
+  job.addImplementation(await sslContextEmptyTrustManager(job.identifier));
+  // Exceptions can cause undefined values if classes are not found. Thus addImplementation only adds if function was hooked
+  job.addImplementation(await okHttp3CertificatePinnerCheck(job.identifier));
+  job.addImplementation(await okHttp3CertificatePinnerCheckOkHttp(job.identifier));
+  job.addImplementation(await appceleratorTitaniumPinningTrustManager(job.identifier));
+  job.addImplementation(await trustManagerImplVerifyChainCheck(job.identifier));
+  job.addImplementation(await trustManagerImplCheckTrustedRecursiveCheck(job.identifier));
+  job.addImplementation(await phoneGapSSLCertificateChecker(job.identifier));
 
-  job.implementations = [];
-
-  job.implementations.push(sslContextEmptyTrustManager(job.identifier));
-  job.implementations.push(okHttp3CertificatePinnerCheck(job.identifier));
-  job.implementations.push(okHttp3CertificatePinnerCheckOkHttp(job.identifier));
-  job.implementations.push(appceleratorTitaniumPinningTrustManager(job.identifier));
-  job.implementations.push(trustManagerImplVerifyChainCheck(job.identifier));
-  job.implementations.push(trustManagerImplCheckTrustedRecursiveCheck(job.identifier));
-  job.implementations.push(phoneGapSSLCertificateChecker(job.identifier));
   jobs.add(job);
 };
