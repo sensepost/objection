@@ -1,17 +1,17 @@
-import { colors as c } from "../lib/color";
+import { colors as c } from "../lib/color.js";
 import {
   IKeyStoreDetail,
   IKeyStoreEntry
-} from "./lib/interfaces";
-import { wrapJavaPerform } from "./lib/libjava";
+} from "./lib/interfaces.js";
+import { wrapJavaPerform } from "./lib/libjava.js";
 import {
   KeyFactory,
   KeyInfo,
   KeyStore,
   SecretKeyFactory
-} from "./lib/types";
-import { IJob } from "../lib/interfaces";
-import * as jobs from "../lib/jobs";
+} from "./lib/types.js";
+import { IJob } from "../lib/interfaces.js";
+import * as jobs from "../lib/jobs.js";
 
 // Dump entries in the Android Keystore, together with a flag
 // indicating if its a key or a certificate.
@@ -220,9 +220,9 @@ const keystoreGetKey = (ident: string): any | undefined => {
 export const watchKeystore = (): void => {
   const job: IJob = {
     identifier: jobs.identifier(),
-    implementations: [],
     type: "android-keystore-watch",
   };
+  job.implementations = [];
 
   job.implementations.push(keystoreLoad(job.identifier));
   job.implementations.push(keystoreGetKey(job.identifier));

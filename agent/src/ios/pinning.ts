@@ -1,8 +1,8 @@
-import { colors as c } from "../lib/color";
-import { qsend } from "../lib/helpers";
-import { IJob } from "../lib/interfaces";
-import * as jobs from "../lib/jobs";
-import { libObjc } from "./lib/libobjc";
+import { colors as c } from "../lib/color.js";
+import { qsend } from "../lib/helpers.js";
+import { IJob } from "../lib/interfaces.js";
+import * as jobs from "../lib/jobs.js";
+import { libObjc } from "./lib/libobjc.js";
 
 // These hooks attempt many ways to kill SSL pinning and certificate
 // validations. The first sections search for common libraries and
@@ -165,7 +165,7 @@ const afNetworking = (ident: string): InvocationListener[] => {
           args[2] = new NativePointer(0x0);
         }
       },
-    }) : null;
+    }) : new InvocationListener();
 
   return [
     setSSLPinningmode,
@@ -255,7 +255,7 @@ const trustKit = (ident: string): InvocationListener => {
   // https://github.com/datatheorem/TrustKit/blob/
   //  71878dce8c761fc226fecc5dbb6e86fbedaee05e/TrustKit/TSKPinningValidator.m#L84
   if (!ObjC.classes.TSKPinningValidator) {
-    return;
+    return new InvocationListener();
   }
 
   send(c.blackBright(`[${ident}] `) + `Found TrustKit. Hooking known pinning methods.`);
@@ -286,7 +286,7 @@ const cordovaCustomURLConnectionDelegate = (ident: string): InvocationListener =
   // https://github.com/EddyVerbruggen/SSLCertificateChecker-PhoneGap-Plugin/blob/
   //  67634bfdf4a31bb09b301db40f8f27fbd8818f61/src/ios/SSLCertificateChecker.m#L109-L116
   if (!ObjC.classes.CustomURLConnectionDelegate) {
-    return;
+    return new InvocationListener();
   }
 
   send(c.blackBright(`[${ident}] `) + `Found SSLCertificateChecker-PhoneGap-Plugin.` +
@@ -392,7 +392,7 @@ const tlsHelperCreatePeerTrust = (ident: string): NativePointerValue => {
   const tlsHelper = libObjc.tls_helper_create_peer_trust;
 
   if (tlsHelper.isNull()) {
-    return null;
+    return NULL;
   }
 
   Interceptor.replace(tlsHelper, new NativeCallback((hdsk, server, SecTrustRef) => {
@@ -413,7 +413,7 @@ const nwTlsCreatePeerTrust = (ident: string): InvocationListener => {
   const peerTrust = libObjc.nw_tls_create_peer_trust;
 
   if (peerTrust.isNull()) {
-    return null;
+    return new InvocationListener();
   }
 
   return Interceptor.attach(peerTrust, {
@@ -445,7 +445,7 @@ const nwTlsCreatePeerTrust = (ident: string): InvocationListener => {
 };
 
 // SSL_CTX_set_custom_verify
-const sSLCtxSetCustomVerify = (ident: string): InvocationListener => {
+const sSLCtxSetCustomVerify = (ident: string) => {
   const getPskIdentity = libObjc.SSL_get_psk_identity;
   let setCustomVerify = libObjc.SSL_set_custom_verify;
   if (setCustomVerify.isNull()) {
@@ -454,7 +454,7 @@ const sSLCtxSetCustomVerify = (ident: string): InvocationListener => {
   }
 
   if (setCustomVerify.isNull() || getPskIdentity.isNull()) {
-    return null;
+    return new InvocationListener();
   }
 
   // tslint:disable-next-line:only-arrow-functions variable-name
@@ -498,19 +498,19 @@ export const disable = (q: boolean): void => {
 
   const job: IJob = {
     identifier: jobs.identifier(),
-    invocations: [],
-    replacements: [],
     type: "ios-sslpinning-disable",
   };
 
+  job.invocations = [];
+  job.replacements = [];
   // Framework hooks.
   send(c.blackBright(`Hooking common framework methods`));
 
   afNetworking(job.identifier).forEach((i) => {
-    job.invocations.push(i);
+    job.invocations!.push(i);
   });
   nsUrlSession(job.identifier).forEach((i) => {
-    job.invocations.push(i);
+    job.invocations!.push(i);
   });
   job.invocations.push(trustKit(job.identifier));
   job.invocations.push(cordovaCustomURLConnectionDelegate(job.identifier));
@@ -530,7 +530,8 @@ export const disable = (q: boolean): void => {
 
   // iOS 11>
   send(c.blackBright(`Hooking BoringSSL methods`));
-  job.invocations.push(sSLCtxSetCustomVerify(job.identifier));
+  sSLCtxSetCustomVerify(job.identifier)
+  // job.invocations.push(sSLCtxSetCustomVerify(job.identifier));
 
   jobs.add(job);
 };

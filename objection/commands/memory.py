@@ -36,6 +36,30 @@ def _should_only_dump_offsets(args: list) -> bool:
     return '--offsets-only' in args
 
 
+def _is_string_pattern(args: list) -> bool:
+    """
+        Checks if --string-pattern is in the list of tokens received form the
+        command line.
+
+        :param args:
+        :return:
+    """
+
+    return len(args) > 0 and '--string-pattern' in args
+
+
+def _is_string_replace(args: list) -> bool:
+    """
+        Checks if --string-replace is in the list of tokens received form the
+        command line.
+
+        :param args:
+        :return:
+    """
+
+    return len(args) > 0 and '--string-replace' in args
+
+
 def _should_output_json(args: list) -> bool:
     """
         Checks if --json is in the list of tokens received from the command line.
@@ -291,6 +315,45 @@ def find_pattern(args: list) -> None:
         if _should_only_dump_offsets(args):
             for address in data:
                 click.secho(address)
+
+    else:
+        click.secho('Unable to find the pattern in any memory region')
+
+
+def replace_pattern(args: list) -> None:
+    """
+        Searches the current processes accessible memory for a specific pattern and replaces it with given bytes or string.
+
+        :param args:
+        :return:
+    """
+
+    if len(clean_argument_flags(args)) < 2:
+        click.secho('Usage: memory replace "<search pattern eg: 41 41 ?? 41>" "<replace value eg: 41 50>" (--string-pattern) (--string-replace)', bold=True)
+        return
+
+    # if we got a string as search pattern input, convert it to hex
+    if _is_string_pattern(args):
+        pattern = ' '.join(hex(ord(x))[2:] for x in args[0])
+    else:
+        pattern = args[0]
+
+    # if we got a string as replace input, convert it to int[], otherwise convert hex to int[]
+    replace = args[1]
+    if _is_string_replace(args):
+        replace = [ord(x) for x in replace]
+    else:
+        replace = [int(x, 16) for x in replace.split(' ')]
+
+    click.secho('Searching for: {0}, replacing with: {1}'.format(pattern, args[1]), dim=True)
+
+    api = state_connection.get_api()
+    data = api.memory_replace(pattern, replace)
+
+    if len(data) > 0:
+        click.secho('Pattern replaced at {0} addresses'.format(len(data)), fg='green')
+        for address in data:
+            click.secho(address)
 
     else:
         click.secho('Unable to find the pattern in any memory region')

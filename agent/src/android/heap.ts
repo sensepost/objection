@@ -1,11 +1,11 @@
-import { colors as c } from "../lib/color";
+import { colors as c } from "../lib/color.js";
 import {
   IHeapClassDictionary,
   IHeapObject,
   IJavaField,
   IHeapNormalised
-} from "./lib/interfaces";
-import { wrapJavaPerform } from "./lib/libjava";
+} from "./lib/interfaces.js";
+import { wrapJavaPerform } from "./lib/libjava.js";
 
 export let handles: IHeapClassDictionary = {};
 
@@ -72,12 +72,12 @@ export const getInstances = (clazz: string): Promise<any[]> => {
 
 export const methods = (handle: number): Promise<string[]> => {
   return wrapJavaPerform(() => {
-    const clazz: Java.Wrapper = getInstance(handle);
+    const clazz = getInstance(handle);
     if (clazz == null) {
       return [];
     }
 
-    return clazz.class.getDeclaredMethods().map((method) => {
+    return clazz.class.getDeclaredMethods().map((method: any) => {
       return method.toGenericString();
     });
   });
@@ -85,7 +85,7 @@ export const methods = (handle: number): Promise<string[]> => {
 
 export const execute = (handle: number, method: string, returnString: boolean = false): Promise<string | null> => {
   return wrapJavaPerform(() => {
-    const clazz: Java.Wrapper = getInstance(handle);
+    const clazz = getInstance(handle);
 
     if (clazz == null) {
       return;
@@ -104,13 +104,13 @@ export const execute = (handle: number, method: string, returnString: boolean = 
 
 export const fields = (handle: number): Promise<IJavaField[]> => {
   return wrapJavaPerform(() => {
-    const clazz: Java.Wrapper = getInstance(handle);
+    const clazz = getInstance(handle);
 
     if (clazz == null) {
       return;
     }
 
-    return clazz.class.getDeclaredFields().map((field): IJavaField => {
+    return clazz.class.getDeclaredFields().map((field: any): IJavaField => {
       const fieldName: string = field.getName();
       const fieldInstance: Java.Wrapper = clazz.class.getDeclaredField(fieldName);
       fieldInstance.setAccessible(true);
@@ -132,7 +132,7 @@ export const fields = (handle: number): Promise<IJavaField[]> => {
 
 export const evaluate = (handle: number, js: string): Promise<void> => {
   return wrapJavaPerform(() => {
-    const clazz: Java.Wrapper = getInstance(handle);
+    const clazz = getInstance(handle);
 
     if (clazz == null) {
       return;

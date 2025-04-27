@@ -16,6 +16,17 @@ from ..utils.helpers import sizeof_fmt
 _ls_cache = {}
 
 
+def _should_download_folder(args: list) -> bool:
+    """
+        Checks if --json is in the list of tokens received from the command line.
+
+        :param args:
+        :return:
+    """
+
+    return len(args) > 0 and '--folder' in args
+
+
 def cd(args: list) -> None:
     """
         Change the current working directory of the device.
@@ -44,7 +55,9 @@ def cd(args: list) -> None:
         return
 
     # moving one directory back
-    if path == '..':
+    device_path_separator = device_state.platform.path_separator
+
+    if path == '..' or path == '..'+device_path_separator:
 
         split_path = os.path.split(current_dir)
 
@@ -65,6 +78,10 @@ def cd(args: list) -> None:
 
         # assume the path does not exist by default
         does_exist = False
+
+        # normalise path to remove '../'
+        if '..'+device_path_separator in path:
+            path = os.path.normpath(path).replace('\\', device_path_separator)
 
         # check for existence based on the runtime
         if device_state.platform == Ios:
@@ -89,7 +106,13 @@ def cd(args: list) -> None:
     # see if its legit.
     else:
 
-        proposed_path = device_state.platform.path_separator.join([current_dir, path])
+        proposed_path = device_path_separator.join([current_dir, path])
+
+        # normalise path to remove '../'
+        if '..'+device_path_separator in proposed_path:
+            proposed_path = os.path.normpath(proposed_path).replace('\\', device_path_separator)
+            if proposed_path == '//':
+                return
 
         # assume the proposed_path does not exist by default
         does_exist = False
@@ -393,14 +416,16 @@ def download(args: list) -> None:
     source = args[0]
     destination = args[1] if len(args) > 1 else os.path.basename(source)
 
+    should_download_folder = _should_download_folder(args)
+
     if device_state.platform == Ios:
-        _download_ios(source, destination)
+        _download_ios(source, destination, should_download_folder)
 
     if device_state.platform == Android:
-        _download_android(source, destination)
+        _download_android(source, destination, should_download_folder)
 
 
-def _download_ios(path: str, destination: str) -> None:
+def _download_ios(path: str, destination: str, should_download_folder: bool, path_root: bool = True) -> None:
     """
         Download a file from an iOS filesystem and store it locally.
 
@@ -416,27 +441,55 @@ def _download_ios(path: str, destination: str) -> None:
 
     api = state_connection.get_api()
 
-    click.secho('Downloading {0} to {1}'.format(path, destination), fg='green', dim=True)
+    if path_root:
+        click.secho('Downloading {0} to {1}'.format(path, destination), fg='green', dim=True)
 
     if not api.ios_file_readable(path):
         click.secho('Unable to download file. File is not readable.', fg='red')
         return
 
     if not api.ios_file_path_is_file(path):
-        click.secho('Unable to download file. Target path is not a file.', fg='yellow')
+        if not should_download_folder:
+            click.secho('To download folders, specify --folder.', fg='yellow')
+            return
+
+        if os.path.exists(destination):
+            click.secho('The target path already exists.', fg='yellow')
+            return
+
+        os.makedirs(destination)
+
+        if path_root:
+            if not click.confirm('Do you want to download the full directory?', default=True):
+                click.secho('Download aborted.', fg='yellow')
+                return
+            click.secho('Downloading directory recursively...', fg='green')
+
+        data = api.ios_file_ls(path)
+        for name, _ in data['files'].items():
+            sub_path = device_state.platform.path_separator.join([path, name])
+            sub_destination = os.path.join(destination, name)
+
+            _download_ios(sub_path, sub_destination, True, False)
+        if path_root:
+            click.secho('Recursive download finished.', fg='green')
+
         return
 
-    click.secho('Streaming file from device...', dim=True)
+    if path_root:
+        click.secho('Streaming file from device...', dim=True)
     file_data = api.ios_file_download(path)
 
-    click.secho('Writing bytes to destination...', dim=True)
+    if path_root:
+        click.secho('Writing bytes to destination...', dim=True)
+
     with open(destination, 'wb') as fh:
         fh.write(bytearray(file_data['data']))
 
     click.secho('Successfully downloaded {0} to {1}'.format(path, destination), bold=True)
 
 
-def _download_android(path: str, destination: str) -> None:
+def _download_android(path: str, destination: str, should_download_folder: bool, path_root: bool = True) -> None:
     """
         Download a file from the Android filesystem and store it locally.
 
@@ -452,20 +505,47 @@ def _download_android(path: str, destination: str) -> None:
 
     api = state_connection.get_api()
 
-    click.secho('Downloading {0} to {1}'.format(path, destination), fg='green', dim=True)
+    if path_root:
+        click.secho('Downloading {0} to {1}'.format(path, destination), fg='green', dim=True)
 
     if not api.android_file_readable(path):
         click.secho('Unable to download file. Target path is not readable.', fg='red')
         return
 
     if not api.android_file_path_is_file(path):
-        click.secho('Unable to download file. Target path is not a file.', fg='yellow')
+        if not should_download_folder:
+            click.secho('To download folders, specify --folder.', fg='yellow')
+            return
+
+        if os.path.exists(destination):
+            click.secho('The target path already exists.', fg='yellow')
+            return
+
+        os.makedirs(destination)
+
+        if path_root:
+            if not click.confirm('Do you want to download the full directory?', default=True):
+                click.secho('Download aborted.', fg='yellow')
+                return
+            click.secho('Downloading directory recursively...', fg='green')
+
+        data = api.android_file_ls(path)
+        for name, _ in data['files'].items():
+            sub_path = device_state.platform.path_separator.join([path, name])
+            sub_destination = os.path.join(destination, name)
+
+            _download_android(sub_path, sub_destination, True, False)
+        if path_root:
+            click.secho('Recursive download finished.', fg='green')
         return
 
-    click.secho('Streaming file from device...', dim=True)
+    if path_root:
+        click.secho('Streaming file from device...', dim=True)
     file_data = api.android_file_download(path)
 
-    click.secho('Writing bytes to destination...', dim=True)
+    if path_root:
+        click.secho('Writing bytes to destination...', dim=True)
+
     with open(destination, 'wb') as fh:
         fh.write(bytearray(file_data['data']))
 
@@ -663,10 +743,10 @@ def cat(args: list):
     _, destination = tempfile.mkstemp('.file')
 
     if device_state.platform == Ios:
-        _download_ios(source, destination)
+        _download_ios(source, destination, False)
 
     if device_state.platform == Android:
-        _download_android(source, destination)
+        _download_android(source, destination, False)
 
     click.secho('====', dim=True)
     with open(destination, 'r', encoding='utf-8', errors='ignore') as f:
@@ -785,7 +865,10 @@ def list_folders_in_current_fm_directory() -> dict:
         file_name, file_type = entry
 
         if file_type == 'directory':
-            resp[file_name] = file_name
+            if ' ' in file_name:
+                resp[f"'{file_name}'"] = file_name
+            else:
+                resp[file_name] = file_name
 
     return resp
 
@@ -816,6 +899,41 @@ def list_files_in_current_fm_directory() -> dict:
         file_name, file_type = entry
 
         if file_type == 'file':
-            resp[file_name] = file_name
+            if ' ' in file_name:
+                resp[f"'{file_name}'"] = file_name
+            else:
+                resp[file_name] = file_name
+
+    return resp
+
+
+def list_content_in_current_fm_directory() -> dict:
+    """
+        Return folders and files in the current working directory of the
+        Frida attached device.
+    """
+
+    resp = {}
+
+    # check for existence based on the runtime
+    if device_state.platform == Ios:
+        response = _get_short_ios_listing()
+
+    elif device_state.platform == Android:
+        response = _get_short_android_listing()
+
+    # looks like we landed in an unknown runtime.
+    # just return.
+    else:
+        return resp
+
+    # loop the response to get entries.
+    for entry in response:
+        name, _ = entry
+
+        if ' ' in name:
+            resp[f"'{name}'"] = name
+        else:
+            resp[name] = name
 
     return resp

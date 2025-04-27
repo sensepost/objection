@@ -120,7 +120,7 @@ COMMANDS = {
         'exec': filemanager.pwd_print,
     },
 
-    'file': {
+    'filesystem': {
         'meta': 'Work with files on the remote filesystem',
         'commands': {
             'cat': {
@@ -133,8 +133,9 @@ COMMANDS = {
                 'exec': filemanager.upload
             },
             'download': {
-                'meta': 'Download a file',
-                'dynamic': filemanager.list_files_in_current_fm_directory,
+                'meta': 'Download a file or folder',
+                'flags': ['--folder'],
+                'dynamic': filemanager.list_content_in_current_fm_directory,
                 'exec': filemanager.download
             },
 
@@ -224,6 +225,12 @@ COMMANDS = {
                 'meta': 'Search for pattern in the applications memory',
                 'flags': ['--string', '--offsets-only'],
                 'exec': memory.find_pattern
+            },
+
+            'replace': {
+                'meta': 'Search and replace pattern in the applications memory',
+                'flags': ['--string-pattern', '--string-replace'],
+                'exec': memory.replace_pattern
             },
 
             'write': {
@@ -353,7 +360,9 @@ COMMANDS = {
                     },
                     'notify': {
                         'meta': 'Notify when a class becomes available',
-                        'exec': android_hooking.notify
+                        'exec': android_hooking.notify,
+                        'flags': ['--dump-args', '--dump-return', '--dump-backtrace', '--watch']
+
                     },
                     'generate': {
                         'meta': 'Generate Frida hooks for Android',
@@ -449,6 +458,10 @@ COMMANDS = {
                     'launch_service': {
                         'meta': 'Launch a Service class using an Intent',
                         'exec': intents.launch_service
+                    },
+                    'implicit_intents': {
+                        'meta': 'Analyze implicit intents',
+                        'exec': intents.analyze_implicit_intents
                     }
                 }
             },
@@ -538,6 +551,16 @@ COMMANDS = {
                         'meta': 'Delete all keychain entries for the current app\'s entitlement group',
                         'exec': keychain.clear
                     },
+                    'remove': {
+                        'meta': 'Remove an entry from the iOS keychain',
+                        'flags': ['--account', '--service'],
+                        'exec': keychain.remove
+                    },
+                    'update': {
+                        'meta': 'Update an entry from the iOS keychain',
+                        'flags': ['--account', '--service', '--newData'],
+                        'exec': keychain.update
+                    },                     
                     'add': {
                         'meta': 'Add an entry to the iOS keychain',
                         'flags': ['--account', '--service', '--data'],

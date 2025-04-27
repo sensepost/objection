@@ -1,9 +1,9 @@
-import { ICredential } from "./lib/interfaces";
+import { ICredential } from "./lib/interfaces.js";
 import {
   NSArray,
   NSData,
   NSURLCredentialStorage
-} from "./lib/types";
+} from "./lib/types.js";
 
 
 export const dump = (): ICredential[] => {

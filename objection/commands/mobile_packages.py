@@ -100,7 +100,8 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
                       enable_debug: bool = True, gadget_version: str = None, skip_resources: bool = False,
                       network_security_config: bool = False, target_class: str = None,
                       use_aapt2: bool = False, gadget_config: str = None, script_source: str = None,
-                      ignore_nativelibs: bool = True, manifest: str = None) -> None:
+                      ignore_nativelibs: bool = True, manifest: str = None, skip_signing: bool = False,
+                      only_main_classes: bool = False) -> None:
     """
         Patches an Android APK by extracting, patching SMALI, repackaging
         and signing a new APK.
@@ -118,6 +119,9 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
         :param gadget_config:
         :param script_source:
         :param manifest:
+        :param skip_signing:
+        :param ignore_nativelibs:
+        :param only_main_classes:
 
         :return:
     """
@@ -175,7 +179,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
 
     click.secho('Patcher will be using Gadget version: {0}'.format(github_version), fg='green')
 
-    patcher = AndroidPatcher(skip_cleanup=skip_cleanup, skip_resources=skip_resources, manifest=manifest)
+    patcher = AndroidPatcher(skip_cleanup=skip_cleanup, skip_resources=skip_resources, manifest=manifest, only_main_classes=only_main_classes)
 
     # ensure that we have all of the commandline requirements
     if not patcher.are_requirements_met():
@@ -220,7 +224,8 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
 
     patcher.build_new_apk(use_aapt2=use_aapt2)
     patcher.zipalign_apk()
-    patcher.sign_apk()
+    if not skip_signing:
+        patcher.sign_apk()
 
     # woohoo, get the APK!
     destination = source.replace('.apk', '.objection.apk')

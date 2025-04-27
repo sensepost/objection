@@ -30,7 +30,7 @@ def load_plugin(args: list = None) -> None:
         return
 
     spec = importlib.util.spec_from_file_location(str(uuid.uuid4())[:8], path)
-    plugin = spec.loader.load_module()
+    plugin = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(plugin)
 
     namespace = plugin.namespace

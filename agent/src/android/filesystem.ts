@@ -1,14 +1,15 @@
-import * as fs from "fs";
-import { hexStringToBytes } from "../lib/helpers";
-import { IAndroidFilesystem } from "./lib/interfaces";
+import * as fs from "frida-fs";
+import { Buffer } from "buffer";
+import { hexStringToBytes } from "../lib/helpers.js";
+import { IAndroidFilesystem } from "./lib/interfaces.js";
 import {
   getApplicationContext,
   wrapJavaPerform
-} from "./lib/libjava";
+} from "./lib/libjava.js";
 import {
   File,
   JavaClass
-} from "./lib/types";
+} from "./lib/types.js";
 
 export const exists = (path: string): Promise<boolean> => {
   // -- Sample Java
@@ -78,7 +79,9 @@ export const pwd = (): Promise<string> => {
 };
 
 // heavy lifting is done in frida-fs here.
-export const readFile = (path: string): Buffer => {
+export const readFile = (path: string): string | Buffer => {
+  if (fs.statSync(path).size == 0)
+    return Buffer.alloc(0);
   return fs.readFileSync(path);
 };
 

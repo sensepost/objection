@@ -1,5 +1,5 @@
-import * as custom from "../generic/custom";
-import * as http from "../generic/http";
+import * as custom from "../generic/custom.js";
+import * as http from "../generic/http.js";
 
 export const other = {
   evaluate: (js: string): void => custom.evaluate(js),
