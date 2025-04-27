@@ -1,9 +1,9 @@
-import { colors as c } from "../lib/color";
-import { IJob } from "../lib/interfaces";
-import * as jobs from "../lib/jobs";
+import { colors as c } from "../lib/color.js";
+import { IJob } from "../lib/interfaces.js";
+import * as jobs from "../lib/jobs.js";
 import {
   wrapJavaPerform
-} from "./lib/libjava";
+} from "./lib/libjava.js";
 
 function setToArray(set) {
   return set == null ? null : set.toArray()
