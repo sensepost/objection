@@ -5,4 +5,7 @@ Usage: android intent implicit_intents
 Starts a hook to analyze implicit intents during runtime.
 
 Examples:
-   android intent implicit_intents
+   android intent implicit_intents 
+
+To add a backtrace:
+   android intent implicit_intents --dump-backtrace

@@ -3,12 +3,25 @@ import click
 from objection.state.connection import state_connection
 from objection.utils.helpers import clean_argument_flags
 
+def _should_dump_backtrace(args: list) -> bool:
+    """
+        Check if --dump-backtrace is part of the arguments.
+
+        :param args:
+        :return:
+    """
+
+    return '--dump-backtrace' in args
+
+
 def analyze_implicit_intents(args: list) -> None:
     """
         Analyzes implicit intents in hooked methods.
     """
     api = state_connection.get_api()
-    api.android_intent_analyze()
+    backtrace = _should_dump_backtrace(args)
+    api.android_intent_analyze(backtrace)
+    
     click.secho('Started implicit intent analysis', bold=True)
 
 def launch_activity(args: list) -> None:
