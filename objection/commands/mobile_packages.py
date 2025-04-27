@@ -101,7 +101,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
                       network_security_config: bool = False, target_class: str = None,
                       use_aapt2: bool = False, gadget_config: str = None, script_source: str = None,
                       ignore_nativelibs: bool = True, manifest: str = None, skip_signing: bool = False,
-                      only_main_classes: bool = False) -> None:
+                      only_main_classes: bool = False, fix_concurrency_to = None) -> None:
     """
         Patches an Android APK by extracting, patching SMALI, repackaging
         and signing a new APK.
@@ -122,6 +122,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
         :param skip_signing:
         :param ignore_nativelibs:
         :param only_main_classes:
+        :param fix_concurrency_to:
 
         :return:
     """
@@ -192,7 +193,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
 
     # work on patching the APK
     patcher.set_apk_source(source=source)
-    patcher.unpack_apk()
+    patcher.unpack_apk(fix_concurrency_to=fix_concurrency_to)
     patcher.inject_internet_permission()
 
     if not ignore_nativelibs:
@@ -222,7 +223,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
 
         input('Press ENTER to continue...')
 
-    patcher.build_new_apk(use_aapt2=use_aapt2)
+    patcher.build_new_apk(use_aapt2=use_aapt2, fix_concurrency_to=fix_concurrency_to)
     patcher.zipalign_apk()
     if not skip_signing:
         patcher.sign_apk()

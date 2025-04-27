@@ -391,7 +391,7 @@ class AndroidPatcher(BasePlatformPatcher):
 
         return self.apk_temp_directory
 
-    def unpack_apk(self):
+    def unpack_apk(self, fix_concurrency_to = None):
         """
             Unpack an APK with apktool.
 
@@ -399,17 +399,29 @@ class AndroidPatcher(BasePlatformPatcher):
         """
 
         click.secho('Unpacking {0}'.format(self.apk_source), dim=True)
-
-        o = delegator.run(self.list2cmdline([
-            self.required_commands['apktool']['location'],
-            'decode',
-            '-f',
-            '-r' if self.skip_resources else '',
-            '--only-main-classes' if self.only_main_classes else '',
-            '-o',
-            self.apk_temp_directory,
-            self.apk_source
-        ]), timeout=self.command_run_timeout)
+        if fix_concurrency_to is None:
+            o = delegator.run(self.list2cmdline([
+                self.required_commands['apktool']['location'],
+                'decode',
+                '-f',
+                '-r' if self.skip_resources else '',
+                '--only-main-classes' if self.only_main_classes else '',
+                '-o',
+                self.apk_temp_directory,
+                self.apk_source
+            ]), timeout=self.command_run_timeout)
+        else:
+            o = delegator.run(self.list2cmdline([
+                self.required_commands['apktool']['location'],
+                'decode',
+                '-j', fix_concurrency_to,
+                '-f',
+                '-r' if self.skip_resources else '',
+                '--only-main-classes' if self.only_main_classes else '',
+                '-o',
+                self.apk_temp_directory,
+                self.apk_source
+            ]), timeout=self.command_run_timeout)
 
         if len(o.err) > 0:
             click.secho('An error may have occurred while extracting the APK.', fg='red')
@@ -878,7 +890,7 @@ class AndroidPatcher(BasePlatformPatcher):
             click.secho('Adding a gadget configuration file...', fg='green')
             shutil.copyfile(gadget_config, os.path.join(libs_path, 'libfrida-gadget.config.so'))
 
-    def build_new_apk(self, use_aapt2: bool = False):
+    def build_new_apk(self, use_aapt2: bool = False, fix_concurrency_to = None):
         """
             Build a new .apk with the frida-gadget patched in.
 
@@ -886,14 +898,24 @@ class AndroidPatcher(BasePlatformPatcher):
         """
 
         click.secho('Rebuilding the APK with the frida-gadget loaded...', fg='green', dim=True)
-        o = delegator.run(
-            self.list2cmdline([self.required_commands['apktool']['location'],
-                               'build',
-                               self.apk_temp_directory,
-                               ] + (['--use-aapt2'] if use_aapt2 else []) + [
-                                  '-o',
-                                  self.apk_temp_frida_patched
-                              ]), timeout=self.command_run_timeout)
+        if fix_concurrency_to is None:
+            o = delegator.run(
+                self.list2cmdline([self.required_commands['apktool']['location'],
+                                'build',
+                                self.apk_temp_directory,
+                                ] + (['--use-aapt2'] if use_aapt2 else []) + [
+                                    '-o',
+                                    self.apk_temp_frida_patched
+                                ]), timeout=self.command_run_timeout)
+        else:
+            o = delegator.run(
+                self.list2cmdline([self.required_commands['apktool']['location'],
+                                'build','-j',fix_concurrency_to,
+                                self.apk_temp_directory,
+                                ] + (['--use-aapt2'] if use_aapt2 else []) + [
+                                    '-o',
+                                    self.apk_temp_frida_patched
+                                ]), timeout=self.command_run_timeout)
 
         if len(o.err) > 0:
             click.secho(('Rebuilding the APK may have failed. Read the following '
