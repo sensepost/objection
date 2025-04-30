@@ -399,29 +399,17 @@ class AndroidPatcher(BasePlatformPatcher):
         """
 
         click.secho('Unpacking {0}'.format(self.apk_source), dim=True)
-        if fix_concurrency_to is None:
-            o = delegator.run(self.list2cmdline([
-                self.required_commands['apktool']['location'],
-                'decode',
-                '-f',
-                '-r' if self.skip_resources else '',
-                '--only-main-classes' if self.only_main_classes else '',
-                '-o',
-                self.apk_temp_directory,
-                self.apk_source
-            ]), timeout=self.command_run_timeout)
-        else:
-            o = delegator.run(self.list2cmdline([
-                self.required_commands['apktool']['location'],
-                'decode',
-                '-j', fix_concurrency_to,
-                '-f',
-                '-r' if self.skip_resources else '',
-                '--only-main-classes' if self.only_main_classes else '',
-                '-o',
-                self.apk_temp_directory,
-                self.apk_source
-            ]), timeout=self.command_run_timeout)
+
+        o = delegator.run(self.list2cmdline([
+            self.required_commands['apktool']['location'],
+            'decode',
+            '-f',
+            '-r' if self.skip_resources else '',
+            '--only-main-classes' if self.only_main_classes else '',
+            '-o',
+            self.apk_temp_directory,
+            self.apk_source
+        ] + ([] if fix_concurrency_to is None else ['-j', fix_concurrency_to])), timeout=self.command_run_timeout)
 
         if len(o.err) > 0:
             click.secho('An error may have occurred while extracting the APK.', fg='red')
