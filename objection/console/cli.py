@@ -3,6 +3,7 @@ import time
 from pathlib import Path
 
 import click
+from frida import ServerNotRunningError
 
 from objection.commands.plugin_manager import load_plugin
 from objection.utils.agent import Agent, AgentConfig
@@ -30,7 +31,11 @@ def get_agent() -> Agent:
         uid=state_connection.uid
     ))
 
-    agent.run()
+    try:
+        agent.run()
+    except ServerNotRunningError:
+        click.secho('Frida server or gadget is not running on the target!', fg='red')
+        exit(1)
 
     return agent
 
