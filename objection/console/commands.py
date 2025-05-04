@@ -512,7 +512,7 @@ COMMANDS = {
         },
     },
     # ios commands
-        'ios': {
+    'ios': {
         'meta': 'Commands specific to iOS',
         'commands': {
             'info': {
@@ -765,7 +765,215 @@ COMMANDS = {
             },
         }
     },
-
+    # macos commands
+    'macos': {
+        'meta': 'Commands specific to iOS',
+        'commands': {
+            'info': {
+                'meta': 'Get macOS and application related information',
+                'commands': {
+                    'binary': {
+                        'meta': 'Get information about application binaries and dylibs',
+                        'exec': binary.info
+                    }
+                }
+            },
+            'keychain': {
+                'meta': 'Work with the macOS keychain',
+                'commands': {
+                    'dump': {
+                        'meta': 'Dump the keychain for the current app\'s entitlement group',
+                        'flags': ['--json', '--smart'],
+                        'exec': keychain.dump
+                    },
+                    'dump_raw': {
+                        'meta': 'Dump raw, unprocessed keychain entries (advanced)',
+                        'exec': keychain.dump_raw
+                    },
+                    'clear': {
+                        'meta': 'Delete all keychain entries for the current app\'s entitlement group',
+                        'exec': keychain.clear
+                    },
+                    'add': {
+                        'meta': 'Add an entry to the iOS keychain',
+                        'flags': ['--account', '--service', '--data'],
+                        'exec': keychain.add
+                    }
+                }
+            },
+            'plist': {
+                'meta': 'Work with macOS Plists',
+                'commands': {
+                    'cat': {
+                        'meta': 'Cat a plist',
+                        'dynamic': filemanager.list_files_in_current_fm_directory,
+                        'exec': plist.cat
+                    }
+                }
+            },
+            'bundles': {
+                'meta': 'Work with macOS Bundles',
+                'commands': {
+                    'list_frameworks': {
+                        'meta': 'Lists all of the application\'s bundles that represent frameworks',
+                        'flags': ['--include-apple-frameworks', '--full-path'],
+                        'exec': bundles.show_frameworks
+                    },
+                    'list_bundles': {
+                        'meta': 'Lists all of the application\'s non framework bundles',
+                        'flags': ['--full-path'],
+                        'exec': bundles.show_bundles
+                    }
+                }
+            },
+            'nsuserdefaults': {
+                'meta': 'Work with NSUserDefaults',
+                'commands': {
+                    'get': {
+                        'meta': 'Get all of the entries',
+                        'exec': nsuserdefaults.get
+                    }
+                }
+            },
+            'nsurlcredentialstorage': {
+                'meta': 'Work with the shared NSURLCredentialStorage',
+                'commands': {
+                    'dump': {
+                        'meta': 'Dump all of the credentials in the shared NSURLCredentialStorage',
+                        'exec': nsurlcredentialstorage.dump
+                    }
+                }
+            },
+            'cookies': {
+                'meta': 'Work with shared cookies',
+                'commands': {
+                    'get': {
+                        'meta': 'Get the current apps shared cookies',
+                        'flags': ['--json'],
+                        'exec': cookies.get
+                    }
+                }
+            },
+            'heap': {
+                'meta': 'Commands to work with the macOS heap',
+                'commands': {
+                    'print': {
+                        'meta': 'Print information about objects on the iOS heap',
+                        'commands': {
+                            'ivars': {
+                                'meta': 'Print instance variables for an Objective-C object',
+                                'flags': ['--to-utf8'],
+                                'exec': ios_heap.ivars
+                            },
+                            'methods': {
+                                'meta': 'Print instance methods for an Objective-C object',
+                                'flags': ['--without-arguments'],
+                                'exec': ios_heap.methods
+                            }
+                        }
+                    },
+                    'search': {
+                        'meta': 'Search for information about the current macOS heap',
+                        'commands': {
+                            'instances': {
+                                'meta': 'Search for live instances of a particular class',
+                                'exec': ios_heap.instances
+                            }
+                        }
+                    },
+                    'execute': {
+                        'meta': 'Execute methods on objects on the macOS heap',
+                        'flags': ['--return-string'],
+                        'exec': ios_heap.execute
+                    },
+                    'evaluate': {
+                        'meta': 'Evaluate JavaScript on objects on the macOS heap',
+                        'flags': ['--inline'],
+                        'exec': ios_heap.evaluate
+                    }
+                }
+            },
+            'hooking': {
+                'meta': 'Commands used for hooking methods in iOS',
+                'commands': {
+                    'list': {
+                        'meta': 'Lists various bits of information',
+                        'commands': {
+                            'classes': {
+                                'meta': 'List classes available in the current application',
+                                'exec': ios_hooking.show_ios_classes
+                            },
+                            'class_methods': {
+                                'meta': 'List the methods in a class',
+                                'flags': ['--include-parents'],
+                                'exec': ios_hooking.show_ios_class_methods
+                            }
+                        }
+                    },
+                    'watch': {
+                        'meta': 'Watch invocations of classes and methods',
+                        'exec': ios_hooking.watch,
+                        'flags': ['--dump-args', '--dump-backtrace', '--dump-return'],
+                    },
+                    'set': {
+                        'meta': 'Set various values',
+                        'commands': {
+                            'return_value': {
+                                'meta': 'Set a methods return value. Supports only boolean returns',
+                                'exec': ios_hooking.set_method_return_value
+                            }
+                        }
+                    },
+                    'search': {
+                        'meta': 'Search for various classes and or methods',
+                        'exec': ios_hooking.search,
+                        'flags': ['--json', '--only-classes']
+                    },
+                    'generate': {
+                        'meta': 'Generate Frida hooks for macOS',
+                        'commands': {
+                            'class': {
+                                'meta': 'A generic hook manager for Classes',
+                                'exec': ios_generate.clazz
+                            },
+                            'simple': {
+                                'meta': 'Simple hooks for each Class method',
+                                'exec': ios_generate.simple
+                            }
+                        },
+                    }
+                }
+            },
+            'pasteboard': {
+                'meta': 'Work with the macOS pasteboard',
+                'commands': {
+                    'monitor': {
+                        'meta': 'Monitor the macOS pasteboard',
+                        'exec': pasteboard.monitor
+                    }
+                }
+            },
+            'sslpinning': {
+                'meta': 'Work with macOS SSL pinning',
+                'commands': {
+                    'disable': {
+                        'meta': 'Attempt to disable SSL pinning in various iOS libraries/classes',
+                        'flags': ['--quiet'],
+                        'exec': ios_pinning.ios_disable
+                    }
+                }
+            },
+            'monitor': {
+                'meta': 'Commands to work with macOS function monitoring',
+                'commands': {
+                    'crypto': {
+                        'meta': 'Monitor CommonCrypto operations',
+                        'exec': ios_crypto.crypto_enable
+                    }
+                },
+            },
+        }
+    },
     'exit': {
         'meta': 'Exit',
     },

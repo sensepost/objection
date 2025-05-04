@@ -39,6 +39,8 @@ def get_agent() -> Agent:
 @click.group()
 @click.option('--network', '-N', is_flag=True, help='Connect using a network connection instead of USB.',
               show_default=True)
+@click.option('--desktop', '-D', is_flag=True, help='Connect using a local connection for desktop.',
+              show_default=True)
 @click.option('--host', '-h', default='127.0.0.1', show_default=True)
 @click.option('--port', '-p', required=False, default=27042, show_default=True)
 @click.option('--api-host', '-ah', default='127.0.0.1', show_default=True)
@@ -53,7 +55,7 @@ def get_agent() -> Agent:
 @click.option('--foremost', '-f', required=False, is_flag=True, help='Use the current foremost application.')
 @click.option('--debugger', required=False, default=False, is_flag=True, help='Enable the Chrome debug port.')
 @click.option('--uid', required=False, default=None, help='Specify the uid to run as (Android only).')
-def cli(network: bool, host: str, port: int, api_host: str, api_port: int,
+def cli(network: bool, desktop: bool, host: str, port: int, api_host: str, api_port: int,
         name: str, serial: str, debug: bool, spawn: bool, no_pause: bool, 
         foremost: bool, debugger: bool, uid: int) -> None:
     """
@@ -78,6 +80,9 @@ def cli(network: bool, host: str, port: int, api_host: str, api_port: int,
 
     if serial:
         state_connection.device_id = serial
+
+    if desktop:
+        state_connection.use_desktop()
 
     # set api parameters
     app_state.api_host = api_host

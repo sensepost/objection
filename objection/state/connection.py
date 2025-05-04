@@ -8,6 +8,7 @@ class StateConnection(object):
         """
 
         self.network = False
+        self.desktop = False
         self.host = None
         self.port = None
         self.device_type = 'usb'
@@ -42,6 +43,16 @@ class StateConnection(object):
 
         self.network = True
         self.device_type = 'remote'
+
+    def use_desktop(self) -> None:
+        """
+            Sets the values required to have a Network connection.
+
+            :return:
+        """
+
+        self.desktop = True
+        self.device_type = 'local'
 
     def get_comms_type(self) -> int:
         """
