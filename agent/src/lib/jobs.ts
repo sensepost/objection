@@ -55,7 +55,7 @@ export class Job {
           c.log(c.red(`[warn] ${this.type} job missing implementation value`));
         }
          
-        send(c.blackBright(`(`)+ c.blueBright(this.identifier.toString())+ c.blackBright(`) Removing ${method.holder} <function: ${method.methodName}>`))
+        send(c.blackBright(`(`)+ c.blueBright(this.identifier.toString())+ c.blackBright(`) Removing hook ${method.holder} <function: ${method.methodName}>`))
         
         // TODO: May be racy if the method is currently used.
         method.implementation = null;

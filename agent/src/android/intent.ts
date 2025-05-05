@@ -5,7 +5,6 @@ import {
 } from "./lib/libjava.js";
 import { Intent, FridaOverload } from "./lib/types.js";
 import { analyseIntent } from "./lib/intentUtils.js";
-import { IJob } from "../lib/interfaces.js";
 import * as jobs from "../lib/jobs.js";
 
 
@@ -72,11 +71,7 @@ export const startService = (serviceClass: string): Promise<void> => {
 // https://developer.android.com/guide/components/intents-filters#Types
 export const analyzeImplicits = (backtrace = false): Promise<void> => {
 
-  const job: IJob = {
-    identifier: jobs.identifier(),
-    implementations: [],
-    type: `implicit-intent-analyser`,
-  };
+  const job = new jobs.Job(jobs.identifier(),`implicit-intent-analyser`)
   jobs.add(job)
 
   return wrapJavaPerform(() => {
@@ -102,7 +97,7 @@ export const analyzeImplicits = (backtrace = false): Promise<void> => {
             });
             return overload.apply(this, args);
           };
-          job.implementations.push(method.overload);
+          job.addImplementation(overload);
         });
       } catch (e) {
         send(`[-] Error hooking ${c.redBright(`${hook.className}.${hook.methodName}: ${e}`)}`);
