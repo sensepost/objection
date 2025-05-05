@@ -71,6 +71,7 @@ export const android = {
   // android intents
   androidIntentStartActivity: (activityClass: string): Promise<void> => intent.startActivity(activityClass),
   androidIntentStartService: (serviceClass: string): Promise<void> => intent.startService(serviceClass),
+  androidIntentAnalyze: (backtrace: boolean = false): Promise<void> => intent.analyzeImplicits(backtrace),
 
   // android keystore
   androidKeystoreClear: () => keystore.clear(),

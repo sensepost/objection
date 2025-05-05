@@ -55,7 +55,9 @@ def cd(args: list) -> None:
         return
 
     # moving one directory back
-    if path == '..':
+    device_path_separator = device_state.platform.path_separator
+
+    if path == '..' or path == '..'+device_path_separator:
 
         split_path = os.path.split(current_dir)
 
@@ -76,6 +78,10 @@ def cd(args: list) -> None:
 
         # assume the path does not exist by default
         does_exist = False
+
+        # normalise path to remove '../'
+        if '..'+device_path_separator in path:
+            path = os.path.normpath(path).replace('\\', device_path_separator)
 
         # check for existence based on the runtime
         if device_state.platform == Ios:
@@ -100,7 +106,13 @@ def cd(args: list) -> None:
     # see if its legit.
     else:
 
-        proposed_path = device_state.platform.path_separator.join([current_dir, path])
+        proposed_path = device_path_separator.join([current_dir, path])
+
+        # normalise path to remove '../'
+        if '..'+device_path_separator in proposed_path:
+            proposed_path = os.path.normpath(proposed_path).replace('\\', device_path_separator)
+            if proposed_path == '//':
+                return
 
         # assume the proposed_path does not exist by default
         does_exist = False
@@ -731,10 +743,10 @@ def cat(args: list):
     _, destination = tempfile.mkstemp('.file')
 
     if device_state.platform == Ios:
-        _download_ios(source, destination)
+        _download_ios(source, destination, False)
 
     if device_state.platform == Android:
-        _download_android(source, destination)
+        _download_android(source, destination, False)
 
     click.secho('====', dim=True)
     with open(destination, 'r', encoding='utf-8', errors='ignore') as f:
@@ -853,7 +865,10 @@ def list_folders_in_current_fm_directory() -> dict:
         file_name, file_type = entry
 
         if file_type == 'directory':
-            resp[file_name] = file_name
+            if ' ' in file_name:
+                resp[f"'{file_name}'"] = file_name
+            else:
+                resp[file_name] = file_name
 
     return resp
 
@@ -884,7 +899,10 @@ def list_files_in_current_fm_directory() -> dict:
         file_name, file_type = entry
 
         if file_type == 'file':
-            resp[file_name] = file_name
+            if ' ' in file_name:
+                resp[f"'{file_name}'"] = file_name
+            else:
+                resp[file_name] = file_name
 
     return resp
 

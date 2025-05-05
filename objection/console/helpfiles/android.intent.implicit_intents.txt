@@ -1,0 +1,8 @@
+Command: android intent implicit_intents
+
+Usage: android intent implicit_intents
+
+Starts a hook to analyze implicit intents during runtime. Optionally add a backtrade by adding --dump-backtrace
+
+Examples:
+   android intent implicit_intents
