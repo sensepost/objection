@@ -1,6 +1,6 @@
 import { colors as c } from "../../lib/color.js";
 
-export const analyseIntent = (methodName: string, intent: Java.Wrapper): void => {
+export const analyseIntent = (methodName: string, intent: Java.Wrapper, backtrace: boolean = false): void => {
   try {
     send(`\nAnalyzing Intent from: ${c.green(`${methodName}`)}`);
 
@@ -10,11 +10,17 @@ export const analyseIntent = (methodName: string, intent: Java.Wrapper): void =>
       send(`[-] ${c.green('Intent Type: Explicit Intent')}`);
     } else {
       send(`[+] ${c.redBright('Intent Type: Implicit Intent Detected!')}`);
-      
+      if (backtrace) {
+        send(
+          Java.use('android.util.Log')
+            .getStackTraceString(Java.use('java.lang.Exception').$new())
+        )
+      }
+
       // Log intent details
-      send(`[+] Action: ${ `${c.green(`${intent.getAction()}`)}` || `${c.redBright(`[None]`)}` }`);
-      send(`[+] Data URI: ${ `${c.green(`${intent.getDataString()}`)}` || `${c.redBright(`[None]`)}` }`);
-      send(`[+] Type: ${ `${c.green(`${intent.getType()}`)}` || `${c.redBright(`[None]`)}` }`);
+      send(`[+] Action: ${`${c.green(`${intent.getAction()}`)}` || `${c.redBright(`[None]`)}`}`);
+      send(`[+] Data URI: ${`${c.green(`${intent.getDataString()}`)}` || `${c.redBright(`[None]`)}`}`);
+      send(`[+] Type: ${`${c.green(`${intent.getType()}`)}` || `${c.redBright(`[None]`)}`}`);
       send(`[+] Flags: ${c.green(`0x${intent.getFlags().toString(16)}`)}`);
 
       // Categories

@@ -70,7 +70,7 @@ export const startService = (serviceClass: string): Promise<void> => {
 
 // Analyzes and Detects Android Implicit Intents
 // https://developer.android.com/guide/components/intents-filters#Types
-export const analyzeImplicits = (): Promise<void> => {
+export const analyzeImplicits = (backtrace = false): Promise<void> => {
 
   const job: IJob = {
     identifier: jobs.identifier(),
@@ -84,8 +84,8 @@ export const analyzeImplicits = (): Promise<void> => {
       { className: "android.app.Activity", methodName: "startActivityForResult" },
       { className: "android.app.Activity", methodName: "onActivityResult" },
       { className: "androidx.activity.ComponentActivity", methodName: "onActivityResult" },
-      { className: "android.content.Context", methodName: "startActivity"},
-      { className: "android.content.BroadcastReceiver", methodName: "onReceive"}
+      { className: "android.content.Context", methodName: "startActivity" },
+      { className: "android.content.BroadcastReceiver", methodName: "onReceive" }
       // Add other classes and methods as needed
     ];
 
@@ -97,7 +97,7 @@ export const analyzeImplicits = (): Promise<void> => {
           overload.implementation = function (...args: any[]): any {
             args.forEach(arg => {
               if (arg && arg.$className === "android.content.Intent") {
-                analyseIntent(`${hook.className}::${hook.methodName}`, arg);
+                analyseIntent(`${hook.className}::${hook.methodName}`, arg, backtrace = backtrace);
               }
             });
             return overload.apply(this, args);

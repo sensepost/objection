@@ -460,7 +460,8 @@ COMMANDS = {
                     },
                     'implicit_intents': {
                         'meta': 'Analyze implicit intents',
-                        'exec': intents.analyze_implicit_intents
+                        'exec': intents.analyze_implicit_intents,
+                        'flags': ['--dump-backtrace']
                     }
                 }
             },
