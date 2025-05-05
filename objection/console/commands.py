@@ -34,7 +34,6 @@ from ..commands.ios import nsuserdefaults
 from ..commands.ios import pasteboard
 from ..commands.ios import pinning as ios_pinning
 from ..commands.ios import plist
-from ..utils.helpers import list_current_jobs
 
 # commands are defined with their name being the key, then optionally
 # have a meta, dynamic and commands key.
@@ -265,7 +264,7 @@ COMMANDS = {
             },
             'kill': {
                 'meta': 'Kill a job. This unloads the script',
-                'dynamic': list_current_jobs,
+                'dynamic': jobs.list_current_jobs,
                 'exec': jobs.kill
             }
         }

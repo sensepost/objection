@@ -82,4 +82,5 @@ def load_background(args: list = None) -> None:
         hook = ''.join(f.read())
 
     agent = state_connection.get_agent()
-    agent.background(hook)
+    agent.attach_script(source, hook)
+

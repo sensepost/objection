@@ -32,7 +32,7 @@ export const qsend = (quiet: boolean, message: any): void => {
 };
 
 // send a preformated dict
-export const fsend = (ident: string, hook: string, message: any): void => {
+export const fsend = (ident: number, hook: string, message: any): void => {
   send(
     c.blackBright(`[${ident}] `) +
     c.magenta(`[${hook}]`) +
