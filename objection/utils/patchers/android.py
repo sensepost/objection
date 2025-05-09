@@ -886,24 +886,16 @@ class AndroidPatcher(BasePlatformPatcher):
         """
 
         click.secho('Rebuilding the APK with the frida-gadget loaded...', fg='green', dim=True)
-        if fix_concurrency_to is None:
-            o = delegator.run(
-                self.list2cmdline([self.required_commands['apktool']['location'],
-                                'build',
-                                self.apk_temp_directory,
-                                ] + (['--use-aapt2'] if use_aapt2 else []) + [
-                                    '-o',
-                                    self.apk_temp_frida_patched
-                                ]), timeout=self.command_run_timeout)
-        else:
-            o = delegator.run(
-                self.list2cmdline([self.required_commands['apktool']['location'],
-                                'build','-j',fix_concurrency_to,
-                                self.apk_temp_directory,
-                                ] + (['--use-aapt2'] if use_aapt2 else []) + [
-                                    '-o',
-                                    self.apk_temp_frida_patched
-                                ]), timeout=self.command_run_timeout)
+        o = delegator.run(
+            self.list2cmdline([self.required_commands['apktool']['location'],
+                            'build',
+                            self.apk_temp_directory,
+                            ] + (['--use-aapt2'] if use_aapt2 else []) + [
+                                '-o',
+                                self.apk_temp_frida_patched
+                            ]+ ([] if fix_concurrency_to is None else ['-j', fix_concurrency_to]))
+                            , timeout=self.command_run_timeout)
+        
 
         if len(o.err) > 0:
             click.secho(('Rebuilding the APK may have failed. Read the following '
