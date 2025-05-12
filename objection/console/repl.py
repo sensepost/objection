@@ -9,6 +9,7 @@ from prompt_toolkit import PromptSession
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from prompt_toolkit.completion import FuzzyCompleter
 from prompt_toolkit.history import FileHistory
+from prompt_toolkit.patch_stdout import patch_stdout
 from prompt_toolkit.styles import Style
 
 from .commands import COMMANDS
@@ -332,44 +333,44 @@ class Repl(object):
             click.secho('[tab] for command suggestions', fg='white', dim=True)
 
         # the main application loop is here, reading inputs provided by
-        # prompt_toolkit and sending it off the the needed handlers
+        # prompt_toolkit and sending it off the needed handlers
         while True:
 
             try:
+                with patch_stdout(raw=True):
+                    document = self.session.prompt(self.get_prompt_message())
 
-                document = self.session.prompt(self.get_prompt_message())
+                    # check if this is an exit command
+                    if document.strip() in ('quit', 'exit', 'bye'):
+                        click.secho('Exiting...', dim=True)
+                        break
 
-                # check if this is an exit command
-                if document.strip() in ('quit', 'exit', 'bye'):
-                    click.secho('Exiting...', dim=True)
-                    break
+                    if document.strip() in ('resume', 'res'):
+                        click.secho('Resuming attached process', dim=True)
+                        state_connection.agent.resume()
+                        continue
 
-                if document.strip() in ('resume', 'res'):
-                    click.secho('Resuming attached process', dim=True)
-                    state_connection.agent.resume()
-                    continue
+                    # if we got the reconnect command, handle just that
+                    if self.handle_reconnect(document):
+                        continue
 
-                # if we got the reconnect command, handle just that
-                if self.handle_reconnect(document):
-                    continue
+                    # dispatch to the command handler. if something goes horribly
+                    # wrong, catch it instead of crashing the REPL
+                    try:
 
-                # dispatch to the command handler. if something goes horribly
-                # wrong, catch it instead of crashing the REPL
-                try:
+                        # find something to run
+                        self.run_command(document)
 
-                    # find something to run
-                    self.run_command(document)
+                    except frida.core.RPCException as e:
+                        click.secho('A Frida agent exception has occurred.', fg='red', bold=True)
+                        click.secho('{0}'.format(e), fg='red')
+                        click.secho('\nPython stack trace: {}'.format(traceback.format_exc()), dim=True)
 
-                except frida.core.RPCException as e:
-                    click.secho('A Frida agent exception has occurred.', fg='red', bold=True)
-                    click.secho('{0}'.format(e), fg='red')
-                    click.secho('\nPython stack trace: {}'.format(traceback.format_exc()), dim=True)
-
-                except Exception as e:
-                    click.secho(('An unexpected internal exception has occurred. If this '
-                                 'looks like a code related error, please file a bug report!'), fg='red', bold=True)
-                    click.secho('{0}'.format(e), fg='red')
-                    click.secho('\nPython stack trace: {}'.format(traceback.format_exc()), dim=True)
+                    except Exception as e:
+                        click.secho(('An unexpected internal exception has occurred. If this '
+                                     'looks like a code related error, please file a bug report!'), fg='red', bold=True)
+                        click.secho('{0}'.format(e), fg='red')
+                        click.secho('\nPython stack trace: {}'.format(traceback.format_exc()), dim=True)
 
             except KeyboardInterrupt:
                 pass
