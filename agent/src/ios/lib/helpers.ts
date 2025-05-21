@@ -1,3 +1,4 @@
+import ObjC from "frida-objc-bridge";
 import { NSUTF8StringEncoding } from "./constants.js";
 import {
   NSBundle,

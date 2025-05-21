@@ -1,3 +1,4 @@
+import ObjC from "frida-objc-bridge";
 import * as fs from "frida-fs";
 import { Buffer } from "buffer";
 import { hexStringToBytes } from "../lib/helpers.js";

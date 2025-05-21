@@ -1,3 +1,4 @@
+import ObjC from "frida-objc-bridge";
 import { IIosCookie } from "./lib/interfaces.js";
 import {
   NSArray,

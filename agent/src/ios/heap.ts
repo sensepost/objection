@@ -1,3 +1,4 @@
+import ObjC from "frida-objc-bridge";
 import { colors as c } from "../lib/color.js";
 import { bytesToUTF8 } from "./lib/helpers.js";
 import { IHeapObject } from "./lib/interfaces.js";

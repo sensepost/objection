@@ -69,7 +69,7 @@ let dataOutBytes: string = "";
 const secrandomcopybytes = (ident: number): InvocationListener => {
   const hook = "SecRandomCopyBytes";
   return Interceptor.attach(
-    Module.getExportByName(null, hook), {
+    Module.getGlobalExportByName(hook), {
     onEnter(args) {
 
       this.secrandomcopybytes = {};
@@ -89,7 +89,7 @@ const secrandomcopybytes = (ident: number): InvocationListener => {
 const cckeyderivationpbkdf = (ident: number): InvocationListener => {
   const hook = "CCKeyDerivationPBKDF";
   return Interceptor.attach(
-    Module.getExportByName(null, hook), {
+    Module.getGlobalExportByName(hook), {
     onEnter(args) {
 
       this.cckeyderivationpbkdf = {};
@@ -143,7 +143,7 @@ const cckeyderivationpbkdf = (ident: number): InvocationListener => {
 const cccrypt = (ident: number): InvocationListener => {
   const hook = "CCCrypt";
   return Interceptor.attach(
-    Module.getExportByName(null, hook), {
+    Module.getGlobalExportByName(hook), {
     onEnter(args) {
 
       this.cccrpyt = {};
@@ -214,7 +214,7 @@ const cccrypt = (ident: number): InvocationListener => {
 const cccryptorcreate = (ident: number): InvocationListener => {
   const hook = "CCCryptorCreate";
   return Interceptor.attach(
-    Module.getExportByName(null, hook), {
+    Module.getGlobalExportByName(hook), {
     onEnter(args) {
 
       this.cccryptorcreate = {};
@@ -260,7 +260,7 @@ const cccryptorcreate = (ident: number): InvocationListener => {
 const cccryptorupdate = (ident: number): InvocationListener => {
   const hook = "CCCryptorUpdate";
   return Interceptor.attach(
-    Module.getExportByName(null, hook), {
+    Module.getGlobalExportByName(hook), {
     onEnter(args) {
       this.cccryptorupdate = {};
 
@@ -303,7 +303,7 @@ const cccryptorupdate = (ident: number): InvocationListener => {
 const cccryptorfinal = (ident: number): InvocationListener => {
   const hook = "CCCryptorFinal";
   return Interceptor.attach(
-    Module.getExportByName(null, hook), {
+    Module.getGlobalExportByName(hook), {
     onEnter(args) {
 
       this.cccryptorfinal = {};

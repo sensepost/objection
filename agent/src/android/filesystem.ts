@@ -1,3 +1,4 @@
+import Java from "frida-java-bridge";
 import * as fs from "frida-fs";
 import { Buffer } from "buffer";
 import { hexStringToBytes } from "../lib/helpers.js";

@@ -1,3 +1,4 @@
+import Java from "frida-java-bridge";
 import { wrapJavaPerform } from "./lib/libjava.js";
 
 export const deoptimize = (): Promise<void> => {

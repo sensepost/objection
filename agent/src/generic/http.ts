@@ -40,62 +40,64 @@ const dirListingHTML = (pwd: string, path: string): string => {
 };
 
 export const start = (pwd: string, port: number = 9000): void => {
+  log(c.redBright(`httpServer module not currently available.`))
+
   if (httpServer) {
     log(c.redBright(`Server appears to already be running`));
     return;
   }
 
-  if (!pwd.endsWith("/")) {
-    pwd = pwd + "/";
-  }
-  log(`${c.blackBright(`Starting HTTP server in: ${pwd}`)}`);
-  servePath = pwd;
+  // if (!pwd.endsWith("/")) {
+  //   pwd = pwd + "/";
+  // }
+  // log(`${c.blackBright(`Starting HTTP server in: ${pwd}`)}`);
+  // servePath = pwd;
 
-  httpServer = httpLib.createServer((req, res) => {
-    if (req.method && req.url) {
-      log(`${c.greenBright(req.method)} ${req.url}`);
-    } else {
-      log(`${c.redBright('Missing URL or request method.')}`);
-      return;
-    }
+  // httpServer = httpLib.createServer((req, res) => {
+    // if (req.method && req.url) {
+    //   log(`${c.greenBright(req.method)} ${req.url}`);
+    // } else {
+    //   log(`${c.redBright('Missing URL or request method.')}`);
+    //   return;
+    // }
 
-    try {    
-      const parsedUrl = url.parse(req.url);  
-      const fileLocation = pwd + decodeURIComponent(parsedUrl.path);
+    // try {    
+    //   const parsedUrl = url.parse(req.url);  
+    //   const fileLocation = pwd + decodeURIComponent(parsedUrl.path);
       
-      if (fs.statSync(fileLocation).isDirectory()) {
-        res.end(dirListingHTML(pwd, parsedUrl.path));
-        return;
-      }
+    //   if (fs.statSync(fileLocation).isDirectory()) {
+    //     res.end(dirListingHTML(pwd, parsedUrl.path));
+    //     return;
+    //   }
 
-      res.setHeader("Content-type", "application/octet-stream");
+    //   res.setHeader("Content-type", "application/octet-stream");
 
-      // Check that we are not reading an empty file
-      if (fs.statSync(fileLocation).size !== 0) {
-        const file = fs.readFileSync(fileLocation);
-        res.write(file, 'utf-8')
-      }
-      res.end();
+    //   // Check that we are not reading an empty file
+    //   if (fs.statSync(fileLocation).size !== 0) {
+    //     const file = fs.readFileSync(fileLocation);
+    //     res.write(file, 'utf-8')
+    //   }
+    //   res.end();
         
-    } catch (error) {
-      if (error instanceof Error && error.message == "No such file or directory") {
-        res.statusCode = 404;
-        res.end("File not found")
-      } else {
-        if (error instanceof Error) {
-          log(c.redBright(`${error.stack}`));
-        } else {
-          log(c.redBright(`${error}`));
-        }
+    // } catch (error) {
+    //   if (error instanceof Error && error.message == "No such file or directory") {
+    //     res.statusCode = 404;
+    //     res.end("File not found")
+    //   } else {
+    //     if (error instanceof Error) {
+    //       log(c.redBright(`${error.stack}`));
+    //     } else {
+    //       log(c.redBright(`${error}`));
+    //     }
        
-        res.statusCode = 500;
-        res.end("Internal Server Error")
-      }
-    }
-  });
+    //     res.statusCode = 500;
+    //     res.end("Internal Server Error")
+    //   }
+    // }
+  // });
 
-  httpServer.listen(port);
-  listenPort = port;
+  // httpServer.listen(port);
+  // listenPort = port;
 };
 
 export const stop = (): void => {

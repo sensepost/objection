@@ -1,3 +1,5 @@
+import Java from "frida-java-bridge";
+
 // all Java calls need to be wrapped in a Java.perform().
 // this helper just wraps that into a Promise that the
 // rpc export will sniff and resolve before returning

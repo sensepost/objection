@@ -8,7 +8,6 @@
     "module": "Node16",
     "esModuleInterop": true,
     "noImplicitAny": false,
-    "moduleResolution": "node16",
     "strictNullChecks": false
   }
 }

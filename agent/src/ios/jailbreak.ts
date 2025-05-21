@@ -1,3 +1,4 @@
+import ObjC from "frida-objc-bridge";
 import { colors as c } from "../lib/color.js";
 import * as jobs from "../lib/jobs.js";
 
@@ -114,7 +115,7 @@ const fileExistsAtPath = (success: boolean, ident: number): InvocationListener =
 
 // toggles replies to fopen: for the paths in jailbreakPaths
 const fopen = (success: boolean, ident: number): InvocationListener => {
-  const fopen_addr = Module.findExportByName(null, "fopen");
+  const fopen_addr = Module.findGlobalExportByName("fopen");
   if (!fopen_addr) {
     send(c.red(`fopen function not found!`));
     return new InvocationListener(); 
@@ -239,13 +240,12 @@ const canOpenURL = (success: boolean, ident: number): InvocationListener => {
 const libSystemBFork = (success: boolean, ident: number): InvocationListener => {
   // Hook fork() in libSystem.B.dylib and return 0
   // TODO: Hook vfork
-  const libSystemBdylibFork = Module.findExportByName("libSystem.B.dylib", "fork");
+  const libSystemBdylib = Process.findModuleByName("libSystem.B.dylib");
 
-  // iOS simulator does not have libSystem.B.dylib
-  // TODO: Remove as iOS 12 similar may have this now.
-  if (!libSystemBdylibFork) {
+  if (!libSystemBdylib) {
     return new InvocationListener();
   }
+  const libSystemBdylibFork = libSystemBdylib.findExportByName("fork");
 
   return Interceptor.attach(libSystemBdylibFork, {
     onLeave(retval) {

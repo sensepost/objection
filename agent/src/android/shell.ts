@@ -1,3 +1,4 @@
+import Java from "frida-java-bridge";
 import { IExecutedCommand } from "./lib/interfaces.js";
 import { wrapJavaPerform } from "./lib/libjava.js";
 import {

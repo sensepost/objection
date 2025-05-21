@@ -1,3 +1,4 @@
+import ObjC from "frida-objc-bridge";
 import {
   NSDictionary,
   NSUserDefaults
