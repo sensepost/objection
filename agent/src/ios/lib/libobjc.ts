@@ -115,7 +115,7 @@ export const libObjc = new Proxy(api, {
     if (target[key] === null) {
       const mod = Process.findModuleByName(nativeExports[key].moduleName)
       var tgt = new NativePointer(0x00);
-      if (!mod) {
+      if (mod != null) {
         tgt = mod.findExportByName(nativeExports[key].exportName) || new NativePointer(0x00);
       }
      

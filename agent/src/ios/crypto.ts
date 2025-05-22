@@ -66,6 +66,13 @@ let alg = 0;
 // append the final block from CCCryptorFinal
 let dataOutBytes: string = "";
 
+// Compatibility with frida < 16.7
+if (!Module.getGlobalExportByName) {
+  Module.getGlobalExportByName = function(name) {
+    return Module['getExportByName'](null, name);
+  }
+}
+
 const secrandomcopybytes = (ident: number): InvocationListener => {
   const hook = "SecRandomCopyBytes";
   return Interceptor.attach(

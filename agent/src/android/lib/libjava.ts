@@ -1,4 +1,13 @@
-import Java from "frida-java-bridge";
+import Java_bridge from "frida-java-bridge";
+
+let Java: any | undefined;
+// Compatibility with frida < 17
+if (globalThis.Java) {
+  console.error("Warning old version of Frida.")
+  Java = globalThis.Java
+} else {
+  Java = Java_bridge
+}
 
 // all Java calls need to be wrapped in a Java.perform().
 // this helper just wraps that into a Promise that the
