@@ -1,3 +1,4 @@
+import Java from "frida-java-bridge";
 import { wrapJavaPerform } from "./lib/libjava.js";
 import { colors as c } from "../lib/color.js";
 

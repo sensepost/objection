@@ -1,3 +1,5 @@
+import ObjC from "frida-objc-bridge";
+
 export type NSDictionary = ObjC.Object | any;
 export type NSMutableDictionary = ObjC.Object | any;
 export type NSString = ObjC.Object | any;

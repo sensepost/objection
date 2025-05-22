@@ -1,4 +1,5 @@
 // tslint:disable-next-line:no-var-requires
+import ObjC from "frida-objc-bridge";
 import screenshot from "frida-screenshot";
 import { colors as c } from "../lib/color.js";
 import * as jobs from "../lib/jobs.js";
