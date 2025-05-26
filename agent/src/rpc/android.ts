@@ -11,6 +11,7 @@ import * as userinterface from "../android/userinterface.js";
 import * as proxy from "../android/proxy.js";
 import * as general from "../android/general.js";
 
+
 import {
   IHeapObject,
   IJavaField,
@@ -92,4 +93,7 @@ export const android = {
   // android user interface
   androidUiScreenshot: () => userinterface.screenshot(),
   androidUiSetFlagSecure: (v: boolean): Promise<void> => userinterface.setFlagSecure(v),
+
+  // android shared preferences
+  androidSharedprefsMonitor: (encrypted_only: boolean) => sharedprefs.monitor(encrypted_only),
 };
