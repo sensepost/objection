@@ -31,7 +31,7 @@
   "dependencies": {
     "frida-java-bridge": "^7",
     "frida-objc-bridge": "^8",
-    "frida-screenshot": "^5",
+    "frida-screenshot": "^6",
     "macho-ts": "^0.1.0"
   },
   "devDependencies": {
