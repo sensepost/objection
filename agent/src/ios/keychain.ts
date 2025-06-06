@@ -1,5 +1,6 @@
 // dumps all of the keychain items available to the current
 // application.
+import ObjC from "frida-objc-bridge";
 import { colors as c } from "../lib/color.js";
 import { reverseEnumLookup } from "../lib/helpers.js";
 import {

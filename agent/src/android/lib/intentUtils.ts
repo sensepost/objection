@@ -1,3 +1,4 @@
+import Java from "frida-java-bridge";
 import { colors as c } from "../../lib/color.js";
 
 export const analyseIntent = (methodName: string, intent: Java.Wrapper, backtrace: boolean = false): void => {

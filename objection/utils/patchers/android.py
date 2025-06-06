@@ -192,7 +192,7 @@ class AndroidPatcher(BasePlatformPatcher):
             'installation': 'apt install apksigner (Kali Linux)'
         },
         'apktool': {
-            'installation': 'apt install apktool (Kali Linux)'
+            'installation': 'Install from https://apktool.org/docs/install'
         },
         'zipalign': {
             'installation': 'apt install zipalign (Kali Linux)'
@@ -223,7 +223,7 @@ class AndroidPatcher(BasePlatformPatcher):
             :return:bool
         """
 
-        min_version = '2.4.1'  # the version of apktool we require
+        min_version = '2.6.0'  # the version of apktool we require
 
         o = delegator.run(self.list2cmdline([
             self.required_commands['apktool']['location'],

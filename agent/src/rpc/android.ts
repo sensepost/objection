@@ -1,3 +1,4 @@
+import Java from "frida-java-bridge";
 import * as clipboard from "../android/clipboard.js";
 import * as androidfilesystem from "../android/filesystem.js";
 import * as heap from "../android/heap.js";
