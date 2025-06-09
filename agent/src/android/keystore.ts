@@ -1,10 +1,12 @@
-import Java from "frida-java-bridge";
 import { colors as c } from "../lib/color.js";
 import {
   IKeyStoreDetail,
   IKeyStoreEntry
 } from "./lib/interfaces.js";
-import { wrapJavaPerform } from "./lib/libjava.js";
+import { 
+  wrapJavaPerform, 
+  Java 
+} from "./lib/libjava.js";
 import {
   KeyFactory,
   KeyInfo,

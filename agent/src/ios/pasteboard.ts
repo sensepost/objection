@@ -1,4 +1,4 @@
-import ObjC from "frida-objc-bridge";
+import { ObjC } from "../ios/lib/libobjc.js";
 import { colors as c } from "../lib/color.js";
 
 

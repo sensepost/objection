@@ -1,11 +1,11 @@
-import Java from "frida-java-bridge";
 import * as fs from "frida-fs";
 import { Buffer } from "buffer";
 import { hexStringToBytes } from "../lib/helpers.js";
 import { IAndroidFilesystem } from "./lib/interfaces.js";
 import {
   getApplicationContext,
-  wrapJavaPerform
+  wrapJavaPerform, 
+  Java
 } from "./lib/libjava.js";
 import {
   File,

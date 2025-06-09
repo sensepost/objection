@@ -1,8 +1,11 @@
-import ObjC from "frida-objc-bridge";
 import { colors as c } from "../lib/color.js";
 import { qsend } from "../lib/helpers.js";
 import * as jobs from "../lib/jobs.js";
-import { libObjc } from "./lib/libobjc.js";
+import { 
+  libObjc, 
+  ObjC 
+} from "./lib/libobjc.js";
+import type { default as ObjCTypes } from "frida-objc-bridge";
 
 // These hooks attempt many ways to kill SSL pinning and certificate
 // validations. The first sections search for common libraries and
@@ -176,7 +179,7 @@ const afNetworking = (ident: number): InvocationListener[] => {
 };
 
 const nsUrlSession = (ident: number): InvocationListener[] => {
-  const NSURLCredential: ObjC.Object = ObjC.classes.NSURLCredential;
+  const NSURLCredential: ObjCTypes.Object = ObjC.classes.NSURLCredential;
   const resolver = new ApiResolver("objc");
   // - [NSURLSession URLSession:didReceiveChallenge:completionHandler:]
   const search: ApiResolverMatch[] = resolver.enumerateMatches(

@@ -1,4 +1,4 @@
-import Java from "frida-java-bridge";
+import type { default as JavaTypes } from "frida-java-bridge";
 import * as clipboard from "../android/clipboard.js";
 import * as androidfilesystem from "../android/filesystem.js";
 import * as heap from "../android/heap.js";
@@ -58,7 +58,7 @@ export const android = {
     hooking.setReturnValue(fqClazz, filterOverload, ret),
   androidHookingWatch: (pattern: string, watchArgs: boolean, watchBacktrace: boolean, watchRet: boolean): Promise<void> =>
     hooking.watch(pattern, watchArgs, watchBacktrace, watchRet),
-  androidHookingEnumerate: (query: string): Promise<Java.EnumerateMethodsMatchGroup[]> => hooking.javaEnumerate(query),
+  androidHookingEnumerate: (query: string): Promise<JavaTypes.EnumerateMethodsMatchGroup[]> => hooking.javaEnumerate(query),
   androidHookingLazyWatchForPattern: (query: string, watch: boolean, dargs: boolean, dret: boolean, dbt: boolean): void => hooking.lazyWatchForPattern(query, watch, dargs, dret, dbt),
 
   // android heap methods

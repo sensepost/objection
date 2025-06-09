@@ -1,4 +1,4 @@
-import Java from "frida-java-bridge";
+import type { default as JavaTypes } from "frida-java-bridge";
 
 export interface IAndroidFilesystem {
   files: any;
@@ -30,7 +30,7 @@ export interface IHeapClassDictionary {
 
 export interface IHeapObject {
   hashcode: number;
-  instance: Java.Wrapper;
+  instance: JavaTypes.Wrapper;
 }
 
 export interface IHeapNormalised {

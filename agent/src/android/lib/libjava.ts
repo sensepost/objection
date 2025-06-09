@@ -1,13 +1,16 @@
 import Java_bridge from "frida-java-bridge";
+import { colors as c } from "../../lib/color.js";
 
-let Java: any | undefined;
+let Java: typeof Java_bridge;
 // Compatibility with frida < 17
 if (globalThis.Java) {
-  console.error("Warning old version of Frida.")
-  Java = globalThis.Java
+  send(c.blackBright("Pre-v17 version of Frida detected. Attempting to use old bridge interface."))
+  Java = globalThis.Java   
 } else {
   Java = Java_bridge
 }
+
+export { Java }
 
 // all Java calls need to be wrapped in a Java.perform().
 // this helper just wraps that into a Promise that the

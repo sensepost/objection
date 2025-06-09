@@ -1,8 +1,8 @@
-import Java from "frida-java-bridge";
-import ObjC from "frida-objc-bridge";
+import { ObjC } from "../ios/lib/libobjc.js";
 import {
   getApplicationContext,
-  wrapJavaPerform
+  wrapJavaPerform,
+  Java
 } from "../android/lib/libjava.js";
 import {
   NSSearchPaths,

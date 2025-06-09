@@ -1,4 +1,4 @@
-import ObjC from "frida-objc-bridge";
+import { ObjC } from "../ios/lib/libobjc.js";
 import { ICredential } from "./lib/interfaces.js";
 import {
   NSArray,

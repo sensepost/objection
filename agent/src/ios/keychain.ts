@@ -1,6 +1,5 @@
 // dumps all of the keychain items available to the current
 // application.
-import ObjC from "frida-objc-bridge";
 import { colors as c } from "../lib/color.js";
 import { reverseEnumLookup } from "../lib/helpers.js";
 import {
@@ -16,7 +15,10 @@ import {
   IKeychainData,
   IKeychainItem
 } from "./lib/interfaces.js";
-import { libObjc } from "./lib/libobjc.js";
+import { 
+  libObjc, 
+  ObjC 
+} from "./lib/libobjc.js";
 import {
   NSDictionary,
   NSMutableDictionary as NSMutableDictionaryType,

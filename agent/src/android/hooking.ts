@@ -1,11 +1,11 @@
-import Java from "frida-java-bridge";
 import { colors as c } from "../lib/color.js";
 import * as jobs from "../lib/jobs.js";
 import { ICurrentActivityFragment } from "./lib/interfaces.js";
 import {
   getApplicationContext,
   R,
-  wrapJavaPerform
+  wrapJavaPerform,
+  Java
 } from "./lib/libjava.js";
 import {
   Activity,
@@ -17,6 +17,7 @@ import {
   Throwable,
   JavaMethodsOverloadsResult,
 } from "./lib/types.js";
+import type { default as JavaTypes } from "frida-java-bridge";
 
 enum PatternType {
   Regex = 'regex',
@@ -71,7 +72,7 @@ export const lazyWatchForPattern = (query: string, watch: boolean, dargs: boolea
 
   // This method loops over all enumerate matches and then calls watch
   // with the arguments specified in the parent function
-  const watchMatches = (matches: Java.EnumerateMethodsMatchGroup[]) => {
+  const watchMatches = (matches: JavaTypes.EnumerateMethodsMatchGroup[]) => {
     matches.forEach(match => {
       match.classes.forEach(_class => {
         _class.methods.forEach(_method => {
@@ -115,7 +116,7 @@ export const lazyWatchForPattern = (query: string, watch: boolean, dargs: boolea
   }, 1000 * 5);
 };
 
-export const javaEnumerate = (query: string): Promise<Java.EnumerateMethodsMatchGroup[]> => {
+export const javaEnumerate = (query: string): Promise<JavaTypes.EnumerateMethodsMatchGroup[]> => {
   // If the query is just a classname, strongarm it into a pattern.
   if (getPatternType(query) === PatternType.Klass) {
     query = `*${query}*!*`;
@@ -271,9 +272,9 @@ export const watch = (pattern: string, dargs: boolean, dbt: boolean, dret: boole
   jobs.add(job);
 
   return new Promise((resolve, reject) => {
-    javaEnumerate(pattern).then((matches: Java.EnumerateMethodsMatchGroup[]) => {
-      matches.forEach((match: Java.EnumerateMethodsMatchGroup) => {
-        match.classes.forEach((klass: Java.EnumerateMethodsMatchClass) => {
+    javaEnumerate(pattern).then((matches: JavaTypes.EnumerateMethodsMatchGroup[]) => {
+      matches.forEach((match: JavaTypes.EnumerateMethodsMatchGroup) => {
+        match.classes.forEach((klass: JavaTypes.EnumerateMethodsMatchClass) => {
           klass.methods.forEach(method => {
             // Only watch matched methods
             watchMethod(`${klass.name}.${method}`, job, dargs, dbt, dret);

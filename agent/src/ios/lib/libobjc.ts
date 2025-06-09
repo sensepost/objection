@@ -1,3 +1,15 @@
+import ObjC_bridge from "frida-objc-bridge";
+
+let ObjC: typeof ObjC_bridge;
+// Compatibility with frida < 17
+if (globalThis.ObjC) { 
+  ObjC = globalThis.Java
+} else {
+  ObjC = ObjC_bridge
+}
+
+export { ObjC }
+
 const nativeExports: any = {
   // iOS keychain methods
   SecAccessControlGetConstraints: {

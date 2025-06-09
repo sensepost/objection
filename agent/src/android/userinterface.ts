@@ -1,6 +1,8 @@
-import Java from "frida-java-bridge";
 import { colors as c } from "../lib/color.js";
-import { wrapJavaPerform } from "./lib/libjava.js";
+import {
+  wrapJavaPerform,
+  Java
+} from "./lib/libjava.js";
 import {
   Activity,
   ActivityClientRecord,

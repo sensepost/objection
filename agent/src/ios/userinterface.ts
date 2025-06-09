@@ -1,5 +1,6 @@
 // tslint:disable-next-line:no-var-requires
-import ObjC from "frida-objc-bridge";
+import { ObjC } from "../ios/lib/libobjc.js";
+import type { default as ObjCTypes } from "frida-objc-bridge";
 import screenshot from "frida-screenshot";
 import { colors as c } from "../lib/color.js";
 import * as jobs from "../lib/jobs.js";
@@ -20,7 +21,7 @@ export const alert = (message: string): void => {
 
   // Defining a Block that will be passed as handler parameter
   // to +[UIAlertAction actionWithTitle:style:handler:]
-  const handler: ObjC.Block = new ObjC.Block({
+  const handler = new ObjC.Block({
     argTypes: ["object"],
     implementation: () => { return; },
     retType: "void",
@@ -30,11 +31,11 @@ export const alert = (message: string): void => {
   ObjC.schedule(ObjC.mainQueue, () => {
 
     // Using integer numerals for preferredStyle which is of type enum UIAlertControllerStyle
-    const alertController: ObjC.Object = UIAlertController.alertControllerWithTitle_message_preferredStyle_(
+    const alertController: ObjCTypes.Object = UIAlertController.alertControllerWithTitle_message_preferredStyle_(
       "Alert", message, 1);
 
     // Again using integer numeral for style parameter that is enum
-    const okButton: ObjC.Object = UIAlertAction.actionWithTitle_style_handler_("OK", 0, handler);
+    const okButton: ObjCTypes.Object = UIAlertAction.actionWithTitle_style_handler_("OK", 0, handler);
     alertController.addAction_(okButton);
 
     // Instead of using `ObjC.choose()` and looking for UIViewController instances
