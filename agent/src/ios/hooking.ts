@@ -1,3 +1,4 @@
+import { ObjC } from "../ios/lib/libobjc.js";
 import { colors as c } from "../lib/color.js";
 import * as jobs from "../lib/jobs.js";
 

@@ -3,7 +3,7 @@ import shutil
 
 import click
 import delegator
-from pkg_resources import parse_version
+from packaging.version import Version
 
 from ..utils.patchers.android import AndroidGadget, AndroidPatcher
 from ..utils.patchers.github import Github
@@ -49,7 +49,7 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
 
     # check if the local version needs updating. this can be either because
     # the version is outdated or we simply don't have the gadget yet
-    if parse_version(github_version) != parse_version(local_version) or not ios_gadget.gadget_exists():
+    if Version(github_version) != Version(local_version) or not ios_gadget.gadget_exists():
         # download!
         click.secho('Remote FridaGadget version is v{0}, local is v{1}. Downloading...'.format(
             github_version, local_version), fg='green')
@@ -167,7 +167,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
     # check if the local version needs updating. this can be either because
     # the version is outdated or we simply don't have the gadget yet, or, we want
     # a very specific version
-    if parse_version(github_version) != parse_version(local_version) or not android_gadget.gadget_exists():
+    if Version(github_version) != Version(local_version) or not android_gadget.gadget_exists():
         # download!
         click.secho('Remote FridaGadget version is v{0}, local is v{1}. Downloading...'.format(
             github_version, local_version), fg='green')

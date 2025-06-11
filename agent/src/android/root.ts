@@ -1,6 +1,9 @@
 import { colors as c } from "../lib/color.js";
 import * as jobs from "../lib/jobs.js";
-import { wrapJavaPerform } from "./lib/libjava.js";
+import {
+  wrapJavaPerform,
+  Java
+} from "./lib/libjava.js";
 import {
   File,
   IOException,

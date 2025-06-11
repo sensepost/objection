@@ -1,7 +1,11 @@
 import { colors as c } from "../lib/color.js";
 import { qsend } from "../lib/helpers.js";
 import * as jobs from "../lib/jobs.js";
-import { libObjc } from "./lib/libobjc.js";
+import { 
+  libObjc, 
+  ObjC 
+} from "./lib/libobjc.js";
+import type { default as ObjCTypes } from "frida-objc-bridge";
 
 // These hooks attempt many ways to kill SSL pinning and certificate
 // validations. The first sections search for common libraries and
@@ -137,7 +141,7 @@ const afNetworking = (ident: number): InvocationListener[] => {
   });
 
   // +[AFSecurityPolicy policyWithPinningMode:withPinnedCertificates:]
-  const policyWithPinningModewithPinnedCertificates: InvocationListener =
+  const policyWithPinningModewithPinnedCertificates: InvocationListener | null =
     (AFSecurityPolicy["+ policyWithPinningMode:withPinnedCertificates:"]) ? Interceptor.attach(
       AFSecurityPolicy["+ policyWithPinningMode:withPinnedCertificates:"].implementation, {
       onEnter(args) {
@@ -170,12 +174,12 @@ const afNetworking = (ident: number): InvocationListener[] => {
     setSSLPinningmode,
     setAllowInvalidCertificates,
     policyWithPinningMode,
-    policyWithPinningModewithPinnedCertificates,
+    ...(policyWithPinningModewithPinnedCertificates ? [policyWithPinningModewithPinnedCertificates] : []),
   ];
 };
 
 const nsUrlSession = (ident: number): InvocationListener[] => {
-  const NSURLCredential: ObjC.Object = ObjC.classes.NSURLCredential;
+  const NSURLCredential: ObjCTypes.Object = ObjC.classes.NSURLCredential;
   const resolver = new ApiResolver("objc");
   // - [NSURLSession URLSession:didReceiveChallenge:completionHandler:]
   const search: ApiResolverMatch[] = resolver.enumerateMatches(
@@ -250,7 +254,7 @@ const nsUrlSession = (ident: number): InvocationListener[] => {
 };
 
 // TrustKit
-const trustKit = (ident: number): InvocationListener => {
+const trustKit = (ident: number): InvocationListener | null => {
   // https://github.com/datatheorem/TrustKit/blob/
   //  71878dce8c761fc226fecc5dbb6e86fbedaee05e/TrustKit/TSKPinningValidator.m#L84
   if (!ObjC.classes.TSKPinningValidator) {
@@ -281,7 +285,7 @@ const trustKit = (ident: number): InvocationListener => {
   });
 };
 
-const cordovaCustomURLConnectionDelegate = (ident: number): InvocationListener => {
+const cordovaCustomURLConnectionDelegate = (ident: number): InvocationListener | null => {
   // https://github.com/EddyVerbruggen/SSLCertificateChecker-PhoneGap-Plugin/blob/
   //  67634bfdf4a31bb09b301db40f8f27fbd8818f61/src/ios/SSLCertificateChecker.m#L109-L116
   if (!ObjC.classes.CustomURLConnectionDelegate) {
@@ -408,7 +412,7 @@ const tlsHelperCreatePeerTrust = (ident: number): NativePointerValue => {
 };
 
 // nw_tls_create_peer_trust
-const nwTlsCreatePeerTrust = (ident: number): InvocationListener => {
+const nwTlsCreatePeerTrust = (ident: number): InvocationListener | null => {
   const peerTrust = libObjc.nw_tls_create_peer_trust;
 
   if (peerTrust.isNull()) {

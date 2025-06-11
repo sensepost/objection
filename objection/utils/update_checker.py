@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 import click
 import requests
-from pkg_resources import parse_version
+from packaging.version import Version
 
 from ..__init__ import __version__
 
@@ -63,7 +63,7 @@ def notify_newer_version() -> None:
 
     cache_version = cached_version_data()['remote_version']
 
-    if parse_version(cache_version) > parse_version(__version__):
+    if Version(cache_version) > Version(__version__):
         click.secho('\n\nA newer version of objection is available!', fg='green')
         click.secho('You have v{0} and v{1} is ready for download.\n'.format(
             __version__, cache_version), fg='green')

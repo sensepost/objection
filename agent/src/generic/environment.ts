@@ -1,6 +1,8 @@
+import { ObjC } from "../ios/lib/libobjc.js";
 import {
   getApplicationContext,
-  wrapJavaPerform
+  wrapJavaPerform,
+  Java
 } from "../android/lib/libjava.js";
 import {
   NSSearchPaths,

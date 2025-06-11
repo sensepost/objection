@@ -1,3 +1,4 @@
+import { ObjC } from "../ios/lib/libobjc.js";
 import { BundleType } from "./lib/constants.js";
 import { IFramework } from "./lib/interfaces.js";
 import {

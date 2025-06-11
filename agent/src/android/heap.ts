@@ -5,11 +5,15 @@ import {
   IJavaField,
   IHeapNormalised
 } from "./lib/interfaces.js";
-import { wrapJavaPerform } from "./lib/libjava.js";
-
+import {
+  wrapJavaPerform,
+  Java
+} from "./lib/libjava.js";
 export let handles: IHeapClassDictionary = {};
+import type { default as JavaTypes } from "frida-java-bridge";
 
-const getInstance = (hashcode: number): Java.Wrapper | null => {
+
+const getInstance = (hashcode: number): JavaTypes.Wrapper | null => {
   const matches: IHeapObject[] = [];
 
   // Search for this handle, and push the results to matches
@@ -112,7 +116,7 @@ export const fields = (handle: number): Promise<IJavaField[]> => {
 
     return clazz.class.getDeclaredFields().map((field: any): IJavaField => {
       const fieldName: string = field.getName();
-      const fieldInstance: Java.Wrapper = clazz.class.getDeclaredField(fieldName);
+      const fieldInstance: JavaTypes.Wrapper = clazz.class.getDeclaredField(fieldName);
       fieldInstance.setAccessible(true);
 
       let fieldValue = fieldInstance.get(clazz);

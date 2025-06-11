@@ -1,12 +1,13 @@
 frida>=16.0.0
 frida-tools>=10.0.0
-prompt-toolkit>=3.0.3,<4.0.0
-click
+prompt-toolkit>=3.0.30,<4.0.0
+click>=8.2.0
 tabulate
-semver>=2,<3
+semver>=2
 delegator.py
-requests
+requests>=2.32.0
 Flask>=3.0.0
 Pygments>=2.0.0
 litecli>=1.3.0
 setuptools>=70.0.0
+packaging>=23.0

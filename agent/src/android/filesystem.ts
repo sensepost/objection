@@ -4,7 +4,8 @@ import { hexStringToBytes } from "../lib/helpers.js";
 import { IAndroidFilesystem } from "./lib/interfaces.js";
 import {
   getApplicationContext,
-  wrapJavaPerform
+  wrapJavaPerform, 
+  Java
 } from "./lib/libjava.js";
 import {
   File,

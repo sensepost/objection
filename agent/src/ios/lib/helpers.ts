@@ -1,3 +1,5 @@
+import { ObjC } from "./libobjc.js";
+import type { default as ObjCTypes } from "frida-objc-bridge";
 import { NSUTF8StringEncoding } from "./constants.js";
 import {
   NSBundle,
@@ -8,7 +10,7 @@ import {
 
 // Attempt to unarchive data. Returning a string of `` indicates that the
 // unarchiving failed.
-export const unArchiveDataAndGetString = (data: ObjC.Object | any): string => {
+export const unArchiveDataAndGetString = (data: ObjCTypes.Object | any): string => {
 
   try {
 
@@ -55,7 +57,7 @@ export const smartDataToString = (raw: any): string => {
 
   try {
 
-    const dataObject: ObjC.Object | any = new ObjC.Object(raw);
+    const dataObject: ObjCTypes.Object | any = new ObjC.Object(raw);
 
     switch (dataObject.$className) {
       case "__NSCFData":

@@ -15,7 +15,10 @@ import {
   IKeychainData,
   IKeychainItem
 } from "./lib/interfaces.js";
-import { libObjc } from "./lib/libobjc.js";
+import { 
+  libObjc, 
+  ObjC 
+} from "./lib/libobjc.js";
 import {
   NSDictionary,
   NSMutableDictionary as NSMutableDictionaryType,

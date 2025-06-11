@@ -45,11 +45,12 @@ def get_agent() -> Agent:
 @click.option('--network', '-N', is_flag=True, help='Connect using a network connection instead of USB.',
               show_default=True)
 @click.option('--host', '-h', default='127.0.0.1', show_default=True)
-@click.option('--port', '-p', required=False, default=27042, show_default=True)
+@click.option('--port', '-P', required=False, default=27042, show_default=True)
 @click.option('--api-host', '-ah', default='127.0.0.1', show_default=True)
 @click.option('--api-port', '-ap', required=False, default=8888, show_default=True)
 @click.option('--name', '-n', required=False,
               help='Name or bundle identifier to attach to.', show_default=True)
+@click.option('--gadget', '-g', is_eager=True, hidden=True, deprecated="Please use '-n' or '--name' instead")
 @click.option('--serial', '-S', required=False, default=None, help='A device serial to connect to.')
 @click.option('--debug', '-d', required=False, default=False, is_flag=True,
               help='Enable debug mode with verbose output.')
@@ -59,7 +60,7 @@ def get_agent() -> Agent:
 @click.option('--debugger', required=False, default=False, is_flag=True, help='Enable the Chrome debug port.')
 @click.option('--uid', required=False, default=None, help='Specify the uid to run as (Android only).')
 def cli(network: bool, host: str, port: int, api_host: str, api_port: int,
-        name: str, serial: str, debug: bool, spawn: bool, no_pause: bool, 
+        name: str, gadget: str, serial: str, debug: bool, spawn: bool, no_pause: bool,
         foremost: bool, debugger: bool, uid: int) -> None:
     """
         \b
@@ -87,6 +88,10 @@ def cli(network: bool, host: str, port: int, api_host: str, api_port: int,
     # set api parameters
     app_state.api_host = api_host
     app_state.api_port = api_port
+
+    # Backwards compatibility
+    if gadget is not None:
+        name = gadget
 
     state_connection.name = name
     state_connection.spawn = spawn
@@ -184,6 +189,33 @@ def start(plugin_folder: str, quiet: bool, startup_command: str, file_commands, 
     # drop into the repl
     repl.run(quiet=quiet)
 
+# Some ugly backwards compatibility
+@cli.command(deprecated="Use 'objection start' instead of 'objection explore'")
+@click.option('--plugin-folder', '-P', required=False, default=None, help='The folder to load plugins from.')
+@click.option('--quiet', '-q', required=False, default=False, is_flag=True)
+@click.option('--startup-command', '-s', required=False, multiple=True,
+              help='A command to run before the repl polls the device for information.')
+@click.option('--file-commands', '-c', required=False, type=click.File('r'),
+              help=('A file containing objection commands, separated by a '
+                    'newline, that will run before the repl polls the device for information.'))
+@click.option('--startup-script', '-S', required=False, type=click.File('r'),
+              help='A script to import and run before the repl polls the device for information.')
+@click.option('--enable-api', '-a', required=False, default=False, is_flag=True,
+              help='Start the objection API server.')
+def explore(plugin_folder: str, quiet: bool, startup_command: str, file_commands, startup_script: click.File,
+            enable_api: bool) -> None:
+    """
+        Deprecated: Use 'start' instead.
+    """
+    # Call the start command's callback directly
+    ctx = click.get_current_context()
+    ctx.invoke(start,
+               plugin_folder=plugin_folder,
+               quiet=quiet,
+               startup_command=startup_command,
+               file_commands=file_commands,
+               startup_script=startup_script,
+               enable_api=enable_api)
 
 @cli.command()
 @click.option('--hook-debug', '-d', required=False, default=False, is_flag=True,

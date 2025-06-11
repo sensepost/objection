@@ -3,7 +3,10 @@ import {
   IKeyStoreDetail,
   IKeyStoreEntry
 } from "./lib/interfaces.js";
-import { wrapJavaPerform } from "./lib/libjava.js";
+import { 
+  wrapJavaPerform, 
+  Java 
+} from "./lib/libjava.js";
 import {
   KeyFactory,
   KeyInfo,

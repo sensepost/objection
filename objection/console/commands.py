@@ -139,23 +139,23 @@ COMMANDS = {
 
             # http file server
 
-            'http': {
-                'meta': 'Work with an on device HTTP file server',
-                'commands': {
-                    'start': {
-                        'meta': 'Start\'s an HTTP server in the current working directory',
-                        'exec': http.start
-                    },
-                    'status': {
-                        'meta': 'Get the status of the HTTP server',
-                        'exec': http.status
-                    },
-                    'stop': {
-                        'meta': 'Stop\'s a running HTTP server',
-                        'exec': http.stop
-                    }
-                }
-            },
+            # 'http': {
+            #     'meta': 'Work with an on device HTTP file server',
+            #     'commands': {
+            #         'start': {
+            #             'meta': 'Start\'s an HTTP server in the current working directory',
+            #             'exec': http.start
+            #         },
+            #         'status': {
+            #             'meta': 'Get the status of the HTTP server',
+            #             'exec': http.status
+            #         },
+            #         'stop': {
+            #             'meta': 'Stop\'s a running HTTP server',
+            #             'exec': http.stop
+            #         }
+            #     }
+            # },
         }
     },
 

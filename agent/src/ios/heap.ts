@@ -1,15 +1,17 @@
+import { ObjC } from "../ios/lib/libobjc.js";
+import type { default as ObjCTypes } from "frida-objc-bridge";
 import { colors as c } from "../lib/color.js";
 import { bytesToUTF8 } from "./lib/helpers.js";
 import { IHeapObject } from "./lib/interfaces.js";
 
 
-const enumerateInstances = (clazz: string): ObjC.Object[] => {
+const enumerateInstances = (clazz: string): ObjCTypes.Object[] => {
   if (!ObjC.classes.hasOwnProperty(clazz)) {
     c.log(`Unknown Objective-C class: ${c.redBright(clazz)}`);
     return [];
   }
 
-  const specifier: ObjC.DetailedChooseSpecifier = {
+  const specifier: ObjCTypes.DetailedChooseSpecifier = {
     class: ObjC.classes[clazz],
     subclasses: true,  // don't skip subclasses
   };
@@ -40,7 +42,7 @@ export const getInstances = (clazz: string): IHeapObject[] => {
   return instances;
 };
 
-const resolvePointer = (pointer: string): ObjC.Object => {
+const resolvePointer = (pointer: string): ObjCTypes.Object => {
   const o = new ObjC.Object(new NativePointer(pointer));
   c.log(`${c.blackBright(`Pointer ` + pointer + ` is to class `)}${c.greenBright(o.$className)}`);
 

@@ -1,3 +1,15 @@
+import ObjC_bridge from "frida-objc-bridge";
+
+let ObjC: typeof ObjC_bridge;
+// Compatibility with frida < 17
+if (globalThis.ObjC) { 
+  ObjC = globalThis.Java
+} else {
+  ObjC = ObjC_bridge
+}
+
+export { ObjC }
+
 const nativeExports: any = {
   // iOS keychain methods
   SecAccessControlGetConstraints: {
@@ -113,10 +125,13 @@ export const libObjc = new Proxy(api, {
   get: (target, key) => {
 
     if (target[key] === null) {
-
-      const f = Module.findExportByName(
-        nativeExports[key].moduleName, nativeExports[key].exportName) || new NativePointer(0x00);
-      target[key] = new NativeFunction(f,
+      const mod = Process.findModuleByName(nativeExports[key].moduleName)
+      var tgt = new NativePointer(0x00);
+      if (mod != null) {
+        tgt = mod.findExportByName(nativeExports[key].exportName) || new NativePointer(0x00);
+      }
+     
+      target[key] = new NativeFunction(tgt,
         nativeExports[key].retType, nativeExports[key].argTypes);
     }
 

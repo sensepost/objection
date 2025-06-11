@@ -1,3 +1,4 @@
+import { ObjC } from "../ios/lib/libobjc.js";
 import { NSMutableDictionary } from "./lib/types.js";
 
 

@@ -1,6 +1,7 @@
+import { Java } from "./libjava.js";
 import { colors as c } from "../../lib/color.js";
 
-export const analyseIntent = (methodName: string, intent: Java.Wrapper, backtrace: boolean = false): void => {
+export const analyseIntent = (methodName: string, intent: any, backtrace: boolean = false): void => {
   try {
     send(`\nAnalyzing Intent from: ${c.green(`${methodName}`)}`);
 

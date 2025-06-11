@@ -1,7 +1,8 @@
 import { colors as c } from "../lib/color.js";
 import {
   getApplicationContext,
-  wrapJavaPerform
+  wrapJavaPerform, 
+  Java
 } from "./lib/libjava.js";
 import { ClipboardManager } from "./lib/types.js";
 

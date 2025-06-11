@@ -1,3 +1,4 @@
+import { ObjC } from "../ios/lib/libobjc.js";
 import { IIosCookie } from "./lib/interfaces.js";
 import {
   NSArray,

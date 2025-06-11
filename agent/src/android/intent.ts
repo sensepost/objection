@@ -1,12 +1,13 @@
 import { colors as c } from "../lib/color.js";
 import {
   getApplicationContext,
-  wrapJavaPerform
+  wrapJavaPerform,
+  Java
 } from "./lib/libjava.js";
 import { Intent, FridaOverload } from "./lib/types.js";
 import { analyseIntent } from "./lib/intentUtils.js";
 import * as jobs from "../lib/jobs.js";
-
+import type { default as JavaTypes } from "frida-java-bridge";
 
 // https://developer.android.com/reference/android/content/Intent.html#FLAG_ACTIVITY_NEW_TASK
 const FLAG_ACTIVITY_NEW_TASK = 0x10000000;
@@ -28,7 +29,7 @@ export const startActivity = (activityClass: string): Promise<void> => {
     const androidIntent: Intent = Java.use("android.content.Intent");
 
     // Get the Activity class's .class
-    const newActivity: Java.Wrapper = Java.use(activityClass).class;
+    const newActivity: JavaTypes.Wrapper = Java.use(activityClass).class;
     send(`Starting activity ${c.green(activityClass)}...`);
 
     // Init and launch the intent
