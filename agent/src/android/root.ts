@@ -44,6 +44,8 @@ const testKeysCheck = (success: boolean, ident: number): any => {
       send(c.blackBright(`[${ident}] `) + `Marking "test-keys" check as ` + c.green(`failed`) + `.`);
       return false;
     };
+
+    return JavaString.contains;
   });
 };
 
@@ -51,8 +53,9 @@ const execSuCheck = (success: boolean, ident: number): any => {
   return wrapJavaPerform(() => {
     const JavaRuntime: Runtime = Java.use("java.lang.Runtime");
     const iOException: IOException = Java.use("java.io.IOException");
+    const JavaRuntime_exec = JavaRuntime.exec.overload("java.lang.String");
 
-    JavaRuntime.exec.overload("java.lang.String").implementation = function (command: string) {
+    JavaRuntime_exec.implementation = function (command: string) {
       if (command.endsWith("su")) {
         if (success) {
           send(c.blackBright(`[${ident}] `) + `Check for 'su' using command exec detected, allowing.`);
@@ -66,6 +69,8 @@ const execSuCheck = (success: boolean, ident: number): any => {
       // call the original method
       return this.exec.overload("java.lang.String").call(this, command);
     };
+
+    return JavaRuntime_exec;
   });
 };
 
@@ -93,6 +98,8 @@ const fileExistsCheck = (success: boolean, ident: number): any => {
       // call the original method
       return this.exists.call(this);
     };
+
+    return JavaFile.exists;
   });
 };
 
@@ -101,7 +108,9 @@ const fileExistsCheck = (success: boolean, ident: number): any => {
 const rootBeerIsRooted = (success: boolean, ident: number): any => {
   return wrapJavaPerform(() => {
     const RootBeer = Java.use("com.scottyab.rootbeer.RootBeer");
-    RootBeer.isRooted.overload().implementation = function () {
+    const RootBeer_isRooted = RootBeer.isRooted.overload();
+
+    RootBeer_isRooted.implementation = function () {
       if (success) {
         send(
           c.blackBright(`[${ident}] `) +
@@ -116,6 +125,8 @@ const rootBeerIsRooted = (success: boolean, ident: number): any => {
       );
       return false;
     };
+
+    return RootBeer_isRooted;
   });
 };
 
@@ -137,6 +148,8 @@ const rootBeerCheckForBinary = (success: boolean, ident: number): any => {
       );
       return false;
     };
+
+    return RootBeer.checkForBinary;
   });
 };
 
@@ -158,13 +171,17 @@ const rootBeerCheckForDangerousProps = (success: boolean, ident: number): any =>
       );
       return false;
     };
+
+    return RootBeer.checkForDangerousProps;
   });
 };
 
 const rootBeerDetectRootCloakingApps = (success: boolean, ident: number): any => {
   return wrapJavaPerform(() => {
     const RootBeer = Java.use("com.scottyab.rootbeer.RootBeer");
-    RootBeer.detectRootCloakingApps.overload().implementation = function () {
+    const RootBeer_detectRootCloakingApps = RootBeer.detectRootCloakingApps.overload();
+
+    RootBeer_detectRootCloakingApps.implementation = function () {
       if (success) {
         send(
           c.blackBright(`[${ident}] `) +
@@ -179,6 +196,8 @@ const rootBeerDetectRootCloakingApps = (success: boolean, ident: number): any =>
       );
       return false;
     };
+
+    return RootBeer_detectRootCloakingApps;
   });
 };
 
@@ -200,6 +219,8 @@ const rootBeerCheckSuExists = (success: boolean, ident: number): any => {
       );
       return false;
     };
+
+    return RootBeer.checkSuExists;
   });
 };
 
@@ -221,34 +242,46 @@ const rootBeerDetectTestKeys = (success: boolean, ident: number): any => {
       );
       return false;
     };
+
+    return RootBeer.detectTestKeys;
   });
 };
 
 const rootBeerCheckSeLinux = (success: boolean, ident: number): any => {
   return wrapJavaPerform(() => {
-    const Util = Java.use("com.scottyab.rootbeer.util");
-    Util.isSelinuxFlagInEnabled.overload().implementation = function () {
-      if (success) {
+    try {
+      const Util = Java.use("com.scottyab.rootbeer.util");
+      Util.isSelinuxFlagInEnabled.overload().implementation = function () {
+        if (success) {
+          send(
+            c.blackBright(`[${ident}]`) +
+            `Rootbeer.util->isSelinuxFlagInEnabled() check detected, marking as ${c.green("true")}`,
+          );
+          return true;
+        }
+  
         send(
-          c.blackBright(`[${ident}]`) +
-          `Rootbeer.util->isSelinuxFlagInEnabled() check detected, marking as ${c.green("true")}`,
+          c.blackBright(`[${ident}] `) +
+          `Rootbeer.util->isSelinuxFlagInEnabled() check detected, marking as ${c.green("false")}`,
         );
-        return true;
-      }
-
-      send(
-        c.blackBright(`[${ident}] `) +
-        `Rootbeer.util->isSelinuxFlagInEnabled() check detected, marking as ${c.green("false")}`,
-      );
-      return false;
-    };
+        return false;
+      };
+  
+      return Util.isSelinuxFlagInEnabled;
+    } catch (err) {
+      if ((err as Error).message.indexOf("java.lang.ClassNotFoundException") === 0) {
+        return null;
+      };
+      throw err;
+    }
   });
 };
 
 const rootBeerNative = (success: boolean, ident: number): any => {
   return wrapJavaPerform(() => {
     const RootBeerNative = Java.use("com.scottyab.rootbeer.RootBeerNative");
-    RootBeerNative.checkForRoot.overload('[Ljava.lang.Object;').implementation = function () {
+    const RootBeerNative_checkForRoot = RootBeerNative.checkForRoot.overload('[Ljava.lang.Object;');
+    RootBeerNative_checkForRoot.implementation = function () {
       if (success) {
         send(
           c.blackBright(`[${ident}] `) +
@@ -263,74 +296,98 @@ const rootBeerNative = (success: boolean, ident: number): any => {
       );
       return 0;
     };
+
+    return RootBeerNative_checkForRoot;
   });
 };
 
 // ref: https://www.ayrx.me/gantix-jailmonkey-root-detection-bypass/
-const jailMonkeyBypass = (success: boolean, ident: number): any => {
+const jailMonkeyBypass = (success: boolean, ident: number): Promise<any> => {
   return wrapJavaPerform(() => {
-    const JavaJailMonkeyModule = Java.use("com.gantix.JailMonkey.JailMonkeyModule");
-    const JavaHashMap = Java.use("java.util.HashMap");
-    const JavaFalseObject = Java.use("java.lang.Boolean").FALSE.value;
+    try {
+      const JavaJailMonkeyModule = Java.use("com.gantix.JailMonkey.JailMonkeyModule");
+      const JavaHashMap = Java.use("java.util.HashMap");
+      const JavaBoolean = Java.use("java.lang.Boolean")
+      const JavaFalseObject = JavaBoolean.FALSE.value;
+      const JavaTrueObject = JavaBoolean.TRUE.value;
 
-    JavaJailMonkeyModule.getConstants.implementation = function () {
-      send(
-        c.blackBright(`[${ident}] `) +
-        `JailMonkeyModule.getConstants() called, returning false for all keys.`
-      );
+      JavaJailMonkeyModule.getConstants.implementation = function () {
+        if (success) {
+          send(
+            c.blackBright(`[${ident}] `) +
+            `RootBeer->checkForDangerousProps() check detected, marking as ${c.green("true")} for all keys.`,
+          );
+          const hm = JavaHashMap.$new();
+          hm.put("isJailBroken", JavaTrueObject);
+          hm.put("hookDetected", JavaTrueObject);
+          hm.put("canMockLocation", JavaTrueObject);
+          hm.put("isOnExternalStorage", JavaTrueObject);
+          hm.put("AdbEnabled", JavaTrueObject);
+          
+          return hm;
+        }
+        send(
+          c.blackBright(`[${ident}] `) +
+          `JailMonkeyModule.getConstants() called, returning ${c.green("false")} for all keys.`
+        );
 
-      const hm = JavaHashMap.$new();
-      hm.put("isJailBroken", JavaFalseObject);
-      hm.put("hookDetected", JavaFalseObject);
-      hm.put("canMockLocation", JavaFalseObject);
-      hm.put("isOnExternalStorage", JavaFalseObject);
-      hm.put("AdbEnabled", JavaFalseObject);
+        const hm = JavaHashMap.$new();
+        hm.put("isJailBroken", JavaFalseObject);
+        hm.put("hookDetected", JavaFalseObject);
+        hm.put("canMockLocation", JavaFalseObject);
+        hm.put("isOnExternalStorage", JavaFalseObject);
+        hm.put("AdbEnabled", JavaFalseObject);
 
-      return hm;
-    };
+        return hm;
+      };
 
-    return JavaJailMonkeyModule;
+      return JavaJailMonkeyModule.getConstants;
+    } catch (err) {
+      if ((err as Error).message.indexOf("java.lang.ClassNotFoundException") === 0) {
+        return null;
+      };
+      throw err;
+    }
   });
 };
 
-export const disable = (): void => {
+export const disable = async (): Promise<void> => {
   const job: jobs.Job = new jobs.Job(jobs.identifier(), 'root-detection-disable');
 
-  job.addImplementation(testKeysCheck(false, job.identifier));
-  job.addImplementation(execSuCheck(false, job.identifier));
-  job.addImplementation(fileExistsCheck(false, job.identifier));
-  job.addImplementation(jailMonkeyBypass(false, job.identifier));
-
+  job.addImplementation(await testKeysCheck(false, job.identifier));
+  job.addImplementation(await execSuCheck(false, job.identifier));
+  job.addImplementation(await fileExistsCheck(false, job.identifier));
+  job.addImplementation(await jailMonkeyBypass(false, job.identifier));
   // RootBeer functions
-  job.addImplementation(rootBeerIsRooted(false, job.identifier));
-  job.addImplementation(rootBeerCheckForBinary(false, job.identifier));
-  job.addImplementation(rootBeerCheckForDangerousProps(false, job.identifier));
-  job.addImplementation(rootBeerDetectRootCloakingApps(false, job.identifier));
-  job.addImplementation(rootBeerCheckSuExists(false, job.identifier));
-  job.addImplementation(rootBeerDetectTestKeys(false, job.identifier));
-  job.addImplementation(rootBeerNative(false, job.identifier));
-  job.addImplementation(rootBeerCheckSeLinux(false, job.identifier));
+  job.addImplementation(await rootBeerIsRooted(false, job.identifier));
+  job.addImplementation(await rootBeerCheckForBinary(false, job.identifier));
+  job.addImplementation(await rootBeerCheckForDangerousProps(false, job.identifier));
+  job.addImplementation(await rootBeerDetectRootCloakingApps(false, job.identifier));
+  job.addImplementation(await rootBeerCheckSuExists(false, job.identifier));
+  job.addImplementation(await rootBeerDetectTestKeys(false, job.identifier));
+  job.addImplementation(await rootBeerNative(false, job.identifier));
+  job.addImplementation(await rootBeerCheckSeLinux(false, job.identifier));
 
   jobs.add(job);
 };
 
-export const enable = (): void => {
+export const enable = async (): Promise<void> => {
   const job: jobs.Job = new jobs.Job(jobs.identifier(), "root-detection-enable");
 
-  job.addImplementation(testKeysCheck(true, job.identifier));
-  job.addImplementation(execSuCheck(true, job.identifier));
-  job.addImplementation(fileExistsCheck(true, job.identifier));
-  job.addImplementation(jailMonkeyBypass(true, job.identifier));
+  job.addImplementation(await testKeysCheck(true, job.identifier));
+  job.addImplementation(await execSuCheck(true, job.identifier));
+  job.addImplementation(await fileExistsCheck(true, job.identifier));
+  job.addImplementation(await jailMonkeyBypass(true, job.identifier));
 
   // RootBeer functions
-  job.addImplementation(rootBeerIsRooted(true, job.identifier));
-  job.addImplementation(rootBeerCheckForBinary(true, job.identifier));
-  job.addImplementation(rootBeerCheckForDangerousProps(true, job.identifier));
-  job.addImplementation(rootBeerDetectRootCloakingApps(true, job.identifier));
-  job.addImplementation(rootBeerCheckSuExists(true, job.identifier));
-  job.addImplementation(rootBeerDetectTestKeys(true, job.identifier));
-  job.addImplementation(rootBeerNative(true, job.identifier));
-  job.addImplementation(rootBeerCheckSeLinux(false, job.identifier));
+  job.addImplementation(await rootBeerIsRooted(true, job.identifier));
+  job.addImplementation(await rootBeerCheckForBinary(true, job.identifier));
+  job.addImplementation(await rootBeerCheckForDangerousProps(true, job.identifier));
+  job.addImplementation(await rootBeerDetectRootCloakingApps(true, job.identifier));
+  job.addImplementation(await rootBeerCheckSuExists(true, job.identifier));
+  job.addImplementation(await rootBeerDetectTestKeys(true, job.identifier));
+  job.addImplementation(await rootBeerNative(true, job.identifier));
+  job.addImplementation(await rootBeerCheckSeLinux(false, job.identifier));
 
   jobs.add(job);
 };

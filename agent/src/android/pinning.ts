@@ -120,9 +120,10 @@ const okHttp3CertificatePinnerCheck = (ident: number): Promise<any | undefined> 
       return CertificatePinnerCheck;
 
     } catch (err) {
-      if ((err as Error).message.indexOf("ClassNotFoundException") === 0) {
+      if ((err as Error).message.indexOf("java.lang.ClassNotFoundException") !== 0) {
         throw err;
       }
+      return null;
     }
   });
 };
@@ -162,9 +163,10 @@ const okHttp3CertificatePinnerCheckOkHttp = (ident: number): Promise<any | undef
       return CertificatePinnerCheckOkHttp;
 
     } catch (err) {
-      if ((err as Error).message.indexOf("ClassNotFoundException") === 0) {
+      if ((err as Error).message.indexOf("java.lang.ClassNotFoundException") !== 0) {
         throw err;
       }
+      return null;
     }
   });
 };
@@ -192,9 +194,10 @@ const appceleratorTitaniumPinningTrustManager = (ident: number): Promise<any | u
       return PinningTrustManagerCheckServerTrusted;
 
     } catch (err) {
-      if ((err as Error).message.indexOf("ClassNotFoundException") === 0) {
+      if ((err as Error).message.indexOf("java.lang.ClassNotFoundException") !== 0) {
         throw err;
       }
+      return null;
     }
   });
 };
@@ -233,9 +236,10 @@ const trustManagerImplVerifyChainCheck = (ident: number): Promise<any> => {
       return TrustManagerImplverifyChain;
 
     } catch (err) {
-      if ((err as Error).message.indexOf("ClassNotFoundException") === 0) {
+      if ((err as Error).message.indexOf("java.lang.ClassNotFoundException") !== 0) {
         throw err;
       }
+      return null;
     }
   });
 };
@@ -271,9 +275,10 @@ const trustManagerImplCheckTrustedRecursiveCheck = (ident: number): Promise<any>
       return TrustManagerImplcheckTrustedRecursive;
 
     } catch (err) {
-      if ((err as Error).message.indexOf("ClassNotFoundException") === 0) {
+      if ((err as Error).message.indexOf("java.lang.ClassNotFoundException") !== 0) {
         throw err;
       }
+      return null;
     }
   });
 };
@@ -303,9 +308,10 @@ const phoneGapSSLCertificateChecker = (ident: number): Promise<any> => {
       return SSLCertificateCheckerExecute;
 
     } catch (err) {
-      if ((err as Error).message.indexOf("ClassNotFoundException") === 0) {
+      if ((err as Error).message.indexOf("java.lang.ClassNotFoundException") !== 0) {
         throw err;
       }
+      return null;
     }
   });
 };
