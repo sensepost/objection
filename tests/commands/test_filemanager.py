@@ -380,7 +380,7 @@ Readable: True  Writable: True
         with capture(download, []) as o:
             output = o
 
-        self.assertEqual(output, 'Usage: file download <remote location> (optional: <local destination>)\n')
+        self.assertEqual(output, 'Usage: filesystem download <remote location> (optional: <local destination>)\n')
 
     @mock.patch('objection.commands.filemanager._download_ios')
     def test_download_platform_proxy_calls_ios_method(self, mock_download_ios):
@@ -490,7 +490,7 @@ Successfully downloaded /foo to /bar
         with capture(upload, []) as o:
             output = o
 
-        self.assertEqual(output, 'Usage: file upload <local source> (optional: <remote destination>)\n')
+        self.assertEqual(output, 'Usage: filesystem upload <local source> (optional: <remote destination>)\n')
 
     @mock.patch('objection.commands.filemanager._upload_ios')
     def test_file_upload_method_proxy_calls_ios_helper_method(self, mock_upload_ios):
