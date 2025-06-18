@@ -199,16 +199,19 @@ class Agent(object):
         """
 
         if (self.config.name is None) and (not self.config.foremost):
-            raise Exception('Need a target name to spawn/attach to')
+            click.secho('Need a target name to spawn/attach to', fg='red')
+            sys.exit(1)
 
         if self.config.foremost:
             try:
                 app = self.device.get_frontmost_application()
             except Exception as e:
-                raise Exception(f'Could not get foremost application on {self.device.name}: {e}')
+                click.secho(f'Could not get foremost application on {self.device.name}: {e}', fg='red')
+                sys.exit(1)
 
             if app is None:
-                raise Exception(f'No foremost application on {self.device.name}')
+                click.secho(f'No foremost application on {self.device.name}', fg='red')
+                sys.exit(1)
 
             self.pid = app.pid
             # update the global state for the prompt etc.
@@ -230,9 +233,28 @@ class Agent(object):
             except ValueError:
                 pass
 
+            # maybe we have a process name
             if self.pid is None:
-                # last resort, maybe we have a process name
-                self.pid = self.device.get_process(self.config.name).pid
+                try:
+                    self.pid = self.device.get_process(self.config.name).pid
+                except frida.ProcessNotFoundError:
+                    pass
+
+            if self.pid is None:
+                # maybe we have an app identifier
+                app_list = self.device.enumerate_applications()
+                app_name_lc = self.config.name.lower()
+                matching_app = [app for app in app_list if app.identifier.lower() == app_name_lc]
+                if len(matching_app) == 1 and matching_app[0].pid is not None:
+                    self.pid = matching_app[0].pid
+                elif len(matching_app) > 1:
+                    app_list_str = ', '.join([f"{app.identifier}: {app.pid}" for app in matching_app])
+                    click.secho("Ambiguous identifier. Applications with the same identifier found: "+ app_list_str, fg='red')
+                    sys.exit(1)
+
+        if self.pid is None:
+            click.secho("Unable to find target application.", fg='red', bold=True)
+            sys.exit(1)
 
         debug_print(f'process PID determined as {self.pid}')
 
