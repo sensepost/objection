@@ -23,8 +23,14 @@ export class Job {
   }; 
   
   addImplementation(implementation: any): void {
-    if (implementation !== undefined)
+    if (implementation !== undefined) {
+      // Functions not found, working as expected
+      if (implementation == null) return;
       this.implementations.push(implementation);
+    } else {
+      c.log(c.redBright(`[warn] Undefined implementation:`));
+      c.log(c.blackBright(new Error().stack));
+    }
   };
   
   addReplacement(replacement: any): void {
