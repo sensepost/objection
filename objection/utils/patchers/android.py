@@ -13,6 +13,7 @@ import semver
 
 from .base import BasePlatformGadget, BasePlatformPatcher, objection_path
 from .github import Github
+from ..helpers import debug_print
 
 
 class AndroidGadget(BasePlatformGadget):
@@ -405,6 +406,7 @@ class AndroidPatcher(BasePlatformPatcher):
 
         click.secho('Unpacking {0}'.format(self.apk_source), dim=True)
 
+
         o = delegator.run(self.list2cmdline([
             self.required_commands['apktool']['location'],
             'decode',
@@ -418,11 +420,11 @@ class AndroidPatcher(BasePlatformPatcher):
             self.apk_source
         ] + ([] if fix_concurrency_to is None else ['-j', fix_concurrency_to])), timeout=self.command_run_timeout)
 
+        debug_print("Command:" + o.cmd)
+
         if len(o.err) > 0:
             click.secho('An error may have occurred while extracting the APK.', fg='red')
             click.secho(o.err, fg='red')
-
-        click.secho(o.cmd, dim=True)
             
     def inject_internet_permission(self):
         """
