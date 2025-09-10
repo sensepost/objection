@@ -410,8 +410,8 @@ class AndroidPatcher(BasePlatformPatcher):
             self.required_commands['apktool']['location'],
             'decode',
             '-f',
-            '-r' if self.skip_resources else '',
-            '--only-main-classes' if self.only_main_classes else '',
+        ] + (['-r'] if self.skip_resources else [])
+          + (['--only-main-classes'] if self.only_main_classes else []) + [
             '-o',
             self.apk_temp_directory,
             self.apk_source
