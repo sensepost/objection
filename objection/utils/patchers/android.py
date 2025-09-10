@@ -227,8 +227,14 @@ class AndroidPatcher(BasePlatformPatcher):
 
         o = delegator.run(self.list2cmdline([
             self.required_commands['apktool']['location'],
-            '-version',
+            '-version', # older versions expect this but refuse "version"
         ]), timeout=self.command_run_timeout).out.strip()
+
+        if o.startswith("Apktool "):
+            o = delegator.run(self.list2cmdline([
+                self.required_commands['apktool']['location'],
+                'version', # newer versions expect this but refuse "-version"
+            ]), timeout=self.command_run_timeout).out.strip()
 
         # On windows we get this 'Press any key to continue' thing,
         # localized to the the current language. Assume that the version
@@ -404,8 +410,8 @@ class AndroidPatcher(BasePlatformPatcher):
             self.required_commands['apktool']['location'],
             'decode',
             '-f',
-            '-r' if self.skip_resources else '',
-            '--only-main-classes' if self.only_main_classes else '',
+        ] + (['-r'] if self.skip_resources else [])
+          + (['--only-main-classes'] if self.only_main_classes else []) + [
             '-o',
             self.apk_temp_directory,
             self.apk_source
@@ -589,32 +595,66 @@ class AndroidPatcher(BasePlatformPatcher):
         # check if the activity path exists. If not, try and see if this may have been
         # a multidex setup
         if not os.path.exists(activity_path):
+            glob_result = self._find_dotnumber_smali(os.path.join(self.apk_temp_directory, 'smali'), target_class)
 
-            click.secho('Smali not found in smali directory. This might be a multidex APK. Searching...', dim=True)
+            if len(glob_result) == 1:
+                activity_path = glob_result[0]
+            else:
+                click.secho('Smali not found in smali directory. This might be a multidex APK. Searching...', dim=True)
 
-            # apk tool will dump the dex classes to a smali directory. in multidex setups
-            # we have folders such as smali_classes2, smali_classes3 etc. we will search
-            # those paths for the launch activity we detected.
-            for x in range(2, 100):
-                smali_path = os.path.join(self.apk_temp_directory, 'smali_classes{0}'.format(x))
+                # apk tool will dump the dex classes to a smali directory. in multidex setups
+                # we have folders such as smali_classes2, smali_classes3 etc. we will search
+                # those paths for the launch activity we detected.
+                for x in range(2, 100):
+                    smali_path = os.path.join(self.apk_temp_directory, 'smali_classes{0}'.format(x))
 
-                # stop if the smali_classes directory does not exist.
-                if not os.path.exists(smali_path):
-                    break
+                    # stop if the smali_classes directory does not exist.
+                    if not os.path.exists(smali_path):
+                        break
 
-                # determine the path to the launchable activity again
-                activity_path = os.path.join(smali_path, target_class) + '.smali'
+                    # determine the path to the launchable activity again
+                    activity_path = os.path.join(smali_path, target_class) + '.smali'
 
-                # if we found the activity, stop the loop
-                if os.path.exists(activity_path):
-                    click.secho('Found smali at: {0}'.format(activity_path), dim=True)
-                    break
+                    # if we found the activity, stop the loop
+                    if os.path.exists(activity_path):
+                        click.secho('Found smali at: {0}'.format(activity_path), dim=True)
+                        break
+
+                    # determine the path to the launchable activity again, this time using glob
+                    glob_result = self._find_dotnumber_smali(smali_path, target_class)
+                    # if we found the activity, stop the loop
+                    if len(glob_result) == 1:
+                        activity_path = os.path.join(smali_path, glob_result[0])
+                        click.secho('Found smali at: {0}'.format(activity_path), dim=True)
+                        break
 
         # one final check to ensure we have the target .smali file
         if not os.path.exists(activity_path):
             raise Exception('Unable to find smali to patch!')
 
         return activity_path
+
+    def _find_dotnumber_smali(self, path: str, target: str) -> list[str]:
+        """
+            Determines whether the target file could be found under a mangled directory under the specified path.
+
+            :param path:
+            :patam target:
+            :return:
+        """
+        parts = target.split('/', 1)
+        if len(parts) == 1:
+            filename = target + ".smali"
+            return [filename] if os.path.exists(os.path.join(path, filename)) else []
+        else:
+            result = []
+            prefix, postfix = parts
+            for entry in os.listdir(path):
+                check = prefix + "."
+                if entry == prefix or (entry.startswith(check) and entry[len(check):].isdigit()):
+                    result.extend((entry + "/" + item for item in
+                                   self._find_dotnumber_smali(os.path.join(path, entry), postfix)))
+            return result
 
     @staticmethod
     def _determine_end_of_smali_method_from_line(smali: list, start: int) -> int:
