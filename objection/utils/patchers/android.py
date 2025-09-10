@@ -227,8 +227,14 @@ class AndroidPatcher(BasePlatformPatcher):
 
         o = delegator.run(self.list2cmdline([
             self.required_commands['apktool']['location'],
-            '-version',
+            '-version', # older versions expect this but refuse "version"
         ]), timeout=self.command_run_timeout).out.strip()
+
+        if o.startswith("Apktool "):
+            o = delegator.run(self.list2cmdline([
+                self.required_commands['apktool']['location'],
+                'version', # newer versions expect this but refuse "-version"
+            ]), timeout=self.command_run_timeout).out.strip()
 
         # On windows we get this 'Press any key to continue' thing,
         # localized to the the current language. Assume that the version
