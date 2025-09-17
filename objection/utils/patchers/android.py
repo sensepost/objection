@@ -227,7 +227,7 @@ class AndroidPatcher(BasePlatformPatcher):
 
         o = delegator.run(self.list2cmdline([
             self.required_commands['apktool']['location'],
-            '-version',
+            'v',
         ]), timeout=self.command_run_timeout).out.strip()
 
         # On windows we get this 'Press any key to continue' thing,
