@@ -182,8 +182,8 @@ class AndroidPatcher(BasePlatformPatcher):
     """ Class used to patch Android APK's"""
 
     required_commands = {
-        'aapt': {
-            'installation': 'apt install aapt (Kali Linux)'
+        'aapt2': {
+            'installation': 'Install aapt2 from https://developer.android.com/build/building-cmdline#download_aapt2'
         },
         'adb': {
             'installation': 'apt install adb (Kali Linux); brew install adb (macOS)'
@@ -206,7 +206,7 @@ class AndroidPatcher(BasePlatformPatcher):
         self.apk_temp_directory = tempfile.mkdtemp(suffix='.apktemp')
         self.apk_temp_frida_patched = self.apk_temp_directory + '.objection.apk'
         self.apk_temp_frida_patched_aligned = self.apk_temp_directory + '.aligned.objection.apk'
-        self.aapt = None
+        self.aapt2 = None
         self.skip_cleanup = skip_cleanup
         self.skip_resources = skip_resources
         self.manifest = manifest
@@ -227,7 +227,7 @@ class AndroidPatcher(BasePlatformPatcher):
 
         o = delegator.run(self.list2cmdline([
             self.required_commands['apktool']['location'],
-            '-version',
+            'v',
         ]), timeout=self.command_run_timeout).out.strip()
 
         # On windows we get this 'Press any key to continue' thing,
@@ -298,26 +298,26 @@ class AndroidPatcher(BasePlatformPatcher):
 
     def _get_appt_output(self):
         """
-            Get the output of `aapt dump badging`.
+            Get the output of `aapt2 dump badging`.
 
             :return:
         """
 
-        if not self.aapt:
+        if not self.aapt2:
             o = delegator.run(self.list2cmdline([
-                self.required_commands['aapt']['location'],
+                self.required_commands['aapt2']['location'],
                 'dump',
                 'badging',
                 self.apk_source
             ]), timeout=self.command_run_timeout)
 
             if len(o.err) > 0:
-                click.secho('An error may have occurred while running aapt.', fg='red')
+                click.secho('An error may have occurred while running aapt2.', fg='red')
                 click.secho(o.err, fg='red')
 
-            self.aapt = o.out
+            self.aapt2 = o.out
 
-        return self.aapt
+        return self.aapt2
 
     def _get_launchable_activity(self) -> str:
         """
@@ -400,21 +400,26 @@ class AndroidPatcher(BasePlatformPatcher):
 
         click.secho('Unpacking {0}'.format(self.apk_source), dim=True)
 
-        o = delegator.run(self.list2cmdline([
-            self.required_commands['apktool']['location'],
-            'decode',
-            '-f',
-            '-r' if self.skip_resources else '',
-            '--only-main-classes' if self.only_main_classes else '',
-            '-o',
-            self.apk_temp_directory,
-            self.apk_source
-        ] + ([] if fix_concurrency_to is None else ['-j', fix_concurrency_to])), timeout=self.command_run_timeout)
+        o = delegator.run(
+            self.list2cmdline(filter(None, [
+                self.required_commands['apktool']['location'],
+                'decode',
+                '-f',
+                '-r' if self.skip_resources else None,
+                '--only-main-classes' if self.only_main_classes else None,
+                '-o',
+                self.apk_temp_directory,
+                self.apk_source,
+                '-j' if fix_concurrency_to else None,
+                fix_concurrency_to
+            ])),
+            timeout=self.command_run_timeout
+        )
 
         if len(o.err) > 0:
             click.secho('An error may have occurred while extracting the APK.', fg='red')
             click.secho(o.err, fg='red')
-            
+
     def inject_internet_permission(self):
         """
             Checks the status of the source APK to see if it
@@ -878,7 +883,7 @@ class AndroidPatcher(BasePlatformPatcher):
             click.secho('Adding a gadget configuration file...', fg='green')
             shutil.copyfile(gadget_config, os.path.join(libs_path, 'libfrida-gadget.config.so'))
 
-    def build_new_apk(self, use_aapt2: bool = False, fix_concurrency_to = None):
+    def build_new_apk(self, fix_concurrency_to = None):
         """
             Build a new .apk with the frida-gadget patched in.
 
@@ -887,15 +892,17 @@ class AndroidPatcher(BasePlatformPatcher):
 
         click.secho('Rebuilding the APK with the frida-gadget loaded...', fg='green', dim=True)
         o = delegator.run(
-            self.list2cmdline([self.required_commands['apktool']['location'],
-                            'build',
-                            self.apk_temp_directory,
-                            ] + (['--use-aapt2'] if use_aapt2 else []) + [
-                                '-o',
-                                self.apk_temp_frida_patched
-                            ]+ ([] if fix_concurrency_to is None else ['-j', fix_concurrency_to]))
-                            , timeout=self.command_run_timeout)
-        
+            self.list2cmdline(filter(None, [
+                self.required_commands['apktool']['location'],
+                'b',
+                self.apk_temp_directory,
+                '-o',
+                self.apk_temp_frida_patched,
+                '-j' if fix_concurrency_to else None,
+                fix_concurrency_to
+            ])),
+            timeout=self.command_run_timeout
+        )
 
         if len(o.err) > 0:
             click.secho(('Rebuilding the APK may have failed. Read the following '
