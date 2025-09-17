@@ -883,7 +883,7 @@ class AndroidPatcher(BasePlatformPatcher):
             click.secho('Adding a gadget configuration file...', fg='green')
             shutil.copyfile(gadget_config, os.path.join(libs_path, 'libfrida-gadget.config.so'))
 
-    def build_new_apk(self, use_aapt2: bool = False, fix_concurrency_to = None):
+    def build_new_apk(self, fix_concurrency_to = None):
         """
             Build a new .apk with the frida-gadget patched in.
 
@@ -892,15 +892,17 @@ class AndroidPatcher(BasePlatformPatcher):
 
         click.secho('Rebuilding the APK with the frida-gadget loaded...', fg='green', dim=True)
         o = delegator.run(
-            self.list2cmdline([self.required_commands['apktool']['location'],
-                            'build',
-                            self.apk_temp_directory,
-                            ] + (['--use-aapt2'] if use_aapt2 else []) + [
-                                '-o',
-                                self.apk_temp_frida_patched
-                            ]+ ([] if fix_concurrency_to is None else ['-j', fix_concurrency_to]))
-                            , timeout=self.command_run_timeout)
-        
+            self.list2cmdline(filter(None, [
+                self.required_commands['apktool']['location'],
+                'b',
+                self.apk_temp_directory,
+                '-o',
+                self.apk_temp_frida_patched,
+                '-j' if fix_concurrency_to else None,
+                fix_concurrency_to
+            ])),
+            timeout=self.command_run_timeout
+        )
 
         if len(o.err) > 0:
             click.secho(('Rebuilding the APK may have failed. Read the following '

@@ -223,7 +223,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
 
         input('Press ENTER to continue...')
 
-    patcher.build_new_apk(use_aapt2=use_aapt2, fix_concurrency_to=fix_concurrency_to)
+    patcher.build_new_apk(fix_concurrency_to=fix_concurrency_to)
     patcher.zipalign_apk()
     if not skip_signing:
         patcher.sign_apk()
