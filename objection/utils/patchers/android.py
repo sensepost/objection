@@ -182,8 +182,8 @@ class AndroidPatcher(BasePlatformPatcher):
     """ Class used to patch Android APK's"""
 
     required_commands = {
-        'aapt': {
-            'installation': 'apt install aapt (Kali Linux)'
+        'aapt2': {
+            'installation': 'Install aapt2 from https://developer.android.com/build/building-cmdline#download_aapt2'
         },
         'adb': {
             'installation': 'apt install adb (Kali Linux); brew install adb (macOS)'
@@ -206,7 +206,7 @@ class AndroidPatcher(BasePlatformPatcher):
         self.apk_temp_directory = tempfile.mkdtemp(suffix='.apktemp')
         self.apk_temp_frida_patched = self.apk_temp_directory + '.objection.apk'
         self.apk_temp_frida_patched_aligned = self.apk_temp_directory + '.aligned.objection.apk'
-        self.aapt = None
+        self.aapt2 = None
         self.skip_cleanup = skip_cleanup
         self.skip_resources = skip_resources
         self.manifest = manifest
@@ -298,26 +298,26 @@ class AndroidPatcher(BasePlatformPatcher):
 
     def _get_appt_output(self):
         """
-            Get the output of `aapt dump badging`.
+            Get the output of `aapt2 dump badging`.
 
             :return:
         """
 
-        if not self.aapt:
+        if not self.aapt2:
             o = delegator.run(self.list2cmdline([
-                self.required_commands['aapt']['location'],
+                self.required_commands['aapt2']['location'],
                 'dump',
                 'badging',
                 self.apk_source
             ]), timeout=self.command_run_timeout)
 
             if len(o.err) > 0:
-                click.secho('An error may have occurred while running aapt.', fg='red')
+                click.secho('An error may have occurred while running aapt2.', fg='red')
                 click.secho(o.err, fg='red')
 
-            self.aapt = o.out
+            self.aapt2 = o.out
 
-        return self.aapt
+        return self.aapt2
 
     def _get_launchable_activity(self) -> str:
         """
@@ -419,7 +419,7 @@ class AndroidPatcher(BasePlatformPatcher):
         if len(o.err) > 0:
             click.secho('An error may have occurred while extracting the APK.', fg='red')
             click.secho(o.err, fg='red')
-            
+
     def inject_internet_permission(self):
         """
             Checks the status of the source APK to see if it
