@@ -231,8 +231,34 @@ class Agent(object):
                 pass
 
             if self.pid is None:
-                # last resort, maybe we have a process name
-                self.pid = self.device.get_process(self.config.name).pid
+                try:
+                    self.pid = self.device.get_process(self.config.name).pid
+                except:
+                    processes = self.device.enumerate_processes()
+                    for process in processes:
+                        try:
+                            app = self.device.get_frontmost_application()
+                            if app and app.identifier == self.config.name:
+                                self.pid = app.pid
+                                break
+                        except:
+                            pass
+
+                    if self.pid is None:
+                        try:
+                            applications = self.device.enumerate_applications()
+                            for app in applications:
+                                if app.identifier == self.config.name:
+                                    for process in processes:
+                                        if process.name == app.name:
+                                            self.pid = process.pid
+                                            break
+                                    break
+                        except:
+                            pass
+
+                    if self.pid is None:
+                        raise Exception(f'Unable to find process with name or identifier: {self.config.name}')
 
         debug_print(f'process PID determined as {self.pid}')
 
