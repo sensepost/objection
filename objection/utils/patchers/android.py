@@ -400,21 +400,23 @@ class AndroidPatcher(BasePlatformPatcher):
 
         click.secho('Unpacking {0}'.format(self.apk_source), dim=True)
 
-        o = delegator.run(self.list2cmdline([
+        cmdline = self.list2cmdline([
             self.required_commands['apktool']['location'],
             'decode',
             '-f',
-            '-r' if self.skip_resources else '',
-            '--only-main-classes' if self.only_main_classes else '',
+            *(['-r'] if self.skip_resources else []),
+            *(['--only-main-classes'] if self.only_main_classes else []),
             '-o',
             self.apk_temp_directory,
             self.apk_source
-        ] + ([] if fix_concurrency_to is None else ['-j', fix_concurrency_to])), timeout=self.command_run_timeout)
+        ] + ([] if fix_concurrency_to is None else ['-j', fix_concurrency_to]))
+        o = delegator.run(cmdline, timeout=self.command_run_timeout)
 
         if len(o.err) > 0:
             click.secho('An error may have occurred while extracting the APK.', fg='red')
+            click.secho(f'Invocation: {cmdline}', fg='red')
             click.secho(o.err, fg='red')
-            
+
     def inject_internet_permission(self):
         """
             Checks the status of the source APK to see if it
