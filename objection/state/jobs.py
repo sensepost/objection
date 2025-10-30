@@ -72,16 +72,19 @@ class JobManagerState(object):
         if new_job.uuid not in self.jobs:
             self.jobs[new_job.uuid] = new_job
 
-    def remove_job(self, job_uuid: int) -> Job:
+    def remove_job(self, job_uuid: int):
         """
             Removes a job from the job state manager.
 
             :param job_uuid:
             :return Job:
         """
+        if job_uuid not in self.jobs:
+            click.secho(f"Error: Job with ID {job_uuid} does not exist.", fg='red')
+            return
+
         job_to_remove = self.jobs.pop(job_uuid)
         job_to_remove.end()
-        return job_to_remove
 
     def cleanup(self) -> None:
         """

@@ -13,6 +13,7 @@ import semver
 
 from .base import BasePlatformGadget, BasePlatformPatcher, objection_path
 from .github import Github
+from ..helpers import debug_print
 
 
 class AndroidGadget(BasePlatformGadget):
@@ -236,6 +237,11 @@ class AndroidPatcher(BasePlatformPatcher):
         if len(o.split('\n')) > 1:
             o = o.split('\n')[0]
 
+        # Apktool v2.12.0 has changed the syntax `apktool -version, this grabs the version from the usage screen output
+        # instead of re-running as `apktool v`.
+        if len(o.split(' ')) > 1:
+            o = o.split(' ')[1]
+
         if len(o) == 0:
             click.secho('Unable to determine apktool version. Is it installed')
             return False
@@ -400,16 +406,21 @@ class AndroidPatcher(BasePlatformPatcher):
 
         click.secho('Unpacking {0}'.format(self.apk_source), dim=True)
 
+
         o = delegator.run(self.list2cmdline([
             self.required_commands['apktool']['location'],
             'decode',
             '-f',
-            '-r' if self.skip_resources else '',
-            '--only-main-classes' if self.only_main_classes else '',
+        ] +
+          (['-r'] if self.skip_resources else []) +
+          (['--only-main-classes'] if self.only_main_classes else []) +
+        [
             '-o',
             self.apk_temp_directory,
             self.apk_source
         ] + ([] if fix_concurrency_to is None else ['-j', fix_concurrency_to])), timeout=self.command_run_timeout)
+
+        debug_print("Command:" + o.cmd)
 
         if len(o.err) > 0:
             click.secho('An error may have occurred while extracting the APK.', fg='red')

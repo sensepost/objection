@@ -407,7 +407,7 @@ def download(args: list) -> None:
     """
 
     if len(args) < 1:
-        click.secho('Usage: file download <remote location> (optional: <local destination>)', bold=True)
+        click.secho('Usage: filesystem download <remote location> (optional: <local destination>)', bold=True)
         return
 
     # determine the source and destination file names.
@@ -564,7 +564,7 @@ def upload(args: list) -> None:
     """
 
     if len(args) < 1:
-        click.secho('Usage: file upload <local source> (optional: <remote destination>)', bold=True)
+        click.secho('Usage: filesystem upload <local source> (optional: <remote destination>)', bold=True)
         return
 
     source = args[0]
@@ -733,7 +733,7 @@ def cat(args: list):
     """
 
     if len(args) < 1:
-        click.secho('Usage: file cat <remote location>', bold=True)
+        click.secho('Usage: filesystem cat <remote location>', bold=True)
         return
 
     # determine the source and destination file names.
