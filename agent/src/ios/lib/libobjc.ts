@@ -2,8 +2,8 @@ import ObjC_bridge from "frida-objc-bridge";
 
 let ObjC: typeof ObjC_bridge;
 // Compatibility with frida < 17
-if (globalThis.ObjC) { 
-  ObjC = globalThis.Java
+if (globalThis.ObjC) {
+  ObjC = globalThis.ObjC
 } else {
   ObjC = ObjC_bridge
 }
