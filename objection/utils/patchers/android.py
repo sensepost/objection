@@ -200,7 +200,9 @@ class AndroidPatcher(BasePlatformPatcher):
         }
     }
 
-    def __init__(self, skip_cleanup: bool = False, skip_resources: bool = False, manifest: str = None, only_main_classes: bool = False):
+    def __init__(self, skip_cleanup: bool = False, skip_resources: bool = False, manifest: str = None, only_main_classes: bool = False, use_aapt2: bool = False):
+        if use_aapt2:
+            self.required_commands['aapt2'] =  {'installation': 'apt install aapt2 (Kali Linux)'}
         super(AndroidPatcher, self).__init__()
 
         self.apk_source = None
@@ -211,6 +213,7 @@ class AndroidPatcher(BasePlatformPatcher):
         self.skip_cleanup = skip_cleanup
         self.skip_resources = skip_resources
         self.manifest = manifest
+        self.use_aapt2 = use_aapt2
 
         self.keystore = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../assets', 'objection.jks')
         self.netsec_config = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../assets',
@@ -310,15 +313,16 @@ class AndroidPatcher(BasePlatformPatcher):
         """
 
         if not self.aapt:
-            o = delegator.run(self.list2cmdline([
-                self.required_commands['aapt']['location'],
+            cmd = self.list2cmdline([
+                self.required_commands['aapt2' if self.use_aapt2 else 'aapt']['location'],
                 'dump',
                 'badging',
                 self.apk_source
-            ]), timeout=self.command_run_timeout)
+            ])
+            o = delegator.run(cmd, timeout=self.command_run_timeout)
 
             if len(o.err) > 0:
-                click.secho('An error may have occurred while running aapt.', fg='red')
+                click.secho(f'An error may have occurred while running aapt cmd: {cmd}.', fg='red')
                 click.secho(o.err, fg='red')
 
             self.aapt = o.out
