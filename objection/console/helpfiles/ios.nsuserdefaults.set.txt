@@ -1,0 +1,25 @@
+Command: ios nsuserdefaults set
+
+Usage: ios nsuserdefaults set <key> <value> [--type string|int|float|bool]
+
+Sets a value in the application's NSUserDefaults for the specified key.
+The command will attempt to auto-detect the value type based on the input,
+but you can explicitly specify the type using the --type flag.
+
+Type Detection:
+  - "true" or "false" -> boolean
+  - Numbers without decimal -> integer
+  - Numbers with decimal -> float
+  - Everything else -> string
+
+Arguments:
+  <key>        The NSUserDefaults key to set
+  <value>      The value to store
+  --type       Optional: Explicitly specify the value type (string|int|float|bool)
+
+Examples:
+   ios nsuserdefaults set username "john.doe"
+   ios nsuserdefaults set isFirstLaunch false
+   ios nsuserdefaults set loginAttempts 3
+   ios nsuserdefaults set apiVersion 2.5
+   ios nsuserdefaults set debugMode true --type bool
