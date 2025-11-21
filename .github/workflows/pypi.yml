@@ -1,0 +1,36 @@
+name: Release to PyPi
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  pypi:
+    name: Publish to PyPI
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Ensure node for agent
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+      - name: Set tagged version
+        run: |
+          VERSION="$GITHUB_REF_NAME"
+          uv version "$VERSION"
+      - name: Build Agent
+        run: cd agent && npm ci
+      - name: Build
+        run: uv build
+      - name: Publish
+        run: uv publish
