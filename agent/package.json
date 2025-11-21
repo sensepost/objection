@@ -7,7 +7,7 @@
   "main": "src/index.ts",
   "scripts": {
     "prepare": "npm run build",
-    "build": "frida-compile src/index.ts -o ../objection/agent.js",
+    "build": "frida-compile src/index.ts -o ../objection/agent.js -T none",
     "watch": "frida-compile src/index.ts -o ../objection/agent.js -w",
     "lint": "tslint -c tslint.json 'src/**/*.ts'"
   },
@@ -29,6 +29,7 @@
   },
   "homepage": "https://github.com/sensepost/objection#readme",
   "dependencies": {
+    "frida-fs": "^7.0.0",
     "frida-java-bridge": "^7",
     "frida-objc-bridge": "^8",
     "frida-screenshot": "^6",
@@ -36,8 +37,8 @@
   },
   "devDependencies": {
     "@types/frida-gum": "^19",
-    "@types/node": "^18",
-    "frida-compile": "^17",
+    "@types/node": "^24",
+    "frida-compile": "^19",
     "tslint": "^6"
   }
 }
