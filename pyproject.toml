@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=70.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "objection"
+version = "1.11.0"
+description = "Instrumented Mobile Pentest Framework"
+readme = "README.md"
+requires-python = ">=3.14"
+license = "GPL-3.0-or-later"
+authors = [{name = "Leon Jacobs", email = "leon@sensepost.com"}]
+keywords = ["mobile", "instrumentation", "pentest", "frida", "hook"]
+classifiers = [
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: JavaScript",
+]
+dependencies = [
+    "click>=8.2.0",
+    "delegator-py>=0.1.1",
+    "flask>=3.0.0",
+    "frida>=16.0.0",
+    "frida-tools>=10.0.0",
+    "litecli>=1.3.0",
+    "packaging>=23.0",
+    "prompt-toolkit>=3.0.30,<4.0.0",
+    "pygments>=2.0.0",
+    "requests>=2.32.0",
+    "semver>=2",
+    "setuptools>=70.0.0",
+    "tabulate>=0.9.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/sensepost/objection"
+Repository = "https://github.com/sensepost/objection"
+"Bug Tracker" = "https://github.com/sensepost/objection/issues"
+
+[project.scripts]
+objection = "objection.console.cli:cli"
+
+[tool.setuptools]
+package-dir = {"" = "."}
+
+[tool.setuptools.packages.find]
+include = ["objection", "objection.*"]
+
+[tool.setuptools.package-data]
+objection = [
+    "console/helpfiles/*.txt",
+    "utils/assets/*.jks",
+    "utils/assets/*.js",
+    "utils/assets/*.xml",
+    "agent.js",
+]

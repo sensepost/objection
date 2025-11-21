@@ -1,6 +1,28 @@
 import sys
+from importlib import metadata
+from pathlib import Path
 
-__version__ = '1.11.0'
+import tomllib
+
+
+def _load_version() -> str:
+    """
+        Prefer the installed package metadata and fall back to pyproject.toml
+        when running from a checkout.
+    """
+
+    try:
+        return metadata.version("objection")
+    except metadata.PackageNotFoundError:
+        pyproject_path = Path(__file__).resolve().parent.parent / "pyproject.toml"
+        try:
+            with pyproject_path.open("rb") as f:
+                return tomllib.load(f)["project"]["version"]
+        except Exception:
+            return "0.0.0"
+
+
+__version__ = _load_version()
 
 # helper containing a python 3 related warning
 # if this is run with python 2
