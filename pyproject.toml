@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "objection"
-version = "1.11.0"
+version = "1.12.2"
 description = "Instrumented Mobile Pentest Framework"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.10"
 license = "GPL-3.0-or-later"
 authors = [{name = "Leon Jacobs", email = "leon@sensepost.com"}]
 keywords = ["mobile", "instrumentation", "pentest", "frida", "hook"]
