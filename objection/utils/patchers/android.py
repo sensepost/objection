@@ -10,6 +10,7 @@ import click
 import delegator
 import requests
 import semver
+import subprocess
 
 from .base import BasePlatformGadget, BasePlatformPatcher, objection_path
 from .github import Github
@@ -310,18 +311,40 @@ class AndroidPatcher(BasePlatformPatcher):
         """
 
         if not self.aapt:
-            o = delegator.run(self.list2cmdline([
-                self.required_commands['aapt']['location'],
-                'dump',
-                'badging',
-                self.apk_source
-            ]), timeout=self.command_run_timeout)
+            cmd = self.list2cmdline([
+                    self.required_commands['aapt']['location'],
+                    'dump',
+                    'badging',
+                    self.apk_source
+                ])
+            
+            try:
+                o = delegator.run(cmd, timeout=self.command_run_timeout)
 
-            if len(o.err) > 0:
-                click.secho('An error may have occurred while running aapt.', fg='red')
-                click.secho(o.err, fg='red')
+                if len(o.err) > 0:
+                    click.secho('An error may have occurred while running aapt.', fg='red')
+                    click.secho(o.err, fg='red')
 
-            self.aapt = o.out
+                self.aapt = o.out
+                
+            except ValueError:
+                result = subprocess.run(
+                    cmd, 
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    timeout=self.command_run_timeout,
+                    shell=True,
+                    encoding='utf-8'
+                )
+
+                self.aapt = result.stdout
+                error_output = result.stderr
+            
+                if result.returncode != 0:
+                    click.secho('An error may have occurred while running aapt.', fg='red')
+                    click.secho(error_output, fg='red')
+
+            
 
         return self.aapt
 
