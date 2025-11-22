@@ -106,6 +106,10 @@ const okHttp3CertificatePinnerCheck = (ident: number): Promise<any | undefined> 
       const certificatePinner: CertificatePinner = Java.use("okhttp3.CertificatePinner");
       send(c.blackBright(`Found okhttp3.CertificatePinner, overriding CertificatePinner.check()`));
 
+      if(!certificatePinner.check) {
+        return null;
+      }
+
       const CertificatePinnerCheck = certificatePinner.check.overload("java.lang.String", "java.util.List");
 
       // tslint:disable-next-line:only-arrow-functions
@@ -147,6 +151,11 @@ const okHttp3CertificatePinnerCheckOkHttp = (ident: number): Promise<any | undef
   return wrapJavaPerform(() => {
     try {
       const certificatePinner: CertificatePinner = Java.use("okhttp3.CertificatePinner");
+
+      if(!certificatePinner.check$okhttp) {
+        return null;
+      }
+      
       send(c.blackBright(`Found okhttp3.CertificatePinner, overriding CertificatePinner.check$okhttp()`));
 
       const CertificatePinnerCheckOkHttp = certificatePinner.check$okhttp.overload("java.lang.String", "u15");
@@ -175,12 +184,17 @@ const appceleratorTitaniumPinningTrustManager = (ident: number): Promise<any | u
   return wrapJavaPerform(() => {
     try {
       const pinningTrustManager: PinningTrustManager = Java.use("appcelerator.https.PinningTrustManager");
+      const PinningTrustManagerCheckServerTrusted = pinningTrustManager.checkServerTrusted;
+
+      if(!PinningTrustManagerCheckServerTrusted) {
+        return null;
+      }
+
       send(
         c.blackBright(`Found appcelerator.https.PinningTrustManager, ` +
           `overriding PinningTrustManager.checkServerTrusted()`),
       );
 
-      const PinningTrustManagerCheckServerTrusted = pinningTrustManager.checkServerTrusted;
 
       // tslint:disable-next-line:only-arrow-functions
       PinningTrustManagerCheckServerTrusted.implementation = function () {
@@ -213,14 +227,21 @@ const trustManagerImplVerifyChainCheck = (ident: number): Promise<any> => {
   return wrapJavaPerform(() => {
     try {
       const trustManagerImpl: TrustManagerImpl = Java.use("com.android.org.conscrypt.TrustManagerImpl");
-      send(
-        c.blackBright(`Found com.android.org.conscrypt.TrustManagerImpl, ` +
-          `overriding TrustManagerImpl.verifyChain()`),
-      );
 
       // https://github.com/google/conscrypt/blob/c88f9f55a523f128f0e4dace76a34724bfa1e88c/
       //  platform/src/main/java/org/conscrypt/TrustManagerImpl.java#L650
       const TrustManagerImplverifyChain = trustManagerImpl.verifyChain;
+
+      if((!TrustManagerImplverifyChain)) {
+        return null;
+      }
+
+       send(
+        c.blackBright(`Found com.android.org.conscrypt.TrustManagerImpl, ` +
+          `overriding TrustManagerImpl.verifyChain()`),
+      );
+
+
       // tslint:disable-next-line:only-arrow-functions
       TrustManagerImplverifyChain.implementation = function (untrustedChain, trustAnchorChain,
         host, clientAuth, ocspData, tlsSctData) {
@@ -252,14 +273,19 @@ const trustManagerImplCheckTrustedRecursiveCheck = (ident: number): Promise<any>
     try {
       const arrayList: ArrayList = Java.use("java.util.ArrayList");
       const trustManagerImpl: TrustManagerImpl = Java.use("com.android.org.conscrypt.TrustManagerImpl");
+      
+      if(!trustManagerImpl.checkTrustedRecursive) {
+        return null;
+      }
+
+      // https://android.googlesource.com/platform/external/conscrypt/+/1186465/src/
+      //  platform/java/org/conscrypt/TrustManagerImpl.java#391
+      const TrustManagerImplcheckTrustedRecursive = trustManagerImpl.checkTrustedRecursive;
       send(
         c.blackBright(`Found com.android.org.conscrypt.TrustManagerImpl, ` +
           `overriding TrustManagerImpl.checkTrustedRecursive()`),
       );
 
-      // https://android.googlesource.com/platform/external/conscrypt/+/1186465/src/
-      //  platform/java/org/conscrypt/TrustManagerImpl.java#391
-      const TrustManagerImplcheckTrustedRecursive = trustManagerImpl.checkTrustedRecursive;
       // tslint:disable-next-line:only-arrow-functions
       TrustManagerImplcheckTrustedRecursive.implementation = function (certs, host, clientAuth, untrustedChain,
         trustAnchorChain, used) {
@@ -287,6 +313,11 @@ const phoneGapSSLCertificateChecker = (ident: number): Promise<any> => {
   return wrapJavaPerform(() => {
     try {
       const sslCertificateChecker: SSLCertificateChecker = Java.use("nl.xservices.plugins.SSLCertificateChecker");
+
+      if(!sslCertificateChecker.execute) {
+        return null;
+      }
+      
       send(
         c.blackBright(`Found nl.xservices.plugins.SSLCertificateChecker, ` +
           `overriding SSLCertificateChecker.execute()`),
