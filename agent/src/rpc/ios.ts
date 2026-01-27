@@ -105,4 +105,5 @@ export const ios = {
 
   // ios nsuserdefaults
   iosNsuserDefaultsGet: (): NSUserDefaults | any => nsuserdefaults.get(),
+  iosNsuserDefaultsSet: (key: string, value: any, valueType?: string): boolean => nsuserdefaults.set(key, value, valueType),
 };

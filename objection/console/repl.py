@@ -17,6 +17,7 @@ from .completer import CommandCompleter
 from ..__init__ import __version__
 from ..state.app import app_state
 from ..state.connection import state_connection
+from ..utils.agent import Agent, AgentConfig
 from ..utils.helpers import get_tokens
 
 
@@ -280,6 +281,59 @@ class Repl(object):
         return user_help
 
     @staticmethod
+    def perform_reconnect() -> bool:
+        """
+            Performs the actual reconnection logic.
+
+            :return: True if successful, False otherwise
+        """
+        try:
+            # Get current connection config
+            current_agent = state_connection.agent
+
+            # Cleanup current agent (ignore errors if already destroyed)
+            click.secho('Unloading current agent...', dim=True)
+            try:
+                if current_agent.script:
+                    current_agent.script.unload()
+            except (frida.InvalidOperationError, Exception):
+                pass  # Script already destroyed or detached
+
+            try:
+                if current_agent.session:
+                    current_agent.session.detach()
+            except (frida.InvalidOperationError, Exception):
+                pass  # Session already detached
+
+            # Create new agent with same config
+            click.secho('Creating new agent session...', dim=True)
+            new_agent = Agent(AgentConfig(
+                name=state_connection.name,
+                host=state_connection.host,
+                port=state_connection.port,
+                device_type=state_connection.device_type,
+                device_id=state_connection.device_id,
+                spawn=False,  # Don't spawn on reconnect, attach to existing
+                foremost=state_connection.foremost,
+                debugger=state_connection.debugger,
+                pause=not state_connection.no_pause,
+                uid=state_connection.uid
+            ))
+
+            new_agent.run()
+            state_connection.set_agent(new_agent)
+
+            click.secho('Successfully reconnected!', fg='green')
+            return True
+
+        except (frida.ServerNotRunningError, frida.TimedOutError) as e:
+            click.secho('Failed to reconnect with error: {0}'.format(e), fg='red')
+            return False
+        except Exception as e:
+            click.secho('Failed to reconnect: {0}'.format(e), fg='red')
+            return False
+
+    @staticmethod
     def handle_reconnect(document: str) -> bool:
         """
             Handles a reconnection attempt to a device.
@@ -292,22 +346,8 @@ class Repl(object):
         """
 
         if document.strip() in ('reconnect', 'reset'):
-
             click.secho('Reconnecting...', dim=True)
-
-            try:
-                # TODO
-                # state_connection.a.unload()
-                #
-                # agent = OldAgent()
-                # agent.inject()
-                # state_connection.a = agent
-
-                click.secho('Not yet implemented!', fg='yellow')
-
-            except (frida.ServerNotRunningError, frida.TimedOutError) as e:
-                click.secho('Failed to reconnect with error: {0}'.format(e), fg='red')
-
+            Repl.perform_reconnect()
             return True
 
         return False
@@ -360,6 +400,19 @@ class Repl(object):
 
                         # find something to run
                         self.run_command(document)
+
+                    except frida.InvalidOperationError as e:
+                        # Check if script was destroyed - attempt auto-reconnect
+                        if 'script has been destroyed' in str(e).lower() or 'script is destroyed' in str(e).lower():
+                            click.secho('Script has been destroyed. Attempting auto-reconnect...', fg='yellow')
+                            if self.perform_reconnect():
+                                click.secho('Reconnected! Please retry your command.', fg='green')
+                            else:
+                                click.secho('Auto-reconnect failed. Use "reconnect" to try again manually.', fg='red')
+                        else:
+                            click.secho('A Frida operation error has occurred.', fg='red', bold=True)
+                            click.secho('{0}'.format(e), fg='red')
+                            click.secho('\nPython stack trace: {}'.format(traceback.format_exc()), dim=True)
 
                     except frida.core.RPCException as e:
                         click.secho('A Frida agent exception has occurred.', fg='red', bold=True)

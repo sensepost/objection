@@ -588,6 +588,10 @@ COMMANDS = {
                     'get': {
                         'meta': 'Get all of the entries',
                         'exec': nsuserdefaults.get
+                    },
+                    'set': {
+                        'meta': 'Set a value for a key',
+                        'exec': nsuserdefaults.set
                     }
                 }
             },
