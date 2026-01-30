@@ -300,7 +300,7 @@ def patchipa(source: str, gadget_version: str, codesign_signature: str, provisio
 @click.option('--network-security-config', '-N', is_flag=True, default=False,
               help='Include a network_security_config.xml file allowing for user added CA\'s to be trusted on '
                    'Android 7 and up. This option requires the --decode-resources flag.')
-@click.option('--decode-resources', '-D', is_flag=True, default=False,
+@click.option('--decode-resources', '-D', is_flag=True, default=True,
               help='Decode resource as part of the apktool processing.', show_default=False)
 @click.option('--skip-signing', '-C', is_flag=True, default=False,
               help='Skip signing the apk file.', show_default=False)
@@ -324,10 +324,12 @@ def patchipa(source: str, gadget_version: str, codesign_signature: str, provisio
 @click.option('--manifest', '-m', help='A decoded AndroidManifest.xml file to read.', default=None)
 @click.option('--only-main-classes', help="Only patch classes that are in the main dex file.", is_flag=True, default=False)
 @click.option('--fix-concurrency-to', '-j', help="Only use N threads for repackaging - set to 1 if running into OOM errors.", default=None)
+@click.option('--lief', is_flag=True, default=False,
+              help='Use LIEF to patch existing native libraries instead of Smali patching.', show_default=False)
 
 def patchapk(source: str, architecture: str, gadget_version: str, pause: bool, skip_cleanup: bool,
              enable_debug: bool, decode_resources: bool, network_security_config: bool, target_class: str,
-             use_aapt1: bool, gadget_name: str, gadget_config: str, script_source: str, ignore_nativelibs: bool, manifest: str, skip_signing: bool, only_main_classes:bool = False, fix_concurrency_to = None) -> None:
+             use_aapt1: bool, gadget_name: str, gadget_config: str, script_source: str, ignore_nativelibs: bool, manifest: str, skip_signing: bool, only_main_classes:bool = False, fix_concurrency_to = None, lief: bool = False) -> None:
     """
         Patch an APK with the frida-gadget.so.
     """
@@ -341,10 +343,15 @@ def patchapk(source: str, architecture: str, gadget_version: str, pause: bool, s
     if enable_debug and not decode_resources:
         click.secho('The --enable-debug flag is incompatible with the --decode-resources flag.', fg='red')
         return
+    
+    # ensure we decode libs if we have the --lief flag.
+    if ignore_nativelibs and lief:
+        click.secho('The --ignore-nativelibs cannot be used when --lief is specified.', fg='red')
+        return
 
-    # ensure we decode resources if we do not have the --ignore-nativelibs flag.
+    # ensure we decode resources if we have the --decode-resources flag.
     if not ignore_nativelibs and not decode_resources:
-        click.secho('The --ignore-nativelibs flag is required with the --decode-resources flag.', fg='red')
+        click.secho('The --ignore-nativelibs flag cannot be used when --decode-resources is specified.', fg='red')
         return
 
     # ensure provided gadget name is a valid android lib name

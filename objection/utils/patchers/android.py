@@ -841,15 +841,20 @@ class AndroidPatcher(BasePlatformPatcher):
                 # Might create the arch folder inside the APK tree
                 return os.path.join(base_libs_path, self.architecture)
 
-    def inject_load_library(self, target_class: str = None):
+    def inject_load_library(self, target_class: str = None, use_lief: bool = False):
         """
             Injects a loadLibrary call into a class.
             If a target class is not specified, we will make an attempt
             at searching for a launchable activity in the target APK.
+            
+            If use_lief is True, will attempt to patch existing native libraries
+            using LIEF instead of smali patching.
 
             Most of the idea for this comes from:
                 https://koz.io/using-frida-on-android-without-root/
 
+            :param target_class: Target class to patch (optional)
+            :param use_lief: Whether to use LIEF for patching native libraries
             :return:
         """
 
@@ -860,7 +865,7 @@ class AndroidPatcher(BasePlatformPatcher):
 
         if target_class:
             click.secho('Using target class: {0} for patch'.format(target_class), fg='green', bold=True)
-        else:
+        elif use_lief:
             click.secho('Target class not specified, injecting through existing native libraries...', fg='green',
                         bold=True)
             # Inspired by https://fadeevab.com/frida-gadget-injection-on-android-no-root-2-methods/
@@ -873,14 +878,54 @@ class AndroidPatcher(BasePlatformPatcher):
                 if lib not in [self.libfridagadget_name, self.libfridagadgetconfig_name]
             ]
             if existing_libs_in_apk:
-                for lib in existing_libs_in_apk:
-                    libnative = lief.parse(os.path.join(libs_path, lib))
-                    libnative.add_library(self.libfridagadget_name)  # Injection!
-                    libnative.write(os.path.join(libs_path, lib))
+                # Present a selection of native libraries to patch
+                click.secho('Found {0} native libraries in APK:'.format(len(existing_libs_in_apk)), fg='cyan')
+                
+                # Display all available libraries with indices
+                for i, lib in enumerate(existing_libs_in_apk, 1):
+                    click.secho('  {0}. {1}'.format(i, lib), fg='white')
+                
+                # Add option for all libraries
+                click.secho('  {0}. All libraries'.format(len(existing_libs_in_apk) + 1), fg='black', bold=True)
+                
+                # Get user selection
+                while True:
+                    try:
+                        choice = click.prompt(
+                            'Select which library to patch (number)', 
+                            type=int, 
+                            default=len(existing_libs_in_apk) + 1
+                        )
+                        if 1 <= choice <= len(existing_libs_in_apk):
+                            # Single library selected
+                            selected_lib = existing_libs_in_apk[choice - 1]
+                            click.secho('Patching library: {0}'.format(selected_lib), fg='green', bold=True)
+                            libnative = lief.parse(os.path.join(libs_path, selected_lib))
+                            libnative.add_library(self.libfridagadget_name)  # Injection!
+                            libnative.write(os.path.join(libs_path, selected_lib))
+                            break
+                        elif choice == len(existing_libs_in_apk) + 1:
+                            # All libraries selected
+                            click.secho('Patching all libraries...', fg='green', bold=True)
+                            for lib in existing_libs_in_apk:
+                                click.secho('  Patching: {0}'.format(lib), fg='green')
+                                libnative = lief.parse(os.path.join(libs_path, lib))
+                                libnative.add_library(self.libfridagadget_name)  # Injection!
+                                libnative.write(os.path.join(libs_path, lib))
+                            break
+                        else:
+                            click.secho('Invalid selection. Please choose a number between 1 and {0}.'.format(
+                                len(existing_libs_in_apk) + 1), fg='red')
+                    except (ValueError, click.Abort):
+                        click.secho('Invalid input. Please enter a number.', fg='red')
+                
                 return
             else:
                 click.secho('No native libraries found in APK, searching for launchable activity instead...', fg='green',
                             bold=True)
+        else:
+            # When no target class is specified and LIEF is not used, search for launchable activity
+            click.secho('Target class not specified, searching for launchable activity...', fg='green', bold=True)
 
         activity_path = self._determine_smali_path_for_class(
             target_class if target_class else self._get_launchable_activity())
@@ -953,7 +998,7 @@ class AndroidPatcher(BasePlatformPatcher):
             self.list2cmdline([self.required_commands['apktool']['location'],
                             'build',
                             self.apk_temp_directory,
-                            ] + (['--use-aapt2'] if not use_aapt1 else []) + [
+                            ] + (['--use-aapt1'] if use_aapt1 else []) + [
                                 '-o',
                                 self.apk_temp_frida_patched
                             ]+ ([] if fix_concurrency_to is None else ['-j', fix_concurrency_to]))

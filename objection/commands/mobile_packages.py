@@ -102,7 +102,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
                       use_aapt1: bool = False, gadget_name: str = 'libfrida-gadget.so',
                       gadget_config: str = None, script_source: str = None,
                       ignore_nativelibs: bool = True, manifest: str = None, skip_signing: bool = False,
-                      only_main_classes: bool = False, fix_concurrency_to = None) -> None:
+                      only_main_classes: bool = False, fix_concurrency_to = None, lief: bool = False) -> None:
     """
         Patches an Android APK by extracting, patching SMALI, repackaging
         and signing a new APK.
@@ -125,6 +125,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
         :param ignore_nativelibs:
         :param only_main_classes:
         :param fix_concurrency_to:
+        :param lief:
 
         :return:
     """
@@ -212,7 +213,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
         gadget_config,
         gadget_name
     )
-    patcher.inject_load_library(target_class=target_class)
+    patcher.inject_load_library(target_class=target_class, use_lief=lief)
 
     if script_source:
         click.secho('Copying over a custom script to use with the gadget config.', fg='green')
