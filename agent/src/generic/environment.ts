@@ -16,6 +16,7 @@ import { NSBundle } from "../ios/lib/types.js";
 import { DeviceType } from "../lib/constants.js";
 import {
   IAndroidPackage,
+  IDarwinPaths,
   IFridaInfo,
   IIosBundlePaths,
   IIosPackage
@@ -123,4 +124,14 @@ export const androidPaths = (): Promise<any> => {
       packageCodePath: context.getPackageCodePath().toString(),
     };
   });
+};
+
+export const darwinPaths = (): IDarwinPaths => {
+  const mainModule = Process.mainModule;
+  return {
+    HomeDirectory: Process.getHomeDir(),
+    TempDirectory: Process.getTmpDir(),
+    CurrentDirectory: Process.getCurrentDir(),
+    ExecutablePath: mainModule ? mainModule.path : "n/a",
+  };
 };

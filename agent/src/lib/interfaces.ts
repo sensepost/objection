@@ -36,3 +36,10 @@ export interface IIosBundlePaths {
   LibraryDirectory: string;
 }
 
+export interface IDarwinPaths {
+  HomeDirectory: string;
+  TempDirectory: string;
+  CurrentDirectory: string;
+  ExecutablePath: string;
+}
+
