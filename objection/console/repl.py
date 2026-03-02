@@ -292,23 +292,30 @@ class Repl(object):
         """
 
         if document.strip() in ('reconnect', 'reset'):
-
-            click.secho('Reconnecting...', dim=True)
+            click.secho('Performing soft-restart...', fg='yellow')
 
             try:
-                # TODO
-                # state_connection.a.unload()
-                #
-                # agent = OldAgent()
-                # agent.inject()
-                # state_connection.a = agent
+                from objection.state.connection import state_connection
+                from objection.console.cli import get_agent
+                
+                if state_connection.agent:
+                    state_connection.agent.jobs = [] # Empty cleanup of jobs to avoid loop on exit
+                
+                state_connection.agent = None
+                state_connection.session = None
 
-                click.secho('Not yet implemented!', fg='yellow')
+                click.secho(f'Re-attaching to {state_connection.name}...', dim=True)
+                
+                new_agent = get_agent()
+                state_connection.agent = new_agent
+                
+                click.secho('Reconnection successful!', fg='green')
 
-            except (frida.ServerNotRunningError, frida.TimedOutError) as e:
-                click.secho('Failed to reconnect with error: {0}'.format(e), fg='red')
+            except Exception as e:
+                click.secho(f'Reconnection failed: {e}', fg='red')
+                click.secho('Ensure the application is running and the device is connected.', dim=True)
 
-            return True
+            return True 
 
         return False
 
