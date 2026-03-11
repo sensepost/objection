@@ -62,9 +62,12 @@ COMMANDS = {
     },
 
     'reconnect': {
-        'meta': 'Reconnect to the current device',
+        'meta': 'Reconnect to the current app',
         'exec': None,  # handled in the Repl class itself
     },
+
+    'reconnect_spawn': {
+        'meta': 'Respawn the current app',
 
     'resume': {
         'meta': 'Resume the attached process',

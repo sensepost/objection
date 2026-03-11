@@ -291,21 +291,44 @@ class Repl(object):
             :return:
         """
 
-        if document.strip() in ('reconnect', 'reset'):
-            click.secho('Performing soft-restart...', fg='yellow')
-
+        if document.strip() in ('reconnect', 'reset', 'reconnect_spawn'):
             try:
-                from objection.state.connection import state_connection
-                from objection.console.cli import get_agent
+                from .cli import get_agent
+
+                reconnect_spawn = document.strip() == 'reconnect_spawn'
+                if reconnect_spawn:
+                    click.secho('Performing full-restart...', fg='yellow')
+                    state_connection.spawn = True
+                    state_connection.no_pause = True
+                else:
+                    click.secho('Performing soft-restart...', fg='yellow')
+                    state_connection.spawn = False
+
+                curr_agent = state_connection.agent
+
+                # Cleanup current agent (ignore errors if already destroyed)
+                click.secho('Unloading current agent...', dim=True)
+                try:
+                    if curr_agent.script:
+                        curr_agent.script.unload()
+
+                except (frida.InvalidOperationError, Exception):
+                    pass  # Script already destroyed or detached
+
+                try:
+                    if curr_agent.session:
+                        curr_agent.session.detach()
+                except (frida.InvalidOperationError, Exception):
+                    pass  # Session already detached
                 
-                if state_connection.agent:
-                    state_connection.agent.jobs = [] # Empty cleanup of jobs to avoid loop on exit
-                
+                # Need to clear because destructor will attempt to clear script/session again.
+                curr_agent.script = None
                 state_connection.agent = None
                 state_connection.session = None
 
                 click.secho(f'Re-attaching to {state_connection.name}...', dim=True)
-                
+
+                # Try respawn the agent.
                 new_agent = get_agent()
                 state_connection.agent = new_agent
                 
@@ -315,7 +338,7 @@ class Repl(object):
                 click.secho(f'Reconnection failed: {e}', fg='red')
                 click.secho('Ensure the application is running and the device is connected.', dim=True)
 
-            return True 
+            return True
 
         return False
 
