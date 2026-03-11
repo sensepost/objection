@@ -223,7 +223,21 @@ class Agent(object):
                     raise Exception('--uid flag can only be used on Android.')
                 self.pid = self.device.spawn(self.config.name, uid=int(self.config.uid))
             else:
-                self.pid = self.device.spawn(self.config.name)
+                try:
+                    self.pid = self.device.spawn(self.config.name)
+                except frida.InvalidArgumentError:
+                    pass
+
+                # Maybe we have an app name and not identifier
+                app_list = self.device.enumerate_applications()
+                app_name_lc = self.config.name.lower()
+
+                matching_app = [app for app in app_list if app.name.lower() == app_name_lc]
+                # Don't care about matching_app[0].pid not in (0, None), if already running we restart anyway.
+                if len(matching_app) == 1:
+                    debug_print("Found app by name instead of package, spawning.")
+                    self.pid = self.device.spawn(matching_app[0].identifier)
+
             self.resumed = False
         else:
             # check if the name is actually an integer. this way we can
@@ -241,11 +255,12 @@ class Agent(object):
                     pass
 
             if self.pid is None:
-                # maybe we have an app identifier
+                # maybe we have an app identifier/package name
                 app_list = self.device.enumerate_applications()
                 app_name_lc = self.config.name.lower()
                 matching_app = [app for app in app_list if app.identifier.lower() == app_name_lc]
-                if len(matching_app) == 1 and matching_app[0].pid is not None:
+                if len(matching_app) == 1 and matching_app[0].pid not in (0, None):
+                    debug_print("Found app by package name.")
                     self.pid = matching_app[0].pid
                 elif len(matching_app) > 1:
                     app_list_str = ', '.join([f"{app.identifier}: {app.pid}" for app in matching_app])
