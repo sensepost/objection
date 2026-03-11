@@ -124,9 +124,12 @@ const okHttp3CertificatePinnerCheck = (ident: number): Promise<any | undefined> 
       return CertificatePinnerCheck;
 
     } catch (err) {
-      if ((err as Error).message.indexOf("java.lang.ClassNotFoundException") !== 0) {
-        throw err;
+      const message = (err as Error).stack || String(err);
+      if (message.indexOf("java.lang.ClassNotFoundException") !== -1) {
+        return null;
       }
+
+      send(c.red(`[${ident}] Error overriding OkHTTP 3.x CertificatePinner.check(): ${message}`));
       return null;
     }
   });
@@ -158,7 +161,12 @@ const okHttp3CertificatePinnerCheckOkHttp = (ident: number): Promise<any | undef
       
       send(c.blackBright(`Found okhttp3.CertificatePinner, overriding CertificatePinner.check$okhttp()`));
 
-      const CertificatePinnerCheckOkHttp = certificatePinner.check$okhttp.overload("java.lang.String", "u15");
+      const CertificatePinnerCheckOkHttp = certificatePinner.check$okhttp;
+
+      if (!CertificatePinnerCheckOkHttp) {
+        send(c.yellow(`Cannot find CertificatePinner.check$okhttp()`));
+        return null;
+      }
 
       // tslint:disable-next-line:only-arrow-functions
       CertificatePinnerCheckOkHttp.implementation = function () {
@@ -172,9 +180,12 @@ const okHttp3CertificatePinnerCheckOkHttp = (ident: number): Promise<any | undef
       return CertificatePinnerCheckOkHttp;
 
     } catch (err) {
-      if ((err as Error).message.indexOf("java.lang.ClassNotFoundException") !== 0) {
-        throw err;
+      const message = (err as Error).stack || String(err);
+      if (message.indexOf("java.lang.ClassNotFoundException") !== -1) {
+        return null;
       }
+
+      send(c.red(`[${ident}] Error overriding OkHTTP 3.x CertificatePinner.check$okhttp(): ${message}`));
       return null;
     }
   });
@@ -208,9 +219,12 @@ const appceleratorTitaniumPinningTrustManager = (ident: number): Promise<any | u
       return PinningTrustManagerCheckServerTrusted;
 
     } catch (err) {
-      if ((err as Error).message.indexOf("java.lang.ClassNotFoundException") !== 0) {
-        throw err;
+      const message = (err as Error).stack || String(err);
+      if (message.indexOf("java.lang.ClassNotFoundException") !== -1) {
+        return null;
       }
+
+      send(c.red(`[${ident}] Error overriding PinningTrustManager.checkServerTrusted(): ${message}`));
       return null;
     }
   });
@@ -257,9 +271,12 @@ const trustManagerImplVerifyChainCheck = (ident: number): Promise<any> => {
       return TrustManagerImplverifyChain;
 
     } catch (err) {
-      if ((err as Error).message.indexOf("java.lang.ClassNotFoundException") !== 0) {
-        throw err;
+      const message = (err as Error).stack || String(err);
+      if (message.indexOf("java.lang.ClassNotFoundException") !== -1) {
+        return null;
       }
+
+      send(c.red(`[${ident}] Error overriding TrustManagerImpl.verifyChain(): ${message}`));
       return null;
     }
   });
@@ -301,9 +318,12 @@ const trustManagerImplCheckTrustedRecursiveCheck = (ident: number): Promise<any>
       return TrustManagerImplcheckTrustedRecursive;
 
     } catch (err) {
-      if ((err as Error).message.indexOf("java.lang.ClassNotFoundException") !== 0) {
-        throw err;
+      const message = (err as Error).stack || String(err);
+      if (message.indexOf("java.lang.ClassNotFoundException") !== -1) {
+        return null;
       }
+
+      send(c.red(`[${ident}] Error overriding TrustManagerImpl.checkTrustedRecursive(): ${message}`));
       return null;
     }
   });
@@ -339,9 +359,12 @@ const phoneGapSSLCertificateChecker = (ident: number): Promise<any> => {
       return SSLCertificateCheckerExecute;
 
     } catch (err) {
-      if ((err as Error).message.indexOf("java.lang.ClassNotFoundException") !== 0) {
-        throw err;
+      const message = (err as Error).stack || String(err);
+      if (message.indexOf("java.lang.ClassNotFoundException") !== -1) {
+        return null;
       }
+
+      send(c.red(`[${ident}] Error overriding SSLCertificateChecker.execute(): ${message}`));
       return null;
     }
   });

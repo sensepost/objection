@@ -185,18 +185,28 @@ export const clear = () => {
 // TODO: Store the keystores themselves maybe?
 const keystoreLoad = (ident: number): Promise<any> => {
   return wrapJavaPerform(() => {
-    const ks: KeyStore = Java.use("java.security.KeyStore");
-    const ksLoad = ks.load.overload("java.io.InputStream", "[C");
-    send(c.blackBright(`[${ident}] Watching Keystore.load("java.io.InputStream", "[C")`));
+    try {
+      const ks: KeyStore = Java.use("java.security.KeyStore");
+      const ksLoad = ks.load.overload("java.io.InputStream", "[C");
+      send(c.blackBright(`[${ident}] Watching Keystore.load("java.io.InputStream", "[C")`));
 
-    ksLoad.implementation = function (stream, password) {
-      send(c.blackBright(`[${ident}] `) +
-        `Keystore.load(${c.greenBright(stream)}, ${c.redBright(password || `null`)}) ` +
-        `called, loading a ${c.cyanBright(this.getType())} keystore.`);
-      return this.load(stream, password);
-    };
+      ksLoad.implementation = function (stream, password) {
+        send(c.blackBright(`[${ident}] `) +
+          `Keystore.load(${c.greenBright(stream)}, ${c.redBright(password || `null`)}) ` +
+          `called, loading a ${c.cyanBright(this.getType())} keystore.`);
+        return this.load(stream, password);
+      };
 
-    return ksLoad
+      return ksLoad;
+    } catch (err) {
+      const message = (err as Error).stack || String(err);
+      if (message.indexOf("java.lang.ClassNotFoundException") !== -1) {
+        return null;
+      }
+
+      send(c.red(`[${ident}] Error overriding KeyStore.load(): ${message}`));
+      return null;
+    }
   });
 };
 
@@ -204,19 +214,29 @@ const keystoreLoad = (ident: number): Promise<any> => {
 // TODO: Extract more information, like the key itself maybe?
 const keystoreGetKey = (ident: number): Promise<any> => {
   return wrapJavaPerform(() => {
-    const ks: KeyStore = Java.use("java.security.KeyStore");
-    const ksGetKey = ks.getKey.overload("java.lang.String", "[C");
-    send(c.blackBright(`[${ident}] Watching Keystore.getKey("java.lang.String", "[C")`));
+    try {
+      const ks: KeyStore = Java.use("java.security.KeyStore");
+      const ksGetKey = ks.getKey.overload("java.lang.String", "[C");
+      send(c.blackBright(`[${ident}] Watching Keystore.getKey("java.lang.String", "[C")`));
 
-    ksGetKey.implementation = function (alias, password) {
-      const key = this.getKey(alias, password);
-      send(c.blackBright(`[${ident}] `) +
-        `Keystore.getKey(${c.greenBright(alias)}, ${c.redBright(password || `null`)}) ` +
-        `called, returning a ${c.greenBright(key.$className)} instance.`);
-      return key;
-    };
+      ksGetKey.implementation = function (alias, password) {
+        const key = this.getKey(alias, password);
+        send(c.blackBright(`[${ident}] `) +
+          `Keystore.getKey(${c.greenBright(alias)}, ${c.redBright(password || `null`)}) ` +
+          `called, returning a ${c.greenBright(key.$className)} instance.`);
+        return key;
+      };
 
-    return ksGetKey;
+      return ksGetKey;
+    } catch (err) {
+      const message = (err as Error).stack || String(err);
+      if (message.indexOf("java.lang.ClassNotFoundException") !== -1) {
+        return null;
+      }
+
+      send(c.red(`[${ident}] Error overriding KeyStore.getKey(): ${message}`));
+      return null;
+    }
   });
 };
 
