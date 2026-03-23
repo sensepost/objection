@@ -1,6 +1,6 @@
 Command: sqlite connect
 
-Usage: sqlite connect <remote sqlite database location>
+Usage: sqlite connect <remote sqlite database location> [--sync]
 
 Connect to a SQLite database on the remote device. The connection process downloads
 a copy of the remote database file to a local temporary directory. The file is then
@@ -8,6 +8,10 @@ validated to make sure that it is a SQLite3 database file. Once considered a val
 database file, the connection is considered complete.
 The `sqlite status` command will show details about the connection once successful.
 
+Flags:
+   --sync   Synchronize the database file with the remote copy
+
 Examples:
    sqlite connect Preferences/settings.sqlite
    sqlite connect credentials.sqlite
+   sqlite connect Preferences/settings.sqlite --sync

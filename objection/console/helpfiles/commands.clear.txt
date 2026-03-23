@@ -1,0 +1,9 @@
+Command: commands clear
+
+Usage: commands clear
+
+Clears the current session's command history. After this command, no previous
+commands will be available in the history.
+
+Examples:
+   commands clear

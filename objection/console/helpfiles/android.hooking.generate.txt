@@ -1,0 +1,9 @@
+Command: android hooking generate
+
+Usage: android hooking generate <subcommand>
+
+Contains subcommands to generate Frida hooks for Android classes.
+
+Examples:
+   android hooking generate class <class name>
+   android hooking generate simple <class name>

@@ -1,0 +1,13 @@
+Command: ios heap evaluate
+
+Usage: ios heap evaluate <object address> <javascript> [--inline]
+
+Evaluates JavaScript on an Objective-C object on the heap. This allows complex
+operations and transformations using Frida's JavaScript runtime.
+
+Flags:
+   --inline   Evaluate inline without multiline input
+
+Examples:
+   ios heap evaluate 0x12345678 "[obj methodWithArg:123]"
+   ios heap evaluate 0x12345678 "[obj methodWithArg:123]" --inline

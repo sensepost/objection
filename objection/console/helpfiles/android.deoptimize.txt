@@ -1,0 +1,10 @@
+Command: android deoptimize
+
+Usage: android deoptimize
+
+Forces the Android Runtime VM to execute code in the interpreter instead of 
+using any compiled/optimized code. This is useful for dynamic analysis and can
+help with hooking and tracing operations.
+
+Examples:
+   android deoptimize

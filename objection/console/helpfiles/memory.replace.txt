@@ -1,0 +1,14 @@
+Command: memory replace
+
+Usage: memory replace <hex pattern> <replacement> [--string-pattern] [--string-replace]
+
+Searches for and replaces a pattern in the application's memory. This modifies
+the running process memory directly.
+
+Flags:
+   --string-pattern   Interpret pattern as a string instead of hex
+   --string-replace   Interpret replacement as a string instead of hex
+
+Examples:
+   memory replace "41 42 43" "44 45 46"
+   memory replace "hello" "world" --string-pattern --string-replace

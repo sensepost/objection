@@ -1,0 +1,9 @@
+Command: ios heap print
+
+Usage: ios heap print <subcommand>
+
+Contains subcommands to print information about objects on the iOS heap.
+
+Examples:
+   ios heap print ivars <object>
+   ios heap print methods <object>

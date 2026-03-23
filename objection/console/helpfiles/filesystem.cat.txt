@@ -1,0 +1,10 @@
+Command: filesystem cat
+
+Usage: filesystem cat <file path>
+
+Prints a file's contents to the console. The file path should be relative to
+the current working directory or an absolute path.
+
+Examples:
+   filesystem cat config.txt
+   filesystem cat /var/mobile/Preferences/config.plist

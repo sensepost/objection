@@ -1,7 +1,0 @@
-Command: android hooking watch class
-
-Usage: android hooking watch class <class>
-Hooks a specified class' methods and reports on invocations.
-
-Examples:
-   android hooking watch class com.example.test 

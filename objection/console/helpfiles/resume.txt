@@ -1,0 +1,9 @@
+Command: resume
+
+Usage: resume
+
+Resumes execution of the attached process. Use this after the process has been
+paused or suspended.
+
+Examples:
+   resume

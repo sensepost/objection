@@ -1,0 +1,13 @@
+Command: ios heap execute
+
+Usage: ios heap execute <object address> <method name> [--return-string]
+
+Executes a method on an Objective-C object on the heap. This allows dynamic
+invocation of object methods for testing and exploration.
+
+Flags:
+   --return-string   Convert the return value to a string
+
+Examples:
+   ios heap execute 0x12345678 "description"
+   ios heap execute 0x12345678 "description" --return-string

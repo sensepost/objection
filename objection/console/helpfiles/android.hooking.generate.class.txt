@@ -1,0 +1,10 @@
+Command: android hooking generate class
+
+Usage: android hooking generate class <class name>
+
+Generates a generic Frida hook manager for the specified Android Java class.
+This creates a template hook that can be customized for various hooking operations.
+
+Examples:
+   android hooking generate class com.example.MyClass
+   android hooking generate class android.app.Activity

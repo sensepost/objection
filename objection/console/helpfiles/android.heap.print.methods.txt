@@ -1,0 +1,13 @@
+Command: android heap print methods
+
+Usage: android heap print methods <object handle> [--without-arguments]
+
+Prints instance methods available for a Java object handle. This displays all
+methods that can be called on the object, with optional method signatures.
+
+Flags:
+   --without-arguments   Do not display method argument information
+
+Examples:
+   android heap print methods 0x12345678
+   android heap print methods 0x12345678 --without-arguments

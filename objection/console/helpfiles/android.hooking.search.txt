@@ -1,1 +1,16 @@
-Contains subcommands helpful when searching for classes and methods.
+Command: android hooking search
+
+Usage: android hooking search <pattern> [--json <filename>] [--only-classes]
+
+Searches for classes and methods in the current Android application matching
+the specified pattern. The pattern should be in the form <class>!<method>.
+
+Flags:
+   --json <filename>  Output results as JSON to the specified file
+   --only-classes     Only show classes in search results, not methods
+
+Examples:
+   android hooking search com.example.test
+   android hooking search *com.example*!*
+   android hooking search com.example --only-classes
+   android hooking search com.example --json search_results.json

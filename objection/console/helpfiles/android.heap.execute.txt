@@ -1,0 +1,13 @@
+Command: android heap execute
+
+Usage: android heap execute <object handle> <method name> [--return-string]
+
+Executes a method on a Java object handle on the heap. This allows dynamic
+invocation of object methods for testing and exploration.
+
+Flags:
+   --return-string   Convert the return value to a string
+
+Examples:
+   android heap execute 0x12345678 toString
+   android heap execute 0x12345678 toString --return-string

@@ -1,0 +1,13 @@
+Command: ios heap print ivars
+
+Usage: ios heap print ivars <object address> [--to-utf8]
+
+Prints instance variables (ivars) for an Objective-C object. This displays all
+instance variable names and their current values.
+
+Flags:
+   --to-utf8   Attempt to decode output as UTF-8
+
+Examples:
+   ios heap print ivars 0x12345678
+   ios heap print ivars 0x12345678 --to-utf8

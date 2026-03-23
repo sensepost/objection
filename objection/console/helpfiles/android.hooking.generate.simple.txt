@@ -1,0 +1,10 @@
+Command: android hooking generate simple
+
+Usage: android hooking generate simple <class name>
+
+Generates simple Frida hooks for each method in the specified Android Java class.
+This creates basic hooks that log method invocations without complex processing.
+
+Examples:
+   android hooking generate simple com.example.MyClass
+   android hooking generate simple android.app.Activity

@@ -1,0 +1,10 @@
+Command: commands
+
+Usage: commands <subcommand>
+
+Contains subcommands for working with commands executed in the current session.
+
+Examples:
+   commands history
+   commands save
+   commands clear

@@ -1,0 +1,13 @@
+Command: ios heap print methods
+
+Usage: ios heap print methods <object address> [--without-arguments]
+
+Prints instance methods available for an Objective-C object. This displays
+all methods that can be called on the object.
+
+Flags:
+   --without-arguments   Do not display method argument information
+
+Examples:
+   ios heap print methods 0x12345678
+   ios heap print methods 0x12345678 --without-arguments

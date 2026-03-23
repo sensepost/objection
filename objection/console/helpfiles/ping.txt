@@ -1,0 +1,9 @@
+Command: ping
+
+Usage: ping
+
+Pings the injected Frida agent to verify connectivity. If the agent responds
+successfully, the connection is working properly.
+
+Examples:
+   ping

@@ -1,1 +1,19 @@
-Contains subcommands to watch for method invocations on Objective-C classes.
+Command: ios hooking watch
+
+Usage: ios hooking watch <pattern> 
+       [--dump-args] [--dump-backtrace] [--dump-return] [--include-parents]
+
+Hooks into Objective-C methods matching the specified pattern and reports on 
+invocations.
+
+Flags:
+   --dump-args         Dump method arguments when invoked
+   --dump-backtrace    Dump the call stack backtrace
+   --dump-return       Dump method return values
+   --include-parents   Include methods inherited from parent classes
+
+Examples:
+   ios hooking watch KeychainDataManager
+   ios hooking watch "+[KeychainDataManager update:forKey:]"
+   ios hooking watch PinnedNSURLSessionStarwarsApi --include-parents
+   ios hooking watch KeychainDataManager --dump-args --dump-return

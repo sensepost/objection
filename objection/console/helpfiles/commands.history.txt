@@ -1,0 +1,9 @@
+Command: commands history
+
+Usage: commands history
+
+Lists all unique commands that have been run in the current session.
+Duplicate commands are only shown once.
+
+Examples:
+   commands history

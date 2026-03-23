@@ -1,0 +1,9 @@
+Command: android heap print
+
+Usage: android heap print <subcommand>
+
+Contains subcommands to print information about objects on the Android heap.
+
+Examples:
+   android heap print fields <handle>
+   android heap print methods <handle>

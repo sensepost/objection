@@ -1,0 +1,9 @@
+Command: ios info binary
+
+Usage: ios info binary
+
+Gets information about application binaries and dylibs, including their paths,
+architectures, and other relevant details.
+
+Examples:
+   ios info binary
