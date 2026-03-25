@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "objection"
-version = "1.12.3"
+version = "1.12.4"
 description = "Instrumented Mobile Pentest Framework"
 readme = "README.md"
 requires-python = ">=3.10"
