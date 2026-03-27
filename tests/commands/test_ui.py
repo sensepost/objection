@@ -13,19 +13,19 @@ class TestUI(unittest.TestCase):
 
     @mock.patch('objection.commands.ui._alert_ios')
     def test_alert_helper_method_proxy_calls_ios(self, mock_alert_ios):
-        device_state.platform = Ios()
+        device_state.platform = Ios
 
         alert([])
 
-        self.assertTrue(mock_alert_ios.called_with('objection!'))
+        mock_alert_ios.assert_called_with('objection!')
 
     @mock.patch('objection.commands.ui._alert_ios')
     def test_alert_helper_method_proxy_calls_ios_custom_message(self, mock_alert_ios):
-        device_state.platform = Ios()
+        device_state.platform = Ios
 
         alert(['foo'])
 
-        self.assertTrue(mock_alert_ios.called_with('foo'))
+        mock_alert_ios.assert_called_with('foo')
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_alert_ios_helper_method(self, mock_api):

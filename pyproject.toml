@@ -38,6 +38,12 @@ Homepage = "https://github.com/sensepost/objection"
 Repository = "https://github.com/sensepost/objection"
 "Bug Tracker" = "https://github.com/sensepost/objection/issues"
 
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+]
+
 [project.scripts]
 objection = "objection.console.cli:cli"
 
@@ -55,3 +61,10 @@ objection = [
     "utils/assets/*.xml",
     "agent.js",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = "-v --strict-markers"

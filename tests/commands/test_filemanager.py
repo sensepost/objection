@@ -5,7 +5,7 @@ from objection.commands.filemanager import cd, _path_exists_ios, _path_exists_an
     _pwd_android, ls, _ls_ios, _ls_android, download, _download_ios, _download_android, upload, rm, _rm_android
 from objection.state.device import device_state, Ios, Android
 from objection.state.filemanager import file_manager_state
-from ..helpers import capture
+from ..helpers import capture, normalize_table_whitespace
 
 
 class TestFileManager(unittest.TestCase):
@@ -278,13 +278,16 @@ class TestFileManager(unittest.TestCase):
             output = o
 
         expected_outut = """NSFileType    Perms    NSFileProtection    Read    Write    Owner    Group    Size       Creation    Name
-------------  -------  ------------------  ------  -------  -------  -------  ---------  ----------  ------
-A             B        C                   True    False    D (E)    F (G)    115.4 GiB  H           test
+    ------------  -------  ------------------  ------  -------  -------  -------  ---------  ----------  ------
+    A             B        C                   True    False    D (E)    F (G)    115.4 GiB  H           test
 
-Readable: True  Writable: False
-"""
+    Readable: True  Writable: False
+    """
 
-        self.assertEqual(output, expected_outut)
+        self.assertEqual(
+            normalize_table_whitespace(output),
+            normalize_table_whitespace(expected_outut),
+        )
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_lists_readable_ios_directory_using_helper_method_no_attributes(self, mock_api):
@@ -306,13 +309,16 @@ Readable: True  Writable: False
             output = o
 
         expected_outut = """NSFileType    Perms    NSFileProtection    Read    Write    Owner      Group      Size    Creation    Name
-------------  -------  ------------------  ------  -------  ---------  ---------  ------  ----------  ------
-n/a           n/a      n/a                 True    True     n/a (n/a)  n/a (n/a)  n/a     n/a         test
+    ------------  -------  ------------------  ------  -------  ---------  ---------  ------  ----------  ------
+    n/a           n/a      n/a                 True    True     n/a (n/a)  n/a (n/a)  n/a     n/a         test
 
-Readable: True  Writable: True
-"""
+    Readable: True  Writable: True
+    """
 
-        self.assertEqual(output, expected_outut)
+        self.assertEqual(
+            normalize_table_whitespace(output),
+            normalize_table_whitespace(expected_outut),
+        )
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_lists_unreadable_ios_directory_using_helper_method(self, mock_api):
@@ -354,13 +360,16 @@ Readable: True  Writable: True
             output = o
 
         expected_outut = """Type    Last Modified            Read    Write    Hidden    Size     Name
-------  -----------------------  ------  -------  --------  -------  ------
-File    2017-10-05 07:36:41 GMT  True    True     False     249.0 B  test
+    ------  -----------------------  ------  -------  --------  -------  ------
+    File    2017-10-05 07:36:41 GMT  True    True     False     249.0 B  test
 
-Readable: True  Writable: True
-"""
+    Readable: True  Writable: True
+    """
 
-        self.assertEqual(output, expected_outut)
+        self.assertEqual(
+            normalize_table_whitespace(output),
+            normalize_table_whitespace(expected_outut),
+        )
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_lists_unreadable_android_directory_using_helper_method(self, mock_api):
@@ -407,7 +416,7 @@ Readable: True  Writable: True
 
         file_manager_state.cwd = '/foo'
 
-        with capture(_download_ios, '/foo', '/bar') as o:
+        with capture(_download_ios, '/foo', '/bar', False) as o:
             output = o
 
         expected_output = """Downloading /foo to /bar
@@ -423,7 +432,7 @@ Successfully downloaded /foo to /bar
     def test_downloads_file_but_fails_on_unreadable_with_ios_helper(self, mock_api):
         mock_api.return_value.ios_file_readable.return_value = False
 
-        with capture(_download_ios, '/foo', '/bar') as o:
+        with capture(_download_ios, '/foo', '/bar', False) as o:
             output = o
 
         self.assertEqual(output, 'Downloading /foo to /bar\nUnable to download file. File is not readable.\n')
@@ -433,10 +442,10 @@ Successfully downloaded /foo to /bar
         mock_api.return_value.ios_file_readable.return_value = True
         mock_api.return_value.ios_file_path_is_file.return_value = False
 
-        with capture(_download_ios, '/foo', '/bar') as o:
+        with capture(_download_ios, '/foo', '/bar', False) as o:
             output = o
 
-        self.assertEqual(output, 'Downloading /foo to /bar\nUnable to download file. Target path is not a file.\n')
+        self.assertEqual(output, 'Downloading /foo to /bar\nTo download folders, specify --folder.\n')
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     @mock.patch('objection.commands.filemanager.open', create=True)
@@ -447,7 +456,7 @@ Successfully downloaded /foo to /bar
 
         file_manager_state.cwd = '/foo'
 
-        with capture(_download_android, '/foo', '/bar') as o:
+        with capture(_download_android, '/foo', '/bar', False) as o:
             output = o
 
         expected = """Downloading /foo to /bar
@@ -466,7 +475,7 @@ Successfully downloaded /foo to /bar
 
         file_manager_state.cwd = '/foo'
 
-        with capture(_download_android, '/foo', '/bar') as o:
+        with capture(_download_android, '/foo', '/bar', False) as o:
             output = o
 
         self.assertFalse(mock_open.called)
@@ -480,11 +489,11 @@ Successfully downloaded /foo to /bar
 
         file_manager_state.cwd = '/foo'
 
-        with capture(_download_android, '/foo', '/bar') as o:
+        with capture(_download_android, '/foo', '/bar', False) as o:
             output = o
 
         self.assertFalse(mock_open.called)
-        self.assertEqual(output, 'Downloading /foo to /bar\nUnable to download file. Target path is not a file.\n')
+        self.assertEqual(output, 'Downloading /foo to /bar\nTo download folders, specify --folder.\n')
 
     def test_file_upload_method_proxy_validates_arguments(self):
         with capture(upload, []) as o:

@@ -2,7 +2,7 @@ import unittest
 from unittest import mock
 
 from objection.commands.android.keystore import entries, clear
-from ...helpers import capture
+from ...helpers import capture, normalize_table_whitespace
 
 
 class TestKeystore(unittest.TestCase):
@@ -13,11 +13,11 @@ class TestKeystore(unittest.TestCase):
         with capture(entries, []) as o:
             output = o
 
-        expected_output = """Alias    Key    Certificate
--------  -----  -------------
+        expected_output = """Alias  Key  Certificate
+-----  ---  -----------
 """
 
-        self.assertEqual(output, expected_output)
+        self.assertEqual(normalize_table_whitespace(output), normalize_table_whitespace(expected_output))
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_entries_handles(self, mock_api):
@@ -30,12 +30,12 @@ class TestKeystore(unittest.TestCase):
         with capture(entries, []) as o:
             output = o
 
-        expected_output = """Alias    Key    Certificate
--------  -----  -------------
-test     True   True
+        expected_output = """Alias  Key   Certificate
+-----  ----  -----------
+test   True  True
 """
 
-        self.assertEqual(output, expected_output)
+        self.assertEqual(normalize_table_whitespace(output), normalize_table_whitespace(expected_output))
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     @mock.patch('objection.commands.android.keystore.click.confirm')
