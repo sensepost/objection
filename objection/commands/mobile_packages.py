@@ -97,11 +97,12 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
 
 
 def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup: bool = True,
-                      enable_debug: bool = True, gadget_version: str = None, skip_resources: bool = False,
+                      enable_debug: bool = True, gadget_version: str = None, decode_resources: bool = False,
                       network_security_config: bool = False, target_class: str = None,
-                      use_aapt2: bool = False, gadget_config: str = None, script_source: str = None,
+                      use_aapt1: bool = False, gadget_name: str = 'libfrida-gadget.so',
+                      gadget_config: str = None, script_source: str = None,
                       ignore_nativelibs: bool = True, manifest: str = None, skip_signing: bool = False,
-                      only_main_classes: bool = False, fix_concurrency_to = None) -> None:
+                      only_main_classes: bool = False, fix_concurrency_to = None, lief: bool = False) -> None:
     """
         Patches an Android APK by extracting, patching SMALI, repackaging
         and signing a new APK.
@@ -112,10 +113,11 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
         :param skip_cleanup:
         :param enable_debug:
         :param gadget_version:
-        :param skip_resources:
+        :param decode_resources:
         :param network_security_config:
         :param target_class:
-        :param use_aapt2:
+        :param use_aapt1:
+        :param gadget_name:
         :param gadget_config:
         :param script_source:
         :param manifest:
@@ -123,10 +125,10 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
         :param ignore_nativelibs:
         :param only_main_classes:
         :param fix_concurrency_to:
+        :param lief:
 
         :return:
     """
-
     github = Github(gadget_version=gadget_version)
     android_gadget = AndroidGadget(github)
 
@@ -180,7 +182,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
 
     click.secho('Patcher will be using Gadget version: {0}'.format(github_version), fg='green')
 
-    patcher = AndroidPatcher(skip_cleanup=skip_cleanup, skip_resources=skip_resources, manifest=manifest, only_main_classes=only_main_classes)
+    patcher = AndroidPatcher(skip_cleanup=skip_cleanup, decode_resources=decode_resources, manifest=manifest, only_main_classes=only_main_classes)
 
     # ensure that we have all of the commandline requirements
     if not patcher.are_requirements_met():
@@ -205,8 +207,13 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
     if network_security_config:
         patcher.add_network_security_config()
 
-    patcher.inject_load_library(target_class=target_class)
-    patcher.add_gadget_to_apk(architecture, android_gadget.get_frida_library_path(), gadget_config)
+    patcher.add_gadget_to_apk(
+        architecture,
+        android_gadget.get_frida_library_path(),
+        gadget_config,
+        gadget_name
+    )
+    patcher.inject_load_library(target_class=target_class, use_lief=lief)
 
     if script_source:
         click.secho('Copying over a custom script to use with the gadget config.', fg='green')
@@ -223,7 +230,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
 
         input('Press ENTER to continue...')
 
-    patcher.build_new_apk(use_aapt2=use_aapt2, fix_concurrency_to=fix_concurrency_to)
+    patcher.build_new_apk(use_aapt1=use_aapt1, fix_concurrency_to=fix_concurrency_to)
     patcher.zipalign_apk()
     if not skip_signing:
         patcher.sign_apk()

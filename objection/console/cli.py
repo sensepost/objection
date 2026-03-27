@@ -299,14 +299,20 @@ def patchipa(source: str, gadget_version: str, codesign_signature: str, provisio
               help='Set the android:debuggable flag to true in the application manifest.', show_default=True)
 @click.option('--network-security-config', '-N', is_flag=True, default=False,
               help='Include a network_security_config.xml file allowing for user added CA\'s to be trusted on '
-                   'Android 7 and up. This option can not be used with the --skip-resources flag.')
-@click.option('--skip-resources', '-D', is_flag=True, default=False,
-              help='Skip resource decoding as part of the apktool processing.', show_default=False)
+                   'Android 7 and up. This option requires the --decode-resources flag.')
+@click.option('--decode-resources', '-D', is_flag=True, default=True,
+              help='Decode resource as part of the apktool processing.', show_default=False)
 @click.option('--skip-signing', '-C', is_flag=True, default=False,
               help='Skip signing the apk file.', show_default=False)
 @click.option('--target-class', '-t', help='The target class to patch.', default=None)
-@click.option('--use-aapt2', '-2', is_flag=True, default=False,
-              help='Use the aapt2 binary instead of aapt as part of the apktool processing.', show_default=False)
+@click.option('--use-aapt1', '-1', is_flag=True, default=False,
+              help='Use the aapt binary instead of aapt2 as part of the apktool processing.', show_default=True)
+@click.option('--gadget-name', '-g', default='libfrida-gadget.so',
+              help=(
+                  'Name of the gadget library. Can be named whatever you want to dodge anti-frida '
+                  'detection schemes looking for loaded libraries with frida in the name.'
+                  'Refer to https://frida.re/docs/gadget/ for more information.'),
+              show_default=True)
 @click.option('--gadget-config', '-c', default=None, help=(
         'The gadget configuration file to use. '
         'Refer to https://frida.re/docs/gadget/ for more information.'), show_default=False)
@@ -318,27 +324,39 @@ def patchipa(source: str, gadget_version: str, codesign_signature: str, provisio
 @click.option('--manifest', '-m', help='A decoded AndroidManifest.xml file to read.', default=None)
 @click.option('--only-main-classes', help="Only patch classes that are in the main dex file.", is_flag=True, default=False)
 @click.option('--fix-concurrency-to', '-j', help="Only use N threads for repackaging - set to 1 if running into OOM errors.", default=None)
+@click.option('--lief', is_flag=True, default=False,
+              help='Use LIEF to patch existing native libraries instead of Smali patching.', show_default=False)
 
 def patchapk(source: str, architecture: str, gadget_version: str, pause: bool, skip_cleanup: bool,
-             enable_debug: bool, skip_resources: bool, network_security_config: bool, target_class: str,
-             use_aapt2: bool, gadget_config: str, script_source: str, ignore_nativelibs: bool, manifest: str, skip_signing: bool, only_main_classes:bool = False, fix_concurrency_to = None) -> None:
+             enable_debug: bool, decode_resources: bool, network_security_config: bool, target_class: str,
+             use_aapt1: bool, gadget_name: str, gadget_config: str, script_source: str, ignore_nativelibs: bool, manifest: str, skip_signing: bool, only_main_classes:bool = False, fix_concurrency_to = None, lief: bool = False) -> None:
     """
         Patch an APK with the frida-gadget.so.
     """
 
     # ensure we decode resources if we have the network-security-config flag.
-    if network_security_config and skip_resources:
-        click.secho('The --network-security-config flag is incompatible with the --skip-resources flag.', fg='red')
+    if network_security_config and not decode_resources:
+        click.secho('The --network-security-config flag requires the --decode-resources flag.', fg='red')
         return
 
     # ensure we decode resources if we have the enable-debug flag.
-    if enable_debug and skip_resources:
-        click.secho('The --enable-debug flag is incompatible with the --skip-resources flag.', fg='red')
+    if enable_debug and not decode_resources:
+        click.secho('The --enable-debug flag is incompatible with the --decode-resources flag.', fg='red')
+        return
+    
+    # ensure we decode libs if we have the --lief flag.
+    if ignore_nativelibs and lief:
+        click.secho('The --ignore-nativelibs cannot be used when --lief is specified.', fg='red')
         return
 
-    # ensure we decode resources if we do not have the --ignore-nativelibs flag.
-    if not ignore_nativelibs and skip_resources:
-        click.secho('The --ignore-nativelibs flag is required with the --skip-resources flag.', fg='red')
+    # ensure we decode resources if we have the --decode-resources flag.
+    if not ignore_nativelibs and not decode_resources:
+        click.secho('The --ignore-nativelibs flag cannot be used when --decode-resources is specified.', fg='red')
+        return
+
+    # ensure provided gadget name is a valid android lib name
+    if not gadget_name.startswith('lib') or not gadget_name.endswith('.so'):
+        click.secho("Gadget name should start with 'lib' and end in '.so'", fg='red')
         return
 
     patch_android_apk(**locals())
