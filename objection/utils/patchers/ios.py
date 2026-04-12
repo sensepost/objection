@@ -481,7 +481,8 @@ class IosPatcher(BasePlatformPatcher):
 
         finally:
             # cleanup the temp path
-            os.remove(decoded_location)
+            if os.path.exists(decoded_location):
+                os.remove(decoded_location)
 
         click.secho('Mobile provision bundle identifier is: {}'.format(self.bundle_id), dim=True)
 
