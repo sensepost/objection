@@ -460,35 +460,30 @@ class IosPatcher(BasePlatformPatcher):
 
         _, decoded_location = tempfile.mkstemp('decoded_provision')
 
-        # Decode the mobile provision using macOS's security cms tool
-        delegator.run(self.list2cmdline([
-            self.required_commands['security']['location'],
-            'cms', '-D', '-i', self.provision_file,
-            '-o', decoded_location
-        ]), timeout=self.command_run_timeout)
+        try:
+            # Decode the mobile provision using macOS's security cms tool
+            cms_result = delegator.run(self.list2cmdline([
+                self.required_commands['security']['location'],
+                'cms', '-D', '-i', self.provision_file,
+                '-o', decoded_location
+            ]), timeout=self.command_run_timeout)
 
-        # https://stackoverflow.com/a/66820375
-        # security cms -D -i your.mobileprovision | plutil -extract
-        #   Entitlements.application-identifier xml1 -o - - | grep string |
-        #   sed 's/^<string>[^\.]*\.\(.*\)<\/string>$/\1/g'
-        c = delegator.run(self.list2cmdline([
-            'cat', decoded_location
-        ]), timeout=self.command_run_timeout).pipe(self.list2cmdline([
-            self.required_commands['plutil']['location'],
-            '-extract', 'Entitlements.application-identifier', 'xml1', '-o', '-', '-'
-        ]), timeout=self.command_run_timeout).pipe(self.list2cmdline([
-            'grep', 'string'
-        ]), timeout=self.command_run_timeout).pipe(self.list2cmdline([
-            'sed', r's/^<string>[^\.]*\.\(.*\)<\/string>$/\1/g'
-        ]), timeout=self.command_run_timeout)
+            if cms_result.return_code != 0:
+                raise Exception('Failed to decode provisioning profile: {}'.format(cms_result.err))
 
-        if len(c.out) > 0:
-            self.bundle_id = c.out.strip()
+            # Parse the decoded plist and extract the bundle identifier
+            with open(decoded_location, 'rb') as f:
+                parsed_data = plistlib.load(f)
+
+            app_id = parsed_data.get('Entitlements', {}).get('application-identifier', '')
+            if '.' in app_id:
+                self.bundle_id = app_id.split('.', 1)[1]
+
+        finally:
+            # cleanup the temp path
+            os.remove(decoded_location)
 
         click.secho('Mobile provision bundle identifier is: {}'.format(self.bundle_id), dim=True)
-
-        # cleanup the temp path
-        os.remove(decoded_location)
 
     def _cleanup_extracted_data(self) -> None:
         """
