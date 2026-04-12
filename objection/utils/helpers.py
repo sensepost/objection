@@ -134,21 +134,26 @@ def warn_about_older_operating_systems() -> None:
         :return:
     """
 
+    platform = getattr(device_state, 'platform', None)
+    version = getattr(device_state, 'version', None)
+    if platform is None or version is None:
+        return
+
     android_supported = '5'
     ios_supported = '9'
 
     # android & ios version warnings
-    if device_state.platform == Android and (
-            Version(device_state.version) < Version(android_supported)):
+    if platform == Android and (
+            Version(version) < Version(android_supported)):
         click.secho('Warning: You appear to be running Android {0} which may result in '
                     'some hooks failing.\nIt is recommended to use at least an Android '
-                    'version {1} device with objection.'.format(device_state.version, android_supported),
+                    'version {1} device with objection.'.format(version, android_supported),
                     fg='yellow')
 
     # android & ios version warnings
-    if device_state.platform == Ios and (
-            Version(device_state.version) < Version(ios_supported)):
+    if platform == Ios and (
+            Version(version) < Version(ios_supported)):
         click.secho('Warning: You appear to be running iOS {0} which may result in '
                     'some hooks failing.\nIt is recommended to use at least an iOS '
-                    'version {1} device with objection.'.format(device_state.version, ios_supported),
+                    'version {1} device with objection.'.format(version, ios_supported),
                     fg='yellow')
