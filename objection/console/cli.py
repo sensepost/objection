@@ -44,7 +44,7 @@ def get_agent() -> Agent:
 @click.group()
 @click.option('--network', '-N', is_flag=True, help='Connect using a network connection instead of USB.',
               show_default=True)
-@click.option('--local', '-l', is_flag=True,
+@click.option('--local', '-L', is_flag=True,
               help='Connect using a local connection (for iOS Simulator).', show_default=True)
 @click.option('--host', '-h', default='127.0.0.1', show_default=True)
 @click.option('--port', '-P', required=False, default=27042, show_default=True)
