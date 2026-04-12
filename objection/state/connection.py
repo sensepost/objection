@@ -43,6 +43,16 @@ class StateConnection(object):
         self.network = True
         self.device_type = 'remote'
 
+    def use_local(self) -> None:
+        """
+            Sets the values required to have a local connection.
+
+            :return:
+        """
+
+        self.network = False
+        self.device_type = 'local'
+
     def get_comms_type(self) -> int:
         """
             Returns the currently configured connection type.
