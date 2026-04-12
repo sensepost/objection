@@ -333,6 +333,12 @@ class Agent(object):
             device_state.set_platform(Ios)
         elif params['os']['id'] == 'android':
             device_state.set_platform(Android)
+        else:
+            rt = self.exports().env_runtime()
+            if rt == 'ios':
+                device_state.set_platform(Ios)
+            elif rt == 'android':
+                device_state.set_platform(Android)                
 
         # set os version
         device_state.set_version(params['os']['version'])
