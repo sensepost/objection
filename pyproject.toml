@@ -7,7 +7,7 @@ name = "objection"
 version = "1.12.5"
 description = "Instrumented Mobile Pentest Framework"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = "GPL-3.0-or-later"
 authors = [{name = "Leon Jacobs", email = "leon@sensepost.com"}]
 keywords = ["mobile", "instrumentation", "pentest", "frida", "hook"]
