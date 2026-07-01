@@ -1,0 +1,14 @@
+Command: filesystem download
+
+Usage: filesystem download <remote path> <local path> [--folder]
+
+Downloads a file or folder from the remote device to the local machine. The
+remote path can be relative to the current working directory or an absolute path.
+
+Flags:
+   --folder   Download a folder instead of a single file
+
+Examples:
+   filesystem download test.txt
+   filesystem download /var/mobile/Preferences/config.plist
+   filesystem download /var/mobile/Documents Documents --folder

@@ -1,0 +1,10 @@
+Command: ios keychain dump_raw
+
+Usage: ios keychain dump_raw
+
+Dumps raw, unprocessed keychain entries for the current app's entitlement group.
+This is an advanced command that shows the keychain data without processing
+or formatting.
+
+Examples:
+   ios keychain dump_raw

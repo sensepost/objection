@@ -1,0 +1,9 @@
+Command: android hooking get current_activity
+
+Usage: android hooking get current_activity
+
+Gets the currently foregrounded Android Activity. This is useful for identifying
+which Activity is currently displayed to the user.
+
+Examples:
+   android hooking get current_activity

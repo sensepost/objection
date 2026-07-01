@@ -1,0 +1,10 @@
+Command: filesystem upload
+
+Usage: filesystem upload <local file path> <remote path>
+
+Uploads a file from the local machine to the remote device. The remote path
+can be relative to the current working directory or an absolute path.
+
+Examples:
+   filesystem upload /home/user/test.txt test.txt
+   filesystem upload /home/user/config.plist /var/mobile/Preferences/config.plist

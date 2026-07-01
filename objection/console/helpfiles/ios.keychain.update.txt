@@ -1,0 +1,13 @@
+Command: ios keychain update
+
+Usage: ios keychain update --account <account> --service <service> --newData <data>
+
+Updates an entry in the iOS keychain with new data. All parameters are required.
+
+Flags:
+   --account   The account name (required)
+   --service   The service name (required)
+   --newData   The new data to store (required)
+
+Examples:
+   ios keychain update --account user@example.com --service com.example.app --newData "newsecret"

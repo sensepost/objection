@@ -1,0 +1,17 @@
+Command: android hooking notify
+
+Usage: android hooking notify <class name> [--dump-args] [--dump-return] [--dump-backtrace] [--watch]
+
+Notifies when a class becomes available in the application. This is useful
+for hooking classes that may be loaded dynamically at runtime. Additional
+flags can be used to dump arguments, return values, and backtraces.
+
+Flags:
+   --dump-args         Dump method arguments
+   --dump-return       Dump method return values
+   --dump-backtrace    Dump call stack backtrace
+   --watch             Continue watching for invocations after class is found
+
+Examples:
+   android hooking notify com.example.MyClass
+   android hooking notify com.example.MyClass --dump-args --watch

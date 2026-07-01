@@ -1,0 +1,8 @@
+Command: ios heap search
+
+Usage: ios heap search <subcommand>
+
+Contains subcommands to search for information about the iOS heap.
+
+Examples:
+   ios heap search instances <class name>

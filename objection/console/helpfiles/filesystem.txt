@@ -1,0 +1,10 @@
+Command: filesystem
+
+Usage: filesystem <subcommand>
+
+Contains subcommands to work with files on the remote filesystem. Previously called `file`
+
+Examples:
+   filesystem cat <file>
+   filesystem upload <local file> <remote path>
+   filesystem download <remote file or folder> [--folder]

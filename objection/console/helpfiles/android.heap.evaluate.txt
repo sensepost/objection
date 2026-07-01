@@ -1,0 +1,10 @@
+Command: android heap evaluate
+
+Usage: android heap evaluate <object handle> <javascript>
+
+Evaluates JavaScript on a Java object handle. This allows complex operations
+and transformations using Frida's JavaScript runtime.
+
+Examples:
+   android heap evaluate 0x12345678 "this.myMethod()"
+   android heap evaluate 0x12345678 "this.toString()"

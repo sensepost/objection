@@ -44,6 +44,8 @@ def get_agent() -> Agent:
 @click.group()
 @click.option('--network', '-N', is_flag=True, help='Connect using a network connection instead of USB.',
               show_default=True)
+@click.option('--local', '-L', is_flag=True,
+              help='Connect using a local connection (for iOS Simulator).', show_default=True)
 @click.option('--host', '-h', default='127.0.0.1', show_default=True)
 @click.option('--port', '-P', required=False, default=27042, show_default=True)
 @click.option('--api-host', '-ah', default='127.0.0.1', show_default=True)
@@ -59,7 +61,7 @@ def get_agent() -> Agent:
 @click.option('--foremost', '-f', required=False, is_flag=True, help='Use the current foremost application.')
 @click.option('--debugger', required=False, default=False, is_flag=True, help='Enable the Chrome debug port.')
 @click.option('--uid', required=False, default=None, help='Specify the uid to run as (Android only).')
-def cli(network: bool, host: str, port: int, api_host: str, api_port: int,
+def cli(network: bool, local: bool, host: str, port: int, api_host: str, api_port: int,
         name: str, gadget: str, serial: str, debug: bool, spawn: bool, no_pause: bool,
         foremost: bool, debugger: bool, uid: int) -> None:
     """
@@ -77,10 +79,21 @@ def cli(network: bool, host: str, port: int, api_host: str, api_port: int,
     if debug:
         app_state.debug = debug
 
-    if network:
+    if network and local:
+        raise click.UsageError('The --local flag cannot be used with --network.')
+
+    if local:
+        state_connection.use_local()
+        state_connection.host = None
+        state_connection.port = None
+    elif network:
         state_connection.use_network()
         state_connection.host = host
         state_connection.port = port
+    else:
+        state_connection.use_usb()
+        state_connection.host = None
+        state_connection.port = None
 
     if serial:
         state_connection.device_id = serial

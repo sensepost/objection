@@ -1,0 +1,8 @@
+Command: android heap search
+
+Usage: android heap search <subcommand>
+
+Contains subcommands to search for information about the Android heap.
+
+Examples:
+   android heap search instances <class name>

@@ -1,1 +1,16 @@
-Contains subcommands helpful when searching for classes and methods.
+Command: ios hooking search
+
+Usage: ios hooking search <pattern> [--json <filename>] [--only-classes]
+
+Searches for Objective-C classes and methods in the current iOS application
+matching the specified pattern.
+
+Flags:
+   --json <filename>  Output results as JSON to the specified file
+   --only-classes     Only show classes in search results, not methods
+
+Examples:
+   ios hooking search KeychainDataManager
+   ios hooking search "+[KeychainDataManager update:forKey:]"
+   ios hooking search *Manager* --only-classes
+   ios hooking search *Manager* --json search_results.json

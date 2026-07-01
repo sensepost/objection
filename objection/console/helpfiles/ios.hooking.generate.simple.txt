@@ -1,0 +1,10 @@
+Command: ios hooking generate simple
+
+Usage: ios hooking generate simple <class name>
+
+Generates simple Frida hooks for each method in the specified iOS Objective-C class.
+This creates basic hooks that log method invocations without complex processing.
+
+Examples:
+   ios hooking generate simple NSString
+   ios hooking generate simple UIViewController

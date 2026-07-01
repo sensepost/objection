@@ -1,0 +1,9 @@
+Command: ios hooking generate
+
+Usage: ios hooking generate <subcommand>
+
+Contains subcommands to generate Frida hooks for iOS Objective-C classes.
+
+Examples:
+   ios hooking generate class <class name>
+   ios hooking generate simple <class name>

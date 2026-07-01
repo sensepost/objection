@@ -1,0 +1,10 @@
+Command: evaluate
+
+Usage: evaluate <javascript>
+
+Evaluates JavaScript within the agent context. This allows direct execution of
+Frida scripts for advanced manipulation and testing.
+
+Examples:
+   evaluate "send({msg: 'hello'})"
+   evaluate "console.log(Java.enumerateLoadedClasses())"

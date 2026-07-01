@@ -107,143 +107,203 @@ const fileExistsCheck = (success: boolean, ident: number): any => {
 
 const rootBeerIsRooted = (success: boolean, ident: number): any => {
   return wrapJavaPerform(() => {
-    const RootBeer = Java.use("com.scottyab.rootbeer.RootBeer");
-    const RootBeer_isRooted = RootBeer.isRooted.overload();
+    try {
+      const RootBeer = Java.use("com.scottyab.rootbeer.RootBeer");
+      const RootBeer_isRooted = RootBeer.isRooted.overload();
 
-    RootBeer_isRooted.implementation = function () {
-      if (success) {
+      RootBeer_isRooted.implementation = function () {
+        if (success) {
+          send(
+            c.blackBright(`[${ident}] `) +
+            `RootBeer->isRooted() check detected, marking as ${c.green("true")}.`,
+          );
+          return true;
+        }
+
         send(
           c.blackBright(`[${ident}] `) +
-          `RootBeer->isRooted() check detected, marking as ${c.green("true")}.`,
+          `RootBeer->isRooted() check detected, marking as ${c.green("false")}.`,
         );
-        return true;
+        return false;
+      };
+
+      return RootBeer_isRooted;
+    } catch (err) {
+      const message = (err as Error).stack || String(err);
+      if (message.indexOf("java.lang.ClassNotFoundException") !== -1) {
+        return null;
       }
 
-      send(
-        c.blackBright(`[${ident}] `) +
-        `RootBeer->isRooted() check detected, marking as ${c.green("false")}.`,
-      );
-      return false;
-    };
-
-    return RootBeer_isRooted;
+      send(c.red(`[${ident}] Error overriding RootBeer.isRooted(): ${message}`));
+      return null;
+    }
   });
 };
 
 const rootBeerCheckForBinary = (success: boolean, ident: number): any => {
   return wrapJavaPerform(() => {
-    const RootBeer = Java.use("com.scottyab.rootbeer.RootBeer");
-    RootBeer.checkForBinary.overload('java.lang.String').implementation = function () {
-      if (success) {
+    try {
+      const RootBeer = Java.use("com.scottyab.rootbeer.RootBeer");
+      RootBeer.checkForBinary.overload("java.lang.String").implementation = function () {
+        if (success) {
+          send(
+            c.blackBright(`[${ident}] `) +
+            `RootBeer->checkForBinary() check detected, marking as ${c.green("true")}.`,
+          );
+          return true;
+        }
+
         send(
           c.blackBright(`[${ident}] `) +
-          `RootBeer->checkForBinary() check detected, marking as ${c.green("true")}.`,
+          `RootBeer->checkForBinary() check detected, marking as ${c.green("false")}.`,
         );
-        return true;
+        return false;
+      };
+
+      return RootBeer.checkForBinary;
+    } catch (err) {
+      const message = (err as Error).stack || String(err);
+      if (message.indexOf("java.lang.ClassNotFoundException") !== -1) {
+        return null;
       }
 
-      send(
-        c.blackBright(`[${ident}] `) +
-        `RootBeer->checkForBinary() check detected, marking as ${c.green("false")}.`,
-      );
-      return false;
-    };
-
-    return RootBeer.checkForBinary;
+      send(c.red(`[${ident}] Error overriding RootBeer.checkForBinary(): ${message}`));
+      return null;
+    }
   });
 };
 
 const rootBeerCheckForDangerousProps = (success: boolean, ident: number): any => {
   return wrapJavaPerform(() => {
-    const RootBeer = Java.use("com.scottyab.rootbeer.RootBeer");
-    RootBeer.checkForDangerousProps.overload().implementation = function () {
-      if (success) {
+    try {
+      const RootBeer = Java.use("com.scottyab.rootbeer.RootBeer");
+      RootBeer.checkForDangerousProps.overload().implementation = function () {
+        if (success) {
+          send(
+            c.blackBright(`[${ident}] `) +
+            `RootBeer->checkForDangerousProps() check detected, marking as ${c.green("true")}.`,
+          );
+          return true;
+        }
+
         send(
           c.blackBright(`[${ident}] `) +
-          `RootBeer->checkForDangerousProps() check detected, marking as ${c.green("true")}.`,
+          `RootBeer->checkForDangerousProps() check detected, marking as ${c.green("false")}.`,
         );
-        return true;
+        return false;
+      };
+
+      return RootBeer.checkForDangerousProps;
+    } catch (err) {
+      const message = (err as Error).stack || String(err);
+      if (message.indexOf("java.lang.ClassNotFoundException") !== -1) {
+        return null;
       }
 
-      send(
-        c.blackBright(`[${ident}] `) +
-        `RootBeer->checkForDangerousProps() check detected, marking as ${c.green("false")}.`,
-      );
-      return false;
-    };
-
-    return RootBeer.checkForDangerousProps;
+      send(c.red(`[${ident}] Error overriding RootBeer.checkForDangerousProps(): ${message}`));
+      return null;
+    }
   });
 };
 
 const rootBeerDetectRootCloakingApps = (success: boolean, ident: number): any => {
   return wrapJavaPerform(() => {
-    const RootBeer = Java.use("com.scottyab.rootbeer.RootBeer");
-    const RootBeer_detectRootCloakingApps = RootBeer.detectRootCloakingApps.overload();
+    try {
+      const RootBeer = Java.use("com.scottyab.rootbeer.RootBeer");
+      const RootBeer_detectRootCloakingApps = RootBeer.detectRootCloakingApps.overload();
 
-    RootBeer_detectRootCloakingApps.implementation = function () {
-      if (success) {
+      RootBeer_detectRootCloakingApps.implementation = function () {
+        if (success) {
+          send(
+            c.blackBright(`[${ident}] `) +
+            `RootBeer->detectRootCloakingApps() check detected, marking as ${c.green("true")}.`,
+          );
+          return true;
+        }
+
         send(
           c.blackBright(`[${ident}] `) +
-          `RootBeer->detectRootCloakingApps() check detected, marking as ${c.green("true")}.`,
+          `RootBeer->detectRootCloakingApps() check detected, marking as ${c.green("false")}.`,
         );
-        return true;
+        return false;
+      };
+
+      return RootBeer_detectRootCloakingApps;
+    } catch (err) {
+      const message = (err as Error).stack || String(err);
+      if (message.indexOf("java.lang.ClassNotFoundException") !== -1) {
+        return null;
       }
 
-      send(
-        c.blackBright(`[${ident}] `) +
-        `RootBeer->detectRootCloakingApps() check detected, marking as ${c.green("false")}.`,
-      );
-      return false;
-    };
-
-    return RootBeer_detectRootCloakingApps;
+      send(c.red(`[${ident}] Error overriding RootBeer.detectRootCloakingApps(): ${message}`));
+      return null;
+    }
   });
 };
 
 const rootBeerCheckSuExists = (success: boolean, ident: number): any => {
   return wrapJavaPerform(() => {
-    const RootBeer = Java.use("com.scottyab.rootbeer.RootBeer");
-    RootBeer.checkSuExists.overload().implementation = function () {
-      if (success) {
+    try {
+      const RootBeer = Java.use("com.scottyab.rootbeer.RootBeer");
+      RootBeer.checkSuExists.overload().implementation = function () {
+        if (success) {
+          send(
+            c.blackBright(`[${ident}] `) +
+            `RootBeer->checkSuExists() check detected, marking as ${c.green("true")}.`,
+          );
+          return true;
+        }
+
         send(
           c.blackBright(`[${ident}] `) +
-          `RootBeer->checkSuExists() check detected, marking as ${c.green("true")}.`,
+          `RootBeer->checkSuExists() check detected, marking as ${c.green("false")}.`,
         );
-        return true;
+        return false;
+      };
+
+      return RootBeer.checkSuExists;
+    } catch (err) {
+      const message = (err as Error).stack || String(err);
+      if (message.indexOf("java.lang.ClassNotFoundException") !== -1) {
+        return null;
       }
 
-      send(
-        c.blackBright(`[${ident}] `) +
-        `RootBeer->checkSuExists() check detected, marking as ${c.green("false")}.`,
-      );
-      return false;
-    };
-
-    return RootBeer.checkSuExists;
+      send(c.red(`[${ident}] Error overriding RootBeer.checkSuExists(): ${message}`));
+      return null;
+    }
   });
 };
 
 const rootBeerDetectTestKeys = (success: boolean, ident: number): any => {
   return wrapJavaPerform(() => {
-    const RootBeer = Java.use("com.scottyab.rootbeer.RootBeer");
-    RootBeer.detectTestKeys.overload().implementation = function () {
-      if (success) {
+    try {
+      const RootBeer = Java.use("com.scottyab.rootbeer.RootBeer");
+      RootBeer.detectTestKeys.overload().implementation = function () {
+        if (success) {
+          send(
+            c.blackBright(`[${ident}] `) +
+            `RootBeer->detectTestKeys() check detected, marking as ${c.green("true")}.`,
+          );
+          return true;
+        }
+
         send(
           c.blackBright(`[${ident}] `) +
-          `RootBeer->detectTestKeys() check detected, marking as ${c.green("true")}.`,
+          `RootBeer->detectTestKeys() check detected, marking as ${c.green("false")}.`,
         );
-        return true;
+        return false;
+      };
+
+      return RootBeer.detectTestKeys;
+    } catch (err) {
+      const message = (err as Error).stack || String(err);
+      if (message.indexOf("java.lang.ClassNotFoundException") !== -1) {
+        return null;
       }
 
-      send(
-        c.blackBright(`[${ident}] `) +
-        `RootBeer->detectTestKeys() check detected, marking as ${c.green("false")}.`,
-      );
-      return false;
-    };
-
-    return RootBeer.detectTestKeys;
+      send(c.red(`[${ident}] Error overriding RootBeer.detectTestKeys(): ${message}`));
+      return null;
+    }
   });
 };
 
@@ -269,35 +329,48 @@ const rootBeerCheckSeLinux = (success: boolean, ident: number): any => {
   
       return Util.isSelinuxFlagInEnabled;
     } catch (err) {
-      if ((err as Error).message.indexOf("java.lang.ClassNotFoundException") === 0) {
+      const message = (err as Error).stack || String(err);
+      if (message.indexOf("java.lang.ClassNotFoundException") !== -1) {
         return null;
-      };
-      throw err;
+      }
+
+      send(c.red(`[${ident}] Error overriding RootBeer util isSelinuxFlagInEnabled(): ${message}`));
+      return null;
     }
   });
 };
 
 const rootBeerNative = (success: boolean, ident: number): any => {
   return wrapJavaPerform(() => {
-    const RootBeerNative = Java.use("com.scottyab.rootbeer.RootBeerNative");
-    const RootBeerNative_checkForRoot = RootBeerNative.checkForRoot.overload('[Ljava.lang.Object;');
-    RootBeerNative_checkForRoot.implementation = function () {
-      if (success) {
+    try {
+      const RootBeerNative = Java.use("com.scottyab.rootbeer.RootBeerNative");
+      const RootBeerNative_checkForRoot = RootBeerNative.checkForRoot.overload("[Ljava.lang.Object;");
+      RootBeerNative_checkForRoot.implementation = function () {
+        if (success) {
+          send(
+            c.blackBright(`[${ident}] `) +
+            `RootBeerNative->checkForRoot() check detected, marking as ${c.green("1")}.`,
+          );
+          return 1;
+        }
+
         send(
           c.blackBright(`[${ident}] `) +
-          `RootBeerNative->checkForRoot() check detected, marking as ${c.green("1")}.`,
+          `RootBeerNative->checkForRoot() check detected, marking as ${c.green("0")}.`,
         );
-        return 1;
+        return 0;
+      };
+
+      return RootBeerNative_checkForRoot;
+    } catch (err) {
+      const message = (err as Error).stack || String(err);
+      if (message.indexOf("java.lang.ClassNotFoundException") !== -1) {
+        return null;
       }
 
-      send(
-        c.blackBright(`[${ident}] `) +
-        `RootBeerNative->checkForRoot() check detected, marking as ${c.green("0")}.`,
-      );
-      return 0;
-    };
-
-    return RootBeerNative_checkForRoot;
+      send(c.red(`[${ident}] Error overriding RootBeerNative.checkForRoot(): ${message}`));
+      return null;
+    }
   });
 };
 
@@ -343,10 +416,13 @@ const jailMonkeyBypass = (success: boolean, ident: number): Promise<any> => {
 
       return JavaJailMonkeyModule.getConstants;
     } catch (err) {
-      if ((err as Error).message.indexOf("java.lang.ClassNotFoundException") === 0) {
+      const message = (err as Error).stack || String(err);
+      if (message.indexOf("java.lang.ClassNotFoundException") !== -1) {
         return null;
-      };
-      throw err;
+      }
+
+      send(c.red(`[${ident}] Error overriding JailMonkeyModule.getConstants(): ${message}`));
+      return null;
     }
   });
 };

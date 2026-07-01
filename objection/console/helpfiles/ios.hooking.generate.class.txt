@@ -1,0 +1,10 @@
+Command: ios hooking generate class
+
+Usage: ios hooking generate class <class name>
+
+Generates a generic Frida hook manager for the specified iOS Objective-C class.
+This creates a template hook that can be customized for various hooking operations.
+
+Examples:
+   ios hooking generate class NSString
+   ios hooking generate class UIViewController

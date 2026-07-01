@@ -1,0 +1,9 @@
+Command: android hooking list class_loaders
+
+Usage: android hooking list class_loaders
+
+Lists the registered class loaders in the Android application.
+This is useful for understanding the class loading hierarchy.
+
+Examples:
+   android hooking list class_loaders

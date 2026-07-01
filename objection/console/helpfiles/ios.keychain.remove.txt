@@ -1,0 +1,13 @@
+Command: ios keychain remove
+
+Usage: ios keychain remove --account <account> --service <service>
+
+Removes an entry from the iOS keychain. Both account and service parameters
+are required to identify which keychain entry to remove.
+
+Flags:
+   --account   The account name (required)
+   --service   The service name (required)
+
+Examples:
+   ios keychain remove --account user@example.com --service com.example.app

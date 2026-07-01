@@ -1,0 +1,9 @@
+Command: android heap print fields
+
+Usage: android heap print fields <object handle>
+
+Prints instance fields for a Java object handle. This displays all accessible 
+field values for the specified object, useful for inspecting object state.
+
+Examples:
+   android heap print fields 0x12345678

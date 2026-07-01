@@ -1,0 +1,9 @@
+Command: commands save
+
+Usage: commands save
+
+Saves all unique commands that have been run in the current session to a file.
+The file path will be displayed after saving.
+
+Examples:
+   commands save

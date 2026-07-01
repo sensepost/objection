@@ -1,0 +1,10 @@
+Command: ios heap search instances
+
+Usage: ios heap search instances <class name>
+
+Searches for live instances of a particular Objective-C class on the heap.
+Returns all instances currently in memory for the specified class.
+
+Examples:
+   ios heap search instances NSString
+   ios heap search instances UIViewController

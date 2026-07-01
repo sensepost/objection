@@ -62,7 +62,12 @@ COMMANDS = {
     },
 
     'reconnect': {
-        'meta': 'Reconnect to the current device',
+        'meta': 'Reconnect to the current app',
+        'exec': None,  # handled in the Repl class itself
+    },
+
+    'reconnect_spawn': {
+        'meta': 'Respawn the current app',
         'exec': None,  # handled in the Repl class itself
     },
 
@@ -512,7 +517,7 @@ COMMANDS = {
         },
     },
     # ios commands
-        'ios': {
+    'ios': {
         'meta': 'Commands specific to iOS',
         'commands': {
             'info': {

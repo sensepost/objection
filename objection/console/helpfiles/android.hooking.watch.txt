@@ -1,1 +1,20 @@
-Contains subcommands to watch for various bits of information on class invocations.
+Command: android hooking watch
+
+Usage: android hooking watch <class/method pattern> 
+       [--dump-args] [--dump-backtrace] [--dump-return]
+
+Hooks Android Java methods matching the specified pattern and reports on 
+invocations. The pattern can be a class name, a package pattern with 
+wildcards, or a specific class and method separated by an exclamation 
+mark (!).
+
+Flags:
+   --dump-args       Dump method arguments when invoked
+   --dump-backtrace  Dump the call stack backtrace
+   --dump-return     Dump method return values
+
+Examples:
+   android hooking watch com.example.test
+   android hooking watch *com.example*!*
+   android hooking watch com.example.test.MyClass!login
+   android hooking watch com.example.test --dump-args --dump-return

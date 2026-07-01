@@ -1,0 +1,9 @@
+Command: android ui
+
+Usage: android ui <subcommand>
+
+Contains subcommands for Android user interface operations.
+
+Examples:
+   android ui screenshot
+   android ui FLAG_SECURE

@@ -1,0 +1,9 @@
+Command: ios ui biometrics_bypass
+
+Usage: ios ui biometrics_bypass
+
+Hooks the iOS Biometrics LAContext and responds with successful authentication.
+This allows bypassing Touch ID/Face ID checks for testing purposes.
+
+Examples:
+   ios ui biometrics_bypass
