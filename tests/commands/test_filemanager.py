@@ -56,6 +56,20 @@ class TestFileManager(unittest.TestCase):
         self.assertEqual(output, '/foo/bar/baz\n')
         self.assertEqual(file_manager_state.cwd, '/foo/bar/baz')
 
+    @mock.patch('objection.commands.filemanager.os.path.isabs', return_value=False)
+    @mock.patch('objection.commands.filemanager._path_exists_ios')
+    def test_cd_treats_unix_style_path_as_absolute_when_host_is_windows(self, mock_path_exists_ios, _):
+        mock_path_exists_ios.return_value = True
+
+        file_manager_state.cwd = '/current'
+        device_state.platform = Ios
+
+        with capture(cd, ['/foo/bar']) as o:
+            output = o
+
+        self.assertEqual(output, '/foo/bar\n')
+        self.assertEqual(file_manager_state.cwd, '/foo/bar')
+
     @mock.patch('objection.commands.filemanager._path_exists_android')
     def test_cd_to_absoluate_android_path(self, mock_path_exists_android):
         mock_path_exists_android.return_value = True
@@ -239,6 +253,16 @@ class TestFileManager(unittest.TestCase):
         ls(['/foo/bar'])
 
         self.assertTrue(mock_ls_ios.called)
+
+    @mock.patch('objection.commands.filemanager.os.path.isabs', return_value=False)
+    @mock.patch('objection.commands.filemanager._ls_ios')
+    def test_ls_treats_unix_style_path_as_absolute_when_host_is_windows(self, mock_ls_ios, _):
+        device_state.platform = Ios
+        file_manager_state.cwd = '/current'
+
+        ls(['/foo/bar'])
+
+        mock_ls_ios.assert_called_once_with('/foo/bar')
 
     @mock.patch('objection.commands.filemanager._ls_android')
     def test_ls_calls_android_helper_method(self, mock_ls_android):
