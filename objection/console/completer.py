@@ -40,12 +40,15 @@ class CommandCompleter(Completer):
         # how a shell invocation would have been done.
         # we will also cleanup flags that come in the form
         #  of --flag so that multiples can be suggested.
-        tokens = [token for token in get_tokens(document.text) if not token.startswith('--')]
+        all_tokens = get_tokens(document.text)
+        tokens = [token for token in all_tokens if not token.startswith('--')]
 
         # extract the flags in the received tokens. This list
         # will be used to remove suggested flags from those
         # already present in the command.
-        flags = [flag for flag in get_tokens(document.text) if flag.startswith('--')]
+        flags = [flag for flag in all_tokens if flag.startswith('--')]
+        has_trailing_space = document.text.endswith(' ')
+        active_word = document.get_word_before_cursor()
 
         # start with the current suggestions dictionary being
         # all commands
@@ -56,7 +59,7 @@ class CommandCompleter(Completer):
         #   command sub_command sub_sub_command
         # so, lets use that and search the the COMMAND dictionary for
         # the last dictionary with a correct suggestion
-        for token in tokens:
+        for i, token in enumerate(tokens):
 
             candidate = token.lower()
 
@@ -65,6 +68,26 @@ class CommandCompleter(Completer):
                 # if there are sub commands, grab them
                 if 'commands' in current_suggestions[candidate]:
                     current_suggestions = current_suggestions[candidate]['commands']
+
+                # Some commands can have both dynamic and flag completions.
+                # In that case, complete the first positional argument from
+                # dynamic suggestions, then switch to flag suggestions.
+                elif 'dynamic' in current_suggestions[candidate] and 'flags' in current_suggestions[candidate]:
+                    positional_args = tokens[i + 1:]
+
+                    completed_positional_args = len(positional_args)
+                    if (not has_trailing_space
+                            and active_word
+                            and not active_word.startswith('--')
+                            and completed_positional_args > 0):
+                        completed_positional_args -= 1
+
+                    if completed_positional_args == 0:
+                        current_suggestions = current_suggestions[candidate]['dynamic']()
+                    else:
+                        current_suggestions = {
+                            flag: '' for flag in current_suggestions[candidate]['flags'] if flag not in flags
+                        }
 
                 # dynamic commands change based on the current status of the
                 # environment, so, call the method defined

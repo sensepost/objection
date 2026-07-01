@@ -414,9 +414,12 @@ def download(args: list) -> None:
     # if we didnt get a specification of where to dump the file,
     # assume the same name should be used locally.
     source = args[0]
-    destination = args[1] if len(args) > 1 else os.path.basename(source)
-
     should_download_folder = _should_download_folder(args)
+    # If the user specified a destination, use it. Otherwise, use the basename of the source.
+    if len(args) > (1 + should_download_folder):
+        destination = args[1]
+    else:
+        destination = os.path.basename(source)
 
     if device_state.platform == Ios:
         _download_ios(source, destination, should_download_folder)
