@@ -21,7 +21,25 @@ Whether you want to contribute to the TypeScript agent or the Python command lin
 
 ### Python Command Line
 
-Any Python 3 environment should do, but we recommend you use the latest version of Python. To satisfy all of the dependencies that you may need, install those defined in the [`requirements-dev.txt`](https://github.com/sensepost/objection/blob/master/requirements-dev.txt) file in the project's root. This would make all of the code dependencies available, as well as some useful debugging helpers.
+Any Python 3 environment should do, but we recommend you use the latest version of Python. To satisfy all of the dependencies that you may need, install the development dependency group defined in `pyproject.toml`:
+
+```zsh
+uv sync --group dev
+```
+
+This makes the code dependencies available, along with pytest and other useful development helpers.
+
+To run the test suite, you can then use:
+
+```zsh
+uv run pytest
+```
+
+or:
+
+```zsh
+make test
+```
 
 ### TypeScript Agent
 

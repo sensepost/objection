@@ -38,8 +38,8 @@ Homepage = "https://github.com/sensepost/objection"
 Repository = "https://github.com/sensepost/objection"
 "Bug Tracker" = "https://github.com/sensepost/objection/issues"
 
-[project.optional-dependencies]
-test = [
+[dependency-groups]
+dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
 ]

@@ -38,7 +38,8 @@ class Job(object):
 
             click.secho("[job manager] Killing job {0}. Name: {1}. Type: {2}"
                         .format(self.uuid, self.name, self.job_type), dim=True)
-            self.handle.unload()
+            if self.handle is not None:
+                self.handle.unload()
         elif self.job_type == "hook":
             api = state_connection.get_api()
             api.jobs_kill(self.uuid)

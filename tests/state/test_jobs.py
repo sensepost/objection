@@ -17,8 +17,8 @@ class TestJobManager(unittest.TestCase):
         self.assertEqual(len(job_manager_state.jobs), 1)
 
     def test_removes_jobs(self):
-        job1 = Job('foo', 'test', None)
-        job2 = Job('bar', 'test', None)
+        job1 = Job('foo', 'script', None)
+        job2 = Job('bar', 'script', None)
         job_manager_state.add_job(job1)
         job_manager_state.add_job(job2)
 
