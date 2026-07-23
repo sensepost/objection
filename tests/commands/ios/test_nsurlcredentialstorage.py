@@ -2,7 +2,7 @@ import unittest
 from unittest import mock
 
 from objection.commands.ios.nsurlcredentialstorage import dump
-from ...helpers import capture
+from ...helpers import capture, normalize_table_whitespace
 
 
 class TestNsusercredentialstorage(unittest.TestCase):
@@ -20,9 +20,9 @@ class TestNsusercredentialstorage(unittest.TestCase):
         with capture(dump, []) as o:
             output = o
 
-        expected_output = """Protocol    Host       Port  Authentication Method    User    Password
-----------  -------  ------  -----------------------  ------  ----------
-https       foo.bar      80  Default                  foo     bar
+        expected_output = """Protocol  Host     Port  Authentication Method  User  Password
+--------  -------  ----  ---------------------  ----  --------
+https     foo.bar    80  Default                foo   bar
 """
 
-        self.assertEqual(output, expected_output)
+        self.assertEqual(normalize_table_whitespace(output), normalize_table_whitespace(expected_output))

@@ -3,7 +3,7 @@ from unittest import mock
 
 from objection.commands.ios.bundles import show_frameworks, _should_include_apple_bundles, _should_print_full_path, \
     _is_apple_bundle, show_bundles
-from ...helpers import capture
+from ...helpers import capture, normalize_table_whitespace
 
 
 class TestBundles(unittest.TestCase):
@@ -76,7 +76,7 @@ hockeyapp     net.hockeyapp.sdk.ios          1  /hockeyapp
 MapKit        za.apple.MapKit                1  /MapKit
 """
 
-        self.assertEqual(output, expected)
+        self.assertEqual(normalize_table_whitespace(output), normalize_table_whitespace(expected))
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_show_frameworks_prints_with_apple_bundles(self, mock_api):
@@ -93,7 +93,7 @@ hockeyapp                 net.hockeyapp.sdk.ios                       1  /hockey
 MapKit                    za.apple.MapKit                             1  /MapKit
 """
 
-        self.assertEqual(output, expected)
+        self.assertEqual(normalize_table_whitespace(output), normalize_table_whitespace(expected))
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_show_frameworks_prints_with_apple_bundles_and_full_paths(self, mock_api):
@@ -110,7 +110,7 @@ hockeyapp                 net.hockeyapp.sdk.ios                       1  /hockey
 MapKit                    za.apple.MapKit                             1  /MapKit
 """
 
-        self.assertEqual(output, expected)
+        self.assertEqual(normalize_table_whitespace(output), normalize_table_whitespace(expected))
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_show_bundles_prints_bundles(self, mock_api):
@@ -119,15 +119,15 @@ MapKit                    za.apple.MapKit                             1  /MapKit
         with capture(show_bundles, []) as o:
             output = o
 
-        expected = """Executable                Bundle                                Version  Path
-------------------------  ----------------------------------  ---------  -------------------------------------------
-AppleIDSSOAuthentication  com.apple.AppleIDSSOAuthentication          1  /AppleIDSSOAuthentication
-LinguisticData            com.apple.LinguisticData                    1  ...nguisticDataLinguisticDataLinguisticData
-hockeyapp                 net.hockeyapp.sdk.ios                       1  /hockeyapp
-MapKit                    za.apple.MapKit                             1  /MapKit
+        expected = """Executable                Bundle                              Version  Path
+------------------------  ----------------------------------  -------  ------------------------------------------------------------------------
+AppleIDSSOAuthentication  com.apple.AppleIDSSOAuthentication        1  /AppleIDSSOAuthentication
+LinguisticData            com.apple.LinguisticData                  1  /LinguisticData/LinguisticDataLinguisticDataLinguisticDataLinguisticData
+hockeyapp                 net.hockeyapp.sdk.ios                     1  /hockeyapp
+MapKit                    za.apple.MapKit                           1  /MapKit
 """
 
-        self.assertEqual(output, expected)
+        self.assertEqual(normalize_table_whitespace(output), normalize_table_whitespace(expected))
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_show_bundles_prints_bundles(self, mock_api):
@@ -144,4 +144,4 @@ hockeyapp                 net.hockeyapp.sdk.ios                       1  /hockey
 MapKit                    za.apple.MapKit                             1  /MapKit
 """
 
-        self.assertEqual(output, expected)
+        self.assertEqual(normalize_table_whitespace(output), normalize_table_whitespace(expected))

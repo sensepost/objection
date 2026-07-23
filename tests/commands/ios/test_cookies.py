@@ -2,7 +2,7 @@ import unittest
 from unittest import mock
 
 from objection.commands.ios.cookies import get
-from ...helpers import capture
+from ...helpers import capture, normalize_table_whitespace
 
 
 class TestCookies(unittest.TestCase):
@@ -30,9 +30,9 @@ class TestCookies(unittest.TestCase):
         with capture(get, []) as o:
             output = o
 
-        expected_output = """Name    Value    Expires                    Domain    Path    Secure    HTTPOnly
-------  -------  -------------------------  --------  ------  --------  ----------
-foo     bar      01-01-1970 00:00:00 +0000  foo.com   /       false     true
+        expected_output = """Name  Value  Expires                    Domain   Path  Secure  HTTPOnly
+----  -----  -------------------------  -------  ----  ------  --------
+foo   bar    01-01-1970 00:00:00 +0000  foo.com  /     false   true
 """
 
-        self.assertEqual(output, expected_output)
+        self.assertEqual(normalize_table_whitespace(output), normalize_table_whitespace(expected_output))

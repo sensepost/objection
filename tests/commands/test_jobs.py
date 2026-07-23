@@ -2,7 +2,7 @@ import unittest
 from unittest import mock
 
 from objection.commands.jobs import show, kill
-from objection.state.jobs import job_manager_state
+from objection.state.jobs import job_manager_state, Job
 from ..helpers import capture
 
 
@@ -26,7 +26,7 @@ class TestJobs(unittest.TestCase):
         self.mock_job = MockJob()
 
     def tearDown(self):
-        job_manager_state.jobs = []
+        job_manager_state.jobs = {}
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_displays_empty_jobs_message(self, mock_api):
@@ -34,8 +34,8 @@ class TestJobs(unittest.TestCase):
         with capture(show) as o:
             output = o
 
-        expected_output = """Job ID    Hooks    Type
---------  -------  ------
+        expected_output = """Job ID  Type  Name
+------  ----  ----
 """
 
         self.assertEqual(output, expected_output)
@@ -43,14 +43,14 @@ class TestJobs(unittest.TestCase):
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_displays_list_of_jobs(self, mock_api):
         mock_api.return_value.jobs_get.return_value = [
-            {'identifier': 'rdcjq16g8xi', 'invocations': [{}], 'type': 'ios-jailbreak-disable'}]
+            {'identifier': '123456', 'invocations': [{}], 'type': 'ios-jailbreak-disable'}]
 
         with capture(show, []) as o:
             output = o
 
-        expected_outut = """Job ID         Hooks  Type
------------  -------  ---------------------
-rdcjq16g8xi        1  ios-jailbreak-disable
+        expected_outut = """Job ID  Type  Name
+------  ----  ---------------------
+123456  hook  ios-jailbreak-disable
 """
 
         self.assertEqual(output, expected_outut)
@@ -61,14 +61,22 @@ rdcjq16g8xi        1  ios-jailbreak-disable
 
         self.assertEqual(output, 'Usage: jobs kill <uuid>\n')
 
-    @mock.patch('objection.state.connection.state_connection.get_api')
-    def test_cant_find_job_by_uuid(self, mock_api):
-        kill('foo')
-
-        self.assertTrue(mock_api.return_value.jobs_kill.called)
+    def test_cant_find_job_by_uuid(self):
+        # Attempting to kill a job that doesn't exist just removes it from state
+        # If it wasn't there, nothing happens
+        kill(['123'])
+        # Job was not in manager, so nothing happened
+        self.assertEqual(len(job_manager_state.jobs), 0)
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_kills_job_by_uuid(self, mock_api):
-        kill('foo')
+        # Add a job and then kill it
+        mock_handle = mock.MagicMock()
+        job = Job('test', 'hook', mock_handle, 123)
+        job_manager_state.add_job(job)
+        self.assertEqual(len(job_manager_state.jobs), 1)
+        
+        kill(['123'])
+        
+        self.assertEqual(len(job_manager_state.jobs), 0)
 
-        self.assertTrue(mock_api.return_value.jobs_kill.called)

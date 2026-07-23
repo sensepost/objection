@@ -1,10 +1,9 @@
-import os
-
 import click
 
 from objection.commands import filemanager
 from objection.state.connection import state_connection
 from objection.state.device import device_state
+from objection.utils.helpers import is_unix_absolute_path
 
 
 def cat(args: list = None) -> None:
@@ -22,7 +21,7 @@ def cat(args: list = None) -> None:
 
     plist = args[0]
 
-    if not os.path.isabs(plist):
+    if not is_unix_absolute_path(plist):
         pwd = filemanager.pwd()
         plist = device_state.platform.path_separator.join([pwd, plist])
 

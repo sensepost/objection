@@ -11,6 +11,9 @@ frida-agent:
 sdist:
 	uv build
 
+test:
+	uv run pytest
+
 testupload:
 	uv publish --index testpypi
 

@@ -7,6 +7,7 @@ import litecli
 from litecli.main import LiteCli
 
 from ..commands.filemanager import download, upload, pwd, path_exists
+from ..utils.helpers import is_unix_absolute_path
 
 
 def modify_config(rc):
@@ -73,7 +74,7 @@ def connect(args: list) -> None:
 
     # update the full remote path for future syncs
     full_remote_file = db_location \
-        if os.path.isabs(db_location) else os.path.join(pwd(), db_location)
+        if is_unix_absolute_path(db_location) else os.path.join(pwd(), db_location)
 
     click.secho('Caching local copy of database file...', fg='green')
     download([db_location, local_path])

@@ -1,3 +1,4 @@
+import os
 import re
 import shlex
 
@@ -92,6 +93,21 @@ def clean_argument_flags(args: list) -> list:
     """
 
     return [x for x in args if not x.startswith('--')]
+
+
+def is_unix_absolute_path(path: str) -> bool:
+    """
+        Determines whether a path should be treated as absolute on
+        remote Unix-like targets.
+
+        On Windows hosts, os.path.isabs('/foo') may not behave as expected
+        for remote device paths that are always POSIX style.
+
+        :param path:
+        :return:
+    """
+
+    return path.startswith('/') or os.path.isabs(path)
 
 
 def to_snake_case(w: str) -> str:

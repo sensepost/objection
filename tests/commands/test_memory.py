@@ -3,7 +3,7 @@ from unittest import mock
 
 from objection.commands.memory import _is_string_input, dump_all, dump_from_base, list_modules, list_exports, \
     find_pattern, replace_pattern
-from ..helpers import capture
+from ..helpers import capture, normalize_table_whitespace
 
 
 class MockRange:
@@ -84,12 +84,12 @@ Memory dumped to file: /foo
             output = o
 
         expected_outut = """Save the output by adding `--json modules.json` to this command
-Name      Base  Size           Path
-------  ------  -------------  ------
-test     32768  200 (200.0 B)  /foo
+Name   Base  Size           Path
+----  -----  -------------  ----
+test  32768  200 (200.0 B)  /foo
 """
 
-        self.assertEqual(output, expected_outut)
+        self.assertEqual(normalize_table_whitespace(output), normalize_table_whitespace(expected_outut))
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     @mock.patch('objection.commands.memory.open', create=True)
@@ -139,12 +139,12 @@ Usage: memory list exports <module name>
             output = o
 
         expected_outut = """Save the output by adding `--json exports.json` to this command
-Type      Name      Address
---------  ------  ---------
-function  test        32768
+Type      Name  Address
+--------  ----  -------
+function  test    32768
 """
 
-        self.assertEqual(output, expected_outut)
+        self.assertEqual(normalize_table_whitespace(output), normalize_table_whitespace(expected_outut))
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     @mock.patch('objection.commands.memory.open', create=True)

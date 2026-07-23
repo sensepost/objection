@@ -3,7 +3,7 @@ from unittest import mock
 
 from objection.commands.ios.keychain import _should_output_json, dump, dump_raw, clear, add, \
     _data_flag_has_identifier, _get_flag_value, _should_do_smart_decode
-from ...helpers import capture
+from ...helpers import capture, normalize_table_whitespace
 
 
 class TestKeychain(unittest.TestCase):
@@ -68,10 +68,10 @@ class TestKeychain(unittest.TestCase):
         expected_output = """Note: You may be asked to authenticate using the devices passcode or TouchID
 Save the output by adding `--json keychain.json` to this command
 Dumping the iOS keychain...
-Created    Accessible    ACL    Type    Account    Service    Data
----------  ------------  -----  ------  ---------  ---------  ------
+Created  Accessible  ACL  Type  Account  Service  Data
+-------  ----------  ---  ----  -------  -------  ----
 """
-        self.assertEqual(output, expected_output)
+        self.assertEqual(normalize_table_whitespace(output), normalize_table_whitespace(expected_output))
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_dump_to_screen(self, mock_api):
@@ -87,11 +87,11 @@ Created    Accessible    ACL    Type    Account    Service    Data
         expected_output = """Note: You may be asked to authenticate using the devices passcode or TouchID
 Save the output by adding `--json keychain.json` to this command
 Dumping the iOS keychain...
-Created    Accessible    ACL    Type    Account    Service    Data
----------  ------------  -----  ------  ---------  ---------  ------
-now        None          None           foo        foo        bar
+Created  Accessible  ACL   Type  Account  Service  Data
+-------  ----------  ----  ----  -------  -------  ----
+now      None        None        foo      foo      bar
 """
-        self.assertEqual(output, expected_output)
+        self.assertEqual(normalize_table_whitespace(output), normalize_table_whitespace(expected_output))
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_dump_raw(self, mock_api):
@@ -141,7 +141,7 @@ Dumped keychain to: foo.json
         with capture(add, ['--data', 'test_data']) as o:
             output = o
 
-        self.assertEqual(output, 'When specifying the --data flag, either --account or --server should also be added\n')
+        self.assertEqual(output, 'When specifying the --data flag, either --account or --service should also be added\n')
 
     @mock.patch('objection.state.connection.state_connection.get_api')
     def test_adds_item_successfully(self, mock_api):

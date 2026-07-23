@@ -8,7 +8,7 @@ from tabulate import tabulate
 from ..state.connection import state_connection
 from ..state.device import device_state, Ios, Android
 from ..state.filemanager import file_manager_state
-from ..utils.helpers import sizeof_fmt
+from ..utils.helpers import sizeof_fmt, is_unix_absolute_path
 
 # variable used to cache entries from the ls-like
 # commands used in the below helpers. only used
@@ -74,7 +74,7 @@ def cd(args: list) -> None:
 
     # if we got an absolute path, check if the path
     # actually exists, and then cd to it if we can
-    if os.path.isabs(path):
+    if is_unix_absolute_path(path):
 
         # assume the path does not exist by default
         does_exist = False
@@ -258,7 +258,7 @@ def ls(args: list) -> None:
         path = pwd()
     else:
         path = args[0]
-        if not os.path.isabs(path):
+        if not is_unix_absolute_path(path):
             path = device_state.platform.path_separator.join([pwd(), path])
 
     # based on the runtime, execute the correct ls method.
@@ -414,9 +414,12 @@ def download(args: list) -> None:
     # if we didnt get a specification of where to dump the file,
     # assume the same name should be used locally.
     source = args[0]
-    destination = args[1] if len(args) > 1 else os.path.basename(source)
-
     should_download_folder = _should_download_folder(args)
+    # If the user specified a destination, use it. Otherwise, use the basename of the source.
+    if len(args) > (1 + should_download_folder):
+        destination = args[1]
+    else:
+        destination = os.path.basename(source)
 
     if device_state.platform == Ios:
         _download_ios(source, destination, should_download_folder)
@@ -436,7 +439,7 @@ def _download_ios(path: str, destination: str, should_download_folder: bool, pat
 
     # if the path we got is not absolute, join it with the
     # current working directory
-    if not os.path.isabs(path):
+    if not is_unix_absolute_path(path):
         path = device_state.platform.path_separator.join([pwd(), path])
 
     api = state_connection.get_api()
@@ -500,7 +503,7 @@ def _download_android(path: str, destination: str, should_download_folder: bool,
 
     # if the path we got is not absolute, join it with the
     # current working directory
-    if not os.path.isabs(path):
+    if not is_unix_absolute_path(path):
         path = device_state.platform.path_separator.join([pwd(), path])
 
     api = state_connection.get_api()
@@ -587,7 +590,7 @@ def _upload_ios(path: str, destination: str) -> None:
         :return:
     """
 
-    if not os.path.isabs(destination):
+    if not is_unix_absolute_path(destination):
         destination = device_state.platform.path_separator.join([pwd(), destination])
 
     api = state_connection.get_api()
@@ -622,7 +625,7 @@ def _upload_android(path: str, destination: str) -> None:
         :return:
     """
 
-    if not os.path.isabs(destination):
+    if not is_unix_absolute_path(destination):
         destination = device_state.platform.path_separator.join([pwd(), destination])
 
     api = state_connection.get_api()
@@ -662,7 +665,7 @@ def rm(args: list) -> None:
 
     target = args[0]
 
-    if not os.path.isabs(target):
+    if not is_unix_absolute_path(target):
         target = device_state.platform.path_separator.join([pwd(), target])
 
     if not click.confirm('Really delete {0} ?'.format(target)):
