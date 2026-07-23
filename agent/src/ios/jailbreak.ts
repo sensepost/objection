@@ -45,6 +45,7 @@ const jailbreakPaths = [
   "/var/lib/cydia",
   "/var/log/syslog",
   "/var/tmp/cydia.log",
+  "/var/jb"
 ];
 
 
