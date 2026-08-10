@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 import traceback
 
 import click
@@ -13,11 +14,15 @@ from prompt_toolkit.patch_stdout import patch_stdout
 from prompt_toolkit.styles import Style
 
 from .commands import COMMANDS
+from ..commands import command_history
 from .completer import CommandCompleter
 from ..__init__ import __version__
 from ..state.app import app_state
 from ..state.connection import state_connection
 from ..utils.helpers import get_tokens
+
+
+HISTORY_FILE = os.path.expanduser('~/.objection/objection_history')
 
 
 class Repl(object):
@@ -30,6 +35,9 @@ class Repl(object):
 
         self.completer = FuzzyCompleter(CommandCompleter())
         self.commands_repository = COMMANDS
+        self.history = FileHistory(HISTORY_FILE)
+        self._history_timestamps = []
+        self._history_entries = self._load_history_entries()
         self.session = self.get_prompt_session()
 
     def get_prompt_session(self) -> PromptSession:
@@ -40,7 +48,7 @@ class Repl(object):
         """
 
         return PromptSession(
-            history=FileHistory(os.path.expanduser('~/.objection/objection_history')),
+            history=self.history,
             completer=self.completer,
             style=self.get_prompt_style(),
             auto_suggest=AutoSuggestFromHistory(),
@@ -111,8 +119,30 @@ class Repl(object):
         if document.strip() == '':
             return
 
+        document = document.strip()
+
+        # Both a bare number and the !N form refer to the full history list.
+        history_reference = self._resolve_history_reference(document)
+        if history_reference is not None:
+            history_number, historic_command = history_reference
+            if not historic_command:
+                return
+            click.secho('Running historic command {0}: {1}'.format(history_number, historic_command), dim=True)
+            self.run_command(historic_command)
+            return
+
+        # The top-level history command needs access to the prompt session's
+        # persistent history, so it is dispatched here rather than through the
+        # static command repository.
+        if document == 'history':
+            entries = self.get_history_entries()
+            timestamps = self._history_timestamps if len(self._history_timestamps) == len(entries) else []
+            command_history.numbered_history(entries, timestamps)
+            app_state.add_command_to_history(command=document)
+            return
+
         # handle os commands
-        if document.strip().startswith('!'):
+        if document.startswith('!'):
 
             # strip the leading !
             os_cmd = document[1:]
@@ -170,6 +200,104 @@ class Repl(object):
         exec_method(arguments)
 
         app_state.add_command_to_history(command=document)
+        self._record_history_entry(document)
+
+    def _load_history_entries(self) -> list:
+        """Load prompt history in chronological order."""
+
+        entries = []
+        timestamps = []
+        lines = []
+        timestamp = None
+
+        def add_entry() -> None:
+            if not lines:
+                return
+
+            command = ''.join(lines).strip()
+            if command:
+                entries.append(command)
+                timestamps.append(timestamp)
+
+        try:
+            with open(self.history.filename, 'r', encoding='utf-8', errors='replace') as history_file:
+                for line in history_file:
+                    if line.startswith('# '):
+                        add_entry()
+                        lines.clear()
+                        timestamp = line[2:].strip()
+                    elif line.startswith('+'):
+                        lines.append(line[1:])
+                    else:
+                        add_entry()
+                        lines.clear()
+                        timestamp = None
+
+                add_entry()
+        except OSError:
+            return []
+
+        self._history_timestamps = timestamps
+        return entries
+
+    def _append_runtime_history_entry(self, command: str) -> None:
+        """Track a command executed outside prompt_toolkit's FileHistory."""
+
+        command = command.strip()
+        if not command:
+            return
+
+        if not self._history_entries or self._history_entries[-1] != command:
+            self._history_entries.append(command)
+            self._history_timestamps.append(None)
+
+    def _record_history_entry(self, command: str) -> None:
+        """Track commands executed outside prompt_toolkit (for example startup commands)."""
+
+        # Commands entered at the prompt have already been stored by
+        # prompt_toolkit. Avoid adding those entries twice while still making
+        # programmatically executed startup commands available for replay.
+        self._append_runtime_history_entry(command)
+
+    def get_history_entries(self) -> list:
+        """Return the persistent command history in chronological order."""
+
+        return list(self._history_entries)
+
+    def get_startup_history(self, limit: int = 3) -> list:
+        """Return the latest history entries with their full-history numbers."""
+
+        if limit <= 0:
+            return []
+
+        entries = self.get_history_entries()
+        first_entry = max(0, len(entries) - limit)
+        return [(number, entries[number - 1])
+                for number in range(first_entry + 1, len(entries) + 1)]
+
+    def _resolve_history_reference(self, document: str):
+        """Resolve !N against full history and N against startup favourites."""
+
+        full_history = document.startswith('!') and re.fullmatch(r'!\d+', document)
+        bare_number = re.fullmatch(r'\d+', document)
+        if not full_history and not bare_number:
+            return None
+
+        try:
+            number = int(document[1:] if full_history else document)
+        except ValueError:
+            return None
+
+        if number < 1:
+            click.secho('History entries start at 1.', fg='yellow')
+            return (number, '')
+
+        entries = self.get_history_entries()
+        if number <= len(entries):
+            return number, entries[number - 1]
+
+        click.secho('No history entry found for: {0}'.format(number), fg='yellow')
+        return (number, '')
 
     def _find_command_exec_method(self, tokens: list) -> tuple:
         """
@@ -342,7 +470,7 @@ class Repl(object):
 
         return False
 
-    def run(self, quiet: bool) -> None:
+    def run(self, quiet: bool, history_limit: int = 0) -> None:
         """
             Start the objection repl.
         """
@@ -360,6 +488,19 @@ class Repl(object):
 
         if not quiet:
             click.secho(banner, bold=True)
+            startup_history = self.get_startup_history(history_limit)
+            if history_limit > 0:
+                click.secho('* Historic commands', fg='white', dim=True)
+                if startup_history:
+                    timestamps = (self._history_timestamps
+                                  if len(self._history_timestamps) == len(self._history_entries) else [])
+                    for number, command in startup_history:
+                        timestamp = timestamps[number - 1] if number <= len(timestamps) else None
+                        prefix = ('{0} '.format(command_history.format_history_timestamp(timestamp))
+                                  if timestamp else '')
+                        click.secho('{0} {1}{2}'.format(number, prefix, command))
+                else:
+                    click.secho('No historic commands found.', dim=True)
             click.secho('[tab] for command suggestions', fg='white', dim=True)
 
         # the main application loop is here, reading inputs provided by

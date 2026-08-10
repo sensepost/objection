@@ -7,19 +7,23 @@ import tomllib
 
 def _load_version() -> str:
     """
-        Prefer the installed package metadata and fall back to pyproject.toml
-        when running from a checkout.
+        Read the checkout version when running from source, otherwise use the
+        installed package metadata.
     """
 
-    try:
-        return metadata.version("objection")
-    except metadata.PackageNotFoundError:
-        pyproject_path = Path(__file__).resolve().parent.parent / "pyproject.toml"
+    pyproject_path = Path(__file__).resolve().parent.parent / "pyproject.toml"
+    if pyproject_path.exists():
         try:
             with pyproject_path.open("rb") as f:
                 return tomllib.load(f)["project"]["version"]
         except Exception:
-            return "0.0.0"
+
+            pass
+
+    try:
+        return metadata.version("objection")
+    except metadata.PackageNotFoundError:
+        return "0.0.0"
 
 
 __version__ = _load_version()
