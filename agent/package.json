@@ -40,5 +40,8 @@
     "@types/node": "^24",
     "frida-compile": "^19",
     "tslint": "^6"
+  },
+  "allowScripts": {
+    "frida@17.5.1": true
   }
 }
