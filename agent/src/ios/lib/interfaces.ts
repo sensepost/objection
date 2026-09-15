@@ -23,6 +23,9 @@ export interface IKeychainItem {
   accessible_attribute: string;
   entitlement_group: string;
   generic: string;
+  server: string;
+  issuer: string;
+  application_tag: string;
   service: string;
   account: string;
   label: string;
