@@ -112,6 +112,11 @@ COMMANDS = {
         }
     },
 
+    'history': {
+        'meta': 'List and replay commands from the persistent command history',
+        'exec': None,  # handled in the Repl class so it can access prompt history
+    },
+
     'ls': {
         'meta': 'List files in the current working directory',
         'dynamic': filemanager.list_folders_in_current_fm_directory,

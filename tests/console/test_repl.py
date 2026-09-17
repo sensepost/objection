@@ -2,13 +2,18 @@ import unittest
 from unittest import mock
 
 from objection.commands.android.hooking import show_registered_activities
+from objection.commands.command_history import format_history_timestamp, numbered_history
 from objection.console.repl import Repl
+from objection.state.app import app_state
 from ..helpers import capture
 
 
 class TestRepl(unittest.TestCase):
     def setUp(self):
         self.repl = Repl()
+
+    def tearDown(self):
+        app_state.successful_commands = []
 
     def test_does_nothing_when_empty_command_is_passed(self):
         with capture(self.repl.run_command, '') as output:
@@ -97,3 +102,59 @@ class TestRepl(unittest.TestCase):
         run_command.side_effect = TypeError()
 
         self.assertRaises(TypeError)
+
+    def test_prints_numbered_persistent_history(self):
+        self.repl._history_entries = ['import abc.js', 'ios ui screenshot']
+
+        with capture(self.repl.run_command, 'history') as o:
+            output = o
+
+        expected_output = ('Historic commands:\n'
+                           '1 import abc.js\n'
+                           '2 ios ui screenshot\n')
+        self.assertEqual(output, expected_output)
+
+    def test_formats_history_timestamp(self):
+        self.assertEqual(format_history_timestamp('2026-02-16 15:24:59.123456'), '2026-02-16 15:24')
+
+    def test_prints_history_without_period_and_with_compact_timestamp(self):
+        with capture(numbered_history, ['import foo.js'], ['2026-02-16 15:24:59.123456']) as o:
+            output = o
+
+        self.assertEqual(output, 'Historic commands:\n1 2026-02-16 15:24 import foo.js\n')
+
+    def test_replays_a_numbered_history_entry(self):
+        commands_run = []
+        self.repl._history_entries = ['ping']
+        self.repl.commands_repository = {
+            'ping': {'meta': 'test command', 'exec': lambda args: commands_run.append(args)}
+        }
+
+        with capture(self.repl.run_command, '!1') as o:
+            output = o
+
+        self.assertEqual(output, 'Running historic command 1: ping\n')
+        self.assertEqual(commands_run, [[]])
+
+    def test_replays_a_bare_history_number(self):
+        commands_run = []
+        self.repl._history_entries = ['ping', 'other', 'ping']
+        self.repl.commands_repository = {
+            'ping': {'meta': 'test command', 'exec': lambda args: commands_run.append(args)}
+        }
+
+        with capture(self.repl.run_command, '1') as o:
+            output = o
+
+        self.assertEqual(output, 'Running historic command 1: ping\n')
+        self.assertEqual(commands_run, [[]])
+
+    def test_returns_latest_commands_with_full_history_numbers(self):
+        self.repl._history_entries = ['one', 'two', 'three', 'four']
+
+        self.assertEqual(self.repl.get_startup_history(3), [(2, 'two'), (3, 'three'), (4, 'four')])
+
+    def test_can_disable_startup_history(self):
+        self.repl._history_entries = ['one', 'two']
+
+        self.assertEqual(self.repl.get_startup_history(0), [])
