@@ -31,6 +31,8 @@ export enum kSec {
   kSecAttrSynchronizableAny = "syna",
   kSecAttrModificationDate = "mdat",
   kSecAttrServer = "srvr",
+  kSecAttrIssuer = "issr",
+  kSecAttrApplicationTag = "atag",
   kSecAttrDescription = "desc",
   kSecAttrComment = "icmt",
   kSecAttrCreator = "crtr",
