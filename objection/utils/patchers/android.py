@@ -10,6 +10,7 @@ import click
 import delegator
 import requests
 import semver
+import lief
 
 from .base import BasePlatformGadget, BasePlatformPatcher, objection_path
 from .github import Github
@@ -864,7 +865,27 @@ class AndroidPatcher(BasePlatformPatcher):
         with open(activity_path, 'w') as f:
             f.write(''.join(patched_smali))
 
-    def add_gadget_to_apk(self, architecture: str, gadget_source: str, gadget_config: str):
+    def inject_gadget_to_native(self, architecture: str, native_lib: str = "libsqlcipher.so"):
+        """
+            Inject a frida gadget for a specific architecture to
+            a native lib.
+            :param architecture:
+            :param native_lib:
+            :return:
+        """
+
+        libs_path = os.path.join(self.apk_temp_directory, 'lib', architecture)
+
+        click.secho('Injecting Frida gadget to {0}'.format(native_lib), fg='green', dim=True)
+        lib_native = lief.parse(os.path.join(libs_path, native_lib))
+        assert isinstance(lib_native, lief.ELF.Binary)
+
+        click.secho('Injecting in {0}'.format(native_lib), fg='green', dim=True)
+        lib_native.add_library('libfrida-gadget.so')
+        click.secho('Injected {0} in {1}'.format('libfrida-gadget.so', native_lib), fg='green', dim=True)
+        lib_native.write(os.path.join(libs_path, native_lib))
+
+    def add_gadget_to_apk(self, architecture: str, gadget_source: str, gadget_config: str | None):
         """
             Copies a frida gadget for a specific architecture to
             an extracted APK's lib path.

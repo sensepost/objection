@@ -46,6 +46,18 @@ class TestsCommandLineInteractions(unittest.TestCase):
         self.assertIsNone(result.exception)
         self.assertEqual(result.exit_code, 0)
 
+    @mock.patch('objection.console.cli.patch_android_apk')
+    def test_patchapk_passes_lib_native_to_patcher(self, mock_patch_android_apk):
+        runner = CliRunner()
+        result = runner.invoke(patchapk, [
+            '--source', 'foo.apk',
+            '--lib-native', 'libsqlcipher.so',
+        ])
+
+        self.assertIsNone(result.exception)
+        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(mock_patch_android_apk.call_args.kwargs['lib_native'], 'libsqlcipher.so')
+
     def test_patchapk_fails_and_wants_source(self):
         runner = CliRunner()
         result = runner.invoke(patchapk)
