@@ -180,7 +180,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
 
     click.secho('Patcher will be using Gadget version: {0}'.format(github_version), fg='green')
 
-    patcher = AndroidPatcher(skip_cleanup=skip_cleanup, skip_resources=skip_resources, manifest=manifest, only_main_classes=only_main_classes)
+    patcher = AndroidPatcher(skip_cleanup=skip_cleanup, skip_resources=skip_resources, manifest=manifest, only_main_classes=only_main_classes, use_aapt2=use_aapt2)
 
     # ensure that we have all of the commandline requirements
     if not patcher.are_requirements_met():
