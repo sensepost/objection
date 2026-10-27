@@ -156,6 +156,9 @@ export const list = (smartDecode: boolean = false): IKeychainItem[] => {
       negative: bytesToUTF8(data.objectForKey_(kSec.kSecAttrIsNegative)),
       protected: bytesToUTF8(data.objectForKey_(kSec.kSecProtectedDataItemAttr)),
       script_code: bytesToUTF8(data.objectForKey_(kSec.kSecAttrScriptCode)),
+      server: bytesToUTF8(data.objectForKey_(kSec.kSecAttrServer)),
+      issuer: bytesToUTF8(data.objectForKey_(kSec.kSecAttrIssuer)),
+      application_tag: bytesToUTF8(data.objectForKey_(kSec.kSecAttrApplicationTag)),
       service: bytesToUTF8(data.objectForKey_(kSec.kSecAttrService)),
       type: bytesToUTF8(data.objectForKey_(kSec.kSecAttrType)),
     };
