@@ -72,3 +72,53 @@ Copying final apk from /foo/bar/apk to test.objection.apk in current directory..
         self.assertTrue(mock_shutil.copyfile.called)
         self.assertTrue(mock_os.path.join.called)
         self.assertTrue(mock_os.path.abspath.called)
+
+    @mock.patch('objection.commands.mobile_packages.Github')
+    @mock.patch('objection.commands.mobile_packages.AndroidGadget')
+    @mock.patch('objection.commands.mobile_packages.AndroidPatcher')
+    @mock.patch('objection.commands.mobile_packages.shutil')
+    @mock.patch('objection.commands.mobile_packages.os')
+    @mock.patch('objection.commands.mobile_packages.delegator')
+    @mock.patch('objection.commands.mobile_packages.input', create=True)
+    def test_patching_android_apk_with_lib_native_injects_into_native_lib(
+            self, mock_input, mock_delegator, mock_os, mock_shutil, mock_androidpatcher,
+            mock_androidgadget, mock_github):
+        mock_github.return_value.get_latest_version.return_value = '1.0'
+        mock_androidgadget.return_value.get_local_version.return_value = '0.9'
+
+        mock_androidpatcher.return_value.are_requirements_met.return_value = True
+        mock_androidpatcher.return_value.get_temp_working_directory.return_value = '/foo/apk'
+        mock_androidpatcher.return_value.get_patched_apk_path.return_value = '/foo/bar/apk'
+
+        mock_input.return_value = ''
+
+        patch_android_apk('test.apk', 'x86', False, False, lib_native='libsqlcipher.so')
+
+        patcher = mock_androidpatcher.return_value
+        patcher.inject_gadget_to_native.assert_called_once_with('x86', 'libsqlcipher.so')
+        self.assertFalse(patcher.inject_load_library.called)
+
+    @mock.patch('objection.commands.mobile_packages.Github')
+    @mock.patch('objection.commands.mobile_packages.AndroidGadget')
+    @mock.patch('objection.commands.mobile_packages.AndroidPatcher')
+    @mock.patch('objection.commands.mobile_packages.shutil')
+    @mock.patch('objection.commands.mobile_packages.os')
+    @mock.patch('objection.commands.mobile_packages.delegator')
+    @mock.patch('objection.commands.mobile_packages.input', create=True)
+    def test_patching_android_apk_without_lib_native_injects_load_library(
+            self, mock_input, mock_delegator, mock_os, mock_shutil, mock_androidpatcher,
+            mock_androidgadget, mock_github):
+        mock_github.return_value.get_latest_version.return_value = '1.0'
+        mock_androidgadget.return_value.get_local_version.return_value = '0.9'
+
+        mock_androidpatcher.return_value.are_requirements_met.return_value = True
+        mock_androidpatcher.return_value.get_temp_working_directory.return_value = '/foo/apk'
+        mock_androidpatcher.return_value.get_patched_apk_path.return_value = '/foo/bar/apk'
+
+        mock_input.return_value = ''
+
+        patch_android_apk('test.apk', 'x86', False, False, target_class='com.example.MainActivity')
+
+        patcher = mock_androidpatcher.return_value
+        patcher.inject_load_library.assert_called_once_with(target_class='com.example.MainActivity')
+        self.assertFalse(patcher.inject_gadget_to_native.called)

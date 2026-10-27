@@ -101,7 +101,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
                       network_security_config: bool = False, target_class: str = None,
                       use_aapt2: bool = False, gadget_config: str = None, script_source: str = None,
                       ignore_nativelibs: bool = True, manifest: str = None, skip_signing: bool = False,
-                      only_main_classes: bool = False, fix_concurrency_to = None) -> None:
+                      only_main_classes: bool = False, fix_concurrency_to = None, lib_native: str | None = None) -> None:
     """
         Patches an Android APK by extracting, patching SMALI, repackaging
         and signing a new APK.
@@ -123,6 +123,7 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
         :param ignore_nativelibs:
         :param only_main_classes:
         :param fix_concurrency_to:
+        :param lib_native:
 
         :return:
     """
@@ -205,8 +206,12 @@ def patch_android_apk(source: str, architecture: str, pause: bool, skip_cleanup:
     if network_security_config:
         patcher.add_network_security_config()
 
-    patcher.inject_load_library(target_class=target_class)
     patcher.add_gadget_to_apk(architecture, android_gadget.get_frida_library_path(), gadget_config)
+
+    if not lib_native:
+        patcher.inject_load_library(target_class=target_class)
+    else:
+        patcher.inject_gadget_to_native(architecture, lib_native)
 
     if script_source:
         click.secho('Copying over a custom script to use with the gadget config.', fg='green')

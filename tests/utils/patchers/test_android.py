@@ -2,6 +2,8 @@ import os
 import unittest
 from unittest import mock
 
+import lief
+
 from objection.utils.patchers.android import AndroidGadget, AndroidPatcher
 
 
@@ -135,3 +137,39 @@ class TestAndroidPatcher(unittest.TestCase):
 
         self.assertEqual(type(source), AndroidPatcher)
         self.assertEqual(patcher.apk_source, 'foo.apk')
+
+    @mock.patch('objection.utils.patchers.android.AndroidPatcher.__init__', mock.Mock(return_value=None))
+    @mock.patch('objection.utils.patchers.android.AndroidPatcher.__del__', mock.Mock(return_value=None))
+    @mock.patch('objection.utils.patchers.android.lief')
+    @mock.patch('objection.utils.patchers.android.os')
+    def test_inject_gadget_to_native(self, mock_os, mock_lief):
+        mock_os.path.join.side_effect = lambda *args: '/'.join(args)
+
+        parsed_lib = mock.Mock(spec=lief.ELF.Binary)
+        mock_lief.parse.return_value = parsed_lib
+        mock_lief.ELF.Binary = lief.ELF.Binary
+
+        patcher = AndroidPatcher()
+        patcher.apk_temp_directory = '/tmp/test'
+
+        patcher.inject_gadget_to_native('x86', 'libsqlcipher.so')
+
+        mock_lief.parse.assert_called_once_with('/tmp/test/lib/x86/libsqlcipher.so')
+        parsed_lib.add_library.assert_called_once_with('libfrida-gadget.so')
+        parsed_lib.write.assert_called_once_with('/tmp/test/lib/x86/libsqlcipher.so')
+
+    @mock.patch('objection.utils.patchers.android.AndroidPatcher.__init__', mock.Mock(return_value=None))
+    @mock.patch('objection.utils.patchers.android.AndroidPatcher.__del__', mock.Mock(return_value=None))
+    @mock.patch('objection.utils.patchers.android.lief')
+    @mock.patch('objection.utils.patchers.android.os')
+    def test_inject_gadget_to_native_asserts_elf_binary(self, mock_os, mock_lief):
+        mock_os.path.join.side_effect = lambda *args: '/'.join(args)
+
+        mock_lief.parse.return_value = 'not-an-elf-binary'
+        mock_lief.ELF.Binary = lief.ELF.Binary
+
+        patcher = AndroidPatcher()
+        patcher.apk_temp_directory = '/tmp/test'
+
+        with self.assertRaises(AssertionError):
+            patcher.inject_gadget_to_native('x86', 'libsqlcipher.so')
