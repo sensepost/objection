@@ -8,6 +8,7 @@ from pprint import pprint
 
 import click
 import frida
+import frida_tools
 
 from objection.state.app import app_state
 from objection.state.connection import state_connection
@@ -30,6 +31,48 @@ class AgentConfig(object):
     pause: bool = True
     debugger: bool = False
     uid: int = None
+
+
+# Prepended to every script loaded through attach_script(). Since Frida 17 the
+# Java / ObjC / Swift bridges are no longer built into the runtime, so a plain
+# session.create_script() has no `Java` global. frida-tools solves this by
+# defining lazy getters that ask the host for the bridge source; scripts we
+# attach ourselves need the same prelude.
+BRIDGE_PRELUDE = """
+(function () {
+    const bridges = {};
+
+    function load(name) {
+        if (bridges[name] !== undefined)
+            return bridges[name];
+
+        send({ type: 'frida:load-bridge', name: name });
+        recv('frida:bridge-loaded', message => {
+            bridges[name] = Script.evaluate(`/frida/bridges/${message.filename}`,
+                '(function () {' + [
+                    message.source,
+                    `Object.defineProperty(globalThis, '${name}', { value: bridge });`,
+                    'return bridge;'
+                ].join('\\n') + '})();');
+        }).wait();
+
+        return bridges[name];
+    }
+
+    ['Java', 'ObjC', 'Swift'].forEach(name => {
+        Object.defineProperty(globalThis, name, {
+            enumerable: true,
+            configurable: true,
+            get() { return load(name); }
+        });
+    });
+})();
+"""
+
+
+def _bridge_path(name: str):
+    """ Returns the path to a frida-tools bridge bundle, if it exists. """
+    return Path(frida_tools.__file__).parent / 'bridges' / f'{name}.js'
 
 
 class OutputHandlers(object):
@@ -76,17 +119,51 @@ class OutputHandlers(object):
             raise e
 
     @staticmethod
-    def script_on_message(message: dict, data):
+    def try_handle_bridge_request(message: dict, script) -> bool:
+        """
+            Answers a frida:load-bridge request from a script.
+
+            :param message:
+            :param script:
+
+            :return: True if the message was a bridge request and was handled.
+        """
+
+        if script is None or message.get('type') != 'send':
+            return False
+
+        payload = message.get('payload')
+        if not isinstance(payload, dict) or payload.get('type') != 'frida:load-bridge':
+            return False
+
+        bridge = _bridge_path(str(payload.get('name', '')).lower())
+        if not bridge.exists():
+            return False
+
+        script.post({
+            'type': 'frida:bridge-loaded',
+            'filename': bridge.name,
+            'source': bridge.read_text(encoding='utf-8')
+        })
+
+        return True
+
+    @staticmethod
+    def script_on_message(message: dict, data, script=None):
         """
             The callback to run when a message is received from the agent.
 
             :param message:
             :param data:
+            :param script: The script the message came from, if known.
 
             :return:
         """
 
         try:
+            if OutputHandlers.try_handle_bridge_request(message, script):
+                return
+
             # log the hook response if needed
             if app_state.should_debug():
                 click.secho('- [incoming message] ' + '-' * 18, dim=True)
@@ -103,6 +180,9 @@ class OutputHandlers(object):
                     else:
                         click.secho('Dumping unknown agent message', fg='yellow')
                         pprint(message['payload'])
+
+            if message.get('type') == 'error':
+                click.secho('(script error) ' + str(message.get('description', '')), fg='red')
 
         except Exception as e:
             click.secho('Failed to process an incoming message from agent: {0}'.format(e), fg='red', bold=True)
@@ -311,8 +391,9 @@ class Agent(object):
         """
 
         session: frida.core.Session = self.device.attach(self.pid)
-        script: frida.core.Script = session.create_script(source=source)
-        script.on('message', self.handlers.script_on_message)
+        script: frida.core.Script = session.create_script(source=BRIDGE_PRELUDE + source)
+        script.on('message',
+                  lambda message, data: self.handlers.script_on_message(message, data, script))
         script.load()
 
         script_job = Job(job_name, 'script', script)
