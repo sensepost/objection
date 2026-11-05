@@ -60,6 +60,11 @@ BRIDGE_PRELUDE = """
     }
 
     ['Java', 'ObjC', 'Swift'].forEach(name => {
+        // Frida before 17 already provides these globals. Leave them alone so
+        // older runtimes keep working unchanged.
+        if (typeof globalThis[name] !== 'undefined')
+            return;
+
         Object.defineProperty(globalThis, name, {
             enumerable: true,
             configurable: true,
