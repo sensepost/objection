@@ -34,6 +34,26 @@ Copying final ipa from /foo/ipa to current directory...
         self.assertTrue(mock_os.path.basename.called)
 
     @mock.patch('objection.commands.mobile_packages.Github')
+    @mock.patch('objection.commands.mobile_packages.IosGadget')
+    @mock.patch('objection.commands.mobile_packages.IosPatcher')
+    @mock.patch('objection.commands.mobile_packages.shutil')
+    def test_patching_ios_ipa_copies_script_source_by_file_name(self, mock_shutil, mock_iospatcher,
+                                                                mock_iosgadget, mock_github):
+        mock_github.return_value.get_latest_version.return_value = '1.0'
+        mock_iosgadget.return_value.get_local_version.return_value = '1.0'
+
+        mock_iospatcher.return_value.are_requirements_met.return_value = True
+        mock_iospatcher.return_value.app_folder = '/app/Payload/Foo.app'
+        mock_iospatcher.return_value.get_patched_ipa_path.return_value = '/foo/ipa'
+
+        for script_source in ('/home/user/scripts/hook.js', 'scripts/hook.js'):
+            with capture(patch_ios_ipa, 'test.ipa', '00-11', '/foo', '', False, False,
+                         gadget_config='config.json', script_source=script_source):
+                pass
+
+            mock_shutil.copyfile.assert_any_call(script_source, '/app/Payload/Foo.app/Frameworks/hook.js')
+
+    @mock.patch('objection.commands.mobile_packages.Github')
     @mock.patch('objection.commands.mobile_packages.AndroidGadget')
     @mock.patch('objection.commands.mobile_packages.AndroidPatcher')
     @mock.patch('objection.commands.mobile_packages.shutil')

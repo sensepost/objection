@@ -77,7 +77,8 @@ def patch_ios_ipa(source: str, codesign_signature: str, provision_file: str, bin
 
     if script_source:
         click.secho('Copying over a custom script to use with the gadget config.', fg='green')
-        shutil.copyfile(script_source, os.path.join(patcher.app_folder, 'Frameworks', script_source))
+        shutil.copyfile(script_source,
+                        os.path.join(patcher.app_folder, 'Frameworks', os.path.basename(script_source)))
 
     # give a chance to make any last minute modifications if needed
     if pause:
