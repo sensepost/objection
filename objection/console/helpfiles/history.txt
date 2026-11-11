@@ -1,0 +1,12 @@
+Command: history
+
+Usage: history
+
+Lists commands from the persistent command history with a number in front of
+each entry. Use !N or N to execute entry N. Startup history is disabled by
+default; use --history-limit to show the latest entries when objection starts.
+Use --history-limit 0 to disable the startup list explicitly.
+
+Examples:
+   history
+   !69

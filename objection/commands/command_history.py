@@ -1,8 +1,31 @@
+import datetime
 import os
 
 import click
 
 from ..state.app import app_state
+
+
+def format_history_timestamp(timestamp: str) -> str:
+    """Format a prompt-toolkit timestamp for compact history output."""
+
+    try:
+        return datetime.datetime.fromisoformat(timestamp).strftime('%Y-%m-%d %H:%M')
+    except (TypeError, ValueError):
+        return timestamp
+
+
+def numbered_history(commands: list, timestamps: list = None) -> None:
+    """Print a numbered history suitable for selecting or replaying entries."""
+
+    click.secho('Historic commands:', dim=True)
+
+    for number, command in enumerate(commands, start=1):
+        timestamp = ''
+        if timestamps and number <= len(timestamps) and timestamps[number - 1]:
+            timestamp = '{0} '.format(format_history_timestamp(timestamps[number - 1]))
+
+        click.secho('{0} {1}{2}'.format(number, timestamp, command))
 
 
 def history(args: list) -> None:

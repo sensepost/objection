@@ -139,8 +139,10 @@ def api():
               help='A script to import and run before the repl polls the device for information.')
 @click.option('--enable-api', '-a', required=False, default=False, is_flag=True,
               help='Start the objection API server.')
+@click.option('--history-limit', '-H', required=False, type=click.IntRange(min=0), default=0, show_default=True,
+              help='Number of latest history entries to show at startup. Disabled by default.')
 def start(plugin_folder: str, quiet: bool, startup_command: str, file_commands, startup_script: click.File,
-          enable_api: bool) -> None:
+          enable_api: bool, history_limit: int) -> None:
     """
         Start a new session
     """
@@ -200,7 +202,7 @@ def start(plugin_folder: str, quiet: bool, startup_command: str, file_commands, 
         time.sleep(2)
 
     # drop into the repl
-    repl.run(quiet=quiet)
+    repl.run(quiet=quiet, history_limit=history_limit)
 
 # Some ugly backwards compatibility
 @cli.command(deprecated="Use 'objection start' instead of 'objection explore'", hidden=True)
@@ -215,8 +217,10 @@ def start(plugin_folder: str, quiet: bool, startup_command: str, file_commands, 
               help='A script to import and run before the repl polls the device for information.')
 @click.option('--enable-api', '-a', required=False, default=False, is_flag=True,
               help='Start the objection API server.')
+@click.option('--history-limit', '-H', required=False, type=click.IntRange(min=0), default=0, show_default=True,
+              help='Number of latest history entries to show at startup. Disabled by default.')
 def explore(plugin_folder: str, quiet: bool, startup_command: str, file_commands, startup_script: click.File,
-            enable_api: bool) -> None:
+            enable_api: bool, history_limit: int) -> None:
     """
         Deprecated: Use 'start' instead.
     """
@@ -228,7 +232,8 @@ def explore(plugin_folder: str, quiet: bool, startup_command: str, file_commands
                startup_command=startup_command,
                file_commands=file_commands,
                startup_script=startup_script,
-               enable_api=enable_api)
+               enable_api=enable_api,
+               history_limit=history_limit)
 
 @cli.command()
 @click.option('--hook-debug', '-d', required=False, default=False, is_flag=True,
