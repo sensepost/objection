@@ -428,6 +428,26 @@ def download(args: list) -> None:
         _download_android(source, destination, should_download_folder)
 
 
+def _local_entry_name(name: str) -> str:
+    """
+        Reduce a directory entry name reported by the device to a single path
+        component that is safe to join to a local destination.
+
+        Device filenames are attacker controlled: a backslash is legal in one on
+        Android and iOS, but is a path separator on a Windows host.
+
+        :param name:
+        :return: the component, or an empty string if the name has none that is usable
+    """
+
+    safe_name = os.path.basename(name.replace('\\', '/'))
+
+    if safe_name in ('', '.', '..'):
+        return ''
+
+    return safe_name
+
+
 def _download_ios(path: str, destination: str, should_download_folder: bool, path_root: bool = True) -> None:
     """
         Download a file from an iOS filesystem and store it locally.
@@ -470,8 +490,13 @@ def _download_ios(path: str, destination: str, should_download_folder: bool, pat
 
         data = api.ios_file_ls(path)
         for name, _ in data['files'].items():
+            local_name = _local_entry_name(name)
+            if not local_name:
+                click.secho('Skipping {0!r}: not a valid local file name.'.format(name), fg='yellow')
+                continue
+
             sub_path = device_state.platform.path_separator.join([path, name])
-            sub_destination = os.path.join(destination, name)
+            sub_destination = os.path.join(destination, local_name)
 
             _download_ios(sub_path, sub_destination, True, False)
         if path_root:
@@ -534,8 +559,13 @@ def _download_android(path: str, destination: str, should_download_folder: bool,
 
         data = api.android_file_ls(path)
         for name, _ in data['files'].items():
+            local_name = _local_entry_name(name)
+            if not local_name:
+                click.secho('Skipping {0!r}: not a valid local file name.'.format(name), fg='yellow')
+                continue
+
             sub_path = device_state.platform.path_separator.join([path, name])
-            sub_destination = os.path.join(destination, name)
+            sub_destination = os.path.join(destination, local_name)
 
             _download_android(sub_path, sub_destination, True, False)
         if path_root:
