@@ -1,8 +1,10 @@
+import os
+import tempfile
 import unittest
 from unittest import mock
 
 from objection.commands.filemanager import cd, _path_exists_ios, _path_exists_android, pwd, pwd_print, _pwd_ios, \
-    _pwd_android, ls, _ls_ios, _ls_android, download, _download_ios, _download_android, upload, rm, _rm_android
+    _pwd_android, ls, _ls_ios, _ls_android, download, _download_ios, _download_android, upload, rm, _rm_android, _local_entry_name
 from objection.state.device import device_state, Ios, Android
 from objection.state.filemanager import file_manager_state
 from ..helpers import capture, normalize_table_whitespace
@@ -540,3 +542,42 @@ Successfully downloaded /foo to /bar
         upload(['/foo', '/bar'])
 
         self.assertTrue(mock_upload_android.called)
+
+    def test_local_entry_name_keeps_a_plain_name(self):
+        self.assertEqual(_local_entry_name('file.txt'), 'file.txt')
+
+    def test_local_entry_name_strips_directories_and_drives(self):
+        self.assertEqual(_local_entry_name('..\\out.txt'), 'out.txt')
+        self.assertEqual(_local_entry_name('../out.txt'), 'out.txt')
+        self.assertEqual(_local_entry_name('C:\\Users\\x\\Startup\\payload.bat'), 'payload.bat')
+        self.assertEqual(_local_entry_name('/etc/passwd'), 'passwd')
+
+    def test_local_entry_name_rejects_unusable_names(self):
+        for name in ('', '.', '..', '..\\', '../'):
+            self.assertEqual(_local_entry_name(name), '', name)
+
+    def _download_folder_with_hostile_names(self, platform, mock_api, api_prefix):
+        device_state.platform = platform
+        getattr(mock_api.return_value, api_prefix + '_file_readable').return_value = True
+        getattr(mock_api.return_value, api_prefix + '_file_path_is_file').side_effect = lambda p: p != '/dir'
+        getattr(mock_api.return_value, api_prefix + '_file_download').return_value = {'data': b'x'}
+        getattr(mock_api.return_value, api_prefix + '_file_ls').return_value = {
+            'files': {'..\\out.txt': {}, 'C:\\Users\\x\\payload.bat': {}, '..': {}, 'ok.txt': {}}
+        }
+
+        with tempfile.TemporaryDirectory() as root:
+            destination = os.path.join(root, 'dest')
+            download = _download_ios if api_prefix == 'ios' else _download_android
+            with capture(download, '/dir', destination, True, False):
+                pass
+
+            self.assertEqual(os.listdir(root), ['dest'])
+            self.assertEqual(sorted(os.listdir(destination)), ['ok.txt', 'out.txt', 'payload.bat'])
+
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_download_folder_keeps_ios_files_inside_destination(self, mock_api):
+        self._download_folder_with_hostile_names(Ios, mock_api, 'ios')
+
+    @mock.patch('objection.state.connection.state_connection.get_api')
+    def test_download_folder_keeps_android_files_inside_destination(self, mock_api):
+        self._download_folder_with_hostile_names(Android, mock_api, 'android')
